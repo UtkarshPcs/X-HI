@@ -61,5 +61,12 @@ export const holidayData = [
     "message": "Do it in Civics HW copy",
     "file": "Civics.pdf",
     "downloadUrl": "/holiday_homework/Civics.pdf"
+  },
+  {
+    "id": 10,
+    "subject": "IT",
+    "message": "Do it in the Homework copy",
+    "file": "IT.pdf",
+    "downloadUrl": "/holiday_homework/IT.pdf"
   }
 ];

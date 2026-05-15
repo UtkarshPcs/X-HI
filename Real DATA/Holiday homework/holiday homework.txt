@@ -33,3 +33,7 @@ Homework File :- Real DATA/Holiday homework/English.pdf
 Civics
 Message :- Do it in Civics HW copy
 Homework File :- Real DATA/Holiday homework/Civics.pdf
+
+IT 
+Message :- Do it in the Homework copy 
+Homework File :- public/holiday_homework/IT.pdf
