@@ -31,7 +31,16 @@ function App() {
         </main>
         <footer className="app-footer">
           <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            Designed and developed by <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Utkarsh</span> <Heart size={14} color="var(--secondary)" fill="var(--secondary)" />
+            Designed and developed by <span 
+              onClick={() => {
+                if (window.confirm("You are about to be redirected to WhatsApp to chat with Utkarsh. Do you want to continue?")) {
+                  window.open("https://wa.me/918102783645", "_blank");
+                }
+              }}
+              style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s ease', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+              onMouseEnter={(e) => e.target.style.color = 'var(--primary-hover)'}
+              onMouseLeave={(e) => e.target.style.color = 'var(--primary)'}
+            >Utkarsh</span> <Heart size={14} color="var(--secondary)" fill="var(--secondary)" />
           </p>
         </footer>
       </div>
