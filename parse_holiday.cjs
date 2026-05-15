@@ -37,7 +37,7 @@ blocks.forEach((block, index) => {
         subject: subjectLine,
         message: message,
         file: filename,
-        downloadUrl: '/holiday_homework/' + filename
+        downloadUrl: encodeURI('/holiday_homework/' + filename)
       });
     }
   }
