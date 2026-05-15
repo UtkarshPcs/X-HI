@@ -1,10 +1,14 @@
-Economics 
-Message :- Do it in the assignment copy.
-Homework FIlE :- Real DATA/Holiday homework/holiday homework.txt
+English 
+Message :- Do it in notebook
+Homework File :- Real DATA/Holiday homework/English.pdf
 
-Social science Project 
-Message :- Each student has to do Project on the given topic individually. 
-Homework File :- public/holiday_homework/SST Project.pdf
+Hindi
+Message :- Do it in the notebook
+Homework File :- Real DATA/Holiday homework/Hindi.pdf
+
+IT 
+Message :- Do it in the Homework copy 
+Homework File :- public/holiday_homework/IT.pdf
 
 Maths 
 Message :- To be prepare in thin classmate copy, Date of Submission:22.06.2026
@@ -18,39 +22,9 @@ Maths Project
 Message :- To be prepare in Stick file for Board Exam. 2027
 Homework File :- Real DATA/Holiday homework/Maths Project.pdf
 
-Hindi
-Message :- Do it in the notebook
-Homework File :- Real DATA/Holiday homework/Hindi.pdf
-
-History
-Message :- Do it in Holiday homework copy
-Homework File :- Real DATA/Holiday homework/History.pdf
-Homework File :- public/holiday_homework/History2.pdf
-
-English 
-Message :- Do it in notebook
-Homework File :- Real DATA/Holiday homework/English.pdf
-
-Civics
-Message :- Do it in Civics HW copy
-Homework File :- Real DATA/Holiday homework/Civics.pdf
-Homework File :- public/holiday_homework/Civics2.pdf
-
-IT 
-Message :- Do it in the Homework copy 
-Homework File :- public/holiday_homework/IT.pdf
-
 Physics 
 Message :- Do it in the Assignment copy 
 Homework File :- public/holiday_homework/Physics.pdf
-
-Chemistry 
-Message :- Do it in the CW copy
-Homework File :- public/holiday_homework/Chemistry.pdf
-
-Biology 
-Message :- Do it in the Assignment copy
-Homework File :- public/holiday_homework/Biology.pdf
 
 Physics Project
 Message :- Do it in the ( waiting for Teacher Response)
@@ -64,6 +38,38 @@ Complete NCERT question and answers along with intext questions answer in C.W no
 ### 3) Previous Year Questions (PYQs)
 Write/Solve the answers of PYQs BOARDS in your assignment notebook. (It is given in the form of pdf, get a print and answer all)
 
+Physics Extra work 
+Message :- Do it in the Assignment copy
+Project Data :- 
+### Complete NCERT Questions
+Complete NCERT question and answers along with intext questions answer in C.W notebook. 
+
+### Write/Solve PYQs
+Write/Solve the answers of PYQs BOARDS in your assignment notebook. (It is given in the form of pdf, get a print and answer all)
+
+Chemistry 
+Message :- Do it in the CW copy
+Homework File :- public/holiday_homework/Chemistry.pdf
+
+Chemistry Project
+Message :- Do it in the stick file and Practical copy.
+Project Data :- 
+### 1) Project Work
+Write all the chemical equations from chapter 1 to 4 in a file. You can make this file as colourful as you wish.
+
+### 2) Practical
+Write experiment no. 1 (Types of chemical reactions) in your chemistry practical copy.
+
+Chemistry Practicals
+Message :- Do it in the practical copy
+Project Data :- 
+### Practical
+Write experiment no. 1 (Types of chemical reactions) in your chemistry practical copy.
+
+Biology 
+Message :- Do it in the Assignment copy
+Homework File :- public/holiday_homework/Biology.pdf
+
 Biology Project
 Message :- Do it in the stick file
 Project Data :- 
@@ -75,24 +81,6 @@ Project Data :-
 - **a)** Read chapter 5 (Life Processes)
 - **b)** Do intext and chapter end question and answers of chapter 5 (related to topics Nutrition and Respiration)
 
-Chemistry Project
-Message :- Do it in the stick file and Practical copy.
-Project Data :- 
-### 1) Project Work
-Write all the chemical equations from chapter 1 to 4 in a file. You can make this file as colourful as you wish.
-
-### 2) Practical
-Write experiment no. 1 (Types of chemical reactions) in your chemistry practical copy.
-
-Physics Extra work 
-Message :- Do it in the Assignment copy
-Project Data :- 
-### Complete NCERT Questions
-Complete NCERT question and answers along with intext questions answer in C.W notebook. 
-
-### Write/Solve PYQs
-Write/Solve the answers of PYQs BOARDS in your assignment notebook. (It is given in the form of pdf, get a print and answer all)
-
 Biology Extra work
 Message :- Do as Directed 
 Project Data :- 
@@ -100,15 +88,24 @@ Project Data :-
 - **a)** Read chapter 5 (Life Processes)
 - **b)** Do intext and chapter end question and answers of chapter 5 (related to topics Nutrition and Respiration)
 
-Chemistry Practicals
-Message :- Do it in the practical copy
-Project Data :- 
-### Practical
-Write experiment no. 1 (Types of chemical reactions) in your chemistry practical copy.
+Social science Project 
+Message :- Each student has to do Project on the given topic individually. 
+Homework File :- public/holiday_homework/SST Project.pdf
+
+History
+Message :- Do it in History homework copy
+Homework File :- Real DATA/Holiday homework/History.pdf
+Homework File :- public/holiday_homework/History2.pdf
+
+Civics
+Message :- Do it in Civics HW copy
+Homework File :- Real DATA/Holiday homework/Civics.pdf
+Homework File :- public/holiday_homework/Civics2.pdf
 
 Geography
 Message :- Do it in the Assignment copy
 Homework File :- public/holiday_homework/Geography.pdf
 
-
-
+Economics 
+Message :- Do it in the assignment copy.
+Homework FIlE :- Real DATA/Holiday homework/holiday homework.txt

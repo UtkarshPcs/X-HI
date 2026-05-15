@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Sun, Download, CheckCircle, FileText, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { holidayData } from '../data/holidayData';
 
 export default function HolidayHomework() {
-  const [completedTasks, setCompletedTasks] = useState([]);
-  const [selectedProject, setSelectedProject] = useState(null);
-
-  useEffect(() => {
+  const [completedTasks, setCompletedTasks] = useState(() => {
     const saved = localStorage.getItem('completedHolidayHomework');
     if (saved) {
       try {
-        setCompletedTasks(JSON.parse(saved));
+        return JSON.parse(saved);
       } catch (e) {
         console.error("Error parsing completed homework", e);
       }
     }
-  }, []);
+    return [];
+  });
+  const [selectedProject, setSelectedProject] = useState(null);
 
   // Handle hardware back button for Android
   useEffect(() => {

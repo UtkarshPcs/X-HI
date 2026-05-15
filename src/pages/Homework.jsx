@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Calendar, CheckCircle2 } from 'lucide-react';
 import { homeworkData } from '../data/homeworkData';
 

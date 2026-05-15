@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, CalendarHeart, GraduationCap } from 'lucide-react';
+import { Home, BookOpen, CalendarHeart } from 'lucide-react';
 
 export default function Navbar() {
   return (
