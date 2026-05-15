@@ -107,5 +107,23 @@ export const holidayData = [
     "subject": "Chemistry Project",
     "message": "Do it in the stick file and Practical copy.",
     "projectData": "### 1) Project Work\nWrite all the chemical equations from chapter 1 to 4 in a file. You can make this file as colourful as you wish."
+  },
+  {
+    "id": 21,
+    "subject": "Physics Extra work",
+    "message": "Do it in the Assignment copy",
+    "projectData": "### Complete NCERT Questions\nComplete NCERT question and answers along with intext questions answer in C.W notebook."
+  },
+  {
+    "id": 23,
+    "subject": "Biology Extra work",
+    "message": "Do as Directed",
+    "projectData": "### Do as Directed\n- **a)** Read chapter 5 (Life Processes)\n- **b)** Do intext and chapter end question and answers of chapter 5 (related to topics Nutrition and Respiration)"
+  },
+  {
+    "id": 24,
+    "subject": "Chemistry Practicals",
+    "message": "Do it in the practical copy",
+    "projectData": "### Practical\nWrite experiment no. 1 (Types of chemical reactions) in your chemistry practical copy."
   }
 ];
