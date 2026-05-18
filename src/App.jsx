@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Homework from './pages/Homework';
 import HolidayHomework from './pages/HolidayHomework';
+import SchoolCalendar from './pages/SchoolCalendar';
 import { Heart } from 'lucide-react';
 
 function ScrollToTop() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/homework" element={<Homework />} />
             <Route path="/holidays" element={<HolidayHomework />} />
+            <Route path="/calendar" element={<SchoolCalendar />} />
           </Routes>
         </main>
         <footer className="app-footer">

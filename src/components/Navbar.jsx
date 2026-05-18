@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, CalendarHeart } from 'lucide-react';
+import { Home, BookOpen, CalendarHeart, CalendarRange } from 'lucide-react';
 
 export default function Navbar() {
   return (
@@ -29,6 +29,13 @@ export default function Navbar() {
         >
           <CalendarHeart size={20} />
           <span>Holidays</span>
+        </NavLink>
+        <NavLink 
+          to="/calendar" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <CalendarRange size={20} />
+          <span>Calendar</span>
         </NavLink>
       </div>
     </nav>
