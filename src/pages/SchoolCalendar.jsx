@@ -6,10 +6,15 @@ import { homeworkData } from '../data/homeworkData';
 // Build a lookup: "YYYY-MM-DD" → homework tasks array
 const homeworkByDate = {};
 homeworkData.forEach(entry => {
-  // entry.date like "Wednesday, 13 May 2026" — convert to YYYY-MM-DD
+  // Parse the date string (e.g. "Wednesday, 13 May 2026")
   const d = new Date(entry.date);
   if (!isNaN(d)) {
-    const key = d.toISOString().slice(0, 10);
+    // Use LOCAL date getters — NOT toISOString() which returns UTC
+    // and drifts the date back by one day in IST (UTC+5:30)
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const key = `${y}-${m}-${day}`;
     homeworkByDate[key] = entry.tasks;
   }
 });
