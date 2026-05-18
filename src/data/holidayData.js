@@ -7,6 +7,10 @@ export const holidayData = [
       {
         "name": "English.pdf",
         "url": "/holiday_homework/English.pdf"
+      },
+      {
+        "name": "English Sample Paper .pdf",
+        "url": "/holiday_homework/English%20Sample%20Paper%20.pdf"
       }
     ],
     "file": "English.pdf",

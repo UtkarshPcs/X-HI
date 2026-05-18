@@ -1,6 +1,7 @@
 English 
 Message :- Do it in notebook
 Homework File :- Real DATA/Holiday homework/English.pdf
+Homework File :- public/holiday_homework/English Sample Paper .pdf
 
 Hindi
 Message :- Do it in the notebook
