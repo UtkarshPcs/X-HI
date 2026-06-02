@@ -567,3 +567,315 @@ a {
 .markdown-content p:last-child {
   margin-bottom: 0;
 }
+
+
+/* ─── Auth Modal ─────────────────────────────────────────── */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.auth-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  animation: fadeInUp 0.25s ease;
+}
+
+.auth-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+}
+.auth-close:hover { background: var(--surface-hover); }
+
+.auth-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-step h2 {
+  font-size: 1.35rem;
+  margin: 0 0 0.25rem;
+}
+
+.auth-sub {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+.auth-step label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: -0.4rem;
+}
+
+.auth-step input {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.auth-step input:focus { border-color: var(--primary); }
+
+.auth-btn {
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 0.25rem;
+}
+.auth-btn:active { transform: scale(0.98); }
+.auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-btn.primary { background: var(--primary); color: #fff; }
+.auth-btn.primary:hover:not(:disabled) { opacity: 0.88; }
+.auth-btn.secondary {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.auth-btn.secondary:hover { border-color: var(--primary); }
+
+.auth-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  text-align: left;
+  margin-top: -0.25rem;
+}
+
+.auth-err {
+  color: #f87171;
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(248, 113, 113, 0.1);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid #f87171;
+}
+
+.auth-success-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.auth-creds-box {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.auth-creds-value {
+  font-family: 'Outfit', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+}
+
+/* ─── Navbar Auth ─────────────────────────────────────────── */
+.nav-auth {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.nav-user-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+.nav-avatar:hover { opacity: 0.85; }
+
+.nav-login-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.nav-login-btn:hover { opacity: 0.88; }
+
+.nav-logout {
+  background: none !important;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+.nav-logout:hover { color: #f87171; }
+
+/* ─── Profile Page ─────────────────────────────────────────── */
+.profile-page {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-initials {
+  width: 100%;
+  height: 100%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.profile-camera-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 50%;
+}
+.profile-avatar-wrap:hover .profile-camera-overlay { opacity: 1; }
+
+.profile-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profile-roll {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.profile-info-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.profile-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  background: var(--surface-hover);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.profile-info-label { color: var(--text-secondary); }
+.profile-info-value { font-weight: 600; }
+
+.profile-photo-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+.profile-logout {
+  margin-top: 0.75rem;
+  width: 100%;
+}

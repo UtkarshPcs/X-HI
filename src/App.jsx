@@ -1,25 +1,24 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
+import AuthModal from './components/AuthModal';
+import { AuthProvider } from './auth/AuthContext';
 import Home from './pages/Home';
 import Homework from './pages/Homework';
 import HolidayHomework from './pages/HolidayHomework';
 import SchoolCalendar from './pages/SchoolCalendar';
+import ProfilePage from './pages/ProfilePage';
 import { Heart } from 'lucide-react';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 }
 
-function App() {
+function AppInner() {
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <div className="app-container">
         <Navbar />
@@ -29,11 +28,12 @@ function App() {
             <Route path="/homework" element={<Homework />} />
             <Route path="/holidays" element={<HolidayHomework />} />
             <Route path="/calendar" element={<SchoolCalendar />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </main>
         <footer className="app-footer">
           <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            Designed and developed by <span 
+            Designed and developed by <span
               onClick={() => {
                 if (window.confirm("You are about to be redirected to WhatsApp to chat with Utkarsh. Do you want to continue?")) {
                   window.open("https://wa.me/918102783645", "_blank");
@@ -46,6 +46,17 @@ function App() {
           </p>
         </footer>
       </div>
+      <AuthModal />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppInner />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
