@@ -471,8 +471,138 @@ a {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes springUp {
+  0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+  50% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .fade-in-up {
   animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.spring-up {
+  animation: springUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 50ms; opacity: 0; }
+.stagger-2 { animation-delay: 100ms; opacity: 0; }
+.stagger-3 { animation-delay: 150ms; opacity: 0; }
+
+/* Custom Onboarding Tooltip */
+.custom-tooltip {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.custom-tooltip.role-student {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 30px -10px rgba(139, 92, 246, 0.2), 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.custom-tooltip.role-monitor {
+  border-color: rgba(236, 72, 153, 0.3);
+  box-shadow: 0 0 30px -10px rgba(236, 72, 153, 0.2), 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip-header {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tooltip-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.tooltip-body {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.tooltip-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tooltip-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.tooltip-btn:active {
+  transform: scale(0.95);
+}
+
+.tooltip-btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.tooltip-btn.primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+.tooltip-btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tooltip-skip {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0.5rem;
+}
+
+.tooltip-skip:hover {
+  color: var(--text-primary);
+}
+
+.tooltip-progress {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 /* Utilities */

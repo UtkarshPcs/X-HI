@@ -3,35 +3,99 @@ import { Joyride, STATUS } from 'react-joyride';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { completeOnboarding } from '../auth/authService';
+import { Sparkles, HandMetal, Navigation, Compass, LayoutDashboard } from 'lucide-react';
+
+const CustomTooltip = ({
+  index,
+  step,
+  backProps,
+  closeProps,
+  primaryProps,
+  tooltipProps,
+  isLastStep,
+}) => {
+  const { currentUser } = useAuth();
+  const isMonitor = currentUser?.role === ROLES.MONITOR;
+  
+  return (
+    <div 
+      {...tooltipProps} 
+      className={`custom-tooltip spring-up ${isMonitor ? 'role-monitor' : 'role-student'}`}
+    >
+      <div className="tooltip-header stagger-1">
+        {step.icon && <span style={{ color: isMonitor ? 'var(--secondary)' : 'var(--primary)' }}>{step.icon}</span>}
+        <h3 className="tooltip-title" style={{
+          background: isMonitor ? 'linear-gradient(135deg, var(--secondary), #f472b6)' : 'linear-gradient(135deg, var(--primary), #a78bfa)',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent'
+        }}>
+          {step.title}
+        </h3>
+      </div>
+      <div className="tooltip-body stagger-2">
+        {step.content}
+      </div>
+      <div className="tooltip-footer stagger-3">
+        <div className="tooltip-progress">
+          {index + 1} / {step.totalSteps}
+        </div>
+        <div className="tooltip-controls">
+          {!isLastStep && (
+            <button {...closeProps} className="tooltip-skip">
+              Skip
+            </button>
+          )}
+          {index > 0 && (
+            <button {...backProps} className="tooltip-btn secondary">
+              Back
+            </button>
+          )}
+          <button {...primaryProps} className="tooltip-btn primary" style={{ background: isMonitor ? 'var(--secondary)' : 'var(--primary)' }}>
+            {isLastStep ? 'Finish' : 'Next'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const getStudentSteps = (user) => [
   {
     target: 'body',
     placement: 'center',
-    content: (
-      <div style={{ textAlign: 'center', animation: 'fadeInUp 0.5s ease-out' }}>
-        <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>Hi, {user.name.split(' ')[0]}! 👋</h2>
-        <p style={{ fontWeight: 500, color: 'var(--text-primary)' }}>Welcome to your Student Portal.</p>
-        <p style={{ marginTop: '0.75rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Let's take a quick tour of what you can do here.</p>
-      </div>
-    ),
+    title: `Hi, ${user.name.split(' ')[0]}!`,
+    icon: <HandMetal size={24} />,
+    content: 'Welcome to your Student Dashboard. Let\'s take a quick tour of what you can do here to stay on top of your work.',
     disableBeacon: true,
+    totalSteps: 5
   },
   {
     target: '.nav-links a[href="/homework"]',
-    content: 'This is the Homework portal. You can find your daily homework assignments here.',
+    title: 'Daily Homework',
+    icon: <Navigation size={22} />,
+    content: 'Find all your daily homework assignments here. They are updated regularly so you never miss a task.',
+    totalSteps: 5
   },
   {
     target: '.nav-links a[href="/holidays"]',
-    content: 'This is the Holiday Homework portal. You can download holiday assignments and track your progress.',
+    title: 'Holiday Homework',
+    icon: <Compass size={22} />,
+    content: 'Download holiday assignments and track your progress easily during breaks.',
+    totalSteps: 5
   },
   {
     target: '.nav-links a[href="/calendar"]',
-    content: 'Stay updated with the school calendar and upcoming events right here.',
+    title: 'School Calendar',
+    icon: <LayoutDashboard size={22} />,
+    content: 'Stay updated with the school calendar, upcoming events, and important dates right here.',
+    totalSteps: 5
   },
   {
     target: '.nav-user-menu',
-    content: 'Your profile is located here. Click your initials to update your photo and view your details.',
+    title: 'Your Profile',
+    icon: <Sparkles size={22} />,
+    content: 'Click your initials to update your photo, view your details, and manage your account.',
+    totalSteps: 5
   }
 ];
 
@@ -39,19 +103,19 @@ const getMonitorSteps = (user) => [
   {
     target: 'body',
     placement: 'center',
-    content: (
-      <div style={{ textAlign: 'center', animation: 'fadeInUp 0.5s ease-out' }}>
-        <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: 'var(--secondary)' }}>Hello Monitor {user.name.split(' ')[0]}! 🌟</h2>
-        <p style={{ fontWeight: 500, color: 'var(--text-primary)' }}>Welcome to your Dashboard.</p>
-        <p style={{ marginTop: '0.75rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Let's take a quick tour of your special features.</p>
-      </div>
-    ),
+    title: `Hello Monitor ${user.name.split(' ')[0]}!`,
+    icon: <Sparkles size={24} />,
+    content: 'Welcome to your Dashboard. As a monitor, you have special responsibilities and features. Let\'s take a look.',
     disableBeacon: true,
+    totalSteps: 5
   },
-  ...getStudentSteps(user).slice(1, 4), // share the middle steps
+  ...getStudentSteps(user).slice(1, 4).map(s => ({ ...s, totalSteps: 5 })),
   {
     target: '.nav-user-menu',
-    content: 'This is your profile. As a Monitor, you will see special tools added here in the future!',
+    title: 'Monitor Profile',
+    icon: <Sparkles size={22} />,
+    content: 'This is your profile. Soon, you will find special monitor-only tools and administrative options here!',
+    totalSteps: 5
   }
 ];
 
@@ -104,28 +168,11 @@ export default function Onboarding({ forceRun, forceRole, onCloseForceRun }) {
       continuous
       showProgress
       showSkipButton
+      tooltipComponent={CustomTooltip}
       callback={handleJoyrideCallback}
       styles={{
         options: {
-          primaryColor: 'var(--primary, #3b82f6)',
-          backgroundColor: 'var(--surface, #1e1e1e)',
-          textColor: 'var(--text-primary, #ffffff)',
-          arrowColor: 'var(--surface, #1e1e1e)',
           overlayColor: 'rgba(0, 0, 0, 0.65)',
-        },
-        tooltip: {
-          borderRadius: '12px',
-          fontFamily: 'inherit',
-          border: '1px solid var(--border, #333)',
-        },
-        buttonNext: {
-          borderRadius: '6px',
-        },
-        buttonBack: {
-          color: 'var(--text-secondary, #a0a0a0)',
-        },
-        buttonSkip: {
-          color: 'var(--text-secondary, #a0a0a0)',
         }
       }}
     />
