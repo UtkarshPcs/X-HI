@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       currentUser: currentUser ? { ...currentUser, isAdmin: currentUser.phone === '8102783645' } : null,
       loading,
-      modalOpen, openModal, closeModal, step, setStep,
+      modalOpen, openModal, closeModal,
       register, savePassword, login, logout,
       sendOtp, verifyOtp, resetPassword,
     }}>
