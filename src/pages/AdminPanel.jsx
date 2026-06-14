@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Database, Trash2 } from 'lucide-react';
-import { addHomework, migrateLegacyData } from '../services/homeworkService';
+import { ShieldAlert, Plus, Save, Trash2 } from 'lucide-react';
+import { addHomework } from '../services/homeworkService';
 
 export default function AdminPanel() {
   const { currentUser } = useAuth();
@@ -11,7 +11,6 @@ export default function AdminPanel() {
   const [date, setDate] = useState('');
   const [tasks, setTasks] = useState([{ subject: '', description: '', type: 'homework' }]);
   const [loading, setLoading] = useState(false);
-  const [migrating, setMigrating] = useState(false);
 
   useEffect(() => {
     if (currentUser === undefined) return;
@@ -53,18 +52,7 @@ export default function AdminPanel() {
     setLoading(false);
   };
 
-  const handleMigrate = async () => {
-    if (!window.confirm("Are you sure you want to migrate legacy data? This might duplicate if already done.")) return;
-    setMigrating(true);
-    try {
-      const count = await migrateLegacyData();
-      alert(`Successfully migrated ${count} legacy homework entries to Database!`);
-    } catch (err) {
-      console.error(err);
-      alert('Migration failed: ' + err.message);
-    }
-    setMigrating(false);
-  };
+
 
   return (
     <div className="animate-fade-in fade-in-up" style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem' }}>
@@ -135,22 +123,6 @@ export default function AdminPanel() {
             <Save size={18} /> {loading ? 'Saving...' : 'Save Homework'}
           </button>
         </form>
-      </div>
-
-      <div className="glass-card" style={{ border: '1px dashed var(--border)' }}>
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '0.5rem' }}>System Actions</h3>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-          Use this button ONLY ONCE to migrate old homework data from the local file into the Firestore database.
-        </p>
-        <button 
-          onClick={handleMigrate} 
-          disabled={migrating}
-          className="auth-btn secondary" 
-          style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
-        >
-          <Database size={16} style={{ display: 'inline', marginRight: '0.5rem' }} /> 
-          {migrating ? 'Migrating...' : 'Migrate Legacy Homework Data'}
-        </button>
       </div>
     </div>
   );
