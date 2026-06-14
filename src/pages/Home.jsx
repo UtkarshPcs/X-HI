@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Users, UserCircle, ShieldCheck, Copy, Check, BookOpen, CalendarDays, ClipboardList, Hourglass } from 'lucide-react';
+import { Users, UserCircle, ShieldCheck, Copy, Check, BookOpen, CalendarDays, ClipboardList, Hourglass, Lock } from 'lucide-react';
 import { homeworkData } from '../data/homeworkData';
+import { useAuth } from '../auth/AuthContext';
 
 const studentsData = [
   "Aditya Gupta", "Shreya", "Shourya", "Mihika", "Anuraj", "Parth", "Ravi", "Ruchir", "Sonali", "Yesh", 
@@ -27,6 +28,7 @@ const routine = [
 
 export default function Home() {
   const [copied, setCopied] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleCopy = () => {
     const textToCopy = students.map(s => `${s.rollNo}. ${s.name}`).join('\n');
@@ -162,50 +164,66 @@ export default function Home() {
 
       <div className="bento-section mt-2">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0 }}>Student Register</h2>
-          <button 
-            onClick={handleCopy}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              background: copied ? 'rgba(16, 185, 129, 0.15)' : 'var(--surface-hover)',
-              color: copied ? '#10b981' : 'var(--text-primary)',
-              border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.3)' : 'var(--border)'}`,
-              padding: '0.5rem 1rem',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              transition: 'all 0.2s ease',
-              fontFamily: 'Inter, sans-serif'
-            }}
-          >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
-            {copied ? 'Copied!' : 'Copy List (.txt format)'}
-          </button>
+          <h2 className="section-title" style={{ marginBottom: 0 }}>
+            Student Register {!currentUser && <Lock size={18} style={{ display: 'inline', marginLeft: '0.5rem', color: 'var(--text-secondary)' }} />}
+          </h2>
+          {currentUser && (
+            <button 
+              onClick={handleCopy}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: copied ? 'rgba(16, 185, 129, 0.15)' : 'var(--surface-hover)',
+                color: copied ? '#10b981' : 'var(--text-primary)',
+                border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.3)' : 'var(--border)'}`,
+                padding: '0.5rem 1rem',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                fontWeight: 500,
+                transition: 'all 0.2s ease',
+                fontFamily: 'Inter, sans-serif'
+              }}
+            >
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+              {copied ? 'Copied!' : 'Copy List (.txt format)'}
+            </button>
+          )}
         </div>
-        <div className="glass-card table-card glow-hover">
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Roll No</th>
-                  <th>Student Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student) => (
-                  <tr key={student.rollNo}>
-                    <td>
-                      <span className="roll-badge">{student.rollNo}</span>
-                    </td>
-                    <td className="student-name">{student.name}</td>
+        {currentUser ? (
+          <div className="glass-card table-card glow-hover">
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr key={student.rollNo}>
+                      <td>
+                        <span className="roll-badge">{student.rollNo}</span>
+                      </td>
+                      <td className="student-name">{student.name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="glass-card glow-hover" style={{ padding: '3rem 1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <Lock size={48} color="var(--text-secondary)" style={{ opacity: 0.5 }} />
+            <div>
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Register is Locked</h3>
+              <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto' }}>
+                Please login to view the student register and class list.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

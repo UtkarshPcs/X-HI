@@ -222,11 +222,11 @@ export const holidayData = [
     "message": "Do it in the assignment copy.",
     "files": [
       {
-        "name": "holiday homework.txt",
-        "url": "/holiday_homework/holiday%20homework.txt"
+        "name": "Economics.pdf",
+        "url": "/holiday_homework/Economics.pdf"
       }
     ],
-    "file": "holiday homework.txt",
-    "downloadUrl": "/holiday_homework/holiday%20homework.txt"
+    "file": "Economics.pdf",
+    "downloadUrl": "/holiday_homework/Economics.pdf"
   }
 ];
