@@ -54,3 +54,8 @@ export async function getHolidayHomework(phone) {
   const user = await getUserByPhone(phone);
   return user?.completedHolidayHomework_v2 || [];
 }
+
+export async function completeOnboarding(phone) {
+  await updateDoc(userRef(phone), { onboardingCompleted: true });
+}
+

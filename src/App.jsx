@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
+import Onboarding from './components/Onboarding';
 import { AuthProvider } from './auth/AuthContext';
 import Home from './pages/Home';
 import Homework from './pages/Homework';
@@ -47,6 +48,7 @@ function AppInner() {
         </footer>
       </div>
       <AuthModal />
+      <Onboarding />
     </>
   );
 }

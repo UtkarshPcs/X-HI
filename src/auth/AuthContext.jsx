@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
 import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword } from './authService';
+import { getUserRole } from './roles';
 
 const AuthContext = createContext(null);
 
@@ -17,9 +18,15 @@ export function AuthProvider({ children }) {
     const saved = localStorage.getItem('auth_phone');
     if (saved) {
       getUserByPhone(saved)
-        .then((user) => { if (user) setCurrentUser(user); })
+        .then((user) => { 
+          if (user) {
+            user.role = getUserRole(user.rollNo);
+            setCurrentUser(user); 
+          }
+        })
         .finally(() => setLoading(false));
     } else {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setLoading(false);
     }
   }, []);
@@ -34,6 +41,7 @@ export function AuthProvider({ children }) {
   async function savePassword(phone, password) {
     await setPassword(phone, password);
     const user = await getUserByPhone(phone);
+    if (user) user.role = getUserRole(user.rollNo);
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
   }
@@ -41,6 +49,7 @@ export function AuthProvider({ children }) {
   async function login(phone, password) {
     const user = await loginUser(phone, password);
     if (!user) throw new Error('Invalid phone number or password.');
+    user.role = getUserRole(user.rollNo);
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
     return user;
@@ -75,6 +84,7 @@ export function AuthProvider({ children }) {
   async function resetPassword(phone, newPassword) {
     await updatePassword(phone, newPassword);
     const user = await getUserByPhone(phone);
+    if (user) user.role = getUserRole(user.rollNo);
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
   }
