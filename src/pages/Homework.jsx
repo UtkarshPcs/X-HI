@@ -1,18 +1,50 @@
 import { Calendar, Lock, Loader2, Copy, Check } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getHomework } from '../services/homeworkService';
 import { getHomeworkDone, setHomeworkDone } from '../auth/authService';
+import { toDateKey } from '../data/attendanceUtils';
 
+// ── Subject → emoji map ────────────────────────────────────────
+const SUBJECT_EMOJI = {
+  hindi: '📙', math: '🧮', maths: '🧮', mathematics: '🧮',
+  english: '📗', science: '🔬', physics: '⚡', chemistry: '🧪',
+  biology: '🌿', history: '🏛️', geography: '🌍', civics: '⚖️',
+  economics: '📊', it: '💻', computer: '💻', sst: '🗺️',
+  sanskrit: '🕉️', social: '🗺️', 'social science': '🗺️',
+  general: '📌',
+};
+
+function subjectEmoji(subject) {
+  const key = subject.toLowerCase().trim();
+  for (const [k, v] of Object.entries(SUBJECT_EMOJI)) {
+    if (key.includes(k)) return v;
+  }
+  return '📌';
+}
+
+// ── WhatsApp format ────────────────────────────────────────────
 function formatForWhatsApp(day) {
   const date = day.date?.trim() || '';
   const tasks = day.tasks || [];
-  const taskLines = tasks.map((t, i) =>
-    `*${i + 1}. ${t.subject}*\n${t.description.trim()}`
+  const link = `${window.location.origin}/homework?date=${homeworkDateParam(day)}`;
+
+  const taskLines = tasks.map((t) =>
+    `*${subjectEmoji(t.subject)} ${t.subject.toUpperCase()}*\n> ${t.description.trim().replace(/\n/g, '\n> ')}`
   ).join('\n\n');
-  return `📚 *Homework — ${date}*\n\n${taskLines}\n\n> _Shared via 10th HI Portal_`;
+
+  return `📋 *T O D A Y ' S   T A S K S* 📋\n_Date: ${date}_\n━━━━━━━ ✦ ━━━━━━━\n\n${taskLines}\n\n━━━━━━━ ✦ ━━━━━━━\n🔗 ${link}`;
 }
 
+function homeworkDateParam(day) {
+  if (!day?.date) return '';
+  const d = new Date(day.date);
+  if (isNaN(d)) return '';
+  return toDateKey(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+// ── CopyButton ─────────────────────────────────────────────────
 function CopyButton({ day }) {
   const [copied, setCopied] = useState(false);
   async function handleCopy() {
@@ -28,17 +60,21 @@ function CopyButton({ day }) {
       color: copied ? '#6ee7b7' : 'var(--text-secondary)',
       padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-sm)',
       cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, transition: 'all 0.2s',
+      whiteSpace: 'nowrap',
     }}>
       {copied ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> Copy for WhatsApp</>}
     </button>
   );
 }
 
+// ── Main page ──────────────────────────────────────────────────
 export default function Homework() {
   const { currentUser, openModal } = useAuth();
   const [homeworkList, setHomeworkList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [doneKeys, setDoneKeys] = useState(new Set());
+  const [searchParams] = useSearchParams();
+  const dayRefs = useRef({});
 
   useEffect(() => {
     if (!currentUser) return;
@@ -50,6 +86,24 @@ export default function Homework() {
       .then((keys) => setDoneKeys(new Set(keys)))
       .catch(console.error);
   }, [currentUser]);
+
+  // Auto-scroll to ?date= param and set page title
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    if (!dateParam || homeworkList.length === 0) return;
+
+    const match = homeworkList.find((hw) => homeworkDateParam(hw) === dateParam);
+    if (!match) return;
+
+    // Set OG-style page title for link preview
+    document.title = `Homework – ${match.date} | 10th HI Portal`;
+
+    // Scroll to the card
+    const ref = dayRefs.current[match.id];
+    if (ref) setTimeout(() => ref.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+
+    return () => { document.title = 'X HI Portal'; };
+  }, [searchParams, homeworkList]);
 
   const toggleTask = useCallback((taskKey) => {
     if (!currentUser) return;
@@ -92,7 +146,12 @@ export default function Homework() {
             const allDone = dayTotal > 0 && dayDone === dayTotal;
 
             return (
-              <div key={day.id} className="glass-card" style={{ marginBottom: '1.5rem', opacity: allDone ? 0.75 : 1, transition: 'opacity 0.3s' }}>
+              <div
+                key={day.id}
+                ref={(el) => { dayRefs.current[day.id] = el; }}
+                className="glass-card"
+                style={{ marginBottom: '1.5rem', opacity: allDone ? 0.75 : 1, transition: 'opacity 0.3s', scrollMarginTop: '1rem' }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <h2 className="section-title text-gradient" style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -101,8 +160,7 @@ export default function Homework() {
                     </h2>
                     {dayTotal > 0 && (
                       <span style={{
-                        fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px',
-                        borderRadius: '99px',
+                        fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '99px',
                         background: allDone ? 'rgba(16,185,129,0.15)' : 'rgba(139,92,246,0.12)',
                         color: allDone ? '#6ee7b7' : 'var(--text-secondary)',
                         border: `1px solid ${allDone ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
@@ -121,14 +179,7 @@ export default function Homework() {
                     const key = `${day.id}_${idx}`;
                     const done = doneKeys.has(key);
                     return (
-                      <button
-                        key={idx}
-                        onClick={() => toggleTask(key)}
-                        style={{
-                          width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                          padding: 0, cursor: 'pointer',
-                        }}
-                      >
+                      <button key={idx} onClick={() => toggleTask(key)} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
                         <div style={{
                           padding: '0.9rem 1.1rem',
                           background: done ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)',
@@ -137,7 +188,6 @@ export default function Homework() {
                           display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
                           transition: 'all 0.2s',
                         }}>
-                          {/* Checkbox */}
                           <div style={{
                             flexShrink: 0, marginTop: 2,
                             width: 20, height: 20, borderRadius: 6,
@@ -153,15 +203,11 @@ export default function Homework() {
                               fontSize: '1rem', fontWeight: 600, marginBottom: '0.35rem',
                               color: done ? 'var(--text-secondary)' : 'var(--text-primary)',
                               textDecoration: done ? 'line-through' : 'none',
-                              transition: 'all 0.2s',
+                              display: 'flex', alignItems: 'center', gap: '0.4rem',
                             }}>
-                              {task.subject}
+                              <span>{subjectEmoji(task.subject)}</span> {task.subject}
                             </p>
-                            <p style={{
-                              color: 'var(--text-secondary)', fontSize: '0.88rem',
-                              lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0,
-                              opacity: done ? 0.6 : 1,
-                            }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0, opacity: done ? 0.6 : 1 }}>
                               {task.description}
                             </p>
                           </div>
