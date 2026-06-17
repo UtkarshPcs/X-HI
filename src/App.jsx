@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import Onboarding from './components/Onboarding';
 import { AuthProvider } from './auth/AuthContext';
-import Home from './pages/Home';
+import StudentDashboard from './pages/StudentDashboard';
 import Homework from './pages/Homework';
 import HolidayHomework from './pages/HolidayHomework';
 import SchoolCalendar from './pages/SchoolCalendar';
@@ -26,7 +26,7 @@ function AppInner() {
         <Navbar />
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<StudentDashboard />} />
             <Route path="/homework" element={<Homework />} />
             <Route path="/holidays" element={<HolidayHomework />} />
             <Route path="/calendar" element={<SchoolCalendar />} />

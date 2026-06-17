@@ -1,17 +1,17 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users } from 'lucide-react';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { ROLES } from '../auth/roles';
-import Onboarding from '../components/Onboarding';
+import ClassInfo from '../components/ClassInfo';
 import packageJson from '../../package.json';
 
 export default function ProfilePage() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, triggerTour } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef();
   const [photo, setPhoto] = useState(null);
-  const [testOnboarding, setTestOnboarding] = useState({ run: false, role: null });
+  const [showClassInfo, setShowClassInfo] = useState(false);
 
   useEffect(() => {
     if (!currentUser) { navigate('/'); return; }
@@ -82,21 +82,33 @@ export default function ProfilePage() {
 
         {currentUser.role === ROLES.ADMIN && (
           <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--border)', textAlign: 'left' }}>
-            <h4 style={{ color: 'var(--text-primary)', marginBottom: '1rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Tools</h4>
+            <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Tools — Onboarding</h4>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '0.75rem' }}>
+              Tours run on the dashboard. You'll be taken there first.
+            </p>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button 
-                className="auth-btn secondary" 
+              <button
+                className="auth-btn secondary"
                 style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem' }}
-                onClick={() => setTestOnboarding({ run: true, role: ROLES.STUDENT })}>
+                onClick={() => { triggerTour(ROLES.STUDENT); navigate('/'); }}>
                 Test Student Tour
               </button>
-              <button 
-                className="auth-btn secondary" 
+              <button
+                className="auth-btn secondary"
                 style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem' }}
-                onClick={() => setTestOnboarding({ run: true, role: ROLES.MONITOR })}>
+                onClick={() => { triggerTour(ROLES.MONITOR); navigate('/'); }}>
                 Test Monitor Tour
               </button>
             </div>
+            <button
+              className="auth-btn secondary"
+              style={{ width: '100%', marginTop: '0.5rem', padding: '0.5rem', fontSize: '0.85rem' }}
+              onClick={() => {
+                localStorage.removeItem(`onboarding_done_${currentUser.phone}`);
+                alert('Onboarding reset. Refresh the page to trigger it again.');
+              }}>
+              Reset Onboarding (for testing)
+            </button>
           </div>
         )}
 
@@ -109,13 +121,24 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {testOnboarding.run && (
-        <Onboarding 
-          forceRun={true} 
-          forceRole={testOnboarding.role} 
-          onCloseForceRun={() => setTestOnboarding({ run: false, role: null })} 
-        />
-      )}
+      <div className="profile-classinfo-wrap">
+        <button
+          className="class-info-toggle"
+          onClick={() => setShowClassInfo((v) => !v)}
+          aria-expanded={showClassInfo}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Users size={18} /> Class Info — routine, monitors & student register
+          </span>
+          {showClassInfo ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+        {showClassInfo && (
+          <div style={{ marginTop: '1.5rem' }}>
+            <ClassInfo />
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

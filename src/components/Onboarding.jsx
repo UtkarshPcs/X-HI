@@ -3,7 +3,7 @@ import { Joyride, STATUS } from 'react-joyride';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { completeOnboarding } from '../auth/authService';
-import { Sparkles, HandMetal, Navigation, Compass, LayoutDashboard } from 'lucide-react';
+import { Sparkles, HandMetal, Navigation, Compass, LayoutDashboard, CalendarCheck } from 'lucide-react';
 
 const CustomTooltip = ({
   index,
@@ -67,35 +67,43 @@ const getStudentSteps = (user) => [
     icon: <HandMetal size={24} />,
     content: 'Welcome to your Student Dashboard. Let\'s take a quick tour of what you can do here to stay on top of your work.',
     disableBeacon: true,
-    totalSteps: 5
+    totalSteps: 6
+  },
+  {
+    target: '[data-tour="attendance-panel"]',
+    title: 'Track Your Attendance',
+    icon: <CalendarCheck size={22} />,
+    content: 'This is your attendance tracker. Every working day counts as present by default — if you miss a day, just tap that date to mark yourself absent. It updates your attendance percentage automatically so you always stay on top of it.',
+    placement: 'top',
+    totalSteps: 6
   },
   {
     target: '.nav-links a[href="/homework"]',
     title: 'Daily Homework',
     icon: <Navigation size={22} />,
     content: 'Find all your daily homework assignments here. They are updated regularly so you never miss a task.',
-    totalSteps: 5
+    totalSteps: 6
   },
   {
     target: '.nav-links a[href="/holidays"]',
     title: 'Holiday Homework',
     icon: <Compass size={22} />,
     content: 'Download holiday assignments and track your progress easily during breaks.',
-    totalSteps: 5
+    totalSteps: 6
   },
   {
     target: '.nav-links a[href="/calendar"]',
     title: 'School Calendar',
     icon: <LayoutDashboard size={22} />,
     content: 'Stay updated with the school calendar, upcoming events, and important dates right here.',
-    totalSteps: 5
+    totalSteps: 6
   },
   {
     target: '.nav-user-menu',
     title: 'Your Profile',
     icon: <Sparkles size={22} />,
-    content: 'Click your initials to update your photo, view your details, and manage your account.',
-    totalSteps: 5
+    content: 'Click your initials to update your photo, view your details, see class info, and manage your account.',
+    totalSteps: 6
   }
 ];
 
@@ -107,52 +115,54 @@ const getMonitorSteps = (user) => [
     icon: <Sparkles size={24} />,
     content: 'Welcome to your Dashboard. As a monitor, you have special responsibilities and features. Let\'s take a look.',
     disableBeacon: true,
-    totalSteps: 5
+    totalSteps: 6
   },
-  ...getStudentSteps(user).slice(1, 4).map(s => ({ ...s, totalSteps: 5 })),
+  ...getStudentSteps(user).slice(1, 5).map(s => ({ ...s, totalSteps: 6 })),
   {
-    target: '.nav-user-menu',
-    title: 'Monitor Profile',
+    target: '.nav-links a[href="/admin"]',
+    title: 'Monitor Panel',
     icon: <Sparkles size={22} />,
-    content: 'This is your profile. Soon, you will find special monitor-only tools and administrative options here!',
-    totalSteps: 5
+    content: 'As a monitor, you can post notices for the whole class and add daily homework right from the Panel. Notices you post appear on everyone\'s dashboard.',
+    totalSteps: 6
   }
 ];
 
 export default function Onboarding({ forceRun, forceRole, onCloseForceRun }) {
-  const { currentUser } = useAuth();
+  const { currentUser, forceTour, clearTour } = useAuth();
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState([]);
 
+  // Determine effective force values — props (from ProfilePage test) take
+  // precedence; context (global trigger from triggerTour()) is the fallback.
+  const effectiveForceRun  = forceRun  || !!forceTour;
+  const effectiveForceRole = forceRole || forceTour?.role || null;
+
   useEffect(() => {
     if (!currentUser) return;
-    
-    // Check if we are forcing the run (from Admin profile)
-    if (forceRun && forceRole) {
-      setSteps(forceRole === ROLES.MONITOR ? getMonitorSteps(currentUser) : getStudentSteps(currentUser));
+
+    if (effectiveForceRun && effectiveForceRole) {
+      setSteps(effectiveForceRole === ROLES.MONITOR ? getMonitorSteps(currentUser) : getStudentSteps(currentUser));
       setRun(true);
       return;
     }
 
-    // Normal run check — use both Firestore field and localStorage as guard
     const localKey = `onboarding_done_${currentUser.phone}`;
     const alreadyDone = currentUser.onboardingCompleted || localStorage.getItem(localKey);
     if (!alreadyDone && currentUser.role !== ROLES.ADMIN) {
       setSteps(currentUser.role === ROLES.MONITOR ? getMonitorSteps(currentUser) : getStudentSteps(currentUser));
       setRun(true);
     }
-  }, [currentUser, forceRun, forceRole]);
+  }, [currentUser, effectiveForceRun, effectiveForceRole]);
 
   const handleJoyrideCallback = (data) => {
     const { status } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
-    
-    if (finishedStatuses.includes(status)) {
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setRun(false);
       if (forceRun && onCloseForceRun) {
         onCloseForceRun();
+      } else if (forceTour) {
+        clearTour();
       } else if (currentUser) {
-        // Mark done in both localStorage (immediate) and Firestore (persistent)
         localStorage.setItem(`onboarding_done_${currentUser.phone}`, '1');
         completeOnboarding(currentUser.phone).catch(console.error);
       }

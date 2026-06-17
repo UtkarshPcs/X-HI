@@ -59,3 +59,20 @@ export async function completeOnboarding(phone) {
   await updateDoc(userRef(phone), { onboardingCompleted: true });
 }
 
+// ── Attendance ─────────────────────────────────────────────────
+// Stored on the user document as an array of absent date keys
+// (YYYY-MM-DD). All working days are implicitly "present"; only
+// absences are persisted, keeping the document small.
+
+export async function getAttendance(phone) {
+  const user = await getUserByPhone(phone);
+  return user?.attendance_absentDays || [];
+}
+
+export async function setAttendance(phone, absentDays) {
+  // De-duplicate and sort for a clean, deterministic stored value.
+  const cleaned = Array.from(new Set(absentDays)).sort();
+  await updateDoc(userRef(phone), { attendance_absentDays: cleaned });
+  return cleaned;
+}
+

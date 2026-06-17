@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [forceTour, setForceTour] = useState(null); // { role } | null
   const confirmationRef = useRef(null);
   const recaptchaRef = useRef(null);
 
@@ -95,6 +96,9 @@ export function AuthProvider({ children }) {
       modalOpen, openModal, closeModal,
       register, savePassword, login, logout,
       sendOtp, verifyOtp, resetPassword,
+      forceTour,
+      triggerTour: (role) => setForceTour({ role }),
+      clearTour: () => setForceTour(null),
     }}>
       {children}
       <div id="recaptcha-container" />

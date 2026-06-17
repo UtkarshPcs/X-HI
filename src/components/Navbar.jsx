@@ -30,9 +30,9 @@ export default function Navbar() {
         <NavLink to="/calendar" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <CalendarRange size={20} /><span>Calendar</span>
         </NavLink>
-        {currentUser?.isAdmin && (
+        {(currentUser?.isAdmin || currentUser?.role === 'MONITOR') && (
           <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <ShieldAlert size={20} /><span>Admin</span>
+            <ShieldAlert size={20} /><span>Panel</span>
           </NavLink>
         )}
       </div>
