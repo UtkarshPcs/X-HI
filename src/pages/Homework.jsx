@@ -31,7 +31,7 @@ function formatForWhatsApp(day) {
   const link = `${window.location.origin}/homework?date=${homeworkDateParam(day)}`;
 
   const taskLines = tasks.map((t) =>
-    `*${subjectEmoji(t.subject)} ${t.subject.toUpperCase()}*\n> ${t.description.trim().replace(/\n/g, '\n> ')}`
+    `*${subjectEmoji(t.subject)} ${t.subject.toUpperCase().trim()}*\n> ${t.description.trim().replace(/\n/g, '\n> ')}`
   ).join('\n\n');
 
   return `📋 *T O D A Y ' S   T A S K S* 📋\n_Date: ${date}_\n━━━━━━━ ✦ ━━━━━━━\n\n${taskLines}\n\n━━━━━━━ ✦ ━━━━━━━\n🔗 ${link}`;
