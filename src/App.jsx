@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import Onboarding from './components/Onboarding';
+import InstallPrompt from './components/InstallPrompt';
 import { AuthProvider } from './auth/AuthContext';
 import StudentDashboard from './pages/StudentDashboard';
 import Homework from './pages/Homework';
@@ -51,6 +52,7 @@ function AppInner() {
       </div>
       <AuthModal />
       <Onboarding />
+      <InstallPrompt />
     </>
   );
 }
