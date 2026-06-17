@@ -1,23 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X, BookOpen, CalendarDays, FlaskConical, GraduationCap, PartyPopper, Umbrella, Sun, Filter } from 'lucide-react';
 import { CALENDAR_EVENTS, EVENT_TYPES } from '../data/calendarData';
-import { homeworkData } from '../data/homeworkData';
+import { getHomework } from '../services/homeworkService';
+import { toDateKey } from '../data/attendanceUtils';
 
-// Build a lookup: "YYYY-MM-DD" → homework tasks array
-const homeworkByDate = {};
-homeworkData.forEach(entry => {
-  // Parse the date string (e.g. "Wednesday, 13 May 2026")
-  const d = new Date(entry.date);
-  if (!isNaN(d)) {
-    // Use LOCAL date getters — NOT toISOString() which returns UTC
-    // and drifts the date back by one day in IST (UTC+5:30)
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const key = `${y}-${m}-${day}`;
-    homeworkByDate[key] = entry.tasks;
-  }
-});
+// homeworkByDate is now loaded from Firestore — see useEffect below.
 
 const EVENT_ICONS = {
   HOLIDAY_VACATION: Umbrella,
@@ -75,6 +62,21 @@ export default function SchoolCalendar() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [filter, setFilter] = useState('ALL');
   const [showFilters, setShowFilters] = useState(false);
+  const [homeworkByDate, setHomeworkByDate] = useState({});
+
+  // Load homework from Firestore and build date→tasks lookup
+  useEffect(() => {
+    getHomework().then((list) => {
+      const map = {};
+      list.forEach((entry) => {
+        const d = new Date(entry.date);
+        if (!isNaN(d)) {
+          map[toDateKey(d.getFullYear(), d.getMonth(), d.getDate())] = entry.tasks;
+        }
+      });
+      setHomeworkByDate(map);
+    }).catch(console.error);
+  }, []);
 
   const { year, month } = ACADEMIC_MONTHS[monthIdx];
   const daysInMonth = getDaysInMonth(year, month);

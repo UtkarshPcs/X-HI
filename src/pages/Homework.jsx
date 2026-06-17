@@ -1,22 +1,67 @@
-import { Calendar, CheckCircle2, Lock, Loader2 } from 'lucide-react';
+import { Calendar, Lock, Loader2, Share2, Download } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { toBlob } from 'html-to-image';
 import { getHomework } from '../services/homeworkService';
+import ShareCard from '../components/ShareCard';
+
+function useSharingCard() {
+  const [sharing, setSharing] = useState(null); // { id, date, tasks }
+  const cardRef = useRef(null);
+
+  const share = useCallback(async (day) => {
+    setSharing({ id: day.id, date: day.date, tasks: day.tasks || [] });
+
+    // Wait a tick for the ShareCard to mount and fonts to render
+    await new Promise((r) => setTimeout(r, 80));
+
+    try {
+      const blob = await toBlob(cardRef.current, { pixelRatio: 2 });
+      if (!blob) throw new Error('Capture failed');
+
+      const file = new File([blob], `homework-${day.date}.png`, { type: 'image/png' });
+      const shareData = {
+        title: `Homework – ${day.date}`,
+        text: `📚 10th HI Homework\n${day.date}\n\n${(day.tasks || []).map(t => `• ${t.subject}: ${t.description}`).join('\n')}\n\n🔗 xhiportal.vercel.app`,
+        files: [file],
+      };
+
+      if (navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else if (navigator.share) {
+        // Files not supported — share text only
+        await navigator.share({ title: shareData.title, text: shareData.text });
+      } else {
+        // Desktop fallback — download the image
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') console.error('Share failed', err);
+    } finally {
+      setSharing(null);
+    }
+  }, []);
+
+  return { sharing, cardRef, share };
+}
 
 export default function Homework() {
   const { currentUser, openModal } = useAuth();
   const [homeworkList, setHomeworkList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { sharing, cardRef, share } = useSharingCard();
 
   useEffect(() => {
     if (currentUser) {
-      getHomework().then(data => {
-        setHomeworkList(data);
-        setLoading(false);
-      }).catch(err => {
-        console.error("Failed to fetch homework", err);
-        setLoading(false);
-      });
+      getHomework()
+        .then((data) => setHomeworkList(data))
+        .catch(console.error)
+        .finally(() => setLoading(false));
     }
   }, [currentUser]);
 
@@ -38,10 +83,10 @@ export default function Homework() {
   return (
     <div className="animate-fade-in fade-in-up">
       <h1 className="page-title text-gradient">Homework</h1>
-      
+
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '3rem' }}>
-          <Loader2 className="spinner" size={32} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+          <Loader2 size={32} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
         </div>
       ) : (
         <div className="task-list">
@@ -50,46 +95,53 @@ export default function Homework() {
           ) : (
             homeworkList.map((day) => (
               <div key={day.id} className="glass-card" style={{ marginBottom: '1.5rem' }}>
-                <h2 className="section-title text-gradient" style={{ fontSize: '1.3rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
-                  <Calendar size={22} className="text-primary" /> {day.date?.replace(/_/g, '').replace(/Date:/i, '').trim()}
-                </h2>
-                
-                <div className="day-tasks" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {(!day.tasks || day.tasks.length === 0) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h2 className="section-title text-gradient" style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Calendar size={20} className="text-primary" />
+                    {day.date?.replace(/_/g, '').replace(/Date:/i, '').trim()}
+                  </h2>
+                  <button
+                    onClick={() => share(day)}
+                    disabled={sharing?.id === day.id}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      background: 'var(--surface-hover)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-secondary)',
+                      padding: '0.4rem 0.85rem',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      transition: 'all 0.2s',
+                      opacity: sharing?.id === day.id ? 0.6 : 1,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  >
+                    {sharing?.id === day.id
+                      ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Capturing…</>
+                      : navigator.share ? <><Share2 size={14} /> Share</> : <><Download size={14} /> Save</>
+                    }
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {(!day.tasks || day.tasks.length === 0) ? (
                     <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No homework details found.</p>
-                  )}
-                  
-                  {day.tasks && day.tasks.map((task, idx) => (
-                    <div key={idx} className="task-item" style={{
-                      padding: '1rem 1.25rem',
-                      background: 'rgba(255, 255, 255, 0.02)',
+                  ) : day.tasks.map((task, idx) => (
+                    <div key={idx} style={{
+                      padding: '0.9rem 1.1rem',
+                      background: 'rgba(255,255,255,0.02)',
                       borderRadius: 'var(--radius-md)',
                       borderLeft: '4px solid var(--primary)',
-                      position: 'relative'
                     }}>
-                      <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)' }}>
-                        {task.subject !== 'General' ? task.subject : 'Homework Tasks'}
-                        <span className="badge homework">Homework</span>
+                      <h3 style={{ fontSize: '1rem', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
+                        {task.subject}
                       </h3>
-                      <p className="task-desc" style={{ marginTop: '0.5rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0 }}>
                         {task.description}
                       </p>
-                      
-                      <button style={{ 
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '1rem',
-                        background: 'none', 
-                        border: 'none', 
-                        color: 'var(--text-muted)',
-                        cursor: 'pointer',
-                        transition: 'color 0.2s'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'}
-                      onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-                      >
-                        <CheckCircle2 size={20} />
-                      </button>
                     </div>
                   ))}
                 </div>
@@ -97,6 +149,11 @@ export default function Homework() {
             ))
           )}
         </div>
+      )}
+
+      {/* Off-screen ShareCard — mounted only while capturing */}
+      {sharing && (
+        <ShareCard ref={cardRef} date={sharing.date} tasks={sharing.tasks} />
       )}
     </div>
   );
