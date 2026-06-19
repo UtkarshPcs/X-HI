@@ -29,7 +29,7 @@ function subjectEmoji(subject) {
 function formatForWhatsApp(day) {
   const date = day.date?.trim() || '';
   const tasks = day.tasks || [];
-  const link = `${window.location.origin}/homework?date=${homeworkDateParam(day)}`;
+  const link = `${window.location.origin}/share/homework/${homeworkDateParam(day)}`;
 
   const taskLines = tasks.map((t) =>
     `*${subjectEmoji(t.subject)} ${t.subject.toUpperCase().trim()}*\n> ${t.description.trim().replace(/\n/g, '\n> ')}`
@@ -73,7 +73,7 @@ function formatClassworkForWhatsApp(day) {
   const dateStr = new Date(day.date + 'T00:00:00').toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
-  const link = `${window.location.origin}/homework?tab=classwork&date=${day.date}`;
+  const link = `${window.location.origin}/share/classwork/${day.date}`;
   const periods = day.periods || [];
 
   const lines = periods.map((p) =>
