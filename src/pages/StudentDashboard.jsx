@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked } from 'lucide-react';
+import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import AttendanceCalendar from '../components/AttendanceCalendar';
@@ -9,6 +9,7 @@ import { getAttendance, setAttendance, getHolidayHomework, getHomeworkDone, setH
 import { getHomework } from '../services/homeworkService';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { getSyllabus, getCompletedTopics } from '../services/syllabusService';
+import { getAllClasswork } from '../services/classworkService';
 import { allTopics, statsForTopics, toSets } from '../data/syllabusStats';
 import { calcAttendance, todayKey, toDateKey } from '../data/attendanceUtils';
 import { holidayData } from '../data/holidayData';
@@ -61,6 +62,10 @@ export default function StudentDashboard() {
   // Latest homework entry (today or last working day that has data)
   const [latestHw, setLatestHw] = useState(null); // { date, tasks[] }
   const [hwLoading, setHwLoading] = useState(true);
+
+  // Latest classwork record (most recent day with recorded periods)
+  const [latestClasswork, setLatestClasswork] = useState(null);
+  const [cwLoading, setCwLoading] = useState(true);
 
   // Holiday homework completion count
   const [holidayCompleted, setHolidayCompleted] = useState(null);
@@ -122,6 +127,17 @@ export default function StudentDashboard() {
       })
       .catch(console.error)
       .finally(() => { if (active) setHwLoading(false); });
+    return () => { active = false; };
+  }, [currentUser]);
+
+  // Load latest classwork (most recent day with recorded periods).
+  useEffect(() => {
+    if (!currentUser) return;
+    let active = true;
+    getAllClasswork()
+      .then((list) => { if (active) setLatestClasswork(list[0] || null); })
+      .catch(console.error)
+      .finally(() => { if (active) setCwLoading(false); });
     return () => { active = false; };
   }, [currentUser]);
 
@@ -321,6 +337,54 @@ export default function StudentDashboard() {
                   </button>
                 );
               })}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Latest classwork card */}
+      <div className="glass-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ClipboardList size={20} color="#FF6D00" />
+            Latest Classwork
+          </h2>
+          <button
+            className="auth-link"
+            onClick={() => navigate('/homework?tab=classwork')}
+            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+          >
+            View all <ArrowRight size={13} />
+          </button>
+        </div>
+
+        {cwLoading ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
+        ) : !latestClasswork ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No classwork recorded yet.</p>
+        ) : (
+          <>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+              {latestClasswork.weekday}, {new Date(latestClasswork.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {(!latestClasswork.periods || latestClasswork.periods.length === 0) ? (
+                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.9rem' }}>No periods recorded.</p>
+              ) : latestClasswork.periods.map((p, idx) => (
+                <div key={idx} style={{
+                  padding: '0.7rem 0.9rem',
+                  background: 'rgba(255,255,255,0.02)',
+                  borderRadius: 'var(--radius-sm)',
+                  borderLeft: '3px solid #FF6D00',
+                }}>
+                  <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: 0, marginBottom: '0.15rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#FF6D00' }}>{p.period}</span> {p.subject}
+                  </p>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
+                    {p.note}
+                  </p>
+                </div>
+              ))}
             </div>
           </>
         )}
