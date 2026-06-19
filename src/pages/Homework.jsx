@@ -68,6 +68,43 @@ function CopyButton({ day }) {
   );
 }
 
+// ── Classwork WhatsApp format + deep link ──────────────────────
+function formatClassworkForWhatsApp(day) {
+  const dateStr = new Date(day.date + 'T00:00:00').toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+  const link = `${window.location.origin}/homework?tab=classwork&date=${day.date}`;
+  const periods = day.periods || [];
+
+  const lines = periods.map((p) =>
+    `*${subjectEmoji(p.subject)} ${p.period} · ${p.subject.toUpperCase().trim()}*\n> ${(p.note || '').trim().replace(/\n/g, '\n> ')}`
+  ).join('\n\n');
+
+  return `📝 *C L A S S W O R K* 📝\n_${dateStr}_\n━━━━━━━ ✦ ━━━━━━━\n\n${lines}\n\n━━━━━━━ ✦ ━━━━━━━\n🔗 ${link}`;
+}
+
+function ClassworkCopyButton({ day }) {
+  const [copied, setCopied] = useState(false);
+  async function handleCopy() {
+    await navigator.clipboard.writeText(formatClassworkForWhatsApp(day));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <button onClick={handleCopy} style={{
+      display: 'flex', alignItems: 'center', gap: '0.4rem',
+      background: copied ? 'rgba(16,185,129,0.12)' : 'var(--surface-hover)',
+      border: `1px solid ${copied ? 'rgba(16,185,129,0.4)' : 'var(--border)'}`,
+      color: copied ? '#6ee7b7' : 'var(--text-secondary)',
+      padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-sm)',
+      cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, transition: 'all 0.2s',
+      whiteSpace: 'nowrap',
+    }}>
+      {copied ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> Copy for WhatsApp</>}
+    </button>
+  );
+}
+
 // ── Main page ──────────────────────────────────────────────────
 export default function Homework() {
   const { currentUser, openModal } = useAuth();
@@ -76,6 +113,7 @@ export default function Homework() {
   const [doneKeys, setDoneKeys] = useState(new Set());
   const [searchParams, setSearchParams] = useSearchParams();
   const dayRefs = useRef({});
+  const cwRefs = useRef({});
 
   // Tabs: 'homework' | 'classwork'
   const [tab, setTab] = useState(searchParams.get('tab') === 'classwork' ? 'classwork' : 'homework');
@@ -125,6 +163,22 @@ export default function Homework() {
 
     return () => { document.title = 'X HI Portal'; };
   }, [searchParams, homeworkList]);
+
+  // Auto-scroll to ?date= within the Classwork tab + set page title.
+  useEffect(() => {
+    if (tab !== 'classwork') return;
+    const dateParam = searchParams.get('date');
+    if (!dateParam || !classworkList || classworkList.length === 0) return;
+
+    const match = classworkList.find((cw) => cw.date === dateParam);
+    if (!match) return;
+
+    document.title = `Classwork – ${match.weekday} | 10th HI Portal`;
+    const ref = cwRefs.current[match.id];
+    if (ref) setTimeout(() => ref.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+
+    return () => { document.title = 'X HI Portal'; };
+  }, [searchParams, classworkList, tab]);
 
   const toggleTask = useCallback((taskKey) => {
     if (!currentUser) return;
@@ -270,19 +324,27 @@ export default function Homework() {
         ) : (
           <div className="task-list">
             {classworkList.map((day) => (
-              <div key={day.id} className="glass-card" style={{ marginBottom: '1.5rem' }}>
+              <div
+                key={day.id}
+                ref={(el) => { cwRefs.current[day.id] = el; }}
+                className="glass-card"
+                style={{ marginBottom: '1.5rem', scrollMarginTop: '1rem' }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <h2 className="section-title text-gradient" style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Calendar size={20} className="text-primary" />
-                    {day.weekday}, {new Date(day.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </h2>
-                  <span style={{
-                    fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '99px',
-                    background: 'rgba(255,109,0,0.12)', color: '#fb923c',
-                    border: '1px solid rgba(255,109,0,0.3)',
-                  }}>
-                    {day.periods?.length || 0} period{(day.periods?.length || 0) === 1 ? '' : 's'}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <h2 className="section-title text-gradient" style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Calendar size={20} className="text-primary" />
+                      {day.weekday}, {new Date(day.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </h2>
+                    <span style={{
+                      fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '99px',
+                      background: 'rgba(255,109,0,0.12)', color: '#fb923c',
+                      border: '1px solid rgba(255,109,0,0.3)',
+                    }}>
+                      {day.periods?.length || 0} period{(day.periods?.length || 0) === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                  <ClassworkCopyButton day={day} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
