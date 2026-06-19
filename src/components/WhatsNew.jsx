@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 import { useAuth } from '../auth/AuthContext';
 import { completeWhatsNew } from '../auth/authService';
+import { ROLES } from '../auth/roles';
 import {
   isPushSupportedSync, isIosNeedsInstall, permissionState, requestPermissionAndToken,
 } from '../services/pushService';
@@ -128,7 +129,10 @@ export default function WhatsNew() {
 
   // Whether to show the welcome modal is fully derivable — no effect needed.
   // Wait until first-time onboarding is finished so we don't stack modals.
-  const onboardingDone = currentUser.onboardingCompleted ||
+  // Admins never run the original onboarding, so treat them as already done.
+  const isAdmin = currentUser.isAdmin || currentUser.role === ROLES.ADMIN;
+  const onboardingDone = isAdmin ||
+    currentUser.onboardingCompleted ||
     localStorage.getItem(`onboarding_done_${currentUser.phone}`);
   const seen = currentUser.whatsNewSeen_v1 || localStorage.getItem(STORAGE_KEY(currentUser.phone));
   const showModal = !dismissed && !runTour && !!onboardingDone && !seen;

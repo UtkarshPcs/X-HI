@@ -64,6 +64,11 @@ export async function completeWhatsNew(phone) {
   await updateDoc(userRef(phone), { whatsNewSeen_v1: true });
 }
 
+// Testing helper — clears the flag so the announcement shows again.
+export async function resetWhatsNew(phone) {
+  await updateDoc(userRef(phone), { whatsNewSeen_v1: false });
+}
+
 // ── Attendance ─────────────────────────────────────────────────
 // Stored on the user document as an array of absent date keys
 // (YYYY-MM-DD). All working days are implicitly "present"; only

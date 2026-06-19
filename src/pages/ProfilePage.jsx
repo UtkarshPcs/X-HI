@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, ChevronDown, ChevronUp, BookMarked, Bell } from 'lucide-react';
 import { ROLES } from '../auth/roles';
+import { resetWhatsNew } from '../auth/authService';
 import ClassInfo from '../components/ClassInfo';
 import NotificationHistory from '../components/NotificationHistory';
 import packageJson from '../../package.json';
@@ -126,6 +127,18 @@ export default function ProfilePage() {
                 alert('Onboarding reset. Refresh the page to trigger it again.');
               }}>
               Reset Onboarding (for testing)
+            </button>
+            <button
+              className="auth-btn secondary"
+              style={{ width: '100%', marginTop: '0.5rem', padding: '0.5rem', fontSize: '0.85rem' }}
+              onClick={async () => {
+                localStorage.removeItem(`whatsnew_v1_${currentUser.phone}`);
+                try { await resetWhatsNew(currentUser.phone); } catch (e) { console.error(e); }
+                // Full reload so the WhatsNew component remounts and re-reads
+                // the (now reset) flags from a fresh user load.
+                window.location.href = '/';
+              }}>
+              Show "What's New" Again (for testing)
             </button>
           </div>
         )}
