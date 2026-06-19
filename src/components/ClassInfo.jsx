@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Users, UserCircle, ShieldCheck, Copy, Check } from 'lucide-react';
+import { ROUTINE_TABLE } from '../data/routine';
 
 const studentsData = [
   "Aditya Gupta", "Shreya", "Shourya", "Mihika", "Anuraj", "Parth", "Ravi", "Ruchir", "Sonali", "Yesh",
@@ -12,14 +13,7 @@ const students = studentsData.map((name, i) => ({ rollNo: i + 1, name }));
 
 const monitors = ["Utkarsh", "Pratyaksh", "Aditya", "Sonali", "Manshi"];
 
-const routine = [
-  { day: 'Mon', periods: ['Hindi', 'Physics', 'IT', 'Civics', 'Maths', 'English'] },
-  { day: 'Tue', periods: ['Hindi', 'Physics', 'IT', 'Civics', 'Maths', 'English'] },
-  { day: 'Wed', periods: ['Hindi', 'Physics', 'Sports', 'History', 'Maths', 'Economics'] },
-  { day: 'Thu', periods: ['IT', 'Chemistry', 'Biology', 'History', 'Maths', 'Economics'] },
-  { day: 'Fri', periods: ['Hindi', 'Chemistry', 'Biology', 'Geography', 'Maths', 'English'] },
-  { day: 'Sat', periods: ['Hindi', 'Chemistry', 'Biology', 'Geography', 'Maths', 'English'] },
-];
+const routine = ROUTINE_TABLE;
 
 /**
  * Class overview content (teacher, student count, monitors, weekly

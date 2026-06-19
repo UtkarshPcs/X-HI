@@ -1,8 +1,9 @@
-import { Calendar, Lock, Loader2, Copy, Check } from 'lucide-react';
+import { Calendar, Lock, Loader2, Copy, Check, BookOpen, ClipboardList } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getHomework } from '../services/homeworkService';
+import { getAllClasswork } from '../services/classworkService';
 import { getHomeworkDone, setHomeworkDone } from '../auth/authService';
 import { toDateKey } from '../data/attendanceUtils';
 
@@ -73,8 +74,28 @@ export default function Homework() {
   const [homeworkList, setHomeworkList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [doneKeys, setDoneKeys] = useState(new Set());
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dayRefs = useRef({});
+
+  // Tabs: 'homework' | 'classwork'
+  const [tab, setTab] = useState(searchParams.get('tab') === 'classwork' ? 'classwork' : 'homework');
+  const [classworkList, setClassworkList] = useState(null); // null = not loaded yet
+
+  // Load classwork lazily the first time the Classwork tab is opened.
+  useEffect(() => {
+    if (tab !== 'classwork' || classworkList !== null || !currentUser) return;
+    getAllClasswork()
+      .then(setClassworkList)
+      .catch((err) => { console.error(err); setClassworkList([]); });
+  }, [tab, classworkList, currentUser]);
+
+  function selectTab(next) {
+    setTab(next);
+    const params = new URLSearchParams(searchParams);
+    if (next === 'classwork') params.set('tab', 'classwork');
+    else params.delete('tab');
+    setSearchParams(params, { replace: true });
+  }
 
   useEffect(() => {
     if (!currentUser) return;
@@ -132,15 +153,32 @@ export default function Homework() {
     <div className="animate-fade-in fade-in-up">
       <h1 className="page-title text-gradient">Homework</h1>
 
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
-          <Loader2 size={32} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
-        </div>
-      ) : homeworkList.length === 0 ? (
-        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>No homework available.</p>
-      ) : (
-        <div className="task-list">
-          {homeworkList.map((day) => {
+      {/* Tabs */}
+      <div className="hw-tabs">
+        <button
+          className={`hw-tab ${tab === 'homework' ? 'active' : ''}`}
+          onClick={() => selectTab('homework')}
+        >
+          <BookOpen size={16} /> Homework
+        </button>
+        <button
+          className={`hw-tab ${tab === 'classwork' ? 'active' : ''}`}
+          onClick={() => selectTab('classwork')}
+        >
+          <ClipboardList size={16} /> Classwork
+        </button>
+      </div>
+
+      {tab === 'homework' ? (
+        loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+            <Loader2 size={32} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+          </div>
+        ) : homeworkList.length === 0 ? (
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>No homework available.</p>
+        ) : (
+          <div className="task-list">
+            {homeworkList.map((day) => {
             const dayDone = (day.tasks || []).filter((_, i) => doneKeys.has(`${day.id}_${i}`)).length;
             const dayTotal = (day.tasks || []).length;
             const allDone = dayTotal > 0 && dayDone === dayTotal;
@@ -220,6 +258,63 @@ export default function Homework() {
             );
           })}
         </div>
+        )
+      ) : (
+        /* ── Classwork tab ── */
+        classworkList === null ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+            <Loader2 size={32} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+          </div>
+        ) : classworkList.length === 0 ? (
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>No classwork recorded yet.</p>
+        ) : (
+          <div className="task-list">
+            {classworkList.map((day) => (
+              <div key={day.id} className="glass-card" style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h2 className="section-title text-gradient" style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Calendar size={20} className="text-primary" />
+                    {day.weekday}, {new Date(day.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </h2>
+                  <span style={{
+                    fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '99px',
+                    background: 'rgba(255,109,0,0.12)', color: '#fb923c',
+                    border: '1px solid rgba(255,109,0,0.3)',
+                  }}>
+                    {day.periods?.length || 0} period{(day.periods?.length || 0) === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {(!day.periods || day.periods.length === 0) ? (
+                    <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No classwork details.</p>
+                  ) : day.periods.map((p, idx) => (
+                    <div key={idx} style={{
+                      padding: '0.9rem 1.1rem',
+                      background: 'rgba(255,255,255,0.02)',
+                      borderRadius: 'var(--radius-md)',
+                      borderLeft: '4px solid #FF6D00',
+                    }}>
+                      <p style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.35rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#FF6D00' }}>{p.period}</span>
+                        <span>{subjectEmoji(p.subject)}</span> {p.subject}
+                      </p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0 }}>
+                        {p.note}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {day.updatedBy && (
+                  <p style={{ marginTop: '0.75rem', fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'right' }}>
+                    Recorded by {day.updatedBy}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )
       )}
     </div>
   );

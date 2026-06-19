@@ -125,5 +125,52 @@ export function calcAttendance(absentKeys = [], endKey = todayKey(), closedDays)
     presentDays,
     absentDays: absentCount,
     percentage,
+    monthlyAveragePercentage: calcMonthlyAveragedPercentage(absentKeys, endKey, closed),
   };
+}
+
+/**
+ * Attendance as the AVERAGE OF MONTHLY AVERAGES.
+ *
+ * For each calendar month in the session window, compute that month's present
+ * percentage (present working days / total working days × 100). The final
+ * figure is the simple average of those monthly percentages.
+ *
+ * This weights every month equally regardless of how many working days it
+ * had — e.g. after 3 months it's (April% + May% + June%) / 3. Months with no
+ * working days are skipped. The current (partial) month is included up to the
+ * end date.
+ *
+ * @param {string[]} absentKeys
+ * @param {string} [endKey] - end of window (defaults to today)
+ * @param {Set<string>|string[]} [closedDays]
+ * @returns {number} averaged percentage, 0–100, one decimal
+ */
+export function calcMonthlyAveragedPercentage(absentKeys = [], endKey = todayKey(), closedDays) {
+  const closed = toClosedSet(closedDays);
+  const workingDays = getWorkingDays(SESSION_START, endKey, closed);
+  if (workingDays.length === 0) return 100;
+
+  const absentSet = new Set(absentKeys);
+
+  // Group working days by "YYYY-MM" and tally present/total per month.
+  const byMonth = new Map(); // "2026-04" -> { working, absent }
+  for (const key of workingDays) {
+    const ym = key.slice(0, 7);
+    const bucket = byMonth.get(ym) || { working: 0, absent: 0 };
+    bucket.working += 1;
+    if (absentSet.has(key)) bucket.absent += 1;
+    byMonth.set(ym, bucket);
+  }
+
+  // Average each month's present percentage.
+  const monthlyPercents = [];
+  for (const { working, absent } of byMonth.values()) {
+    if (working === 0) continue;
+    monthlyPercents.push(((working - absent) / working) * 100);
+  }
+  if (monthlyPercents.length === 0) return 100;
+
+  const avg = monthlyPercents.reduce((a, b) => a + b, 0) / monthlyPercents.length;
+  return Math.round(avg * 10) / 10; // one decimal
 }

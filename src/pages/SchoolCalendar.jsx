@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, X, BookOpen, CalendarDays, FlaskConical, Gra
 import { CALENDAR_EVENTS, EVENT_TYPES } from '../data/calendarData';
 import { getHomework } from '../services/homeworkService';
 import { getClosedDays } from '../services/calendarOverrideService';
+import { getAllClasswork } from '../services/classworkService';
 
 // homeworkByDate is now loaded from Firestore — see useEffect below.
 
@@ -48,6 +49,7 @@ const FILTER_OPTIONS = [
   { key: 'PRE_BOARD_EXAM',  label: 'Pre-Board' },
   { key: 'CELEBRATION',     label: 'Celebrations' },
   { key: 'HOMEWORK',        label: 'Homework Days' },
+  { key: 'CLASSWORK',       label: 'Classwork Days' },
 ];
 
 export default function SchoolCalendar() {
@@ -83,6 +85,16 @@ export default function SchoolCalendar() {
     getClosedDays().then((days) => setClosedDaysState(new Set(days))).catch(console.error);
   }, []);
 
+  // Classwork: build a { dateKey: record } map for dot markers + modal.
+  const [classworkByDate, setClassworkByDate] = useState({});
+  useEffect(() => {
+    getAllClasswork().then((list) => {
+      const map = {};
+      list.forEach((rec) => { if (rec.date) map[rec.date] = rec; });
+      setClassworkByDate(map);
+    }).catch(console.error);
+  }, []);
+
   const { year, month } = ACADEMIC_MONTHS[monthIdx];
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
@@ -108,6 +120,7 @@ export default function SchoolCalendar() {
   const passesFilter = (dateKey) => {
     if (filter === 'ALL') return true;
     if (filter === 'HOMEWORK') return !!homeworkByDate[dateKey];
+    if (filter === 'CLASSWORK') return !!classworkByDate[dateKey];
     const effective = closedDays.has(dateKey) ? 'HOLIDAY_VACATION' : getEventType(dateKey);
     return effective === filter;
   };
@@ -122,6 +135,7 @@ export default function SchoolCalendar() {
     : null;
   const selectedTypeInfo = selectedType ? EVENT_TYPES[selectedType] : null;
   const selectedHW = selectedDate ? homeworkByDate[selectedDate] : null;
+  const selectedClasswork = selectedDate ? classworkByDate[selectedDate] : null;
   const SelectedIcon = selectedType ? EVENT_ICONS[selectedType] : null;
 
   return (
@@ -160,6 +174,15 @@ export default function SchoolCalendar() {
           }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00C853', display:'inline-block' }} />
             Homework Available
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            background: 'rgba(255,109,0,0.12)', border: '1px solid #FF6D00',
+            padding: '0.35rem 0.75rem', borderRadius: '999px',
+            fontSize: '0.75rem', fontWeight: 600, color: '#c2410c',
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF6D00', display:'inline-block' }} />
+            Classwork Recorded
           </div>
         </div>
 
@@ -256,6 +279,7 @@ export default function SchoolCalendar() {
               const evType = closedDays.has(dateKey) ? 'HOLIDAY_VACATION' : getEventType(dateKey);
               const evInfo = EVENT_TYPES[evType];
               const hasHW = !!homeworkByDate[dateKey];
+              const hasCW = !!classworkByDate[dateKey];
               const isToday = dateKey === todayKey;
               const dimmed = filter !== 'ALL' && !passesFilter(dateKey);
               const Icon = EVENT_ICONS[evType];
@@ -305,6 +329,16 @@ export default function SchoolCalendar() {
                       width: 6, height: 6, borderRadius: '50%',
                       background: '#00C853',
                       boxShadow: '0 0 4px #00C853aa'
+                    }} />
+                  )}
+
+                  {/* Classwork orange dot */}
+                  {hasCW && (
+                    <span style={{
+                      position: 'absolute', bottom: 4, left: 5,
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: '#FF6D00',
+                      boxShadow: '0 0 4px #FF6D00aa'
                     }} />
                   )}
                 </button>
@@ -420,6 +454,39 @@ export default function SchoolCalendar() {
                 textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem'
               }}>
                 No homework recorded for this date.
+              </div>
+            )}
+
+            {/* Classwork section */}
+            {selectedClasswork && selectedClasswork.periods?.length > 0 && (
+              <div style={{ marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF6D00', flexShrink: 0 }} />
+                  <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Classwork ({selectedClasswork.periods.length} period{selectedClasswork.periods.length > 1 ? 's' : ''})
+                  </h3>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {selectedClasswork.periods.map((p, idx) => (
+                    <div key={idx} style={{
+                      background: 'var(--surface-hover)', border: '1px solid var(--border)',
+                      borderLeft: '3px solid #FF6D00', borderRadius: 'var(--radius-sm)',
+                      padding: '0.75rem 1rem',
+                    }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#FF6D00', display: 'block', marginBottom: '0.2rem' }}>
+                        {p.period} · {p.subject}
+                      </span>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
+                        {p.note}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                {selectedClasswork.updatedBy && (
+                  <p style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'right' }}>
+                    Recorded by {selectedClasswork.updatedBy}
+                  </p>
+                )}
               </div>
             )}
           </div>

@@ -174,7 +174,8 @@ export default function StudentDashboard() {
   }
 
   const firstName = currentUser.name.split(' ')[0];
-  const pctClass = stats.percentage >= 75 ? 'att-pct-good' : stats.percentage >= 60 ? 'att-pct-warn' : 'att-pct-bad';
+  const displayPct = stats.monthlyAveragePercentage;
+  const pctClass = displayPct >= 75 ? 'att-pct-good' : displayPct >= 60 ? 'att-pct-warn' : 'att-pct-bad';
 
   const tKey = todayKey();
   const isLatestToday = latestHw && homeworkDateKey(latestHw.date) === tKey;
@@ -192,9 +193,9 @@ export default function StudentDashboard() {
         <div className="glass-card dash-stat glow-hover" data-tour="attendance-stat">
           <span className="dash-stat-label"><TrendingUp size={16} /> Attendance</span>
           <span className={`dash-stat-value ${pctClass}`}>
-            {attendanceLoaded ? `${stats.percentage}%` : '…'}
+            {attendanceLoaded ? `${displayPct}%` : '…'}
           </span>
-          <span className="dash-stat-sub">{stats.presentDays}/{stats.totalDays} working days</span>
+          <span className="dash-stat-sub">{stats.presentDays}/{stats.totalDays} working days · monthly avg</span>
         </div>
 
         {/* Days Absent — scrolls to calendar, not navigate */}
@@ -234,6 +235,7 @@ export default function StudentDashboard() {
       {/* Syllabus progress summary */}
       <div
         className="glass-card glow-hover"
+        data-tour="syllabus-card"
         style={{ cursor: 'pointer' }}
         onClick={() => navigate('/syllabus')}
         title="View full syllabus progress"
@@ -329,7 +331,7 @@ export default function StudentDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0 }}>My Attendance</h2>
           <span className={`dash-stat-value ${pctClass}`} style={{ fontSize: '1.5rem' }}>
-            {attendanceLoaded ? `${stats.percentage}%` : '…'}
+            {attendanceLoaded ? `${displayPct}%` : '…'}
           </span>
         </div>
         <AttendanceCalendar absentDays={absentDays} onToggle={handleToggle} closedDays={closedDays} />

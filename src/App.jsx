@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import Onboarding from './components/Onboarding';
+import WhatsNew from './components/WhatsNew';
 import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
 import ForegroundToast from './components/ForegroundToast';
@@ -57,6 +58,7 @@ function AppInner() {
       </div>
       <AuthModal />
       <Onboarding />
+      <WhatsNew />
       <InstallPrompt />
       <ForegroundToast />
     </>

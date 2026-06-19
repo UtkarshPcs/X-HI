@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send } from 'lucide-react';
+import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import SyllabusProgressBar from '../components/SyllabusProgressBar';
 import { addHomework } from '../services/homeworkService';
 import { getNotices, addNotice, updateNotice, deleteNotice } from '../services/noticeService';
 import { getClosedDays, addClosedDay, removeClosedDay } from '../services/calendarOverrideService';
 import { getSyllabus, getCompletedTopics, setCompletedBulk, toggleCompletedTopic, addTopicToChapter } from '../services/syllabusService';
+import { getClasswork, setClasswork } from '../services/classworkService';
+import { getPeriodsForDate, weekdayName } from '../data/routine';
 import { notifyClass, notifyClassSafe } from '../services/notify';
 import { statsForTopics, chapterTopics } from '../data/syllabusStats';
 import { isWorkingDay, fromDateKey } from '../data/attendanceUtils';
@@ -666,6 +668,130 @@ function SyllabusManager({ currentUser }) {
   );
 }
 
+// ── Classwork section (monitor + admin) ────────────────────────
+function ClassworkManager({ currentUser }) {
+  const [date, setDate] = useState('');
+  const [rows, setRows] = useState([]); // [{ period, subject, note }]
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState('');
+
+  // When the date changes, build rows from the routine and merge any
+  // already-saved notes for that day.
+  async function loadDate(dateKey) {
+    setStatus('');
+    if (!dateKey) { setRows([]); return; }
+    const periods = getPeriodsForDate(dateKey);
+    if (periods.length === 0) {
+      setRows([]);
+      setStatus('No periods scheduled (Sunday / holiday).');
+      return;
+    }
+    setLoading(true);
+    try {
+      const existing = await getClasswork(dateKey);
+      const noteByPeriod = {};
+      if (existing?.periods) {
+        existing.periods.forEach((p) => { noteByPeriod[p.period] = p.note; });
+      }
+      setRows(periods.map((p) => ({ ...p, note: noteByPeriod[p.period] || '' })));
+    } catch (err) {
+      console.error(err);
+      setRows(periods.map((p) => ({ ...p, note: '' })));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleDateChange(e) {
+    const v = e.target.value;
+    setDate(v);
+    loadDate(v);
+  }
+
+  function updateNote(idx, note) {
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, note } : r)));
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    if (!date || rows.length === 0) return;
+    const filled = rows.filter((r) => r.note.trim()).length;
+    if (filled === 0) {
+      setStatus('Add at least one period note before saving.');
+      return;
+    }
+    if (!window.confirm(`Save classwork for ${weekdayName(date)}, ${date}? (${filled} period${filled === 1 ? '' : 's'} filled)`)) return;
+    setSaving(true);
+    setStatus('');
+    try {
+      await setClasswork(date, rows, currentUser);
+      // Fire-and-forget push (admin only; safe no-op for monitors).
+      notifyClassSafe(currentUser, {
+        title: '📝 Classwork Updated',
+        body: `What was done on ${weekdayName(date)} has been posted.`,
+        url: '/homework?tab=classwork',
+        type: 'classwork',
+      });
+      setStatus('✓ Classwork saved.');
+    } catch (err) {
+      console.error(err);
+      setStatus('Failed to save: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="glass-card" style={{ marginBottom: '2rem' }}>
+      <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', color: 'var(--text-primary)' }}>
+        <ClipboardList size={20} /> Record Classwork
+      </h2>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
+        Pick a day — periods are filled in automatically from the routine. Note what was actually done in each period.
+      </p>
+
+      <div style={{ marginBottom: '1rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={handleDateChange}
+          style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
+        />
+        {date && <p style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{weekdayName(date)}</p>}
+      </div>
+
+      {loading ? (
+        <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+      ) : rows.length > 0 ? (
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {rows.map((row, idx) => (
+            <div key={row.period} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)', minWidth: 28 }}>{row.period}</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{row.subject}</span>
+              </div>
+              <textarea
+                placeholder={`What was done in ${row.subject}?`}
+                value={row.note}
+                onChange={(e) => updateNote(idx, e.target.value)}
+                rows={2}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'Inter, sans-serif' }}
+              />
+            </div>
+          ))}
+          <button type="submit" disabled={saving} className="auth-btn primary" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+            <Save size={16} /> {saving ? 'Saving…' : 'Save Classwork'}
+          </button>
+        </form>
+      ) : null}
+
+      {status && <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: status.startsWith('✓') ? '#6ee7b7' : 'var(--text-secondary)' }}>{status}</p>}
+    </div>
+  );
+}
+
 // ── Broadcast (manual push, admin only) ────────────────────────
 function BroadcastManager({ currentUser }) {
   const [title, setTitle] = useState('');
@@ -770,6 +896,7 @@ export default function AdminPanel() {
       <NoticesManager currentUser={currentUser} />
       {isAdminUser(currentUser) && <BroadcastManager currentUser={currentUser} />}
       <HomeworkManager currentUser={currentUser} />
+      <ClassworkManager currentUser={currentUser} />
       <SyllabusManager currentUser={currentUser} />
       {isAdminUser(currentUser) && <CalendarOverrideManager />}
     </div>

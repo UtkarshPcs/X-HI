@@ -59,6 +59,11 @@ export async function completeOnboarding(phone) {
   await updateDoc(userRef(phone), { onboardingCompleted: true });
 }
 
+// One-time "What's New" announcement (syllabus, classwork, CBSE attendance).
+export async function completeWhatsNew(phone) {
+  await updateDoc(userRef(phone), { whatsNewSeen_v1: true });
+}
+
 // ── Attendance ─────────────────────────────────────────────────
 // Stored on the user document as an array of absent date keys
 // (YYYY-MM-DD). All working days are implicitly "present"; only
