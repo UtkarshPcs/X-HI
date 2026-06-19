@@ -1489,3 +1489,219 @@ a {
 @media (max-width: 768px) {
   .install-prompt { padding-bottom: 1.25rem; }
 }
+
+
+/* ─── Syllabus Tracker ───────────────────────────────────────── */
+.syllabus-bar-wrap { width: 100%; display: flex; flex-direction: column; gap: 0.4rem; }
+.syllabus-bar-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;
+}
+.syllabus-bar-label { font-weight: 600; font-size: 0.92rem; color: var(--text-primary); }
+.syllabus-bar-sub { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+
+.syllabus-bar-track {
+  position: relative;
+  width: 100%;
+  background: var(--surface-hover);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.syllabus-bar-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  border-radius: 9999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.syllabus-bar-fill.completed {
+  background: linear-gradient(90deg, #059669, #10b981);
+  z-index: 1;
+}
+.syllabus-bar-fill.checked {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+  z-index: 2;
+}
+
+.syllabus-bar-legend {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.1rem;
+}
+.syllabus-legend-item { display: inline-flex; align-items: center; gap: 0.35rem; }
+.syllabus-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.syllabus-dot.completed { background: #10b981; }
+.syllabus-dot.checked { background: #f59e0b; }
+
+/* Drill-down list rows */
+.syllabus-row {
+  width: 100%;
+  text-align: left;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.syllabus-row:hover { border-color: var(--border-glow); background: rgba(139,92,246,0.04); }
+.syllabus-row-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;
+}
+.syllabus-row-title {
+  font-weight: 600; font-size: 1rem; color: var(--text-primary);
+  display: flex; align-items: center; gap: 0.5rem; margin: 0;
+}
+.syllabus-row-chevron { color: var(--text-muted); flex-shrink: 0; }
+
+/* Breadcrumb */
+.syllabus-breadcrumb {
+  display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+  font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.25rem;
+}
+.syllabus-crumb-btn {
+  background: none; border: none; color: var(--primary); cursor: pointer;
+  font-size: 0.88rem; padding: 0; font-weight: 600;
+}
+.syllabus-crumb-btn:hover { text-decoration: underline; }
+.syllabus-crumb-sep { color: var(--text-muted); }
+.syllabus-crumb-current { color: var(--text-primary); font-weight: 600; }
+
+/* Topic checkbox rows (chapter level) */
+.syllabus-topic {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 0.5rem;
+  width: 100%; text-align: left;
+}
+.syllabus-topic.locked { opacity: 0.55; }
+.syllabus-topic.checkable { cursor: pointer; }
+.syllabus-topic.checkable:hover { border-color: var(--border-glow); }
+.syllabus-topic-box {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.syllabus-topic-box.checked { background: #f59e0b; border-color: #f59e0b; }
+.syllabus-topic-box.completed-only { border-color: #10b981; }
+.syllabus-topic-name { flex: 1; font-size: 0.9rem; color: var(--text-primary); }
+.syllabus-topic-tag {
+  font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; padding: 2px 7px; border-radius: 9999px; white-space: nowrap;
+}
+.syllabus-topic-tag.completed {
+  background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3);
+}
+.syllabus-topic-tag.pending {
+  background: rgba(113,113,122,0.12); color: var(--text-muted); border: 1px solid var(--border);
+}
+
+/* Admin/monitor topic toggle row */
+.syllabus-admin-topic {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 0.75rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); margin-bottom: 0.4rem;
+}
+.syllabus-admin-topic.done { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.3); }
+
+
+/* ─── Notification Prompt (banner) ───────────────────────────── */
+.notif-prompt {
+  display: flex; align-items: center; gap: 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.25rem 0;
+  box-shadow: var(--shadow-glow);
+  animation: fadeInUp 0.4s ease;
+}
+.notif-prompt-icon {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(139,92,246,0.12); color: var(--primary);
+}
+.notif-prompt-text { flex: 1; display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.notif-prompt-text strong { font-size: 0.92rem; color: var(--text-primary); }
+.notif-prompt-text span { font-size: 0.78rem; color: var(--text-secondary); }
+.notif-prompt-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+.notif-prompt-enable {
+  background: var(--primary); color: #fff; border: none;
+  padding: 0.45rem 0.9rem; border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 0.82rem; cursor: pointer; white-space: nowrap;
+  transition: background 0.2s;
+}
+.notif-prompt-enable:hover { background: var(--primary-hover); }
+.notif-prompt-enable:disabled { opacity: 0.6; cursor: default; }
+.notif-prompt-dismiss {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  display: flex; padding: 0.25rem;
+}
+
+/* ─── Foreground push toast ──────────────────────────────────── */
+.fg-toast {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%; transform: translateX(-50%);
+  z-index: 3000;
+  display: flex; align-items: center; gap: 0.75rem;
+  width: min(420px, calc(100vw - 2rem));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 20px -5px var(--border-glow);
+  cursor: pointer;
+  animation: slideDownToast 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes slideDownToast {
+  from { transform: translate(-50%, -120%); opacity: 0; }
+  to   { transform: translate(-50%, 0);     opacity: 1; }
+}
+.fg-toast-icon {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(139,92,246,0.12); color: var(--primary);
+}
+.fg-toast-text { flex: 1; display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.fg-toast-text strong { font-size: 0.9rem; color: var(--text-primary); }
+.fg-toast-text span {
+  font-size: 0.8rem; color: var(--text-secondary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fg-toast-close {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  display: flex; padding: 0.25rem; flex-shrink: 0;
+}
+
+
+/* ─── Notification History ───────────────────────────────────── */
+.notif-history { display: flex; flex-direction: column; gap: 0.75rem; }
+.notif-history-item {
+  display: flex; gap: 0.75rem; align-items: flex-start;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+.notif-history-icon {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.notif-history-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.notif-history-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.notif-history-top strong { font-size: 0.92rem; color: var(--text-primary); }
+.notif-history-time { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+.notif-history-text { font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.45; }
+.notif-history-tag {
+  font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  margin-top: 0.15rem;
+}

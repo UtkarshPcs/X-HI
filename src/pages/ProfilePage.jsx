@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, ChevronDown, ChevronUp, BookMarked, Bell } from 'lucide-react';
 import { ROLES } from '../auth/roles';
 import ClassInfo from '../components/ClassInfo';
+import NotificationHistory from '../components/NotificationHistory';
 import packageJson from '../../package.json';
 
 export default function ProfilePage() {
@@ -12,13 +13,22 @@ export default function ProfilePage() {
   const fileRef = useRef();
   const [photo, setPhoto] = useState(null);
   const [showClassInfo, setShowClassInfo] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [loadedPhotoForPhone, setLoadedPhotoForPhone] = useState(null);
 
+  // Redirect logged-out users. Navigation is an external-system sync, so it
+  // belongs in an effect.
   useEffect(() => {
-    if (!currentUser) { navigate('/'); return; }
-    const saved = localStorage.getItem(`photo_${currentUser.phone}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    if (saved) setPhoto(saved);
+    if (!currentUser) navigate('/');
   }, [currentUser, navigate]);
+
+  // Load the saved photo when the active user changes. Adjusting state during
+  // render (guarded by a "which phone did we load for" marker) is the
+  // React-recommended alternative to calling setState inside an effect.
+  if (currentUser && loadedPhotoForPhone !== currentUser.phone) {
+    setLoadedPhotoForPhone(currentUser.phone);
+    setPhoto(localStorage.getItem(`photo_${currentUser.phone}`) || null);
+  }
 
   function handlePhotoChange(e) {
     const file = e.target.files[0];
@@ -80,6 +90,14 @@ export default function ProfilePage() {
 
         <p className="profile-photo-hint">Tap the photo to change it. Stored on this device only.</p>
 
+        <button
+          className="auth-btn secondary"
+          style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%' }}
+          onClick={() => navigate('/syllabus')}
+        >
+          <BookMarked size={18} /> Syllabus Tracker
+        </button>
+
         {currentUser.role === ROLES.ADMIN && (
           <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--border)', textAlign: 'left' }}>
             <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Tools — Onboarding</h4>
@@ -119,6 +137,24 @@ export default function ProfilePage() {
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '1.5rem' }}>
           App Version: v{packageJson.version}
         </p>
+      </div>
+
+      <div className="profile-classinfo-wrap">
+        <button
+          className="class-info-toggle"
+          onClick={() => setShowNotifications((v) => !v)}
+          aria-expanded={showNotifications}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Bell size={18} /> Notifications — history of class alerts
+          </span>
+          {showNotifications ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+        {showNotifications && (
+          <div style={{ marginTop: '1.5rem' }}>
+            <NotificationHistory />
+          </div>
+        )}
       </div>
 
       <div className="profile-classinfo-wrap">

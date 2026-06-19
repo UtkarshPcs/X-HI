@@ -3,6 +3,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
 import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword } from './authService';
 import { getUserRole } from './roles';
+import { removeToken } from '../services/pushService';
 
 const AuthContext = createContext(null);
 
@@ -56,6 +57,8 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
+    // Best-effort: unsubscribe this device from push before clearing session.
+    removeToken().catch(() => {});
     setCurrentUser(null);
     localStorage.removeItem('auth_phone');
     auth.signOut().catch(() => {});

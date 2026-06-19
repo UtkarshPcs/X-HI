@@ -90,3 +90,41 @@ export async function setHomeworkDone(phone, doneKeys) {
   await updateDoc(userRef(phone), { completedHomework: cleaned });
   return cleaned;
 }
+
+
+// ── Syllabus "checked" topics (per-student) ────────────────────
+// Keys are globally-unique topic IDs (e.g. "science-0-c0-t3"). A student
+// may only meaningfully check topics the monitor has marked completed; the
+// UI enforces this and the percentage math ignores orphaned checks.
+
+export async function getCheckedTopics(phone) {
+  const user = await getUserByPhone(phone);
+  return user?.checkedTopics || [];
+}
+
+export async function setCheckedTopics(phone, checkedKeys) {
+  const cleaned = Array.from(new Set(checkedKeys));
+  await updateDoc(userRef(phone), { checkedTopics: cleaned });
+  return cleaned;
+}
+
+
+// ── Broadcast key (admin push auth) ────────────────────────────
+// The serverless send endpoint can't verify a Firebase ID token (this app
+// uses custom phone+password auth), so an admin proves authority with a
+// per-account secret stored on their user doc. Generated once, lazily.
+
+function randomKey() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function ensureBroadcastKey(phone) {
+  const user = await getUserByPhone(phone);
+  if (!user) throw new Error('User not found.');
+  if (user.broadcastKey) return user.broadcastKey;
+  const key = randomKey();
+  await updateDoc(userRef(phone), { broadcastKey: key });
+  return key;
+}

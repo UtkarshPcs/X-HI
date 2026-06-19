@@ -1,0 +1,222 @@
+{
+  "English": {
+    "Reading_Skills": {
+      "Unseen_Passage": [
+        "Factual Passage",
+        "Discursive Passage",
+        "Literary Passage",
+        "Note Making",
+        "Vocabulary Based Questions",
+        "Inference Based Questions"
+      ]
+    },
+
+    "Writing_Skills": {
+      "Article_Writing": [
+        "Format",
+        "Title",
+        "Introduction",
+        "Body",
+        "Conclusion"
+      ],
+
+      "Speech_Writing": [
+        "Format",
+        "Audience Awareness",
+        "Opening and Closing",
+        "Persuasive Language"
+      ],
+
+      "Debate_Writing": [
+        "For and Against Arguments",
+        "Formal Style",
+        "Rebuttal",
+        "Conclusion"
+      ],
+
+      "Letter_Writing": [
+        "Business Letter",
+        "Official Letter",
+        "Complaint Letter",
+        "Enquiry Letter",
+        "Letter Format"
+      ],
+
+      "Story_Writing": [
+        "Plot Development",
+        "Characterisation",
+        "Dialogue",
+        "Theme",
+        "Moral"
+      ]
+    },
+
+    "Grammar": {
+      "Tenses": [
+        "Present Tense",
+        "Past Tense",
+        "Future Tense"
+      ],
+
+      "Modals": [
+        "Ability",
+        "Permission",
+        "Possibility",
+        "Obligation",
+        "Necessity"
+      ],
+
+      "Subject_Verb_Agreement": [
+        "Singular Subject",
+        "Plural Subject",
+        "Agreement Rules"
+      ],
+
+      "Determiners": [
+        "Articles",
+        "Quantifiers",
+        "Demonstratives",
+        "Possessives"
+      ],
+
+      "Reported_Speech": [
+        "Reporting Statements",
+        "Reporting Questions",
+        "Reporting Commands",
+        "Change of Tense",
+        "Change of Pronouns"
+      ],
+
+      "Active_and_Passive_Voice": [
+        "Active Voice",
+        "Passive Voice",
+        "Transformation Rules"
+      ],
+
+      "Editing_and_Omission": [
+        "Error Detection",
+        "Grammar Correction",
+        "Sentence Editing"
+      ]
+    },
+
+    "Literature": {
+      "Fiction_Prose": {
+        "Two_Gentlemen_of_Verona": [
+          "Brotherhood",
+          "Sacrifice",
+          "Responsibility",
+          "Character Sketch",
+          "Theme"
+        ],
+
+        "Mrs_Packletides_Tiger": [
+          "Satire",
+          "Pride",
+          "Jealousy",
+          "Humour",
+          "Character Analysis"
+        ],
+
+        "The_Letter": [
+          "Hope",
+          "Faith",
+          "Human Emotions",
+          "Transformation",
+          "Theme"
+        ],
+
+        "A_Shady_Plot": [
+          "Humour",
+          "Ghost Story",
+          "Creative Writing",
+          "Irony",
+          "Character Analysis"
+        ],
+
+        "Patol_Babu_Film_Star": [
+          "Dedication",
+          "Professionalism",
+          "Self Respect",
+          "Character Development"
+        ],
+
+        "Virtually_True": [
+          "Technology",
+          "Virtual Reality",
+          "Adventure",
+          "Science Fiction"
+        ]
+      },
+
+      "Poetry": {
+        "The_Frog_and_the_Nightingale": [
+          "Satire",
+          "Exploitation",
+          "Confidence",
+          "Character Contrast",
+          "Poetic Devices"
+        ],
+
+        "Mirror": [
+          "Self Reflection",
+          "Truth",
+          "Ageing",
+          "Symbolism",
+          "Imagery"
+        ],
+
+        "Not_Marble_Nor_the_Gilded_Monuments": [
+          "Power of Poetry",
+          "Immortality",
+          "Time",
+          "Poetic Devices"
+        ],
+
+        "Ozymandias": [
+          "Power",
+          "Pride",
+          "Impermanence",
+          "Irony",
+          "Imagery"
+        ],
+
+        "The_Rime_of_the_Ancient_Mariner": [
+          "Supernatural Elements",
+          "Nature",
+          "Guilt",
+          "Redemption",
+          "Symbolism"
+        ],
+
+        "Snake": [
+          "Nature",
+          "Human Instinct",
+          "Conflict",
+          "Symbolism",
+          "Imagery"
+        ]
+      },
+
+      "Drama": {
+        "The_Dear_Departed": [
+          "Family Relationships",
+          "Greed",
+          "Humour",
+          "Irony",
+          "Character Analysis"
+        ],
+
+        "Julius_Caesar": [
+          "Friendship",
+          "Betrayal",
+          "Ambition",
+          "Leadership",
+          "Persuasion",
+          "Character Sketch",
+          "Themes"
+        ]
+      }
+    }
+  }
+}

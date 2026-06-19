@@ -1,0 +1,130 @@
+{
+  "IT_402": {
+    "Employability_Skills": {
+      "Communication_Skills": [
+        "Communication",
+        "Process of Communication",
+        "Elements of Communication",
+        "Verbal Communication",
+        "Non-Verbal Communication",
+        "Visual Communication",
+        "Communication Cycle",
+        "Barriers to Communication",
+        "Effective Communication Skills",
+        "Feedback in Communication",
+        "Listening Skills",
+        "Speaking Skills"
+      ],
+
+      "Self_Management_Skills": [
+        "Self Management",
+        "Self Awareness",
+        "Self Confidence",
+        "Positive Thinking",
+        "Stress",
+        "Stress Management",
+        "Time Management",
+        "Goal Setting",
+        "Personal Strengths",
+        "Personal Weaknesses",
+        "Motivation"
+      ],
+
+      "ICT_Skills": [
+        "Introduction to ICT",
+        "Computer System",
+        "Hardware",
+        "Software",
+        "Operating System",
+        "Internet",
+        "Web Browser",
+        "Email",
+        "Digital Communication",
+        "Online Safety",
+        "Cyber Security",
+        "Digital Documentation"
+      ],
+
+      "Entrepreneurial_Skills": [
+        "Entrepreneurship",
+        "Entrepreneur",
+        "Characteristics of Entrepreneur",
+        "Types of Entrepreneurship",
+        "Business Opportunities",
+        "Entrepreneurial Competencies",
+        "Entrepreneurial Values",
+        "Risk Taking",
+        "Innovation"
+      ],
+
+      "Green_Skills": [
+        "Environment",
+        "Sustainable Development",
+        "Natural Resources",
+        "Renewable Resources",
+        "Non Renewable Resources",
+        "Green Economy",
+        "Waste Management",
+        "Recycling",
+        "Conservation of Resources",
+        "Green Jobs"
+      ]
+    },
+
+    "Vocational_Skills": {
+      "Digital_Documentation_Advanced": [
+        "Styles",
+        "Formatting",
+        "Page Layout",
+        "Templates",
+        "Table of Contents",
+        "Mail Merge",
+        "Track Changes",
+        "Comments",
+        "Document Review"
+      ],
+
+      "Electronic_Spreadsheet_Advanced": [
+        "Spreadsheet Basics",
+        "Cell Referencing",
+        "Functions",
+        "Mathematical Functions",
+        "Statistical Functions",
+        "Logical Functions",
+        "Charts",
+        "Data Sorting",
+        "Data Filtering",
+        "Conditional Formatting",
+        "What If Analysis"
+      ],
+
+      "Database_Management_System": [
+        "Database",
+        "DBMS",
+        "Tables",
+        "Fields",
+        "Records",
+        "Primary Key",
+        "Data Types",
+        "Queries",
+        "Forms",
+        "Reports",
+        "Relationships",
+        "Database Design"
+      ],
+
+      "Web_Applications_and_Security": [
+        "Internet Services",
+        "Web Applications",
+        "Web Browsers",
+        "Online Transactions",
+        "Digital Payments",
+        "E Governance",
+        "E Learning",
+        "Cyber Crime",
+        "Cyber Safety",
+        "Secure Browsing"
+      ]
+    }
+  }
+}

@@ -1,13 +1,16 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check } from 'lucide-react';
+import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import NoticeBar from '../components/NoticeBar';
-import { getAttendance, setAttendance, getHolidayHomework, getHomeworkDone, setHomeworkDone } from '../auth/authService';
+import SyllabusProgressBar from '../components/SyllabusProgressBar';
+import { getAttendance, setAttendance, getHolidayHomework, getHomeworkDone, setHomeworkDone, getCheckedTopics } from '../auth/authService';
 import { getHomework } from '../services/homeworkService';
 import { getClosedDays } from '../services/calendarOverrideService';
-import { calcAttendance, todayKey, toDateKey, getWorkingDays } from '../data/attendanceUtils';
+import { getSyllabus, getCompletedTopics } from '../services/syllabusService';
+import { allTopics, statsForTopics, toSets } from '../data/syllabusStats';
+import { calcAttendance, todayKey, toDateKey } from '../data/attendanceUtils';
 import { holidayData } from '../data/holidayData';
 
 // Build total checkable holiday homework items (same logic as HolidayHomework page)
@@ -64,6 +67,27 @@ export default function StudentDashboard() {
 
   // Daily homework completion keys
   const [doneKeys, setDoneKeys] = useState(new Set());
+
+  // Syllabus global progress { completedPct, checkedPct } | null while loading
+  const [syllabusStats, setSyllabusStats] = useState(null);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    let active = true;
+    Promise.all([
+      getSyllabus(),
+      getCompletedTopics(),
+      getCheckedTopics(currentUser.phone),
+    ])
+      .then(([sections, completedList, checkedList]) => {
+        if (!active) return;
+        const { completedSet, checkedSet } = toSets(completedList, checkedList);
+        const stats = statsForTopics(allTopics(sections), completedSet, checkedSet);
+        setSyllabusStats(stats);
+      })
+      .catch((err) => { console.error(err); if (active) setSyllabusStats({ completedPct: 0, checkedPct: 0 }); });
+    return () => { active = false; };
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -206,6 +230,34 @@ export default function StudentDashboard() {
 
       {/* Notices */}
       <NoticeBar />
+
+      {/* Syllabus progress summary */}
+      <div
+        className="glass-card glow-hover"
+        style={{ cursor: 'pointer' }}
+        onClick={() => navigate('/syllabus')}
+        title="View full syllabus progress"
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <BookMarked size={20} color="var(--primary)" />
+            Syllabus Progress
+          </h2>
+          <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            View syllabus <ArrowRight size={13} />
+          </span>
+        </div>
+        {syllabusStats === null ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
+        ) : (
+          <SyllabusProgressBar
+            completed={syllabusStats.completedPct}
+            checked={syllabusStats.checkedPct}
+            sublabel={`${syllabusStats.completed}/${syllabusStats.total} topics`}
+            showLegend
+          />
+        )}
+      </div>
 
       {/* Today's / Latest homework card */}
       <div className="glass-card">

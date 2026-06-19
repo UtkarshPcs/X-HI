@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import Onboarding from './components/Onboarding';
 import InstallPrompt from './components/InstallPrompt';
+import NotificationPrompt from './components/NotificationPrompt';
+import ForegroundToast from './components/ForegroundToast';
 import { AuthProvider } from './auth/AuthContext';
 import StudentDashboard from './pages/StudentDashboard';
 import Homework from './pages/Homework';
@@ -11,6 +13,7 @@ import HolidayHomework from './pages/HolidayHomework';
 import SchoolCalendar from './pages/SchoolCalendar';
 import ProfilePage from './pages/ProfilePage';
 import AdminPanel from './pages/AdminPanel';
+import SyllabusPage from './pages/SyllabusPage';
 import { Heart } from 'lucide-react';
 
 function ScrollToTop() {
@@ -26,6 +29,7 @@ function AppInner() {
       <div className="app-container">
         <Navbar />
         <main className="main-content">
+          <NotificationPrompt />
           <Routes>
             <Route path="/" element={<StudentDashboard />} />
             <Route path="/homework" element={<Homework />} />
@@ -33,6 +37,7 @@ function AppInner() {
             <Route path="/calendar" element={<SchoolCalendar />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/syllabus" element={<SyllabusPage />} />
           </Routes>
         </main>
         <footer className="app-footer">
@@ -53,6 +58,7 @@ function AppInner() {
       <AuthModal />
       <Onboarding />
       <InstallPrompt />
+      <ForegroundToast />
     </>
   );
 }

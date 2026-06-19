@@ -1,0 +1,148 @@
+{
+  "Mathematics": {
+    "Real Numbers": [
+      "Euclid's Division Lemma",
+      "Fundamental Theorem of Arithmetic",
+      "Prime Factorisation",
+      "HCF and LCM",
+      "Irrational Numbers",
+      "Decimal Expansion of Rational Numbers"
+    ],
+
+    "Polynomials": [
+      "Polynomial",
+      "Degree of Polynomial",
+      "Zeroes of Polynomial",
+      "Geometrical Meaning of Zeroes",
+      "Relationship Between Zeroes and Coefficients",
+      "Quadratic Polynomials",
+      "Cubic Polynomials"
+    ],
+
+    "Pair of Linear Equations in Two Variables": [
+      "Linear Equation in Two Variables",
+      "Graphical Method",
+      "Algebraic Method",
+      "Substitution Method",
+      "Elimination Method",
+      "Cross Multiplication Method",
+      "Consistent Equations",
+      "Inconsistent Equations",
+      "Dependent Equations"
+    ],
+
+    "Quadratic Equations": [
+      "Quadratic Equation",
+      "Standard Form",
+      "Factorisation Method",
+      "Completing the Square Method",
+      "Quadratic Formula",
+      "Nature of Roots",
+      "Applications of Quadratic Equations"
+    ],
+
+    "Arithmetic Progressions": [
+      "Arithmetic Progression",
+      "Common Difference",
+      "nth Term of AP",
+      "Sum of First n Terms",
+      "Applications of AP"
+    ],
+
+    "Triangles": [
+      "Similar Figures",
+      "Similar Triangles",
+      "Basic Proportionality Theorem",
+      "Converse of BPT",
+      "Criteria for Similarity",
+      "Area of Similar Triangles",
+      "Pythagoras Theorem",
+      "Converse of Pythagoras Theorem"
+    ],
+
+    "Coordinate Geometry": [
+      "Cartesian Plane",
+      "Coordinates of a Point",
+      "Distance Formula",
+      "Section Formula",
+      "Midpoint Formula"
+    ],
+
+    "Introduction to Trigonometry": [
+      "Trigonometric Ratios",
+      "sin θ",
+      "cos θ",
+      "tan θ",
+      "cosec θ",
+      "sec θ",
+      "cot θ",
+      "Trigonometric Ratios of Standard Angles",
+      "Trigonometric Identities",
+      "Complementary Angles"
+    ],
+
+    "Applications of Trigonometry": [
+      "Line of Sight",
+      "Angle of Elevation",
+      "Angle of Depression",
+      "Heights and Distances",
+      "Real Life Applications"
+    ],
+
+    "Circles": [
+      "Tangent to a Circle",
+      "Point of Contact",
+      "Number of Tangents",
+      "Properties of Tangents",
+      "Lengths of Tangents from External Point"
+    ],
+
+    "Areas Related to Circles": [
+      "Circumference of Circle",
+      "Area of Circle",
+      "Arc of Circle",
+      "Sector of Circle",
+      "Segment of Circle",
+      "Area of Sector",
+      "Length of Arc",
+      "Area of Segment",
+      "Combination of Plane Figures"
+    ],
+
+    "Surface Areas and Volumes": [
+      "Cuboid",
+      "Cube",
+      "Cylinder",
+      "Cone",
+      "Sphere",
+      "Hemisphere",
+      "Frustum of Cone",
+      "Curved Surface Area",
+      "Total Surface Area",
+      "Volume",
+      "Conversion of Solids"
+    ],
+
+    "Statistics": [
+      "Grouped Data",
+      "Frequency Distribution",
+      "Mean",
+      "Median",
+      "Mode",
+      "Cumulative Frequency",
+      "Ogive",
+      "Graphical Representation of Data"
+    ],
+
+    "Probability": [
+      "Random Experiment",
+      "Trial",
+      "Event",
+      "Outcome",
+      "Sample Space",
+      "Probability of an Event",
+      "Complementary Events",
+      "Simple Probability Problems"
+    ]
+  }
+}

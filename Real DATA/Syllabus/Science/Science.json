@@ -1,0 +1,279 @@
+{
+  "Science": {
+    "Physics": {
+      "Light - Reflection and Refraction": [
+        "Introduction to Light",
+        "Reflection",
+        "Laws of Reflection",
+        "Spherical Mirrors",
+        "Image Formation by Mirrors",
+        "Mirror Formula",
+        "Magnification",
+        "Refraction",
+        "Laws of Refraction",
+        "Refractive Index",
+        "Spherical Lenses",
+        "Image Formation by Lenses",
+        "Lens Formula",
+        "Magnification by Lenses",
+        "Power of Lens"
+      ],
+
+      "Human Eye and Colourful World": [
+        "Human Eye",
+        "Power of Accommodation",
+        "Defects of Vision",
+        "Myopia",
+        "Hypermetropia",
+        "Presbyopia",
+        "Correction of Eye Defects",
+        "Refraction through Prism",
+        "Dispersion of Light",
+        "Atmospheric Refraction",
+        "Scattering of Light"
+      ],
+
+      "Electricity": [
+        "Electric Charge",
+        "Electric Current",
+        "Electric Potential",
+        "Potential Difference",
+        "Circuit Diagram",
+        "Ohm's Law",
+        "Resistance",
+        "Factors Affecting Resistance",
+        "Resistors in Series",
+        "Resistors in Parallel",
+        "Heating Effect of Current",
+        "Electric Power",
+        "Commercial Unit of Energy"
+      ],
+
+      "Magnetic Effects of Electric Current": [
+        "Magnetic Field",
+        "Magnetic Field Lines",
+        "Magnetic Field Around Conductor",
+        "Right Hand Thumb Rule",
+        "Magnetic Field Around Circular Loop",
+        "Magnetic Field Around Solenoid",
+        "Electromagnet",
+        "Force on Current Carrying Conductor",
+        "Fleming's Left Hand Rule",
+        "Electric Motor",
+        "Electromagnetic Induction",
+        "Fleming's Right Hand Rule",
+        "Electric Generator",
+        "Domestic Electric Circuits"
+      ]
+    }
+  }
+}
+{
+  "Science": {
+    "Chemistry": {
+      "Chemical Reactions and Equations": [
+        "Chemical Reactions",
+        "Chemical Equations",
+        "Balanced Chemical Equations",
+        "Types of Chemical Reactions",
+        "Combination Reaction",
+        "Decomposition Reaction",
+        "Displacement Reaction",
+        "Double Displacement Reaction",
+        "Oxidation",
+        "Reduction",
+        "Redox Reactions",
+        "Corrosion",
+        "Rancidity"
+      ],
+
+      "Acids, Bases and Salts": [
+        "Introduction to Acids and Bases",
+        "Properties of Acids",
+        "Properties of Bases",
+        "Chemical Properties of Acids",
+        "Chemical Properties of Bases",
+        "Indicators",
+        "Olfactory Indicators",
+        "pH Scale",
+        "Importance of pH",
+        "Tooth Decay",
+        "Self Defence by Animals and Plants",
+        "Salts",
+        "Family of Salts",
+        "pH of Salts",
+        "Common Salt",
+        "Baking Soda",
+        "Washing Soda",
+        "Plaster of Paris",
+        "Bleaching Powder"
+      ],
+
+      "Metals and Non-Metals": [
+        "Physical Properties of Metals",
+        "Physical Properties of Non-Metals",
+        "Chemical Properties of Metals",
+        "Reaction with Oxygen",
+        "Reaction with Water",
+        "Reaction with Acids",
+        "Reaction with Salts",
+        "Reactivity Series",
+        "Ionic Compounds",
+        "Properties of Ionic Compounds",
+        "Occurrence of Metals",
+        "Extraction of Metals",
+        "Enrichment of Ores",
+        "Metallurgy",
+        "Corrosion",
+        "Prevention of Corrosion"
+      ],
+
+      "Carbon and Its Compounds": [
+        "Introduction to Carbon",
+        "Covalent Bonding",
+        "Versatile Nature of Carbon",
+        "Catenation",
+        "Saturated Hydrocarbons",
+        "Unsaturated Hydrocarbons",
+        "Homologous Series",
+        "Nomenclature of Carbon Compounds",
+        "Chemical Properties of Carbon Compounds",
+        "Combustion",
+        "Oxidation",
+        "Addition Reaction",
+        "Substitution Reaction",
+        "Ethanol",
+        "Ethanoic Acid",
+        "Soaps",
+        "Detergents",
+        "Cleansing Action of Soap"
+      ],
+
+      "Periodic Classification of Elements": [
+        "Need for Classification",
+        "Dobereiner's Triads",
+        "Newlands' Law of Octaves",
+        "Mendeleev's Periodic Table",
+        "Achievements of Mendeleev",
+        "Limitations of Mendeleev's Table",
+        "Modern Periodic Table",
+        "Periods and Groups",
+        "Valency",
+        "Atomic Size",
+        "Metallic Character",
+        "Non-Metallic Character",
+        "Periodic Trends"
+      ]
+    },
+
+    "Biology": {
+      "Life Processes": [
+        "Life Processes",
+        "Nutrition",
+        "Autotrophic Nutrition",
+        "Photosynthesis",
+        "Heterotrophic Nutrition",
+        "Human Digestive System",
+        "Respiration",
+        "Aerobic Respiration",
+        "Anaerobic Respiration",
+        "Human Respiratory System",
+        "Transportation",
+        "Human Circulatory System",
+        "Blood",
+        "Blood Vessels",
+        "Heart",
+        "Lymph",
+        "Transportation in Plants",
+        "Excretion",
+        "Human Excretory System",
+        "Nephron"
+      ],
+
+      "Control and Coordination": [
+        "Control and Coordination",
+        "Nervous System",
+        "Neuron",
+        "Reflex Action",
+        "Reflex Arc",
+        "Human Brain",
+        "Forebrain",
+        "Midbrain",
+        "Hindbrain",
+        "Coordination in Plants",
+        "Plant Hormones",
+        "Tropic Movements",
+        "Phototropism",
+        "Geotropism",
+        "Hydrotropism",
+        "Hormones in Animals",
+        "Endocrine System"
+      ],
+
+      "How Do Organisms Reproduce?": [
+        "Importance of Reproduction",
+        "Asexual Reproduction",
+        "Fission",
+        "Fragmentation",
+        "Regeneration",
+        "Budding",
+        "Vegetative Propagation",
+        "Spore Formation",
+        "Sexual Reproduction",
+        "Reproductive Health",
+        "Human Male Reproductive System",
+        "Human Female Reproductive System",
+        "Puberty",
+        "Menstruation",
+        "Fertilisation",
+        "Embryo Development",
+        "Methods of Contraception",
+        "Sexually Transmitted Diseases"
+      ],
+
+      "Heredity and Evolution": [
+        "Heredity",
+        "Inherited Traits",
+        "Acquired Traits",
+        "Mendel's Experiments",
+        "Monohybrid Cross",
+        "Dihybrid Cross",
+        "Dominant Traits",
+        "Recessive Traits",
+        "Sex Determination",
+        "Evolution",
+        "Speciation",
+        "Evolutionary Relationships",
+        "Fossils",
+        "Evolution by Stages"
+      ],
+
+      "Our Environment": [
+        "Ecosystem",
+        "Biotic Components",
+        "Abiotic Components",
+        "Food Chain",
+        "Food Web",
+        "Trophic Levels",
+        "Energy Flow in Ecosystem",
+        "Biodegradable Substances",
+        "Non-Biodegradable Substances",
+        "Environmental Problems",
+        "Ozone Layer"
+      ],
+
+      "Sustainable Management of Natural Resources": [
+        "Natural Resources",
+        "Sustainable Development",
+        "Forest and Wildlife Conservation",
+        "Biodiversity",
+        "Stakeholders of Forests",
+        "Water Resources",
+        "Dams",
+        "Rainwater Harvesting",
+        "Coal and Petroleum",
+        "Management of Natural Resources"
+      ]
+    }
+  }
+}

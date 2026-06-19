@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX } from 'lucide-react';
+import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import SyllabusProgressBar from '../components/SyllabusProgressBar';
 import { addHomework } from '../services/homeworkService';
 import { getNotices, addNotice, updateNotice, deleteNotice } from '../services/noticeService';
 import { getClosedDays, addClosedDay, removeClosedDay } from '../services/calendarOverrideService';
+import { getSyllabus, getCompletedTopics, setCompletedBulk, toggleCompletedTopic, addTopicToChapter } from '../services/syllabusService';
+import { notifyClass, notifyClassSafe } from '../services/notify';
+import { statsForTopics, chapterTopics } from '../data/syllabusStats';
 import { isWorkingDay, fromDateKey } from '../data/attendanceUtils';
 import { ROLES } from '../auth/roles';
 
@@ -80,6 +84,9 @@ function NoticesManager({ currentUser }) {
         await updateNotice(editingId, { body });
       } else {
         await addNotice({ body, authorName: currentUser.name, authorPhone: currentUser.phone });
+        // Fire-and-forget push to the class (admin only; safe no-op otherwise).
+        const preview = body.trim().replace(/[#*_>`-]/g, '').replace(/\s+/g, ' ').slice(0, 120);
+        notifyClassSafe(currentUser, { title: '📢 New Notice', body: preview, url: '/', type: 'notice' });
       }
       setBody('');
       setEditingId(null);
@@ -189,7 +196,7 @@ function NoticesManager({ currentUser }) {
 }
 
 // ── Homework section ───────────────────────────────────────────
-function HomeworkManager() {
+function HomeworkManager({ currentUser }) {
   const [date, setDate] = useState('');
   const [tasks, setTasks] = useState([{ subject: '', description: '', type: 'homework' }]);
   const [loading, setLoading] = useState(false);
@@ -205,9 +212,18 @@ function HomeworkManager() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!date || tasks.length === 0) return alert('Please enter date and at least one task');
+    if (!window.confirm(`Post homework for ${date} with ${tasks.length} task(s)?`)) return;
     setLoading(true);
     try {
       await addHomework(date, tasks);
+      // Fire-and-forget push (admin only; safe no-op otherwise).
+      const subjects = tasks.map((t) => t.subject).filter(Boolean).join(', ');
+      notifyClassSafe(currentUser, {
+        title: '📚 Homework Updated',
+        body: subjects ? `New tasks: ${subjects}` : 'New homework has been posted.',
+        url: '/homework',
+        type: 'homework',
+      });
       alert('Homework added successfully!');
       setDate('');
       setTasks([{ subject: '', description: '', type: 'homework' }]);
@@ -398,6 +414,337 @@ function CalendarOverrideManager() {
   );
 }
 
+// ── Syllabus management (monitor + admin) ──────────────────────
+function SyllabusManager({ currentUser }) {
+  const [sections, setSections] = useState(null); // null = loading
+  const [completedList, setCompletedList] = useState([]);
+  const [sectionId, setSectionId] = useState(null);
+  const [subjectId, setSubjectId] = useState(null);
+  const [openChapter, setOpenChapter] = useState(null);
+  const [newTopic, setNewTopic] = useState({}); // { [chapterId]: text }
+  const [busy, setBusy] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [notifyMsg, setNotifyMsg] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([getSyllabus(), getCompletedTopics()])
+      .then(([secs, completed]) => {
+        if (!active) return;
+        setSections(secs);
+        setCompletedList(completed);
+      })
+      .catch((err) => { console.error(err); if (active) setSections([]); });
+    return () => { active = false; };
+  }, [reloadKey]);
+
+  const completedSet = new Set(completedList);
+  const emptyChecked = new Set();
+
+  async function handleToggle(topicId) {
+    // Optimistic update.
+    setCompletedList((prev) => {
+      const set = new Set(prev);
+      set.has(topicId) ? set.delete(topicId) : set.add(topicId);
+      return Array.from(set);
+    });
+    try {
+      await toggleCompletedTopic(topicId, completedList);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update: ' + err.message);
+      setReloadKey((k) => k + 1); // resync on error
+    }
+  }
+
+  async function handleChapterBulk(chapter, markDone) {
+    const ids = chapterTopics(chapter).map((t) => t.topicId);
+    setCompletedList((prev) => {
+      const set = new Set(prev);
+      ids.forEach((id) => (markDone ? set.add(id) : set.delete(id)));
+      return Array.from(set);
+    });
+    try {
+      await setCompletedBulk(ids, markDone, completedList);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update chapter: ' + err.message);
+      setReloadKey((k) => k + 1);
+    }
+  }
+
+  async function handleAddTopic(chapterId) {
+    const text = (newTopic[chapterId] || '').trim();
+    if (!text) return;
+    setBusy(true);
+    try {
+      await addTopicToChapter(chapterId, text);
+      setNewTopic((prev) => ({ ...prev, [chapterId]: '' }));
+      setReloadKey((k) => k + 1);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const activeSection = sections?.find((s) => s.sectionId === sectionId) || null;
+  const activeSubject = activeSection?.subjects.find((s) => s.subjectId === subjectId) || null;
+
+  return (
+    <div className="glass-card" style={{ marginBottom: '2rem' }}>
+      <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', color: 'var(--text-primary)' }}>
+        <BookMarked size={20} /> Syllabus Progress
+      </h2>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1rem' }}>
+        Mark topics as completed for the whole class. Students can only check off topics you've marked complete. You can also add new topics to any chapter.
+      </p>
+
+      {currentUser && (currentUser.isAdmin || currentUser.role === ROLES.ADMIN) && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <button
+            type="button"
+            className="auth-btn secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.9rem', fontSize: '0.85rem' }}
+            onClick={async () => {
+              if (!window.confirm('Notify the whole class that the syllabus was updated?')) return;
+              setNotifyMsg('Sending…');
+              try {
+                const res = await notifyClass(currentUser, {
+                  title: '✅ Syllabus Updated',
+                  body: 'New progress has been marked. Check what to revise.',
+                  url: '/syllabus',
+                  type: 'syllabus',
+                });
+                setNotifyMsg(`✓ Sent to ${res.sent} device${res.sent === 1 ? '' : 's'}.`);
+              } catch (err) {
+                setNotifyMsg('Failed: ' + err.message);
+              }
+            }}
+          >
+            <Send size={15} /> Notify class of update
+          </button>
+          {notifyMsg && <span style={{ marginLeft: '0.6rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{notifyMsg}</span>}
+        </div>
+      )}
+
+      {sections === null ? (
+        <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+      ) : (
+        <>
+          {/* Breadcrumb */}
+          <div className="syllabus-breadcrumb">
+            <button className="syllabus-crumb-btn" onClick={() => { setSectionId(null); setSubjectId(null); setOpenChapter(null); }}>
+              All Sections
+            </button>
+            {activeSection && (
+              <>
+                <ChevronRight size={14} className="syllabus-crumb-sep" />
+                {activeSubject ? (
+                  <button className="syllabus-crumb-btn" onClick={() => { setSubjectId(null); setOpenChapter(null); }}>
+                    {activeSection.sectionName}
+                  </button>
+                ) : (
+                  <span className="syllabus-crumb-current">{activeSection.sectionName}</span>
+                )}
+              </>
+            )}
+            {activeSubject && (
+              <>
+                <ChevronRight size={14} className="syllabus-crumb-sep" />
+                <span className="syllabus-crumb-current">{activeSubject.subjectName}</span>
+              </>
+            )}
+          </div>
+
+          {/* Level 1: sections */}
+          {!activeSection && sections.map((section) => {
+            const stats = statsForTopics(
+              section.subjects.flatMap((s) => s.chapters.flatMap((c) => c.topics)),
+              completedSet, emptyChecked
+            );
+            return (
+              <button key={section.sectionId} className="syllabus-row" onClick={() => setSectionId(section.sectionId)}>
+                <div className="syllabus-row-head">
+                  <h3 className="syllabus-row-title">{section.sectionName}</h3>
+                  <ChevronRight size={18} className="syllabus-row-chevron" />
+                </div>
+                <SyllabusProgressBar completed={stats.completedPct} checked={0} sublabel={`${stats.completed}/${stats.total} done`} size="sm" />
+              </button>
+            );
+          })}
+
+          {/* Level 2: subjects */}
+          {activeSection && !activeSubject && activeSection.subjects.map((subject) => {
+            const stats = statsForTopics(subject.chapters.flatMap((c) => c.topics), completedSet, emptyChecked);
+            return (
+              <button key={subject.subjectId} className="syllabus-row" onClick={() => setSubjectId(subject.subjectId)}>
+                <div className="syllabus-row-head">
+                  <h3 className="syllabus-row-title">{subject.subjectName}</h3>
+                  <ChevronRight size={18} className="syllabus-row-chevron" />
+                </div>
+                <SyllabusProgressBar completed={stats.completedPct} checked={0} sublabel={`${stats.completed}/${stats.total} done`} size="sm" />
+              </button>
+            );
+          })}
+
+          {/* Level 3: chapters + topic toggles */}
+          {activeSubject && activeSubject.chapters.map((chapter) => {
+            const stats = statsForTopics(chapterTopics(chapter), completedSet, emptyChecked);
+            const isOpen = openChapter === chapter.chapterId;
+            const allDone = stats.total > 0 && stats.completed === stats.total;
+            return (
+              <div key={chapter.chapterId} className="syllabus-row" style={{ cursor: 'default' }}>
+                <button
+                  onClick={() => setOpenChapter(isOpen ? null : chapter.chapterId)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}
+                >
+                  <div className="syllabus-row-head">
+                    <h3 className="syllabus-row-title">{chapter.chapterName}</h3>
+                    <ChevronRight size={18} className="syllabus-row-chevron" style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                  </div>
+                  <SyllabusProgressBar completed={stats.completedPct} checked={0} sublabel={`${stats.completed}/${stats.total} done`} size="sm" />
+                </button>
+
+                {isOpen && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+                      <button
+                        className="auth-btn secondary"
+                        style={{ padding: '0.3rem 0.7rem', fontSize: '0.78rem' }}
+                        onClick={() => handleChapterBulk(chapter, !allDone)}
+                      >
+                        {allDone ? 'Unmark all' : 'Mark all complete'}
+                      </button>
+                    </div>
+
+                    {chapter.topics.map((topic) => {
+                      const done = completedSet.has(topic.topicId);
+                      return (
+                        <button
+                          key={topic.topicId}
+                          className={`syllabus-admin-topic ${done ? 'done' : ''}`}
+                          onClick={() => handleToggle(topic.topicId)}
+                          style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                        >
+                          <span className={`syllabus-topic-box ${done ? 'checked' : ''}`} style={done ? { background: '#10b981', borderColor: '#10b981' } : undefined}>
+                            {done && <Check size={13} color="#fff" strokeWidth={3} />}
+                          </span>
+                          <span className="syllabus-topic-name">{topic.topicName}</span>
+                        </button>
+                      );
+                    })}
+
+                    {/* Add topic */}
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.6rem' }}>
+                      <input
+                        type="text"
+                        placeholder="Add a new topic to this chapter…"
+                        value={newTopic[chapter.chapterId] || ''}
+                        onChange={(e) => setNewTopic((prev) => ({ ...prev, [chapter.chapterId]: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTopic(chapter.chapterId); } }}
+                        style={{ flex: 1, padding: '0.5rem 0.7rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
+                      />
+                      <button
+                        type="button"
+                        className="auth-btn primary"
+                        disabled={busy}
+                        onClick={() => handleAddTopic(chapter.chapterId)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.5rem 0.8rem' }}
+                      >
+                        <Plus size={15} /> Add
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Broadcast (manual push, admin only) ────────────────────────
+function BroadcastManager({ currentUser }) {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null); // { ok, sent, failed } | { error }
+
+  async function handleSend(e) {
+    e.preventDefault();
+    if (!title.trim()) return;
+    if (!window.confirm(`Send this notification to all registered devices?\n\n"${title.trim()}"`)) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await notifyClass(currentUser, {
+        title: title.trim(),
+        body: body.trim(),
+        url: '/',
+        type: 'broadcast',
+      });
+      setResult(res);
+      setTitle('');
+      setBody('');
+    } catch (err) {
+      console.error(err);
+      setResult({ error: err.message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="glass-card" style={{ marginBottom: '2rem' }}>
+      <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', color: 'var(--text-primary)' }}>
+        <Send size={20} /> Send Push Notification
+      </h2>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
+        Sends an instant push to every student who enabled notifications — even if the app is closed.
+      </p>
+
+      <form onSubmit={handleSend} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <input
+          type="text"
+          placeholder="Notification title (e.g. Test tomorrow!)"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          maxLength={80}
+          style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
+        />
+        <textarea
+          placeholder="Message body (optional)"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={3}
+          maxLength={300}
+          style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'Inter, sans-serif' }}
+        />
+        <button type="submit" disabled={busy} className="auth-btn primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+          <Send size={16} /> {busy ? 'Sending…' : 'Send to Everyone'}
+        </button>
+      </form>
+
+      {result && (
+        result.error ? (
+          <p className="auth-err" style={{ marginTop: '0.75rem' }}>Failed: {result.error}</p>
+        ) : (
+          <p style={{ marginTop: '0.75rem', color: '#6ee7b7', fontSize: '0.88rem' }}>
+            ✓ Sent to {result.sent} device{result.sent === 1 ? '' : 's'}
+            {result.failed > 0 ? ` · ${result.failed} failed` : ''}
+            {result.pruned > 0 ? ` · ${result.pruned} stale removed` : ''}
+            {result.sent === 0 && !result.failed ? ' (no devices registered yet)' : ''}
+          </p>
+        )
+      )}
+    </div>
+  );
+}
+
 export default function AdminPanel() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -421,7 +768,9 @@ export default function AdminPanel() {
       </div>
 
       <NoticesManager currentUser={currentUser} />
-      <HomeworkManager />
+      {isAdminUser(currentUser) && <BroadcastManager currentUser={currentUser} />}
+      <HomeworkManager currentUser={currentUser} />
+      <SyllabusManager currentUser={currentUser} />
       {isAdminUser(currentUser) && <CalendarOverrideManager />}
     </div>
   );
