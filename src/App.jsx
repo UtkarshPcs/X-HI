@@ -15,6 +15,8 @@ import SchoolCalendar from './pages/SchoolCalendar';
 import ProfilePage from './pages/ProfilePage';
 import AdminPanel from './pages/AdminPanel';
 import SyllabusPage from './pages/SyllabusPage';
+import ClassInfoPage from './pages/ClassInfoPage';
+import AdminServicesPage from './pages/AdminServicesPage';
 import { Heart } from 'lucide-react';
 
 function ScrollToTop() {
@@ -39,6 +41,8 @@ function AppInner() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/syllabus" element={<SyllabusPage />} />
+            <Route path="/class-info" element={<ClassInfoPage />} />
+            <Route path="/admin-services" element={<AdminServicesPage />} />
           </Routes>
         </main>
         <footer className="app-footer">

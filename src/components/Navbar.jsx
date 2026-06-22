@@ -53,7 +53,7 @@ export default function Navbar() {
         </NavLink>
         {(currentUser?.isAdmin || currentUser?.role === 'MONITOR') && (
           <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <ShieldAlert size={20} /><span>Panel</span>
+            <ShieldAlert size={20} /><span>Monitor Panel</span>
           </NavLink>
         )}
       </div>
@@ -102,11 +102,16 @@ export default function Navbar() {
                   <button className="nav-dropdown-item" onClick={() => go('/profile')}>
                     <User size={15} /> Profile
                   </button>
-                  <button className="nav-dropdown-item" onClick={() => go('/profile?tab=classinfo')}>
+                  <button className="nav-dropdown-item" onClick={() => go('/class-info')}>
                     <Users size={15} /> Class Info
                   </button>
                   {(currentUser.isAdmin || currentUser.role === 'MONITOR') && (
                     <button className="nav-dropdown-item" onClick={() => go('/admin')}>
+                      <ShieldAlert size={15} /> Monitor Panel
+                    </button>
+                  )}
+                  {currentUser.role === 'ADMIN' && (
+                    <button className="nav-dropdown-item" onClick={() => go('/admin-services')}>
                       <ShieldAlert size={15} /> Admin Services
                     </button>
                   )}

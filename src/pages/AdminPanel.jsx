@@ -884,7 +884,7 @@ export default function AdminPanel() {
 
   if (!canAccess(currentUser)) return null;
 
-  const roleLabel = isAdminUser(currentUser) ? 'Admin Panel' : 'Monitor Panel';
+  const roleLabel = 'Monitor Panel';
 
   return (
     <div className="animate-fade-in fade-in-up" style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem' }}>

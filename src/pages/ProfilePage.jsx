@@ -1,30 +1,21 @@
 import { useRef, useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users } from 'lucide-react';
 import { ROLES } from '../auth/roles';
-import { resetWhatsNew } from '../auth/authService';
-import ClassInfo from '../components/ClassInfo';
 import packageJson from '../../package.json';
 
 export default function ProfilePage() {
-  const { currentUser, logout, triggerTour } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const fileRef = useRef();
   const [photo, setPhoto] = useState(null);
-  const [showClassInfo, setShowClassInfo] = useState(searchParams.get('tab') === 'classinfo');
   const [loadedPhotoForPhone, setLoadedPhotoForPhone] = useState(null);
 
-  // Redirect logged-out users. Navigation is an external-system sync, so it
-  // belongs in an effect.
   useEffect(() => {
     if (!currentUser) navigate('/');
   }, [currentUser, navigate]);
 
-  // Load the saved photo when the active user changes. Adjusting state during
-  // render (guarded by a "which phone did we load for" marker) is the
-  // React-recommended alternative to calling setState inside an effect.
   if (currentUser && loadedPhotoForPhone !== currentUser.phone) {
     setLoadedPhotoForPhone(currentUser.phone);
     setPhoto(localStorage.getItem(`photo_${currentUser.phone}`) || null);
@@ -90,50 +81,6 @@ export default function ProfilePage() {
 
         <p className="profile-photo-hint">Tap the photo to change it. Stored on this device only.</p>
 
-        {currentUser.role === ROLES.ADMIN && (
-          <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--border)', textAlign: 'left' }}>
-            <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Tools — Onboarding</h4>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '0.75rem' }}>
-              Tours run on the dashboard. You'll be taken there first.
-            </p>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button
-                className="auth-btn secondary"
-                style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem' }}
-                onClick={() => { triggerTour(ROLES.STUDENT); navigate('/'); }}>
-                Test Student Tour
-              </button>
-              <button
-                className="auth-btn secondary"
-                style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem' }}
-                onClick={() => { triggerTour(ROLES.MONITOR); navigate('/'); }}>
-                Test Monitor Tour
-              </button>
-            </div>
-            <button
-              className="auth-btn secondary"
-              style={{ width: '100%', marginTop: '0.5rem', padding: '0.5rem', fontSize: '0.85rem' }}
-              onClick={() => {
-                localStorage.removeItem(`onboarding_done_${currentUser.phone}`);
-                alert('Onboarding reset. Refresh the page to trigger it again.');
-              }}>
-              Reset Onboarding (for testing)
-            </button>
-            <button
-              className="auth-btn secondary"
-              style={{ width: '100%', marginTop: '0.5rem', padding: '0.5rem', fontSize: '0.85rem' }}
-              onClick={async () => {
-                localStorage.removeItem(`whatsnew_v1_${currentUser.phone}`);
-                try { await resetWhatsNew(currentUser.phone); } catch (e) { console.error(e); }
-                // Full reload so the WhatsNew component remounts and re-reads
-                // the (now reset) flags from a fresh user load.
-                window.location.href = '/';
-              }}>
-              Show "What's New" Again (for testing)
-            </button>
-          </div>
-        )}
-
         <button className="auth-btn secondary profile-logout" style={{ marginTop: '2rem' }} onClick={() => { logout(); navigate('/'); }}>
           Logout
         </button>
@@ -142,25 +89,6 @@ export default function ProfilePage() {
           App Version: v{packageJson.version}
         </p>
       </div>
-
-      <div className="profile-classinfo-wrap">
-        <button
-          className="class-info-toggle"
-          onClick={() => setShowClassInfo((v) => !v)}
-          aria-expanded={showClassInfo}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Users size={18} /> Class Info — routine, monitors & student register
-          </span>
-          {showClassInfo ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </button>
-        {showClassInfo && (
-          <div style={{ marginTop: '1.5rem' }}>
-            <ClassInfo />
-          </div>
-        )}
-      </div>
-
     </div>
   );
 }
