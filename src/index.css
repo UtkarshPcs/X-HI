@@ -2121,3 +2121,83 @@ a {
   padding: 0.6rem 0.75rem;
   margin-top: 0.5rem;
 }
+
+/* ─── Marks / Test Scores Banner ─────────────────────────────── */
+.marks-banner {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.marks-banner-icon { color: #2563eb; padding-top: 0.1rem; flex-shrink: 0; }
+.marks-banner-body { flex: 1; font-size: 0.9rem; }
+.marks-banner-body p { color: var(--text-secondary); margin: 0.25rem 0 0; font-size: 0.85rem; }
+
+/* ─── Test Scores Page ────────────────────────────────────────── */
+.ts-scores-grid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+
+.ts-score-bar-wrap { display: flex; flex-direction: column; gap: 0.3rem; }
+.ts-score-bar-header { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--text-secondary); }
+.ts-score-track { height: 10px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.ts-score-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+
+.ts-avg-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.6rem 0.75rem;
+  background: rgba(139,92,246,0.06);
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.ts-improvement {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; margin-bottom: 1rem;
+}
+
+.ts-complaints { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.ts-complaint-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.85rem; padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.ts-complaint-item.pending { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.06); color: #f59e0b; }
+.ts-complaint-item.approved { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.06); color: #10b981; }
+.ts-complaint-item.rejected { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.06); color: #ef4444; }
+
+.ts-complaint-form {
+  display: flex; flex-direction: column; gap: 0.6rem;
+  margin-top: 1rem; padding: 1rem;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: rgba(255,255,255,0.02);
+}
+.ts-label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--text-secondary); }
+
+/* ─── Marks Complaints (Admin) ───────────────────────────────── */
+.marks-complaint-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 0.75rem; padding: 0.75rem;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+.marks-complaint-info { flex: 1; font-size: 0.88rem; }
+.marks-complaint-actions { display: flex; gap: 0.35rem; align-items: center; flex-shrink: 0; }
+
+.marks-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.65rem; border-radius: var(--radius-sm);
+  font-size: 0.8rem; font-weight: 600; border: none; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.marks-btn:hover { opacity: 0.85; }
+.marks-btn:disabled { opacity: 0.5; cursor: default; }
+.marks-btn.approve { background: rgba(16,185,129,0.15); color: #10b981; }
+.marks-btn.reject  { background: rgba(239,68,68,0.12); color: #ef4444; }
+.marks-btn.delete  { background: rgba(107,114,128,0.1); color: var(--text-muted); padding: 0.3rem 0.5rem; }

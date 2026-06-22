@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked } from 'lucide-react';
+import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import NotificationHistory from './NotificationHistory';
 
@@ -117,6 +117,9 @@ export default function Navbar() {
                   )}
                   <button className="nav-dropdown-item" onClick={() => go('/syllabus')}>
                     <BookMarked size={15} /> Syllabus Tracker
+                  </button>
+                  <button className="nav-dropdown-item" onClick={() => go('/test-scores')}>
+                    <BarChart2 size={15} /> Test Scores
                   </button>
                   <div className="nav-dropdown-divider" />
                   <button className="nav-dropdown-item nav-dropdown-logout" onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }}>

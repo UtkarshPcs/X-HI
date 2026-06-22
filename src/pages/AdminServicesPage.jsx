@@ -4,14 +4,16 @@ import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { resetWhatsNew } from '../auth/authService';
 import { getAllUsers, getActivitySummary } from '../services/adminService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
+import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
 
 const TABS = [
-  { id: 'users',    label: 'User Directory',  Icon: Users },
-  { id: 'activity', label: 'Activity',         Icon: Activity },
-  { id: 'merge',    label: 'Merge Profiles',   Icon: GitMerge },
-  { id: 'onboarding', label: 'Onboarding',     Icon: Settings },
+  { id: 'users',      label: 'User Directory',  Icon: Users },
+  { id: 'activity',   label: 'Activity',         Icon: Activity },
+  { id: 'marks',      label: 'Marks Complaints', Icon: FileText },
+  { id: 'merge',      label: 'Merge Profiles',   Icon: GitMerge },
+  { id: 'onboarding', label: 'Onboarding',       Icon: Settings },
 ];
 
 const ROLE_STYLE = {
@@ -219,6 +221,106 @@ function OnboardingTab({ currentUser, navigate, triggerTour }) {
 }
 
 
+
+// ── Marks Complaints Tab ──────────────────────────────────────
+function MarksTab() {
+  const [complaints, setComplaints] = useState(null);
+  const [busy, setBusy] = useState(null); // id being processed
+
+  useEffect(() => {
+    getComplaints().then(setComplaints).catch(() => setComplaints([]));
+  }, []);
+
+  async function handleApprove(c) {
+    setBusy(c.id);
+    try {
+      await applyOverride(c.rollNo, c.test, c.claimedMarks);
+      await updateComplaintStatus(c.id, 'approved');
+      setComplaints(prev => prev.map(x => x.id === c.id ? { ...x, status: 'approved' } : x));
+    } catch (e) { alert(e.message); }
+    finally { setBusy(null); }
+  }
+
+  async function handleReject(c) {
+    setBusy(c.id);
+    try {
+      await updateComplaintStatus(c.id, 'rejected');
+      setComplaints(prev => prev.map(x => x.id === c.id ? { ...x, status: 'rejected' } : x));
+    } catch (e) { alert(e.message); }
+    finally { setBusy(null); }
+  }
+
+  async function handleDelete(id) {
+    if (!confirm('Delete this complaint?')) return;
+    setBusy(id);
+    try {
+      await deleteComplaint(id);
+      setComplaints(prev => prev.filter(x => x.id !== id));
+    } catch (e) { alert(e.message); }
+    finally { setBusy(null); }
+  }
+
+  const pending = (complaints || []).filter(c => c.status === 'pending');
+  const resolved = (complaints || []).filter(c => c.status !== 'pending');
+
+  const STATUS_COLOR = { pending: '#f59e0b', approved: '#10b981', rejected: '#ef4444' };
+
+  function ComplaintRow({ c }) {
+    const isPending = c.status === 'pending';
+    return (
+      <div className="marks-complaint-row">
+        <div className="marks-complaint-info">
+          <strong>{c.name}</strong> <span className="as-muted">Roll {c.rollNo}</span>
+          <span style={{ color: STATUS_COLOR[c.status], fontSize: '0.78rem', fontWeight: 600, textTransform: 'capitalize', marginLeft: '0.5rem' }}>
+            {c.status}
+          </span>
+          <div style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+            {c.test === 'test1' ? 'Test 1' : 'Test 2'} · Current: <strong>{c.currentMarks ?? 'Absent'}</strong> → Claimed: <strong>{c.claimedMarks}</strong>
+            {c.reason && <span> · "{c.reason}"</span>}
+          </div>
+        </div>
+        <div className="marks-complaint-actions">
+          {isPending && (
+            <>
+              <button className="marks-btn approve" onClick={() => handleApprove(c)} disabled={!!busy}>
+                <CheckCircle size={14} /> Approve
+              </button>
+              <button className="marks-btn reject" onClick={() => handleReject(c)} disabled={!!busy}>
+                <XCircle size={14} /> Reject
+              </button>
+            </>
+          )}
+          <button className="marks-btn delete" onClick={() => handleDelete(c.id)} disabled={!!busy}>
+            <Trash2 size={13} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (complaints === null) return <p className="as-muted">Loading…</p>;
+
+  return (
+    <div>
+      <h4 className="as-section-title" style={{ marginBottom: '0.75rem' }}>
+        <Clock size={14} /> Pending ({pending.length})
+      </h4>
+      {pending.length === 0
+        ? <p className="as-muted">No pending complaints.</p>
+        : pending.map(c => <ComplaintRow key={c.id} c={c} />)
+      }
+      {resolved.length > 0 && (
+        <>
+          <h4 className="as-section-title" style={{ margin: '1.5rem 0 0.75rem' }}>
+            <Check size={14} /> Resolved ({resolved.length})
+          </h4>
+          {resolved.map(c => <ComplaintRow key={c.id} c={c} />)}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Merge Tab ─────────────────────────────────────────────────
 function MergeTab() {
   const [rollNo, setRollNo] = useState('');
@@ -382,6 +484,7 @@ export default function AdminServicesPage() {
       <div className="as-content">
         {tab === 'users'      && <UsersTab />}
         {tab === 'activity'   && <ActivityTab />}
+        {tab === 'marks'      && <MarksTab />}
         {tab === 'merge'      && <MergeTab />}
         {tab === 'onboarding' && <OnboardingTab currentUser={currentUser} navigate={navigate} triggerTour={triggerTour} />}
       </div>
