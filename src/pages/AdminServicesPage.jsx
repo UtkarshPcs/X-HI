@@ -4,11 +4,13 @@ import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { resetWhatsNew } from '../auth/authService';
 import { getAllUsers, getActivitySummary } from '../services/adminService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2 } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check } from 'lucide-react';
+import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 
 const TABS = [
   { id: 'users',    label: 'User Directory',  Icon: Users },
   { id: 'activity', label: 'Activity',         Icon: Activity },
+  { id: 'merge',    label: 'Merge Profiles',   Icon: GitMerge },
   { id: 'onboarding', label: 'Onboarding',     Icon: Settings },
 ];
 
@@ -216,6 +218,140 @@ function OnboardingTab({ currentUser, navigate, triggerTour }) {
   );
 }
 
+
+// ── Merge Tab ─────────────────────────────────────────────────
+function MergeTab() {
+  const [rollNo, setRollNo] = useState('');
+  const [dupes, setDupes] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [primaryPhone, setPrimaryPhone] = useState('');
+  const [status, setStatus] = useState(null); // null | 'confirm' | 'merging' | 'done' | 'error'
+  const [errorMsg, setErrorMsg] = useState('');
+
+  async function handleSearch() {
+    if (!rollNo) return;
+    setLoading(true); setDupes(null); setStatus(null); setPrimaryPhone('');
+    try {
+      const found = await fetchDuplicates(rollNo);
+      setDupes(found);
+      if (found.length >= 2) setPrimaryPhone(found[0].phone);
+    } catch(e) { setErrorMsg(e.message); setStatus('error'); }
+    finally { setLoading(false); }
+  }
+
+  async function handleMerge() {
+    setStatus('merging');
+    try {
+      const secondary = dupes.find(u => u.phone !== primaryPhone);
+      await mergeProfiles(primaryPhone, secondary.phone);
+      setStatus('done');
+    } catch(e) { setErrorMsg(e.message); setStatus('error'); }
+  }
+
+  const secondary = dupes?.find(u => u.phone !== primaryPhone);
+
+  function mask(phone) { return phone?.replace(/(\d{2})\d{6}(\d{2})/, '$1XXXXXX$2') || '—'; }
+
+  return (
+    <div>
+      <p className="as-muted" style={{ marginBottom: '1rem' }}>
+        Search by roll number to find duplicate accounts, then merge them into one profile.
+        Array data (homework, attendance, syllabus) is always unioned — nothing is lost.
+        The user will be prompted to set a new password on next login.
+      </p>
+
+      <div className="as-search-row" style={{ maxWidth: 320 }}>
+        <Search size={16} />
+        <input className="as-search" placeholder="Roll number…" value={rollNo}
+          onChange={e => setRollNo(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSearch()} />
+        <button className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}
+          onClick={handleSearch} disabled={loading}>
+          {loading ? '…' : 'Search'}
+        </button>
+      </div>
+
+      {dupes !== null && dupes.length < 2 && (
+        <p className="as-muted" style={{ marginTop: '1rem' }}>
+          {dupes.length === 0 ? 'No users found for this roll number.' : 'Only one account found — no merge needed.'}
+        </p>
+      )}
+
+      {dupes?.length >= 2 && status !== 'done' && (
+        <div className="merge-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#f59e0b' }}>
+            <AlertTriangle size={16} /> <strong>2 accounts found for Roll {rollNo}</strong>
+          </div>
+
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+            Choose which phone number becomes the <strong>primary</strong> (login) number.
+            The other becomes the alternate — both will still work to log in.
+          </p>
+
+          <div className="merge-phone-list">
+            {dupes.map(u => (
+              <label key={u.phone} className={`merge-phone-option ${primaryPhone === u.phone ? 'selected' : ''}`}>
+                <input type="radio" name="primary" value={u.phone}
+                  checked={primaryPhone === u.phone}
+                  onChange={() => setPrimaryPhone(u.phone)} />
+                <div>
+                  <div style={{ fontWeight: 600 }}>{u.name}</div>
+                  <div className="as-mono" style={{ fontSize: '0.82rem' }}>{mask(u.phone)}</div>
+                  <div className="as-muted" style={{ fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                    Joined {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN') : '—'} ·{' '}
+                    Homework: {(u.completedHomework || []).length} ·{' '}
+                    Absent days: {(u.attendance_absentDays || []).length}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
+
+          {secondary && (
+            <div className="merge-summary">
+              <strong>After merge:</strong> {mask(primaryPhone)} is primary · {mask(secondary.phone)} becomes alternate ·
+              Array data unioned · Password cleared (user sets new one on next login)
+            </div>
+          )}
+
+          {status === 'confirm' ? (
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+              <button className="auth-btn" style={{ flex: 1 }} onClick={handleMerge}>
+                Yes, merge permanently
+              </button>
+              <button className="auth-btn secondary" style={{ flex: 1 }} onClick={() => setStatus(null)}>
+                Cancel
+              </button>
+            </div>
+          ) : status === 'merging' ? (
+            <p className="as-muted" style={{ marginTop: '1rem' }}>Merging…</p>
+          ) : (
+            <button className="auth-btn" style={{ marginTop: '1rem', width: '100%' }}
+              onClick={() => setStatus('confirm')} disabled={!primaryPhone}>
+              <GitMerge size={15} /> Merge Profiles
+            </button>
+          )}
+
+          {status === 'error' && <p style={{ color: '#ef4444', marginTop: '0.75rem', fontSize: '0.85rem' }}>{errorMsg}</p>}
+        </div>
+      )}
+
+      {status === 'done' && (
+        <div className="merge-card merge-done">
+          <Check size={20} color="#10b981" />
+          <div>
+            <strong>Merge complete.</strong>
+            <p className="as-muted">
+              {mask(primaryPhone)} is now the primary account.
+              The user will see a banner on their dashboard and be prompted to set a new password on next login.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────
 export default function AdminServicesPage() {
   const { currentUser, triggerTour } = useAuth();
@@ -246,6 +382,7 @@ export default function AdminServicesPage() {
       <div className="as-content">
         {tab === 'users'      && <UsersTab />}
         {tab === 'activity'   && <ActivityTab />}
+        {tab === 'merge'      && <MergeTab />}
         {tab === 'onboarding' && <OnboardingTab currentUser={currentUser} navigate={navigate} triggerTour={triggerTour} />}
       </div>
     </div>

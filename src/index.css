@@ -2056,3 +2056,68 @@ a {
   padding: 0.3rem 0.6rem;
   cursor: pointer;
 }
+
+/* ─── Merge Banner ────────────────────────────────────────── */
+.merge-banner {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius);
+  padding: 1rem 1rem 1rem 1rem;
+  margin-bottom: 1rem;
+}
+.merge-banner-icon {
+  color: var(--primary);
+  padding-top: 0.1rem;
+  flex-shrink: 0;
+}
+.merge-banner-body { flex: 1; font-size: 0.9rem; }
+.merge-banner-body p { color: var(--text-secondary); margin: 0.25rem 0 0; font-size: 0.85rem; }
+.merge-banner-close {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; padding: 0.2rem; flex-shrink: 0;
+}
+.merge-banner-close:hover { color: var(--text-primary); }
+
+/* ─── Merge Card (Admin Services) ────────────────────────── */
+.merge-card {
+  margin-top: 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.merge-card.merge-done {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.06);
+}
+.merge-phone-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.merge-phone-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.merge-phone-option.selected {
+  border-color: var(--primary);
+  background: rgba(139, 92, 246, 0.06);
+}
+.merge-phone-option input { margin-top: 0.2rem; accent-color: var(--primary); flex-shrink: 0; }
+.merge-summary {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  margin-top: 0.5rem;
+}

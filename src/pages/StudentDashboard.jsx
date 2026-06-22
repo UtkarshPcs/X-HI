@@ -6,6 +6,7 @@ import AttendanceCalendar from '../components/AttendanceCalendar';
 import NoticeBar from '../components/NoticeBar';
 import SyllabusProgressBar from '../components/SyllabusProgressBar';
 import { getAttendance, setAttendance, getHolidayHomework, getHomeworkDone, setHomeworkDone, getCheckedTopics } from '../auth/authService';
+import MergeBanner from '../components/MergeBanner';
 import { getHomework } from '../services/homeworkService';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { getSyllabus, getCompletedTopics } from '../services/syllabusService';
@@ -246,6 +247,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* Notices */}
+      <MergeBanner />
       <NoticeBar />
 
       {/* Syllabus progress summary */}

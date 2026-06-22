@@ -48,12 +48,17 @@ export function AuthProvider({ children }) {
   }
 
   async function login(phone, password) {
-    const user = await loginUser(phone, password);
-    if (!user) throw new Error('Invalid phone number or password.');
-    user.role = getUserRole(user.rollNo);
-    setCurrentUser(user);
-    localStorage.setItem('auth_phone', phone);
-    return user;
+    const result = await loginUser(phone, password);
+    if (!result) throw new Error('Invalid phone number or password.');
+    if (result.__needsPasswordReset) {
+      // Post-merge: redirect to password reset with primary phone
+      throw Object.assign(new Error('NEEDS_PASSWORD_RESET'), { primaryPhone: result.phone });
+    }
+    result.role = getUserRole(result.rollNo);
+    setCurrentUser(result);
+    // If they logged in via alternate phone, persist the primary phone for session restore
+    localStorage.setItem('auth_phone', result.phone);
+    return result;
   }
 
   function logout() {

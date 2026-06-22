@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 async function sha256(text) {
@@ -13,12 +13,28 @@ function userRef(phone) {
 
 export async function getUserByPhone(phone) {
   const snap = await getDoc(userRef(phone));
-  return snap.exists() ? snap.data() : null;
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  // If this phone was merged into another, transparently load the primary
+  if (data.mergedInto) {
+    const primarySnap = await getDoc(userRef(data.mergedInto));
+    return primarySnap.exists() ? { ...primarySnap.data(), _loginPhone: phone } : null;
+  }
+  return data;
 }
 
 export async function registerUser({ name, phone, rollNo }) {
   const existing = await getUserByPhone(phone);
   if (existing) throw new Error('Phone already registered. Please login.');
+  // Prevent duplicate roll numbers (unless rollNo is 0 = outsider)
+  if (rollNo !== 0) {
+    const allSnap = await getDocs(collection(db, 'users'));
+    const dup = allSnap.docs.find(d => {
+      const u = d.data();
+      return Number(u.rollNo) === Number(rollNo) && !u.mergedInto;
+    });
+    if (dup) throw new Error('This roll number is already registered.');
+  }
   await setDoc(userRef(phone), {
     name,
     phone,
@@ -36,6 +52,8 @@ export async function setPassword(phone, password) {
 export async function loginUser(phone, password) {
   const user = await getUserByPhone(phone);
   if (!user) return null;
+  // Post-merge: passwordHash cleared, user must set a new one
+  if (!user.passwordHash) return { __needsPasswordReset: true, phone: user.phone };
   const hash = await sha256(password);
   if (hash !== user.passwordHash) return null;
   return user;
