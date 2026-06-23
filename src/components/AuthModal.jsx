@@ -1,100 +1,124 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { matchStudent, isNameInClass } from '../auth/nameMatch';
+import { matchStudent } from '../auth/nameMatch';
 import { getUserByPhone } from '../auth/authService';
+import { getTeachers } from '../services/teacherService';
+import { GraduationCap, User } from 'lucide-react';
 
-const STEPS = {
-  CHOOSE: 'choose',         // login or register?
-  REGISTER: 'register',     // name + phone + roll
-  REGISTER_OUTSIDER: 'register-outsider', // name + phone
-  SET_PASS: 'set-pass',     // create password
-  CREDENTIALS: 'creds',     // show "save your ID"
-  LOGIN: 'login',           // phone + password
-  FORGOT_SEND: 'otp-send',  // enter phone for OTP
-  FORGOT_VERIFY: 'otp-verify', // enter OTP
-  RESET_PASS: 'reset-pass', // set new password
+const S = {
+  PICK:         'pick',          // student or teacher?
+  // --- student ---
+  PHONE:        'phone',         // enter phone → detect new/existing
+  REGISTER:     'register',      // name + roll
+  SET_PASS:     'set-pass',      // create password
+  DONE:         'done',          // success screen
+  LOGIN:        'login',         // phone + password
+  FORGOT_SEND:  'otp-send',
+  FORGOT_VFY:   'otp-verify',
+  RESET_PASS:   'reset-pass',
+  // --- teacher ---
+  TEACHER_LOGIN: 'teacher-login',
 };
 
-export default function AuthModal() {
-  const { modalOpen, closeModal, register, savePassword, login, sendOtp, verifyOtp, resetPassword } = useAuth();
-  const [step, setStep] = useState(STEPS.CHOOSE);
-  const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false);
+// Progress dots for student registration
+function Dots({ step }) {
+  const steps = [S.REGISTER, S.SET_PASS, S.DONE];
+  const idx = steps.indexOf(step);
+  if (idx === -1) return null;
+  return (
+    <div className="auth-dots">
+      {steps.map((_, i) => (
+        <span key={i} className={`auth-dot ${i <= idx ? 'active' : ''}`} />
+      ))}
+    </div>
+  );
+}
 
-  // Form fields
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [rollNo, setRollNo] = useState('');
-  const [password, setPassword] = useState('');
+export default function AuthModal() {
+  const {
+    modalOpen, closeModal,
+    register, savePassword, login, sendOtp, verifyOtp, resetPassword,
+    loginTeacherCtx,
+  } = useAuth();
+
+  const [step, setStep]         = useState(S.PICK);
+  const [err, setErr]           = useState('');
+  const [busy, setBusy]         = useState(false);
+  const [teachers, setTeachers] = useState([]);
+
+  // student fields
+  const [phone,     setPhone]     = useState('');
+  const [name,      setName]      = useState('');
+  const [rollNo,    setRollNo]    = useState('');
+  const [password,  setPassword]  = useState('');
   const [password2, setPassword2] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpPhone, setOtpPhone] = useState(''); // phone used in forgot flow
+  const [otp,       setOtp]       = useState('');
+  const [otpPhone,  setOtpPhone]  = useState('');
+
+  // teacher fields
+  const [teacherId, setTeacherId] = useState('');
+  const [tPassword, setTPassword] = useState('');
+
+  useEffect(() => {
+    if (step === S.TEACHER_LOGIN && teachers.length === 0) {
+      getTeachers().then(setTeachers).catch(() => {});
+    }
+  }, [step]);
 
   if (!modalOpen) return null;
 
   function reset() {
-    setStep(STEPS.CHOOSE);
-    setErr(''); setName(''); setPhone(''); setRollNo('');
+    setStep(S.PICK); setErr('');
+    setPhone(''); setName(''); setRollNo('');
     setPassword(''); setPassword2(''); setOtp(''); setOtpPhone('');
+    setTeacherId(''); setTPassword('');
   }
 
   function handleClose() { reset(); closeModal(); }
 
+  // ── STUDENT: phone probe ──────────────────────────────────
+  async function handlePhone(e) {
+    e.preventDefault(); setErr(''); setBusy(true);
+    try {
+      const existing = await getUserByPhone(phone.trim());
+      if (existing) setStep(S.LOGIN);
+      else setStep(S.REGISTER);
+    } catch { setErr('Connection error. Try again.'); }
+    finally { setBusy(false); }
+  }
+
+  // ── STUDENT: register ────────────────────────────────────
   async function handleRegister(e) {
-    e.preventDefault();
-    setErr('');
+    e.preventDefault(); setErr('');
     const roll = parseInt(rollNo, 10);
-    const student = matchStudent(name, roll);
-    if (!student) {
-      setErr('Name or roll number does not match our records. Check and try again.');
+    if (!matchStudent(name, roll)) {
+      setErr('Name or roll number doesn\'t match our records. Check and try again.');
       return;
     }
     setBusy(true);
     try {
-      const existing = await getUserByPhone(phone);
-      if (existing) { setErr('This phone is already registered. Please login.'); return; }
       await register(name.trim(), phone.trim(), roll);
-      setStep(STEPS.SET_PASS);
-    } catch (ex) {
-      setErr(ex.message);
-    } finally { setBusy(false); }
+      setStep(S.SET_PASS);
+    } catch (ex) { setErr(ex.message); }
+    finally { setBusy(false); }
   }
 
-  async function handleRegisterOutsider(e) {
-    e.preventDefault();
-    setErr('');
-    if (isNameInClass(name)) {
-      setErr('Warning: You seem to be a student of this classroom. Please register as a student using your roll number instead.');
-      return;
-    }
-    setBusy(true);
-    try {
-      const existing = await getUserByPhone(phone);
-      if (existing) { setErr('This phone is already registered. Please login.'); return; }
-      await register(name.trim(), phone.trim(), 0);
-      setStep(STEPS.SET_PASS);
-    } catch (ex) {
-      setErr(ex.message);
-    } finally { setBusy(false); }
-  }
-
+  // ── STUDENT: set password ────────────────────────────────
   async function handleSetPassword(e) {
-    e.preventDefault();
-    setErr('');
+    e.preventDefault(); setErr('');
     if (password.length < 6) { setErr('Password must be at least 6 characters.'); return; }
     if (password !== password2) { setErr('Passwords do not match.'); return; }
     setBusy(true);
     try {
       await savePassword(phone.trim(), password);
-      setStep(STEPS.CREDENTIALS);
+      setStep(S.DONE);
     } catch (ex) { setErr(ex.message); }
     finally { setBusy(false); }
   }
 
+  // ── STUDENT: login ────────────────────────────────────────
   async function handleLogin(e) {
-    e.preventDefault();
-    setErr('');
-    setBusy(true);
+    e.preventDefault(); setErr(''); setBusy(true);
     try {
       await login(phone.trim(), password);
       handleClose();
@@ -102,34 +126,30 @@ export default function AuthModal() {
     finally { setBusy(false); }
   }
 
+  // ── STUDENT: forgot password ──────────────────────────────
   async function handleSendOtp(e) {
-    e.preventDefault();
-    setErr('');
-    if (!otpPhone.trim()) { setErr('Enter your registered phone number.'); return; }
+    e.preventDefault(); setErr('');
     const user = await getUserByPhone(otpPhone.trim());
     if (!user) { setErr('No account found with this phone number.'); return; }
     setBusy(true);
     try {
       await sendOtp(otpPhone.trim());
-      setStep(STEPS.FORGOT_VERIFY);
+      setStep(S.FORGOT_VFY);
     } catch (ex) { setErr('Failed to send OTP. ' + ex.message); }
     finally { setBusy(false); }
   }
 
   async function handleVerifyOtp(e) {
-    e.preventDefault();
-    setErr('');
-    setBusy(true);
+    e.preventDefault(); setErr(''); setBusy(true);
     try {
       await verifyOtp(otp.trim());
-      setStep(STEPS.RESET_PASS);
-    } catch (ex) { setErr('Invalid OTP. Try again.'); }
+      setStep(S.RESET_PASS);
+    } catch { setErr('Invalid OTP. Try again.'); }
     finally { setBusy(false); }
   }
 
   async function handleResetPassword(e) {
-    e.preventDefault();
-    setErr('');
+    e.preventDefault(); setErr('');
     if (password.length < 6) { setErr('Password must be at least 6 characters.'); return; }
     if (password !== password2) { setErr('Passwords do not match.'); return; }
     setBusy(true);
@@ -140,126 +160,242 @@ export default function AuthModal() {
     finally { setBusy(false); }
   }
 
+  // ── TEACHER: login ────────────────────────────────────────
+  async function handleTeacherLogin(e) {
+    e.preventDefault(); setErr(''); setBusy(true);
+    try {
+      await loginTeacherCtx(teacherId, tPassword);
+      handleClose();
+    } catch (ex) { setErr(ex.message); }
+    finally { setBusy(false); }
+  }
+
   return (
     <div className="auth-overlay" onClick={handleClose}>
-      <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="auth-modal" onClick={e => e.stopPropagation()}>
         <button className="auth-close" onClick={handleClose} aria-label="Close">✕</button>
 
-        {step === STEPS.CHOOSE && (
+        {/* ── PICK ── */}
+        {step === S.PICK && (
           <div className="auth-step">
             <h2>Welcome to 10th HI</h2>
-            <p className="auth-sub">Login or create your account</p>
-            <button className="auth-btn primary" onClick={() => setStep(STEPS.LOGIN)}>Login</button>
-            <button className="auth-btn secondary" onClick={() => setStep(STEPS.REGISTER)}>New here? Register as Student</button>
-            <button className="auth-btn secondary" style={{marginTop: '0.5rem', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)'}} onClick={() => setStep(STEPS.REGISTER_OUTSIDER)}>Not a student? Register as Outsider</button>
+            <p className="auth-sub">Select how you want to continue</p>
+            <div className="auth-pick-grid">
+              <button className="auth-pick-card" onClick={() => setStep(S.PHONE)}>
+                <User size={28} />
+                <span>Student</span>
+              </button>
+              <button className="auth-pick-card" onClick={() => setStep(S.TEACHER_LOGIN)}>
+                <GraduationCap size={28} />
+                <span>Teacher</span>
+              </button>
+            </div>
           </div>
         )}
 
-        {step === STEPS.REGISTER && (
+        {/* ── PHONE PROBE ── */}
+        {step === S.PHONE && (
+          <form className="auth-step" onSubmit={handlePhone}>
+            <h2>Student Login</h2>
+            <p className="auth-sub">Enter your phone number to continue</p>
+            <label>Phone Number</label>
+            <input value={phone} onChange={e => setPhone(e.target.value)}
+              type="tel" placeholder="10-digit mobile number" maxLength={10} required autoFocus />
+            {err && <p className="auth-err">{err}</p>}
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Checking…' : 'Continue →'}
+            </button>
+            <button type="button" className="auth-link" onClick={() => { setErr(''); setStep(S.PICK); }}>← Back</button>
+          </form>
+        )}
+
+        {/* ── REGISTER ── */}
+        {step === S.REGISTER && (
           <form className="auth-step" onSubmit={handleRegister}>
-            <h2>Create Student Account</h2>
+            <Dots step={S.REGISTER} />
+            <h2>Create Account</h2>
             <p className="auth-sub">Enter your details exactly as on your ID card</p>
             <label>Full Name (as on ID)</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Aditya Gupta" required />
-            <label>Phone Number</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="10-digit mobile number" type="tel" maxLength={10} required />
-            <label>Roll Number in Class</label>
-            <input value={rollNo} onChange={(e) => setRollNo(e.target.value)} placeholder="1 – 40" type="number" min={1} max={40} required />
+            <input value={name} onChange={e => setName(e.target.value)}
+              placeholder="e.g. Aditya Gupta" required autoFocus />
+            <label>Roll Number</label>
+            <input value={rollNo} onChange={e => setRollNo(e.target.value)}
+              placeholder="1 – 40" type="number" min={1} max={40} required />
+            <p className="auth-sub" style={{ fontSize: '0.78rem', marginTop: '-0.25rem' }}>
+              Phone: {phone} · <button type="button" className="auth-link" style={{ fontSize: '0.78rem' }} onClick={() => setStep(S.PHONE)}>Change</button>
+            </p>
             {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Verifying…' : 'Verify & Continue'}</button>
-            <button type="button" className="auth-link" onClick={() => { setErr(''); setStep(STEPS.CHOOSE); }}>← Back</button>
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Verifying…' : 'Verify & Continue'}
+            </button>
+            <button type="button" className="auth-link"
+              onClick={() => { setErr(''); setStep(S.LOGIN); }}>
+              Already have an account? Login
+            </button>
           </form>
         )}
 
-        {step === STEPS.REGISTER_OUTSIDER && (
-          <form className="auth-step" onSubmit={handleRegisterOutsider}>
-            <h2>Outsider Registration</h2>
-            <p className="auth-sub">Create an account to access shared materials</p>
-            <label>Full Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" required />
-            <label>Phone Number</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="10-digit mobile number" type="tel" maxLength={10} required />
-            {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Processing…' : 'Continue'}</button>
-            <button type="button" className="auth-link" onClick={() => { setErr(''); setStep(STEPS.CHOOSE); }}>← Back</button>
-          </form>
-        )}
-
-        {step === STEPS.SET_PASS && (
+        {/* ── SET PASSWORD ── */}
+        {step === S.SET_PASS && (
           <form className="auth-step" onSubmit={handleSetPassword}>
+            <Dots step={S.SET_PASS} />
             <h2>Set Your Password</h2>
-            <p className="auth-sub">Choose a password you'll remember — you'll need it to login</p>
+            <p className="auth-sub">Choose a password you'll remember</p>
             <label>Password</label>
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Min 6 characters" required />
+            <input value={password} onChange={e => setPassword(e.target.value)}
+              type="password" placeholder="Min 6 characters" required autoFocus />
             <label>Confirm Password</label>
-            <input value={password2} onChange={(e) => setPassword2(e.target.value)} type="password" placeholder="Repeat password" required />
+            <input value={password2} onChange={e => setPassword2(e.target.value)}
+              type="password" placeholder="Repeat password" required />
             {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Set Password'}</button>
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Saving…' : 'Set Password'}
+            </button>
           </form>
         )}
 
-        {step === STEPS.CREDENTIALS && (
+        {/* ── DONE ── */}
+        {step === S.DONE && (
           <div className="auth-step">
+            <Dots step={S.DONE} />
             <div className="auth-success-icon">🎉</div>
             <h2>You're all set!</h2>
-            <p className="auth-sub">Save your login details somewhere safe:</p>
+            <p className="auth-sub">Save your login details:</p>
             <div className="auth-creds-box">
-              <p><strong>Login ID (Phone):</strong><br /><span className="auth-creds-value">{phone}</span></p>
-              <p style={{ marginTop: '0.5rem' }}><strong>Password:</strong> the one you just set</p>
+              <p><strong>Phone:</strong> {phone}</p>
+              <p style={{ marginTop: '0.4rem' }}><strong>Password:</strong> the one you just set</p>
             </div>
-            <p className="auth-sub" style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>Use this phone number + password to login next time.</p>
-            <button className="auth-btn primary" onClick={handleClose}>Done — Go to App</button>
+            <button className="auth-btn primary" onClick={handleClose}>Go to App</button>
           </div>
         )}
 
-        {step === STEPS.LOGIN && (
+        {/* ── LOGIN ── */}
+        {step === S.LOGIN && (
           <form className="auth-step" onSubmit={handleLogin}>
-            <h2>Login</h2>
-            <label>Phone Number (your login ID)</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="10-digit mobile number" maxLength={10} required />
+            <h2>Welcome back</h2>
+            <label>Phone Number</label>
+            <input value={phone} onChange={e => setPhone(e.target.value)}
+              type="tel" placeholder="10-digit mobile number" maxLength={10} required autoFocus />
             <label>Password</label>
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Your password" required />
+            <input value={password} onChange={e => setPassword(e.target.value)}
+              type="password" placeholder="Your password" required />
             {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Logging in…' : 'Login'}</button>
-            <button type="button" className="auth-link" onClick={() => { setErr(''); setStep(STEPS.FORGOT_SEND); }}>Forgot password?</button>
-            <button type="button" className="auth-link" onClick={() => { setErr(''); setStep(STEPS.CHOOSE); }}>← Back</button>
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Logging in…' : 'Login'}
+            </button>
+            <button type="button" className="auth-link"
+              onClick={() => { setErr(''); setStep(S.FORGOT_SEND); }}>
+              Forgot password?
+            </button>
+            <button type="button" className="auth-link"
+              onClick={() => { setErr(''); setStep(S.REGISTER); }}>
+              New here? Register
+            </button>
+            <button type="button" className="auth-link"
+              onClick={() => { setErr(''); setStep(S.PICK); }}>← Back</button>
           </form>
         )}
 
-        {step === STEPS.FORGOT_SEND && (
+        {/* ── FORGOT SEND ── */}
+        {step === S.FORGOT_SEND && (
           <form className="auth-step" onSubmit={handleSendOtp}>
             <h2>Reset Password</h2>
-            <p className="auth-sub">Enter your registered phone number. We'll send an OTP.</p>
+            <p className="auth-sub">Enter your registered phone number.</p>
             <label>Phone Number</label>
-            <input value={otpPhone} onChange={(e) => setOtpPhone(e.target.value)} type="tel" placeholder="Your registered phone" maxLength={10} required />
+            <input value={otpPhone} onChange={e => setOtpPhone(e.target.value)}
+              type="tel" placeholder="Your registered phone" maxLength={10} required autoFocus />
             {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Sending OTP…' : 'Send OTP'}</button>
-            <button type="button" className="auth-link" onClick={() => { setErr(''); setStep(STEPS.LOGIN); }}>← Back to Login</button>
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Sending OTP…' : 'Send OTP'}
+            </button>
+            <button type="button" className="auth-link"
+              onClick={() => { setErr(''); setStep(S.LOGIN); }}>← Back to Login</button>
           </form>
         )}
 
-        {step === STEPS.FORGOT_VERIFY && (
+        {/* ── FORGOT VERIFY ── */}
+        {step === S.FORGOT_VFY && (
           <form className="auth-step" onSubmit={handleVerifyOtp}>
             <h2>Enter OTP</h2>
             <p className="auth-sub">We sent a 6-digit OTP to +91 {otpPhone}</p>
             <label>OTP</label>
-            <input value={otp} onChange={(e) => setOtp(e.target.value)} type="text" placeholder="6-digit OTP" maxLength={6} required />
+            <input value={otp} onChange={e => setOtp(e.target.value)}
+              type="text" placeholder="6-digit OTP" maxLength={6} required autoFocus />
             {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Verifying…' : 'Verify OTP'}</button>
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Verifying…' : 'Verify OTP'}
+            </button>
           </form>
         )}
 
-        {step === STEPS.RESET_PASS && (
+        {/* ── RESET PASSWORD ── */}
+        {step === S.RESET_PASS && (
           <form className="auth-step" onSubmit={handleResetPassword}>
             <h2>New Password</h2>
             <label>New Password</label>
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Min 6 characters" required />
-            <label>Confirm New Password</label>
-            <input value={password2} onChange={(e) => setPassword2(e.target.value)} type="password" placeholder="Repeat password" required />
+            <input value={password} onChange={e => setPassword(e.target.value)}
+              type="password" placeholder="Min 6 characters" required autoFocus />
+            <label>Confirm Password</label>
+            <input value={password2} onChange={e => setPassword2(e.target.value)}
+              type="password" placeholder="Repeat password" required />
             {err && <p className="auth-err">{err}</p>}
-            <button className="auth-btn primary" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save Password'}</button>
+            <button className="auth-btn primary" type="submit" disabled={busy}>
+              {busy ? 'Saving…' : 'Save Password'}
+            </button>
           </form>
         )}
+
+        {/* ── TEACHER LOGIN ── */}
+        {step === S.TEACHER_LOGIN && (
+          <form className="auth-step" onSubmit={handleTeacherLogin}>
+            <h2>Teacher Login</h2>
+            <p className="auth-sub">Select your name and enter your password</p>
+            <label>Select Teacher</label>
+            <select
+              className="auth-input"
+              value={teacherId}
+              onChange={e => setTeacherId(e.target.value)}
+              required
+            >
+              <option value="">— Select your name —</option>
+              {teachers.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.name} · {t.subject} · {t.period}
+                </option>
+              ))}
+            </select>
+            {teacherId && (() => {
+              const t = teachers.find(x => x.id === teacherId);
+              return t ? (
+                <div className="auth-teacher-preview">
+                  <strong>{t.name}</strong>
+                  <span>{t.subject} · {t.period}</span>
+                </div>
+              ) : null;
+            })()}
+            <label>Password</label>
+            <input value={tPassword} onChange={e => setTPassword(e.target.value)}
+              type="password" placeholder="Your password" required />
+            {err && <p className="auth-err">{err}</p>}
+            <button className="auth-btn primary" type="submit" disabled={busy || !teacherId}>
+              {busy ? 'Logging in…' : 'Login'}
+            </button>
+            <p className="auth-sub" style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
+              Don't know your password?{' '}
+              <a
+                href="https://wa.me/918102783645"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#25D366', fontWeight: 600 }}
+              >
+                Contact Utkarsh on WhatsApp
+              </a>
+            </p>
+            <button type="button" className="auth-link"
+              onClick={() => { setErr(''); setStep(S.PICK); }}>← Back</button>
+          </form>
+        )}
+
       </div>
     </div>
   );

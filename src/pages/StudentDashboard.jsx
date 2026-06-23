@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { ROLES } from '../auth/roles';
+import TeacherDashboard from './TeacherDashboard';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import NoticeBar from '../components/NoticeBar';
 import SyllabusProgressBar from '../components/SyllabusProgressBar';
@@ -189,6 +191,10 @@ export default function StudentDashboard() {
 
   if (!currentUser) {
     return <WelcomeLanding onLogin={openModal} />;
+  }
+
+  if (currentUser.role === ROLES.TEACHER) {
+    return <TeacherDashboard />;
   }
 
   const firstName = currentUser.name.split(' ')[0];

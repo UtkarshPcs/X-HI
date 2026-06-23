@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2 } from 'lucide-react';
+import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2, Calculator } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { ROLES } from '../auth/roles';
 import NotificationHistory from './NotificationHistory';
 
 export default function Navbar() {
@@ -45,13 +46,20 @@ export default function Navbar() {
         <NavLink to="/homework" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <BookOpen size={20} /><span>Homework</span>
         </NavLink>
-        <NavLink to="/holidays" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <CalendarHeart size={20} /><span>Holidays</span>
-        </NavLink>
+        {currentUser?.role !== ROLES.TEACHER && (
+          <NavLink to="/holidays" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <CalendarHeart size={20} /><span>Holidays</span>
+          </NavLink>
+        )}
         <NavLink to="/calendar" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <CalendarRange size={20} /><span>Calendar</span>
         </NavLink>
-        {(currentUser?.isAdmin || currentUser?.role === 'MONITOR') && (
+        {currentUser?.role === ROLES.TEACHER && (
+          <NavLink to="/maths" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <Calculator size={20} /><span>Maths</span>
+          </NavLink>
+        )}
+        {(currentUser?.isAdmin || currentUser?.role === ROLES.MONITOR) && (
           <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <ShieldAlert size={20} /><span>Monitor Panel</span>
           </NavLink>
@@ -76,7 +84,11 @@ export default function Navbar() {
                 <div className="nav-dropdown">
                   <div className="nav-dropdown-header">
                     <span className="nav-dropdown-name">{currentUser.name}</span>
-                    <span className="nav-dropdown-sub">Roll No. {currentUser.rollNo || '—'}</span>
+                    <span className="nav-dropdown-sub">
+                      {currentUser.role === ROLES.TEACHER
+                        ? `${currentUser.subject} · ${currentUser.period}`
+                        : `Roll No. ${currentUser.rollNo || '—'}`}
+                    </span>
                   </div>
                   <div className="nav-dropdown-divider" />
                   <button className="nav-dropdown-item" onClick={() => go('/profile')}>
@@ -85,12 +97,12 @@ export default function Navbar() {
                   <button className="nav-dropdown-item" onClick={() => go('/class-info')}>
                     <Users size={15} /> Class Info
                   </button>
-                  {(currentUser.isAdmin || currentUser.role === 'MONITOR') && (
+                  {(currentUser.isAdmin || currentUser.role === ROLES.MONITOR) && (
                     <button className="nav-dropdown-item" onClick={() => go('/admin')}>
                       <ShieldAlert size={15} /> Monitor Panel
                     </button>
                   )}
-                  {currentUser.role === 'ADMIN' && (
+                  {currentUser.role === ROLES.ADMIN && (
                     <button className="nav-dropdown-item" onClick={() => go('/admin-services')}>
                       <ShieldAlert size={15} /> Admin Services
                     </button>
@@ -98,9 +110,11 @@ export default function Navbar() {
                   <button className="nav-dropdown-item" onClick={() => go('/syllabus')}>
                     <BookMarked size={15} /> Syllabus Tracker
                   </button>
-                  <button className="nav-dropdown-item" onClick={() => go('/test-scores')}>
-                    <BarChart2 size={15} /> Test Scores
-                  </button>
+                  {currentUser.role !== ROLES.TEACHER && (
+                    <button className="nav-dropdown-item" onClick={() => go('/test-scores')}>
+                      <BarChart2 size={15} /> Test Scores
+                    </button>
+                  )}
                   <div className="nav-dropdown-divider" />
                   <button className="nav-dropdown-item nav-dropdown-logout" onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }}>
                     <LogOut size={15} /> Logout

@@ -106,6 +106,7 @@ export default function TestScoresPage() {
 
   useEffect(() => {
     if (!currentUser) { navigate('/'); return; }
+    if (currentUser.role === 'TEACHER') { navigate('/maths'); return; }
     getOverrides().then(setOverrides).catch(() => {});
     getMyComplaint(currentUser.phone).then(setMyComplaints).catch(() => {});
   }, [currentUser, navigate]);

@@ -2,8 +2,9 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
 import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword } from './authService';
-import { getUserRole } from './roles';
+import { getUserRole, ROLES } from './roles';
 import { removeToken } from '../services/pushService';
+import { loginTeacher, getTeacher } from '../services/teacherService';
 
 const AuthContext = createContext(null);
 
@@ -17,6 +18,15 @@ export function AuthProvider({ children }) {
 
   // Restore session from localStorage on mount
   useEffect(() => {
+    const teacherSession = localStorage.getItem('teacher_session');
+    if (teacherSession) {
+      getTeacher(teacherSession)
+        .then(t => {
+          if (t) setCurrentUser({ ...t, role: ROLES.TEACHER });
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
     const saved = localStorage.getItem('auth_phone');
     if (saved) {
       getUserByPhone(saved)
@@ -66,7 +76,17 @@ export function AuthProvider({ children }) {
     removeToken().catch(() => {});
     setCurrentUser(null);
     localStorage.removeItem('auth_phone');
+    localStorage.removeItem('teacher_session');
     auth.signOut().catch(() => {});
+  }
+
+  async function loginTeacherCtx(id, password) {
+    const teacher = await loginTeacher(id, password);
+    if (!teacher) throw new Error('Incorrect password. Try again.');
+    const user = { ...teacher, role: ROLES.TEACHER };
+    setCurrentUser(user);
+    localStorage.setItem('teacher_session', id);
+    return user;
   }
 
   // OTP for forgot-password flow
@@ -102,7 +122,7 @@ export function AuthProvider({ children }) {
       currentUser: currentUser ? { ...currentUser, isAdmin: currentUser.role === 'ADMIN' } : null,
       loading,
       modalOpen, openModal, closeModal,
-      register, savePassword, login, logout,
+      register, savePassword, login, logout, loginTeacherCtx,
       sendOtp, verifyOtp, resetPassword,
       forceTour,
       triggerTour: (role) => setForceTour({ role }),

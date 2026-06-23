@@ -4,14 +4,16 @@ import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { resetWhatsNew } from '../auth/authService';
 import { getAllUsers, getActivitySummary } from '../services/adminService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound } from 'lucide-react';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
+import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher } from '../services/teacherService';
 
 const TABS = [
   { id: 'users',      label: 'User Directory',  Icon: Users },
   { id: 'activity',   label: 'Activity',         Icon: Activity },
   { id: 'marks',      label: 'Marks Complaints', Icon: FileText },
+  { id: 'teachers',   label: 'Teachers',         Icon: GraduationCap },
   { id: 'merge',      label: 'Merge Profiles',   Icon: GitMerge },
   { id: 'onboarding', label: 'Onboarding',       Icon: Settings },
 ];
@@ -454,6 +456,116 @@ function MergeTab() {
   );
 }
 
+// ── Teachers Tab ──────────────────────────────────────────────
+function TeachersTab() {
+  const [teachers, setTeachers] = useState(null);
+  const [busy, setBusy]         = useState(null);
+  const [form, setForm]         = useState({ name: '', subject: '', period: '', password: '' });
+  const [editingId, setEditingId] = useState(null); // id of teacher getting password reset
+  const [newPass, setNewPass]   = useState('');
+  const [showAdd, setShowAdd]   = useState(false);
+
+  useEffect(() => {
+    getTeachers().then(setTeachers).catch(() => setTeachers([]));
+  }, []);
+
+  async function handleAdd(e) {
+    e.preventDefault();
+    if (!form.name || !form.subject || !form.period || !form.password) return;
+    setBusy('add');
+    try {
+      await addTeacher(form);
+      const fresh = await getTeachers();
+      setTeachers(fresh);
+      setForm({ name: '', subject: '', period: '', password: '' });
+      setShowAdd(false);
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
+  async function handleDelete(id) {
+    if (!confirm('Delete this teacher account?')) return;
+    setBusy(id);
+    try {
+      await deleteTeacher(id);
+      setTeachers(prev => prev.filter(t => t.id !== id));
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
+  async function handleSetPassword(e) {
+    e.preventDefault();
+    if (!newPass.trim()) return;
+    setBusy(editingId);
+    try {
+      await updateTeacherPassword(editingId, newPass);
+      setEditingId(null); setNewPass('');
+      alert('Password updated.');
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
+  if (teachers === null) return <p className="as-muted">Loading…</p>;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h4 className="as-section-title" style={{ margin: 0 }}><GraduationCap size={14} /> Teacher Accounts ({teachers.length})</h4>
+        <button className="auth-btn secondary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.82rem' }}
+          onClick={() => setShowAdd(o => !o)}>
+          <Plus size={13} /> {showAdd ? 'Cancel' : 'Add Teacher'}
+        </button>
+      </div>
+
+      {showAdd && (
+        <form onSubmit={handleAdd} className="marks-complaint-row" style={{ flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', padding: '1rem' }}>
+          <h4 style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-primary)' }}>New Teacher</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            <input className="as-search" placeholder="Full name (e.g. R.K. Jha)" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+            <input className="as-search" placeholder="Subject (e.g. Maths)" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} required />
+            <input className="as-search" placeholder="Period (e.g. 5th Period)" value={form.period} onChange={e => setForm(f => ({ ...f, period: e.target.value }))} required />
+            <input className="as-search" placeholder="Password to give teacher" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
+          </div>
+          <button className="auth-btn primary" type="submit" disabled={busy === 'add'} style={{ alignSelf: 'flex-start' }}>
+            {busy === 'add' ? 'Adding…' : 'Add Teacher'}
+          </button>
+        </form>
+      )}
+
+      {teachers.length === 0 ? (
+        <p className="as-muted">No teachers added yet.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {teachers.map(t => (
+            <div key={t.id} className="marks-complaint-row">
+              <div className="marks-complaint-info">
+                <strong>{t.name}</strong>
+                <span className="as-muted" style={{ marginLeft: '0.5rem', fontSize: '0.82rem' }}>{t.subject} · {t.period}</span>
+                {editingId === t.id && (
+                  <form onSubmit={handleSetPassword} style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                    <input className="as-search" type="password" placeholder="New password" value={newPass}
+                      onChange={e => setNewPass(e.target.value)} required style={{ minWidth: 160 }} />
+                    <button className="marks-btn approve" type="submit" disabled={!!busy}>Save</button>
+                    <button type="button" className="marks-btn delete" onClick={() => { setEditingId(null); setNewPass(''); }}>Cancel</button>
+                  </form>
+                )}
+              </div>
+              <div className="marks-complaint-actions">
+                <button className="marks-btn approve" onClick={() => { setEditingId(t.id); setNewPass(''); }} disabled={!!busy}>
+                  <KeyRound size={13} /> Password
+                </button>
+                <button className="marks-btn delete" onClick={() => handleDelete(t.id)} disabled={!!busy}>
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────
 export default function AdminServicesPage() {
   const { currentUser, triggerTour } = useAuth();
@@ -485,6 +597,7 @@ export default function AdminServicesPage() {
         {tab === 'users'      && <UsersTab />}
         {tab === 'activity'   && <ActivityTab />}
         {tab === 'marks'      && <MarksTab />}
+        {tab === 'teachers'   && <TeachersTab />}
         {tab === 'merge'      && <MergeTab />}
         {tab === 'onboarding' && <OnboardingTab currentUser={currentUser} navigate={navigate} triggerTour={triggerTour} />}
       </div>

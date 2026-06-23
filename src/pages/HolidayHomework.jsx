@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, Sun, Download, CheckCircle, FileText, X, Lock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { holidayData } from '../data/holidayData';
@@ -28,6 +29,11 @@ const totalItems = checkItems.length;
 
 export default function HolidayHomework() {
   const { currentUser, openModal } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser?.role === 'TEACHER') navigate('/');
+  }, [currentUser, navigate]);
   
   const [completedKeys, setCompletedKeys] = useState(() => {
     const saved = localStorage.getItem('completedHolidayHomework_v2');

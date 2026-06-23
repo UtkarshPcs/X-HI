@@ -2637,3 +2637,88 @@ a {
   .md-hero { padding: 2.5rem 0.5rem 2rem; }
   .md-stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ─── Auth pick grid ─────────────────────────────────────────── */
+.auth-pick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.auth-pick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.auth-pick-card:hover {
+  border-color: var(--primary);
+  background: rgba(139,92,246,0.08);
+  transform: translateY(-2px);
+}
+
+/* ─── Auth progress dots ─────────────────────────────────────── */
+.auth-dots {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+.auth-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.auth-dot.active { background: var(--primary); }
+
+/* ─── Teacher preview in auth modal ─────────────────────────── */
+.auth-teacher-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.25);
+  border-radius: var(--radius-sm);
+  margin-top: -0.25rem;
+}
+.auth-teacher-preview strong { font-size: 0.95rem; color: var(--text-primary); }
+.auth-teacher-preview span   { font-size: 0.8rem; color: var(--text-secondary); }
+
+/* ─── Teacher dashboard ──────────────────────────────────────── */
+.teacher-chip {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.teacher-tool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
