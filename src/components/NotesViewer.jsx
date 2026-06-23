@@ -1,14 +1,8 @@
-import { X } from 'lucide-react';
-
-/** Ensure fl_inline flag is in the Cloudinary URL for inline PDF rendering */
-function inlineUrl(url) {
-  if (!url) return '';
-  if (url.includes('fl_inline')) return url;
-  return url.replace('/raw/upload/', '/raw/upload/fl_inline/');
-}
+import { X, ExternalLink } from 'lucide-react';
 
 export default function NotesViewer({ note, onClose }) {
-  const pdfUrl = inlineUrl(note.cloudinaryUrl);
+  // Plain Cloudinary URL — no transformations (fl_inline not supported for raw)
+  const pdfUrl = note.cloudinaryUrl.replace('/raw/upload/fl_inline/', '/raw/upload/');
 
   return (
     <div className="notes-viewer-overlay" onClick={onClose}>
@@ -22,12 +16,28 @@ export default function NotesViewer({ note, onClose }) {
             <X size={18} />
           </button>
         </div>
-        <iframe
+
+        {/* object tag works in desktop browsers; shows fallback on mobile */}
+        <object
           className="notes-viewer-frame"
-          src={pdfUrl}
-          title={note.title}
-          frameBorder="0"
-        />
+          data={pdfUrl}
+          type="application/pdf"
+        >
+          {/* Mobile fallback — open in new tab via Google Docs viewer */}
+          <div className="notes-viewer-fallback">
+            <p>PDF preview isn't available on this device.</p>
+            <a
+              href={`https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="auth-btn primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', padding: '0.6rem 1.2rem', borderRadius: 'var(--radius-sm)', marginTop: '0.5rem' }}
+            >
+              <ExternalLink size={15} /> Open in Google Docs
+            </a>
+          </div>
+        </object>
+
         <div className="notes-viewer-footer">
           Uploaded by <strong>{note.uploaderName}</strong>
         </div>

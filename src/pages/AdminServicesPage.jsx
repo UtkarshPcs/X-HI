@@ -512,7 +512,7 @@ function NotesReviewTab() {
                   {n.description && <span> · "{n.description}"</span>}
                 </div>
                 <div style={{ marginTop: '0.4rem' }}>
-                  <a href={n.cloudinaryUrl.includes('fl_inline') ? n.cloudinaryUrl : n.cloudinaryUrl.replace('/raw/upload/', '/raw/upload/fl_inline/')}
+                  <a href={`https://docs.google.com/viewer?url=${encodeURIComponent(n.cloudinaryUrl.replace('/raw/upload/fl_inline/', '/raw/upload/'))}`}
                     target="_blank" rel="noopener noreferrer"
                     style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>
                     Preview PDF ↗

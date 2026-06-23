@@ -2934,3 +2934,8 @@ a {
   transition: border-color 0.15s;
 }
 .notes-file-picker:hover { border-color: var(--primary); color: var(--primary); }
+.notes-viewer-fallback {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 3rem 1rem; gap: 0.5rem; color: var(--text-secondary); text-align: center;
+  height: 100%;
+}
