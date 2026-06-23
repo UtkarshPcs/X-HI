@@ -46,9 +46,21 @@ function NotesListItem({ note, onView }) {
         {note.description && <span className="notes-list-desc">{note.description}</span>}
         <span className="notes-list-meta">by {note.uploaderName} · {new Date(note.approvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
       </div>
-      <button className="notes-view-btn" onClick={() => onView(note)}>
-        <FileText size={14} /> View <span className="notes-cost">-{SPARK_VIEW_COST}✦</span>
-      </button>
+      <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+        <button className="notes-view-btn" onClick={() => onView(note)}>
+          <FileText size={14} /> View <span className="notes-cost">-{SPARK_VIEW_COST}✦</span>
+        </button>
+        <a
+          className="notes-view-btn"
+          href={note.cloudinaryUrl}
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: 'none', background: 'var(--surface-hover)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+        >
+          ⬇
+        </a>
+      </div>
     </div>
   );
 }

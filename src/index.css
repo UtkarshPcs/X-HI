@@ -2909,7 +2909,7 @@ a {
 .notes-viewer-frame { flex: 1; width: 100%; min-height: 500px; border: none; }
 .notes-viewer-footer {
   padding: 0.5rem 1rem; font-size: 0.78rem; color: var(--text-muted);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
 }
 
 /* ── Upload modal ── */

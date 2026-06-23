@@ -40,6 +40,10 @@ export default function NotesViewer({ note, onClose }) {
 
         <div className="notes-viewer-footer">
           Uploaded by <strong>{note.uploaderName}</strong>
+          <a href={pdfUrl} download target="_blank" rel="noopener noreferrer"
+            style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            ⬇ Download
+          </a>
         </div>
       </div>
     </div>
