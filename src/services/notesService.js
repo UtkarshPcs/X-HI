@@ -40,8 +40,8 @@ export async function approveNote(id) {
   await updateDoc(doc(db, COL, id), { status: 'published', approvedAt: Date.now() });
 }
 
-export async function rejectNote(id) {
-  await updateDoc(doc(db, COL, id), { status: 'rejected' });
+export async function rejectNote(id, reason = '') {
+  await updateDoc(doc(db, COL, id), { status: 'rejected', rejectionReason: reason, rejectedAt: Date.now() });
 }
 
 export async function getMyNotes(phone) {

@@ -301,10 +301,20 @@ export default function NotesPage() {
           ) : (
             <div className="notes-list">
               {myNotes.map(n => (
-                <div key={n.id} className="notes-submission-row">
+                <div key={n.id} className="notes-submission-row" style={n.status === 'rejected' ? { borderColor: '#ef444440' } : {}}>
                   <div className="notes-submission-info">
                     <span className="notes-list-title">{n.title}</span>
                     <span className="notes-list-meta">{n.subjectName} · {n.chapterName}</span>
+                    {n.status === 'rejected' && n.rejectionReason && (
+                      <span style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '0.2rem' }}>
+                        ⚠ Admin: {n.rejectionReason}
+                      </span>
+                    )}
+                    {n.status === 'rejected' && !n.rejectionReason && (
+                      <span style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '0.2rem' }}>
+                        ⚠ Rejected by admin
+                      </span>
+                    )}
                   </div>
                   <div className="notes-submission-status">
                     {STATUS_ICON[n.status]}

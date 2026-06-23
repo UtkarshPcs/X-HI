@@ -479,10 +479,11 @@ function NotesReviewTab() {
   }
 
   async function handleReject(n) {
-    if (!confirm(`Reject "${n.title}"?`)) return;
+    const reason = prompt(`Reason for rejecting "${n.title}" (students will see this):`);
+    if (reason === null) return; // cancelled
     setBusy(n.id);
     try {
-      await rejectNote(n.id);
+      await rejectNote(n.id, reason.trim());
       setNotes(prev => prev.filter(x => x.id !== n.id));
     } catch (e) { alert(e.message); }
     finally { setBusy(null); }
