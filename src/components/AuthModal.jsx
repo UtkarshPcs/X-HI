@@ -325,6 +325,9 @@ export default function AuthModal({ resetPhone, onResetConsumed }) {
             <div className="auth-success-icon">📧</div>
             <h2>Check your email</h2>
             <p className="auth-sub">We sent a password reset link to your verified email. Click it to set a new password.</p>
+            <p className="auth-sub" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '-0.5rem' }}>
+              Don't see it? Check your <strong>spam / junk folder</strong>.
+            </p>
             <button className="auth-btn secondary" onClick={handleClose}>Close</button>
           </div>
         )}

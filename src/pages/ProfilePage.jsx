@@ -134,57 +134,76 @@ export default function ProfilePage() {
               <CheckCircle size={15} /> Email verified successfully!
             </div>
           )}
-          {currentUser.email && currentUser.emailVerified ? (
-            <div className="profile-info-item">
-              <span className="profile-info-label">Recovery Email</span>
-              <span className="profile-info-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <CheckCircle size={14} color="#10b981" />
-                {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
-              </span>
+
+          <div className="profile-email-card">
+            <div className="profile-email-header">
+              <Mail size={15} />
+              <span>Recovery Email</span>
             </div>
-          ) : currentUser.email && !currentUser.emailVerified ? (
-            <div className="profile-info-item">
-              <span className="profile-info-label">Recovery Email</span>
-              <span className="profile-info-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                <Clock size={14} color="#f59e0b" />
-                {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
-                <span style={{ color: '#f59e0b', fontSize: '0.75rem' }}>(pending)</span>
-                <button type="button" className="auth-link" style={{ fontSize: '0.78rem' }}
+
+            {currentUser.email && currentUser.emailVerified ? (
+              <div className="profile-email-row">
+                <span className="profile-email-addr">
+                  {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
+                </span>
+                <span className="profile-email-badge verified">
+                  <CheckCircle size={12} /> Verified
+                </span>
+              </div>
+            ) : currentUser.email && !currentUser.emailVerified ? (
+              <>
+                <div className="profile-email-row">
+                  <span className="profile-email-addr">
+                    {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
+                  </span>
+                  <span className="profile-email-badge pending">
+                    <Clock size={12} /> Pending
+                  </span>
+                </div>
+                <p className="profile-email-hint">
+                  Check your inbox (and <strong>spam folder</strong>) for the verification link.
+                </p>
+                <button type="button" className="profile-email-resend"
                   onClick={handleResendVerification} disabled={emailBusy}>
-                  {emailBusy ? 'Sending…' : 'Resend link'}
+                  {emailBusy ? 'Sending…' : 'Resend verification link'}
                 </button>
-              </span>
-              {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
-            </div>
-          ) : showEmailForm ? (
-            <form onSubmit={handleAddEmail} className="profile-email-form">
-              <label className="profile-info-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Mail size={14} /> Recovery Email
-              </label>
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
+              </>
+            ) : showEmailForm ? (
+              <form onSubmit={handleAddEmail} className="profile-email-form">
                 <input
                   type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)}
                   placeholder="your@email.com" required autoFocus
-                  style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '0.9rem' }}
+                  className="profile-email-input"
                 />
-                <button className="auth-btn primary" type="submit" disabled={emailBusy}
-                  style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-                  {emailBusy ? '…' : 'Send link'}
+                <p className="profile-email-hint">
+                  A verification link will be sent to this email. Check your <strong>spam folder</strong> if you don't see it.
+                </p>
+                <div className="profile-email-actions">
+                  <button className="auth-btn primary" type="submit" disabled={emailBusy}
+                    style={{ flex: 1, fontSize: '0.875rem' }}>
+                    {emailBusy ? 'Sending…' : 'Send verification link'}
+                  </button>
+                  <button type="button" className="auth-btn secondary"
+                    onClick={() => { setShowEmailForm(false); setEmailMsg(''); }}
+                    style={{ fontSize: '0.875rem' }}>
+                    Cancel
+                  </button>
+                </div>
+                {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
+              </form>
+            ) : (
+              <>
+                <p className="profile-email-hint" style={{ marginBottom: '0.6rem' }}>
+                  Used to reset your password if you forget it.
+                </p>
+                <button type="button" className="profile-email-resend"
+                  onClick={() => setShowEmailForm(true)}>
+                  + Add email address
                 </button>
-                <button type="button" className="auth-btn secondary" onClick={() => { setShowEmailForm(false); setEmailMsg(''); }}
-                  style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}>
-                  Cancel
-                </button>
-              </div>
-              {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
-            </form>
-          ) : (
-            <button type="button" className="auth-btn secondary"
-              onClick={() => setShowEmailForm(true)}
-              style={{ marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem' }}>
-              <Mail size={15} /> Add Recovery Email
-            </button>
-          )}
+              </>
+            )}
+          </div>
         </div>
 
         <button className="auth-btn secondary profile-logout" style={{ marginTop: '2rem' }} onClick={() => { logout(); navigate('/'); }}>

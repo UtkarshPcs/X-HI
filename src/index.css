@@ -2943,20 +2943,102 @@ a {
 /* ── Profile email section ───────────────────────────────────── */
 .profile-email-section {
   width: 100%;
-  margin-top: 0.75rem;
+  margin-top: 0.25rem;
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+.profile-email-card {
+  width: 100%;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.profile-email-header {
+  display: flex;
   align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.profile-email-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
 }
-.profile-email-form {
-  width: 100%;
-  text-align: left;
+.profile-email-addr {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
 }
+.profile-email-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+.profile-email-badge.verified {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.profile-email-badge.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.profile-email-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+.profile-email-resend {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.83rem;
+  color: var(--primary);
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  transition: background 0.15s;
+}
+.profile-email-resend:hover { background: var(--surface); }
+.profile-email-resend:disabled { opacity: 0.5; cursor: not-allowed; }
+.profile-email-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.profile-email-input:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+.profile-email-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+.profile-email-form { display: flex; flex-direction: column; gap: 0.5rem; }
 .profile-email-msg {
   font-size: 0.82rem;
-  margin-top: 0.4rem;
   color: var(--primary);
+  margin: 0;
 }
 .profile-email-toast {
   display: flex;
@@ -2965,8 +3047,8 @@ a {
   background: rgba(16, 185, 129, 0.12);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.9rem;
   font-size: 0.85rem;
   font-weight: 500;
 }
