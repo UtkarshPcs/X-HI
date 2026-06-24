@@ -33,9 +33,9 @@ export default function ProfilePage() {
     if (!currentUser) navigate('/');
   }, [currentUser, navigate]);
 
-  if (currentUser && loadedPhotoForPhone !== currentUser.phone) {
-    setLoadedPhotoForPhone(currentUser.phone);
-    setPhoto(localStorage.getItem(`photo_${currentUser.phone}`) || null);
+  if (currentUser && loadedPhotoForPhone !== identifier) {
+    setLoadedPhotoForPhone(identifier);
+    setPhoto(localStorage.getItem(`photo_${identifier}`) || null);
   }
 
   function handlePhotoChange(e) {
@@ -45,7 +45,7 @@ export default function ProfilePage() {
     reader.onload = (ev) => {
       const b64 = ev.target.result;
       setPhoto(b64);
-      localStorage.setItem(`photo_${currentUser.phone}`, b64);
+      localStorage.setItem(`photo_${identifier}`, b64);
     };
     reader.readAsDataURL(file);
   }
@@ -86,7 +86,11 @@ export default function ProfilePage() {
 
   if (!currentUser) return null;
 
-  const maskedPhone = currentUser.phone.replace(/(\d{2})\d{6}(\d{2})/, '$1XXXXXX$2');
+  const isTeacher = currentUser.role === ROLES.TEACHER;
+  const identifier = isTeacher ? currentUser.id : currentUser.phone;
+  const maskedPhone = isTeacher
+    ? currentUser.id
+    : currentUser.phone?.replace(/(\d{2})\d{6}(\d{2})/, '$1XXXXXX$2') ?? '—';
 
   return (
     <div className="profile-page">
@@ -101,33 +105,48 @@ export default function ProfilePage() {
         </div>
 
         <h2 className="profile-name">{currentUser.name}</h2>
-        <p className="profile-roll">{currentUser.rollNo === 0 ? 'Outsider Account' : `Class 10th HI · Roll No. ${currentUser.rollNo}`}</p>
+        <p className="profile-roll">
+          {isTeacher
+            ? `${currentUser.subject} · ${currentUser.period}`
+            : currentUser.rollNo === 0 ? 'Outsider Account' : `Class 10th HI · Roll No. ${currentUser.rollNo}`}
+        </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
           {currentUser.role === ROLES.ADMIN && <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }}><ShieldAlert size={14} style={{ marginRight: 4 }} /> ADMIN</span>}
           {currentUser.role === ROLES.MONITOR && <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}><ShieldCheck size={14} style={{ marginRight: 4 }} /> MONITOR</span>}
           {currentUser.role === ROLES.STUDENT && <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}><UserIcon size={14} style={{ marginRight: 4 }} /> STUDENT</span>}
           {currentUser.role === ROLES.OUTSIDER && <span className="badge" style={{ background: 'rgba(168, 162, 158, 0.1)', color: '#a8a29e', border: '1px solid rgba(168, 162, 158, 0.3)' }}><Users size={14} style={{ marginRight: 4 }} /> OUTSIDER</span>}
+          {isTeacher && <span className="badge teacher-chip">TEACHER</span>}
         </div>
 
         <div className="profile-info-grid">
           <div className="profile-info-item">
-            <span className="profile-info-label">Login ID (Phone)</span>
+            <span className="profile-info-label">{isTeacher ? 'Teacher ID' : 'Login ID (Phone)'}</span>
             <span className="profile-info-value">{maskedPhone}</span>
           </div>
-          <div className="profile-info-item">
-            <span className="profile-info-label">{currentUser.rollNo === 0 ? 'Account Type' : 'Roll Number'}</span>
-            <span className="profile-info-value">{currentUser.rollNo === 0 ? 'Outsider' : currentUser.rollNo}</span>
-          </div>
-          <div className="profile-info-item">
-            <span className="profile-info-label">Registered</span>
-            <span className="profile-info-value">{new Date(currentUser.createdAt).toLocaleDateString('en-IN')}</span>
-          </div>
+          {isTeacher ? (
+            <div className="profile-info-item">
+              <span className="profile-info-label">Period</span>
+              <span className="profile-info-value">{currentUser.period}</span>
+            </div>
+          ) : (
+            <div className="profile-info-item">
+              <span className="profile-info-label">{currentUser.rollNo === 0 ? 'Account Type' : 'Roll Number'}</span>
+              <span className="profile-info-value">{currentUser.rollNo === 0 ? 'Outsider' : currentUser.rollNo}</span>
+            </div>
+          )}
+          {!isTeacher && (
+            <div className="profile-info-item">
+              <span className="profile-info-label">Registered</span>
+              <span className="profile-info-value">{currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('en-IN') : '—'}</span>
+            </div>
+          )}
         </div>
 
         <p className="profile-photo-hint">Tap the photo to change it. Stored on this device only.</p>
 
-        {/* ── Email Section ── */}
+        {/* ── Email Section — students only ── */}
+        {!isTeacher && (
         <div className="profile-email-section">
           {verifiedToast && (
             <div className="profile-email-toast">
@@ -205,6 +224,7 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+        )}
 
         <button className="auth-btn secondary profile-logout" style={{ marginTop: '2rem' }} onClick={() => { logout(); navigate('/'); }}>
           Logout
