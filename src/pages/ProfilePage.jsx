@@ -8,7 +8,7 @@ import { sendEmailLink } from '../firebase';
 import packageJson from '../../package.json';
 
 export default function ProfilePage() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const fileRef = useRef();
@@ -65,6 +65,7 @@ export default function ProfilePage() {
     try {
       await saveEmail(currentUser.phone, emailInput.trim());
       await sendEmailLink(emailInput.trim(), 'verify');
+      await refreshUser(currentUser.phone);
       setEmailMsg('✓ Verification link sent! Check your inbox and click the link.');
       setShowEmailForm(false);
     } catch (err) {
