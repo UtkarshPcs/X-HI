@@ -37,7 +37,7 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess }) {
     setBusy(true); setErr('');
     try {
       setProgress('Uploading PDF…');
-      const { url, publicId } = await uploadNotePDF(file);
+      const { url } = await uploadNotePDF(file);
 
       setProgress('Saving…');
       await submitNote({
@@ -49,8 +49,7 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess }) {
         chapterName: selectedChapter.chapterName,
         title:       title.trim(),
         description: desc.trim(),
-        cloudinaryUrl:      url,
-        cloudinaryPublicId: publicId,
+        blobUrl:     url,
         uploaderPhone: currentUser.phone,
         uploaderName:  currentUser.name,
       });

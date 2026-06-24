@@ -6,12 +6,12 @@ import { db } from '../firebase';
 
 const COL = 'notes';
 
-export async function submitNote({ sectionId, subjectId, chapterId, sectionName, subjectName, chapterName, title, description, cloudinaryUrl, cloudinaryPublicId, uploaderPhone, uploaderName }) {
+export async function submitNote({ sectionId, subjectId, chapterId, sectionName, subjectName, chapterName, title, description, blobUrl, uploaderPhone, uploaderName }) {
   return addDoc(collection(db, COL), {
     sectionId, subjectId, chapterId,
     sectionName, subjectName, chapterName,
     title, description: description || '',
-    cloudinaryUrl, cloudinaryPublicId,
+    blobUrl,
     uploaderPhone, uploaderName,
     status: 'pending',
     createdAt: Date.now(),
@@ -46,6 +46,18 @@ export async function rejectNote(id, reason = '') {
 }
 
 export async function deleteNote(id) {
+  // Delete blob from Vercel storage first, then remove Firestore doc
+  try {
+    const snap = await getDoc(doc(db, COL, id));
+    const blobUrl = snap.data()?.blobUrl;
+    if (blobUrl) {
+      await fetch('/api/delete-note-blob', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: blobUrl }),
+      });
+    }
+  } catch (_) { /* don't block deletion if blob cleanup fails */ }
   await deleteDoc(doc(db, COL, id));
 }
 
@@ -63,21 +75,15 @@ export async function getMyNotes(phone) {
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
-/** Upload PDF to Cloudinary, returns { url, publicId } */
+/** Upload PDF to Vercel Blob via server-side API route. Returns { url } */
 export async function uploadNotePDF(file) {
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const preset    = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
   const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', preset);
-  // Use 'image' resource type — PDFs are accepted and served publicly on free plans
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-    method: 'POST', body: fd,
-  });
+  fd.append('file', file, file.name);
+  const res = await fetch('/api/upload-note', { method: 'POST', body: fd });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || 'Upload failed. Try again.');
+    throw new Error(err?.error || 'Upload failed. Try again.');
   }
-  const json = await res.json();
-  return { url: json.secure_url, publicId: json.public_id };
+  const { url } = await res.json();
+  return { url };
 }

@@ -520,7 +520,7 @@ function NotesReviewTab() {
             {n.description && <span> · "{n.description}"</span>}
           </div>
           <div style={{ marginTop: '0.4rem' }}>
-            <a href={`https://docs.google.com/viewer?url=${encodeURIComponent(n.cloudinaryUrl)}`}
+            <a href={`https://docs.google.com/viewer?url=${encodeURIComponent(n.blobUrl)}`}
               target="_blank" rel="noopener noreferrer"
               style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>
               Preview PDF ↗

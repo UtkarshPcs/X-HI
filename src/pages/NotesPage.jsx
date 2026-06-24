@@ -52,7 +52,7 @@ function NotesListItem({ note, onView }) {
         </button>
         <a
           className="notes-view-btn"
-          href={note.cloudinaryUrl}
+          href={note.blobUrl}
           download
           target="_blank"
           rel="noopener noreferrer"

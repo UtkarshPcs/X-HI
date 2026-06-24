@@ -1,8 +1,7 @@
 import { X, ExternalLink } from 'lucide-react';
 
 export default function NotesViewer({ note, onClose }) {
-  // Plain Cloudinary URL — no transformations (fl_inline not supported for raw)
-  const pdfUrl = note.cloudinaryUrl.replace('/raw/upload/fl_inline/', '/raw/upload/');
+  const pdfUrl = note.blobUrl;
 
   return (
     <div className="notes-viewer-overlay" onClick={onClose}>
@@ -17,13 +16,7 @@ export default function NotesViewer({ note, onClose }) {
           </button>
         </div>
 
-        {/* object tag works in desktop browsers; shows fallback on mobile */}
-        <object
-          className="notes-viewer-frame"
-          data={pdfUrl}
-          type="application/pdf"
-        >
-          {/* Mobile fallback — open in new tab via Google Docs viewer */}
+        <object className="notes-viewer-frame" data={pdfUrl} type="application/pdf">
           <div className="notes-viewer-fallback">
             <p>PDF preview isn't available on this device.</p>
             <a
