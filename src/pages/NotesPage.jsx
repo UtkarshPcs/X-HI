@@ -84,33 +84,33 @@ function SparkLogItem({ entry }) {
 const TOUR_STEPS = [
   {
     target: '[data-tour="spark-wallet"]',
-    title: 'Your Sparks Wallet',
-    content: 'This is your Sparks balance. Spend Sparks to unlock chapter notes. You start with 10 — earn more by uploading your own notes.',
+    title: '⚡ Your Sparks',
+    content: 'Sparks are your currency here. You start with 10. Spend them to read notes, earn them back by uploading your own.',
     disableBeacon: true,
     placement: 'bottom',
   },
   {
     target: '[data-tour="tab-browse"]',
-    title: 'Browse Notes',
-    content: 'Browse notes by Section → Subject → Chapter. Viewing a chapter for the first time costs 2 Sparks — after that, all notes in that chapter are free forever.',
+    title: '📚 Browse Notes',
+    content: 'Tap here to find notes. Go Section → Subject → Chapter. Opening a chapter for the first time costs 2 Sparks — after that it\'s free forever.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="tab-purchases"]',
-    title: 'Your Purchases',
-    content: 'Every chapter you\'ve unlocked appears here. Re-read any of those notes anytime, completely free.',
+    title: '🔓 Your Purchases',
+    content: 'Every chapter you\'ve already unlocked lives here. Come back anytime to re-read them — totally free, no extra Sparks needed.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="tab-mysubmissions"]',
-    title: 'My Submissions',
-    content: 'Track notes you\'ve uploaded here. Once an admin approves your note, you automatically earn 4 Sparks.',
+    title: '📤 My Submissions',
+    content: 'See the notes you\'ve uploaded here. Once the admin approves one, you automatically get +4 Sparks.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="upload-fab"]',
-    title: 'Upload Notes',
-    content: 'Tap here to upload a PDF note for any chapter. Submit it for admin review — approval earns you 4 Sparks.',
+    title: '➕ Upload Notes',
+    content: 'Have good notes? Upload a PDF for any chapter. Submit it — if the admin approves, you earn 4 Sparks. Tap the ? anytime to see this guide again.',
     placement: 'top',
   },
 ].map((s, i, arr) => ({ ...s, totalSteps: arr.length }));
@@ -161,6 +161,13 @@ export default function NotesPage() {
   const [viewingNote, setViewingNote] = useState(null);
   const [showUpload,  setShowUpload]  = useState(false);
   const [tourRun,     setTourRun]     = useState(false);
+
+  // Auto-run tour on first ever visit to Notes page
+  useEffect(() => {
+    if (!currentUser || !isStudent) return;
+    const key = `notes_tour_done_${currentUser.phone}`;
+    if (!localStorage.getItem(key)) setTourRun(true);
+  }, [currentUser]);
 
   const isStudent = currentUser && currentUser.role !== ROLES.TEACHER;
 
@@ -244,7 +251,10 @@ export default function NotesPage() {
   }
 
   function handleTourEnd({ status }) {
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) setTourRun(false);
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      setTourRun(false);
+      localStorage.setItem(`notes_tour_done_${currentUser.phone}`, '1');
+    }
   }
 
   if (!currentUser) {
