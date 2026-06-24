@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked, ClipboardList, Mail } from 'lucide-react';
+import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked, ClipboardList, Mail, BookCopy, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
@@ -14,6 +14,7 @@ import { getHomework } from '../services/homeworkService';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { getSyllabus, getCompletedTopics } from '../services/syllabusService';
 import { getAllClasswork } from '../services/classworkService';
+import { getPublishedNotes } from '../services/notesService';
 import { allTopics, statsForTopics, toSets } from '../data/syllabusStats';
 import { calcAttendance, todayKey, toDateKey } from '../data/attendanceUtils';
 import { holidayData } from '../data/holidayData';
@@ -82,6 +83,9 @@ export default function StudentDashboard() {
 
   // Syllabus global progress { completedPct, checkedPct } | null while loading
   const [syllabusStats, setSyllabusStats] = useState(null);
+
+  // Recent published notes (dashboard teaser)
+  const [recentNotes, setRecentNotes] = useState(null);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -178,6 +182,14 @@ export default function StudentDashboard() {
   }, [currentUser]);
 
   const stats = useMemo(() => calcAttendance(absentDays, undefined, closedDays), [absentDays, closedDays]);
+
+  // Fetch 3 most recent published notes once
+  useEffect(() => {
+    if (!currentUser) return;
+    getPublishedNotes()
+      .then(all => setRecentNotes(all.slice(0, 3)))
+      .catch(() => setRecentNotes([]));
+  }, [currentUser]);
 
   const handleToggle = useCallback((key) => {
     if (!currentUser) return;
@@ -424,6 +436,40 @@ export default function StudentDashboard() {
               ))}
             </div>
           </>
+        )}
+      </div>
+
+      {/* Notes teaser */}
+      <div className="glass-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <BookCopy size={20} color="var(--primary)" /> Notes Exchange
+          </h2>
+          <button className="auth-link" onClick={() => navigate('/notes')}
+            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            View all <ArrowRight size={13} />
+          </button>
+        </div>
+        {recentNotes === null ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
+        ) : recentNotes.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No notes uploaded yet. Be the first!</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {recentNotes.map(note => (
+              <div key={note.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)',
+                borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--primary)', gap: '0.5rem',
+              }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontWeight: 600, fontSize: '0.875rem', margin: 0, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{note.title}</p>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>{note.subjectName} · {note.chapterName}</p>
+                </div>
+                <FileText size={15} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
