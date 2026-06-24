@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Megaphone, Users, BarChart2, ArrowRight } from 'lucide-react';
+import { Megaphone, Users, BarChart2, ArrowRight, Bold, Italic, List, Save, Pencil, Trash2, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../auth/AuthContext';
 import { getNotices, addNotice, updateNotice, deleteNotice } from '../services/noticeService';
 import { getAllUsers } from '../services/adminService';
@@ -12,11 +13,41 @@ import { notifyClassSafe } from '../services/notify';
 // ── Notice Tool ───────────────────────────────────────────────
 function NoticeTool({ currentUser }) {
   const [notices, setNotices]     = useState([]);
+  const [loading, setLoading]     = useState(true);
   const [body, setBody]           = useState('');
   const [editingId, setEditingId] = useState(null);
   const [busy, setBusy]           = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const textareaRef               = useRef(null);
 
-  useEffect(() => { getNotices().then(setNotices).catch(() => {}); }, []);
+  useEffect(() => {
+    let active = true;
+    getNotices()
+      .then(d => { if (active) setNotices(d); })
+      .catch(console.error)
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [reloadKey]);
+
+  const refresh = useCallback(() => { setLoading(true); setReloadKey(k => k + 1); }, []);
+
+  function applyFormat(type) {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end   = el.selectionEnd;
+    const sel   = body.slice(start, end);
+    let inserted;
+    if (type === 'bold')        inserted = `**${sel || 'bold text'}**`;
+    else if (type === 'italic') inserted = `*${sel || 'italic text'}*`;
+    else if (type === 'bullet') inserted = (sel || 'list item').split('\n').map(l => `- ${l}`).join('\n');
+    const next = body.slice(0, start) + inserted + body.slice(end);
+    setBody(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      try { el.setSelectionRange(start + inserted.length, start + inserted.length); } catch { /* noop */ }
+    });
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -30,66 +61,91 @@ function NoticeTool({ currentUser }) {
         const preview = body.trim().replace(/[#*_>`-]/g, '').replace(/\s+/g, ' ').slice(0, 120);
         notifyClassSafe(currentUser, { title: '📢 New Notice', body: preview, url: '/', type: 'notice' });
       }
-      setBody(''); setEditingId(null);
-      setNotices(await getNotices());
+      setBody(''); setEditingId(null); refresh();
     } catch (err) { alert('Failed: ' + err.message); }
     finally { setBusy(false); }
   }
 
   async function handleDelete(id) {
     if (!confirm('Delete this notice?')) return;
-    await deleteNotice(id).catch(() => {});
-    setNotices(n => n.filter(x => x.id !== id));
+    try { await deleteNotice(id); refresh(); } catch (err) { alert('Failed: ' + err.message); }
   }
+
+  // Teacher can only edit/delete their own notices
+  const myNotices = notices.filter(n => n.authorPhone === currentUser.id);
 
   return (
     <div className="glass-card">
       <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-        <Megaphone size={20} color="var(--primary)" /> Send / Manage Notices
+        <Megaphone size={20} color="var(--primary)" />
+        {editingId ? 'Edit Notice' : 'Post a Notice'}
       </h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="fmt-toolbar">
+          <button type="button" className="fmt-btn" title="Bold"        onClick={() => applyFormat('bold')}  ><Bold   size={16} /></button>
+          <button type="button" className="fmt-btn" title="Italic"      onClick={() => applyFormat('italic')}><Italic size={16} /></button>
+          <button type="button" className="fmt-btn" title="Bullet list" onClick={() => applyFormat('bullet')}><List   size={16} /></button>
+        </div>
         <textarea
+          ref={textareaRef}
           value={body}
           onChange={e => setBody(e.target.value)}
-          placeholder="Type a notice…"
-          rows={3}
+          placeholder="Write your notice… Use the toolbar for **bold**, *italic*, or bullet lists."
+          rows={5}
           required
-          style={{
-            padding: '0.75rem', background: 'var(--background)',
-            border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-            color: 'var(--text-primary)', resize: 'vertical', fontSize: '0.9rem',
-          }}
+          style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'Inter, sans-serif' }}
         />
+        {body.trim() && (
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
+            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>Preview</span>
+            <div className="markdown-content" style={{ marginTop: '0.5rem' }}><ReactMarkdown>{body}</ReactMarkdown></div>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="auth-btn primary" type="submit" disabled={busy} style={{ flex: 1, padding: '0.5rem' }}>
-            {busy ? 'Posting…' : editingId ? 'Update Notice' : 'Post Notice'}
+          <button type="submit" disabled={busy} className="auth-btn primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+            <Save size={16} /> {busy ? 'Saving…' : editingId ? 'Update Notice' : 'Post Notice'}
           </button>
           {editingId && (
-            <button type="button" className="auth-btn secondary" onClick={() => { setEditingId(null); setBody(''); }} style={{ padding: '0.5rem 1rem' }}>
-              Cancel
+            <button type="button" onClick={() => { setEditingId(null); setBody(''); }} className="auth-btn secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <X size={16} /> Cancel
             </button>
           )}
         </div>
       </form>
-      {notices.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {notices.map(n => (
-            <div key={n.id} style={{
-              padding: '0.6rem 0.8rem', background: 'var(--surface-hover)',
-              borderRadius: 'var(--radius-sm)', fontSize: '0.85rem',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem',
-            }}>
-              <span style={{ color: 'var(--text-secondary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {n.body?.slice(0, 100)}
-              </span>
-              <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-                <button className="auth-link" style={{ fontSize: '0.78rem' }} onClick={() => { setEditingId(n.id); setBody(n.body); }}>Edit</button>
-                <button className="auth-link" style={{ fontSize: '0.78rem', color: '#ef4444' }} onClick={() => handleDelete(n.id)}>Del</button>
+
+      {/* Only show teacher's own notices for management */}
+      <div style={{ marginTop: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+          Your Notices {myNotices.length > 0 && `(${myNotices.length})`}
+        </h3>
+        {loading ? (
+          <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+        ) : myNotices.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No notices posted yet.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {myNotices.map(n => (
+              <div key={n.id} className="notice-item">
+                <div className="markdown-content"><ReactMarkdown>{n.body}</ReactMarkdown></div>
+                <div className="notice-item-meta">
+                  <span>— {n.authorName}</span>
+                  <span style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => { setEditingId(n.id); setBody(n.body); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      title="Edit" style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}>
+                      <Pencil size={15} />
+                    </button>
+                    <button onClick={() => handleDelete(n.id)}
+                      title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}>
+                      <Trash2 size={15} />
+                    </button>
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
