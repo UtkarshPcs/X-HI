@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Megaphone, ChevronDown, ChevronUp } from 'lucide-react';
+import { Megaphone } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { getNotices } from '../services/noticeService';
 
 function formatDate(ms) {
@@ -13,14 +14,9 @@ function formatDate(ms) {
   });
 }
 
-/**
- * Read-only notice feed shown on the student dashboard.
- * Shows the latest notice expanded; older ones collapse behind a toggle.
- */
 export default function NoticeBar() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -49,32 +45,22 @@ export default function NoticeBar() {
     );
   }
 
-  const visible = showAll ? notices : notices.slice(0, 1);
-
   return (
     <div className="glass-card notice-bar">
       <div className="notice-bar-head"><Megaphone size={15} /> Notices</div>
-      {visible.map((n) => (
-        <div key={n.id} className="notice-item">
-          <div className="markdown-content">
-            <ReactMarkdown>{n.body}</ReactMarkdown>
-          </div>
-          <div className="notice-item-meta">
-            <span>— {n.authorName}</span>
-            <span>{formatDate(n.createdAtMs)}{n.updatedAtMs && n.updatedAtMs !== n.createdAtMs ? ' (edited)' : ''}</span>
-          </div>
+      <div className="notice-item">
+        <div className="markdown-content">
+          <ReactMarkdown>{notices[0].body}</ReactMarkdown>
         </div>
-      ))}
+        <div className="notice-item-meta">
+          <span>— {notices[0].authorName}</span>
+          <span>{formatDate(notices[0].createdAtMs)}</span>
+        </div>
+      </div>
       {notices.length > 1 && (
-        <button
-          className="auth-link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => setShowAll((v) => !v)}
-        >
-          {showAll
-            ? <>Show less <ChevronUp size={13} style={{ display: 'inline', verticalAlign: 'middle' }} /></>
-            : <>View all {notices.length} notices <ChevronDown size={13} style={{ display: 'inline', verticalAlign: 'middle' }} /></>}
-        </button>
+        <Link to="/notices" className="auth-link" style={{ alignSelf: 'flex-start' }}>
+          View all {notices.length} notices →
+        </Link>
       )}
     </div>
   );

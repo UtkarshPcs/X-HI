@@ -21,6 +21,7 @@ import TestScoresPage from './pages/TestScoresPage';
 import NotificationsPage from './pages/NotificationsPage';
 import MathsDashboard from './pages/MathsDashboard';
 import NotesPage from './pages/NotesPage';
+import NoticesPage from './pages/NoticesPage';
 import TeacherToolsPage from './pages/TeacherToolsPage';
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
@@ -86,6 +87,7 @@ function AppInner() {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/maths" element={<MathsDashboard />} />
             <Route path="/notes" element={<NotesPage />} />
+            <Route path="/notices" element={<NoticesPage />} />
             <Route path="/teacher-tools" element={<TeacherToolsPage />} />
           </Routes>
         </main>
