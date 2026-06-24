@@ -30,15 +30,16 @@ function clampText(s, max) {
 export default function handler(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get('type') === 'classwork' ? 'classwork' : 'homework';
+    const type = searchParams.get('type') || 'homework';
+    const isClasswork = type === 'classwork';
+    const isNotes     = type === 'notes';
     const title = clampText(searchParams.get('title') || '10th HI Portal', 48);
     const rawLines = (searchParams.get('lines') || '').split('|').map((l) => l.trim()).filter(Boolean).slice(0, 5);
 
-    const isClasswork = type === 'classwork';
-    const accent = isClasswork ? '#FF6D00' : '#8b5cf6';
-    const accentSoft = isClasswork ? 'rgba(255,109,0,0.18)' : 'rgba(139,92,246,0.18)';
-    const label = isClasswork ? 'CLASSWORK' : 'HOMEWORK';
-    const emoji = isClasswork ? '📝' : '📋';
+    const accent     = isNotes ? '#f59e0b' : isClasswork ? '#FF6D00' : '#8b5cf6';
+    const accentSoft = isNotes ? 'rgba(245,158,11,0.18)' : isClasswork ? 'rgba(255,109,0,0.18)' : 'rgba(139,92,246,0.18)';
+    const label      = isNotes ? 'NOTES' : isClasswork ? 'CLASSWORK' : 'HOMEWORK';
+    const emoji      = isNotes ? '📄' : isClasswork ? '📝' : '📋';
 
     const lineEls = rawLines.length
       ? rawLines.map((line) =>

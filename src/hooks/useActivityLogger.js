@@ -13,6 +13,8 @@ const PAGE_LABELS = {
   '/class-info':  'Class Info',
   '/admin':       'Monitor Panel',
   '/admin-services': 'Admin Services',
+  '/notes':       'Notes Exchange',
+  '/maths':       'Maths Dashboard',
 };
 
 export function useActivityLogger() {

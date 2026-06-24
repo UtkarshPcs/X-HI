@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
-import { ChevronRight, ArrowLeft, Upload, FileText, Clock, CheckCircle, XCircle, Zap, HelpCircle } from 'lucide-react';
+import { ChevronRight, ArrowLeft, Upload, FileText, Clock, CheckCircle, XCircle, Zap, HelpCircle, Share2 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { syllabusData } from '../data/syllabusData';
@@ -10,6 +10,7 @@ import {
   getPurchasedChapters, purchaseChapter,
   SPARK_VIEW_COST, INITIAL_SPARKS,
 } from '../services/sparksService';
+import { logActivity } from '../services/adminService';
 import NotesViewer from '../components/NotesViewer';
 import UploadNoteModal from '../components/UploadNoteModal';
 
@@ -41,6 +42,15 @@ function SectionCard({ section, onClick }) {
   );
 }
 
+function shareNote(note) {
+  const url = `${window.location.origin}/api/note-share?id=${note.id}`;
+  if (navigator.share) {
+    navigator.share({ title: note.title, text: `${note.subjectName} · ${note.chapterName}`, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+  }
+}
+
 function NotesListItem({ note, onView, free }) {
   return (
     <div className="notes-list-item">
@@ -53,6 +63,14 @@ function NotesListItem({ note, onView, free }) {
         <button className="notes-view-btn" onClick={() => onView(note)}>
           <FileText size={14} /> View{!free && <span className="notes-cost"> -{SPARK_VIEW_COST}✦</span>}
           {free && <span className="notes-cost" style={{ color: '#10b981' }}> Free</span>}
+        </button>
+        <button
+          className="notes-view-btn"
+          onClick={() => shareNote(note)}
+          title="Share"
+          style={{ background: 'var(--surface-hover)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+        >
+          <Share2 size={13} />
         </button>
         <a
           className="notes-view-btn"
@@ -227,6 +245,7 @@ export default function NotesPage() {
 
     // Already purchased this chapter — free
     if (purchasedChapters.has(note.chapterId)) {
+      logActivity(currentUser.phone, `Notes: viewed "${note.title}" (${note.chapterName})`);
       setViewingNote(note);
       return;
     }
@@ -238,6 +257,7 @@ export default function NotesPage() {
     }
     const newBal = await spendSparks(currentUser.phone, SPARK_VIEW_COST, `Unlocked chapter: ${note.chapterName}`);
     await purchaseChapter(currentUser.phone, note.chapterId);
+    logActivity(currentUser.phone, `Notes: unlocked chapter "${note.chapterName}" (${note.subjectName})`);
     setSparks(newBal);
     setPurchasedChapters(prev => new Set([...prev, note.chapterId]));
     setViewingNote(note);
