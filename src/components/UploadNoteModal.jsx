@@ -3,7 +3,7 @@ import { X, Upload, Loader2 } from 'lucide-react';
 import { syllabusData } from '../data/syllabusData';
 import { uploadNotePDF, submitNote } from '../services/notesService';
 
-const MAX_MB = 10;
+const MAX_MB = 30;
 
 export default function UploadNoteModal({ currentUser, onClose, onSuccess }) {
   const [sectionId,  setSectionId]  = useState('');

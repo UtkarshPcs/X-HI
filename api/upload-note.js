@@ -20,11 +20,11 @@ export default async function handler(req, res) {
       body,
       request: req,
       onBeforeGenerateToken: async (pathname) => {
-        // Validate: only PDFs allowed, max 10 MB
+        // Validate: only PDFs allowed, max 30 MB
         if (!pathname.endsWith('.pdf')) throw new Error('Only PDF files are allowed.');
         return {
           allowedContentTypes: ['application/pdf'],
-          maximumSizeInBytes: 10 * 1024 * 1024,
+          maximumSizeInBytes: 30 * 1024 * 1024,
           tokenPayload: JSON.stringify({ pathname }),
         };
       },
