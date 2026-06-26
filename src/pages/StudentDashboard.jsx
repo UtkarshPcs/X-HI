@@ -252,30 +252,6 @@ export default function StudentDashboard() {
           </span>
         </div>
 
-        {/* Projected full-year attendance */}
-        <div className="glass-card dash-stat glow-hover" title="Projected attendance for the full academic year">
-          <span className="dash-stat-label"><TrendingUp size={16} /> Projected %</span>
-          <span className={`dash-stat-value ${attendanceLoaded ? (yearStats.projectedPct >= 75 ? 'att-pct-good' : yearStats.projectedPct >= 60 ? 'att-pct-warn' : 'att-pct-bad') : ''}`}>
-            {attendanceLoaded ? `${yearStats.projectedPct}%` : '…'}
-          </span>
-          <span className="dash-stat-sub">full year · {yearStats.totalYearDays} total days</span>
-        </div>
-
-        {/* CBSE threshold — days you can still miss */}
-        <div className="glass-card dash-stat glow-hover" title="How many more days you can be absent and stay above 75% for the year">
-          <span className="dash-stat-label"><CalendarCheck size={16} /> Can Miss</span>
-          <span className={`dash-stat-value ${attendanceLoaded ? (yearStats.canMissMore > 10 ? 'att-pct-good' : yearStats.canMissMore > 0 ? 'att-pct-warn' : 'att-pct-bad') : ''}`}>
-            {attendanceLoaded ? (yearStats.canMissMore > 0 ? yearStats.canMissMore : 0) : '…'}
-          </span>
-          <span className="dash-stat-sub" style={{ color: attendanceLoaded && yearStats.canMissMore < 0 ? '#ef4444' : undefined }}>
-            {attendanceLoaded
-              ? yearStats.canMissMore < 0
-                ? `⚠ exceeded by ${Math.abs(yearStats.canMissMore)} days`
-                : 'more days · CBSE 75% rule'
-              : 'more days · CBSE 75% rule'}
-          </span>
-        </div>
-
         {/* Holiday homework progress */}
         <div
           className="glass-card dash-stat glow-hover"
@@ -506,6 +482,33 @@ export default function StudentDashboard() {
             {attendanceLoaded ? `${displayPct}%` : '…'}
           </span>
         </div>
+
+        {/* Full-year projection row */}
+        {attendanceLoaded && (
+          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '130px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.8rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <TrendingUp size={12} /> Projected (full year)
+              </p>
+              <p className={`dash-stat-value ${yearStats.projectedPct >= 75 ? 'att-pct-good' : yearStats.projectedPct >= 60 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.25rem', margin: 0 }}>
+                {yearStats.projectedPct}%
+              </p>
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{yearStats.totalYearDays} total working days</p>
+            </div>
+            <div style={{ flex: 1, minWidth: '130px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.8rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <CalendarCheck size={12} /> Can still miss (CBSE 75%)
+              </p>
+              <p className={`dash-stat-value ${yearStats.canMissMore > 10 ? 'att-pct-good' : yearStats.canMissMore > 0 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.25rem', margin: 0 }}>
+                {yearStats.canMissMore > 0 ? yearStats.canMissMore : 0} days
+              </p>
+              <p style={{ fontSize: '0.72rem', color: yearStats.canMissMore < 0 ? '#ef4444' : 'var(--text-muted)', marginTop: '0.1rem' }}>
+                {yearStats.canMissMore < 0 ? `⚠ exceeded by ${Math.abs(yearStats.canMissMore)} days` : `max ${yearStats.maxAllowed} absences allowed`}
+              </p>
+            </div>
+          </div>
+        )}
+
         <AttendanceCalendar absentDays={absentDays} onToggle={handleToggle} closedDays={closedDays} />
       </div>
     </div>
