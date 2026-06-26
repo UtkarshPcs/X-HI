@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronRight, ArrowLeft, Upload, FileText, Clock, CheckCircle, XCircle, Zap, HelpCircle, Share2 } from 'lucide-react';
+import { ChevronRight, ArrowLeft, Upload, FileText, Clock, CheckCircle, XCircle, Zap, HelpCircle, Share2, Download, X } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { syllabusData } from '../data/syllabusData';
@@ -52,7 +52,107 @@ function shareNote(note) {
   }
 }
 
-function NotesListItem({ note, onView, free }) {
+// ── Note action modal (view / download gate) ──────────────────
+function NoteActionModal({ note, free, sparks, onClose, onView, onDownload, onPurchaseAndAction }) {
+  const [busy, setBusy] = useState(false);
+
+  async function handleAction(action) {
+    if (free) {
+      action === 'view' ? onView() : onDownload();
+      onClose();
+      return;
+    }
+    if (sparks < SPARK_VIEW_COST) {
+      alert(`You need ${SPARK_VIEW_COST} ✦ Sparks. Upload notes to earn more!`);
+      return;
+    }
+    setBusy(true);
+    try {
+      await onPurchaseAndAction(action);
+    } finally {
+      setBusy(false);
+      onClose();
+    }
+  }
+
+  return (
+    <div className="notes-viewer-overlay" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)', padding: '1.5rem', width: '90%', maxWidth: '380px',
+        boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>{note.title}</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{note.subjectName} · {note.chapterName}</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.1rem' }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Uploader + date */}
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+          by {note.uploaderName} · {new Date(note.approvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+        </p>
+
+        {/* Cost badge */}
+        {!free && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)',
+            borderRadius: 'var(--radius-sm)', padding: '0.5rem', marginBottom: '1rem',
+          }}>
+            <SparkIcon size={14} color="#f59e0b" />
+            <span style={{ fontSize: '0.85rem', color: '#f59e0b', fontWeight: 600 }}>
+              Costs {SPARK_VIEW_COST} Sparks to unlock · You have {sparks}
+            </span>
+          </div>
+        )}
+        {free && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+            borderRadius: 'var(--radius-sm)', padding: '0.5rem', marginBottom: '1rem',
+          }}>
+            <CheckCircle size={14} color="#10b981" />
+            <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 600 }}>Chapter unlocked — free access</span>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <button
+            className="auth-btn primary"
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+            disabled={busy}
+            onClick={() => handleAction('view')}
+          >
+            <FileText size={15} /> {free ? 'View' : `View  -${SPARK_VIEW_COST}✦`}
+          </button>
+          <button
+            className="auth-btn secondary"
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+            disabled={busy}
+            onClick={() => handleAction('download')}
+          >
+            <Download size={15} /> {free ? 'Download' : `Download  -${SPARK_VIEW_COST}✦`}
+          </button>
+        </div>
+        {!free && (
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.6rem' }}>
+            Unlocking gives permanent free access to the whole chapter.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NotesListItem({ note, onView, onDownload, free, sparks }) {
+  const [showModal, setShowModal] = useState(false);
   return (
     <div className="notes-list-item">
       <div className="notes-list-info">
@@ -61,7 +161,7 @@ function NotesListItem({ note, onView, free }) {
         <span className="notes-list-meta">by {note.uploaderName} · {new Date(note.approvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
       </div>
       <div className="notes-list-actions">
-        <button className="notes-view-btn" onClick={() => onView(note)}>
+        <button className="notes-view-btn" onClick={() => setShowModal(true)}>
           <FileText size={14} /> View{!free && <span className="notes-cost"> -{SPARK_VIEW_COST}✦</span>}
           {free && <span className="notes-cost" style={{ color: '#10b981' }}> Free</span>}
         </button>
@@ -73,15 +173,26 @@ function NotesListItem({ note, onView, free }) {
         >
           <Share2 size={13} />
         </button>
-        <a
+        <button
           className="notes-view-btn"
-          href={note.blobUrl}
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ textDecoration: 'none', background: 'var(--surface-hover)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-        >⬇</a>
+          onClick={() => setShowModal(true)}
+          style={{ background: 'var(--surface-hover)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+          title="Download"
+        >
+          <Download size={13} />
+        </button>
       </div>
+      {showModal && (
+        <NoteActionModal
+          note={note}
+          free={free}
+          sparks={sparks}
+          onClose={() => setShowModal(false)}
+          onView={() => onView(note)}
+          onDownload={() => onDownload(note)}
+          onPurchaseAndAction={(action) => action === 'view' ? onView(note, true) : onDownload(note, true)}
+        />
+      )}
     </div>
   );
 }
@@ -256,12 +367,15 @@ export default function NotesPage() {
     else if (view === 'subjects') { setView('sections'); setSection(null); }
   }
 
-  async function handleView(note) {
+  async function handleView(note, skipPurchaseCheck = false) {
     if (!currentUser) { openModal(); return; }
     if (!isStudent) return;
 
     // Already purchased this chapter — free
-    if (purchasedChapters.has(note.chapterId)) {
+    if (purchasedChapters.has(note.chapterId) || skipPurchaseCheck) {
+      if (!purchasedChapters.has(note.chapterId)) {
+        // coming from modal after payment already handled
+      }
       logActivity(currentUser.phone, `Notes: viewed "${note.title}" (${note.chapterName})`);
       setViewingNote(note);
       return;
@@ -278,6 +392,33 @@ export default function NotesPage() {
     setSparks(newBal);
     setPurchasedChapters(prev => new Set([...prev, note.chapterId]));
     setViewingNote(note);
+  }
+
+  async function handleDownload(note, skipPurchaseCheck = false) {
+    if (!currentUser) { openModal(); return; }
+    if (!isStudent) return;
+
+    const alreadyOwned = purchasedChapters.has(note.chapterId);
+    if (!alreadyOwned && !skipPurchaseCheck) {
+      // opened via direct download — show modal (handled by NotesListItem)
+      return;
+    }
+    if (!alreadyOwned) {
+      // charge sparks then download
+      const newBal = await spendSparks(currentUser.phone, SPARK_VIEW_COST, `Unlocked chapter: ${note.chapterName}`);
+      await purchaseChapter(currentUser.phone, note.chapterId);
+      logActivity(currentUser.phone, `Notes: downloaded "${note.title}" (${note.chapterName})`);
+      setSparks(newBal);
+      setPurchasedChapters(prev => new Set([...prev, note.chapterId]));
+    }
+    // Trigger download
+    const a = document.createElement('a');
+    a.href = note.blobUrl;
+    a.download = note.title + '.pdf';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   function onUploadSuccess() {
@@ -449,7 +590,9 @@ export default function NotesPage() {
                       key={note.id}
                       note={note}
                       onView={handleView}
+                      onDownload={handleDownload}
                       free={purchasedChapters.has(note.chapterId)}
+                      sparks={sparks}
                     />
                   ))}
                 </div>
@@ -480,7 +623,7 @@ export default function NotesPage() {
                     <span style={{ fontSize: '0.75rem', color: '#10b981', marginLeft: '0.5rem' }}>✓ Unlocked</span>
                   </div>
                   {notes.map(note => (
-                    <NotesListItem key={note.id} note={note} onView={handleView} free />
+                    <NotesListItem key={note.id} note={note} onView={handleView} onDownload={handleDownload} free sparks={sparks} />
                   ))}
                 </div>
               ))}
