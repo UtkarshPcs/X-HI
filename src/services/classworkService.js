@@ -45,7 +45,7 @@ export async function getAllClasswork() {
  * with no filled notes simply isn't recorded (keeps the calendar honest).
  * Returns the saved doc, or null if nothing to save.
  */
-export async function setClasswork(dateKey, periods, user) {
+export async function setClasswork(dateKey, periods, user, isTest = false) {
   const cleaned = (periods || [])
     .map((p) => ({ period: p.period, subject: p.subject, note: (p.note || '').trim() }))
     .filter((p) => p.note.length > 0);
@@ -56,6 +56,7 @@ export async function setClasswork(dateKey, periods, user) {
     periods: cleaned,
     updatedBy: user?.name || 'Unknown',
     updatedAt: Date.now(),
+    ...(isTest && { isTest: true }),
   };
   await setDoc(classworkRef(dateKey), payload);
   return payload;

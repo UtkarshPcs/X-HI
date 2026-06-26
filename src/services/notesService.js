@@ -6,7 +6,7 @@ import { db } from '../firebase';
 
 const COL = 'notes';
 
-export async function submitNote({ sectionId, subjectId, chapterId, sectionName, subjectName, chapterName, title, description, blobUrl, uploaderPhone, uploaderName }) {
+export async function submitNote({ sectionId, subjectId, chapterId, sectionName, subjectName, chapterName, title, description, blobUrl, uploaderPhone, uploaderName, isTest = false }) {
   return addDoc(collection(db, COL), {
     sectionId, subjectId, chapterId,
     sectionName, subjectName, chapterName,
@@ -16,6 +16,7 @@ export async function submitNote({ sectionId, subjectId, chapterId, sectionName,
     status: 'pending',
     createdAt: Date.now(),
     approvedAt: null,
+    ...(isTest && { isTest: true }),
   });
 }
 

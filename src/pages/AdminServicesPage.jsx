@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { ROLES } from '../auth/roles';
-import { resetWhatsNew } from '../auth/authService';
-import { getAllUsers, getActivitySummary } from '../services/adminService';
+import { ROLES, TEST_PHONE } from '../auth/roles';
+import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone } from '../auth/authService';
+import { getAllUsers, getActivitySummary, purgeTestData } from '../services/adminService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical } from 'lucide-react';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
 import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher } from '../services/teacherService';
@@ -21,6 +21,7 @@ const TABS = [
   { id: 'teachers',   label: 'Teachers',         Icon: GraduationCap },
   { id: 'merge',      label: 'Merge Profiles',   Icon: GitMerge },
   { id: 'onboarding', label: 'Onboarding',       Icon: Settings },
+  { id: 'test',       label: 'Test Account',     Icon: FlaskConical },
 ];
 
 const ROLE_STYLE = {
@@ -715,6 +716,79 @@ function TeachersTab() {
   );
 }
 
+// ── Test Account Tab ──────────────────────────────────────────
+function TestAccountTab() {
+  const [account, setAccount] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  async function load() {
+    const u = await getUserByPhone(TEST_PHONE);
+    setAccount(u);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function handleSwitchRole(role) {
+    setBusy(true); setMsg('');
+    try { await setTestAccountRole(role); await load(); setMsg(`✓ Switched to ${role}`); }
+    catch (e) { setMsg('Failed: ' + e.message); }
+    finally { setBusy(false); }
+  }
+
+  async function handleReset() {
+    if (!window.confirm('Reset test account to clean state?')) return;
+    setBusy(true); setMsg('');
+    try { await resetTestAccount(); await load(); setMsg('✓ Account reset.'); }
+    catch (e) { setMsg('Failed: ' + e.message); }
+    finally { setBusy(false); }
+  }
+
+  async function handlePurge() {
+    if (!window.confirm('Delete ALL test-tagged data (notes, homework, classwork)?')) return;
+    setBusy(true); setMsg('');
+    try { const n = await purgeTestData(); setMsg(`✓ Purged ${n} test record${n === 1 ? '' : 's'}.`); }
+    catch (e) { setMsg('Failed: ' + e.message); }
+    finally { setBusy(false); }
+  }
+
+  if (!account) return <p className="as-muted">Loading…</p>;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '480px' }}>
+      <div className="glass-card" style={{ padding: '1rem' }}>
+        <p className="as-muted" style={{ marginBottom: '0.5rem', fontSize: '0.8rem' }}>Phone: {TEST_PHONE}</p>
+        <p style={{ marginBottom: '0.75rem' }}>
+          Current role: <strong style={{ color: 'var(--primary)' }}>{account.activeRole || 'STUDENT'}</strong>
+          {account.email && <> · Email: <span style={{ color: account.emailVerified ? '#6ee7b7' : '#fbbf24' }}>{account.email}</span></>}
+        </p>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+          {[ROLES.STUDENT, ROLES.MONITOR, ROLES.TEACHER, ROLES.ADMIN].map(role => (
+            <button key={role}
+              className={`auth-btn ${account.activeRole === role ? 'primary' : 'secondary'}`}
+              style={{ flex: 1, minWidth: '80px', fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+              disabled={busy} onClick={() => handleSwitchRole(role)}>
+              {role}
+            </button>
+          ))}
+        </div>
+        <button className="auth-btn secondary" style={{ width: '100%', marginBottom: '0.5rem', color: '#f87171', borderColor: 'rgba(248,113,113,0.3)' }}
+          disabled={busy} onClick={handleReset}>
+          🔄 Reset Test Account
+        </button>
+        <button className="auth-btn secondary" style={{ width: '100%', color: '#f87171', borderColor: 'rgba(248,113,113,0.3)' }}
+          disabled={busy} onClick={handlePurge}>
+          🗑 Purge All Test Data
+        </button>
+        {msg && <p style={{ marginTop: '0.6rem', fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center' }}>{msg}</p>}
+      </div>
+      <p className="as-muted" style={{ fontSize: '0.78rem' }}>
+        Test account phone: <strong>{TEST_PHONE}</strong>. All writes made while logged in as this account are tagged <code>isTest: true</code> in Firestore and can be purged in bulk.
+      </p>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────
 export default function AdminServicesPage() {
   const { currentUser, triggerTour } = useAuth();
@@ -750,6 +824,7 @@ export default function AdminServicesPage() {
         {tab === 'teachers'   && <TeachersTab />}
         {tab === 'merge'      && <MergeTab />}
         {tab === 'onboarding' && <OnboardingTab currentUser={currentUser} navigate={navigate} triggerTour={triggerTour} />}
+        {tab === 'test'       && <TestAccountTab />}
       </div>
     </div>
   );

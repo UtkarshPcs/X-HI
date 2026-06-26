@@ -5,6 +5,8 @@ export const ROLES = {
   TEACHER: 'TEACHER',
 };
 
+export const TEST_PHONE = '9999999999';
+
 const MONITORS = [1, 9, 35, 37];
 const ADMINS   = [23];
 

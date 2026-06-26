@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
 import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword } from './authService';
-import { getUserRole, ROLES } from './roles';
+import { getUserRole, ROLES, TEST_PHONE } from './roles';
 import { removeToken } from '../services/pushService';
 import { loginTeacher, getTeacher } from '../services/teacherService';
 
@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
       getUserByPhone(saved)
         .then((user) => { 
           if (user) {
-            user.role = getUserRole(user.rollNo);
+            user.role = user.phone === TEST_PHONE ? (user.activeRole || ROLES.STUDENT) : getUserRole(user.rollNo);
             setCurrentUser(user); 
           }
         })
@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
   async function refreshUser(phone) {
     const user = await getUserByPhone(phone);
     if (user) {
-      user.role = getUserRole(user.rollNo);
+      user.role = user.phone === TEST_PHONE ? (user.activeRole || ROLES.STUDENT) : getUserRole(user.rollNo);
       setCurrentUser(user);
     }
   }
@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
       // Post-merge: redirect to password reset with primary phone
       throw Object.assign(new Error('NEEDS_PASSWORD_RESET'), { primaryPhone: result.phone });
     }
-    result.role = getUserRole(result.rollNo);
+    result.role = result.phone === TEST_PHONE ? (result.activeRole || ROLES.STUDENT) : getUserRole(result.rollNo);
     setCurrentUser(result);
     // If they logged in via alternate phone, persist the primary phone for session restore
     localStorage.setItem('auth_phone', result.phone);

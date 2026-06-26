@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock } from 'lucide-react';
-import { ROLES } from '../auth/roles';
-import { saveEmail } from '../auth/authService';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical } from 'lucide-react';
+import { ROLES, TEST_PHONE } from '../auth/roles';
+import { saveEmail, setTestAccountRole, resetTestAccount } from '../auth/authService';
 import { sendEmailLink } from '../firebase';
 import packageJson from '../../package.json';
 
@@ -35,6 +35,30 @@ export default function ProfilePage() {
 
   const isTeacher = currentUser?.role === ROLES.TEACHER;
   const identifier = isTeacher ? currentUser?.id : currentUser?.phone;
+  const isTestAccount = currentUser?.phone === TEST_PHONE;
+  const [testRoleBusy, setTestRoleBusy] = useState(false);
+  const [testMsg, setTestMsg] = useState('');
+
+  async function handleSwitchRole(role) {
+    setTestRoleBusy(true); setTestMsg('');
+    try {
+      await setTestAccountRole(role);
+      await refreshUser(TEST_PHONE);
+      setTestMsg(`✓ Switched to ${role}`);
+    } catch (e) { setTestMsg('Failed: ' + e.message); }
+    finally { setTestRoleBusy(false); }
+  }
+
+  async function handleResetAccount() {
+    if (!window.confirm('Reset test account? This clears email, attendance, homework, onboarding and resets role to STUDENT.')) return;
+    setTestRoleBusy(true); setTestMsg('');
+    try {
+      await resetTestAccount();
+      await refreshUser(TEST_PHONE);
+      setTestMsg('✓ Account reset to clean state.');
+    } catch (e) { setTestMsg('Failed: ' + e.message); }
+    finally { setTestRoleBusy(false); }
+  }
 
   if (currentUser && loadedPhotoForPhone !== identifier) {
     setLoadedPhotoForPhone(identifier);
@@ -226,6 +250,42 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+        )}
+
+        {/* ── Test Account Role Switcher ── */}
+        {isTestAccount && (
+          <div className="profile-email-section">
+            <div className="profile-email-card">
+              <div className="profile-email-header">
+                <FlaskConical size={15} />
+                <span>Test Account — Switch Role</span>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                {[ROLES.STUDENT, ROLES.MONITOR, ROLES.TEACHER, ROLES.ADMIN].map(role => (
+                  <button
+                    key={role}
+                    type="button"
+                    className={`auth-btn ${currentUser.role === role ? 'primary' : 'secondary'}`}
+                    style={{ flex: 1, minWidth: '80px', fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                    disabled={testRoleBusy || currentUser.role === role}
+                    onClick={() => handleSwitchRole(role)}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="auth-btn secondary"
+                style={{ width: '100%', marginTop: '0.75rem', fontSize: '0.82rem', color: '#f87171', borderColor: 'rgba(248,113,113,0.3)' }}
+                disabled={testRoleBusy}
+                onClick={handleResetAccount}
+              >
+                🔄 Reset Test Account
+              </button>
+              {testMsg && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textAlign: 'center' }}>{testMsg}</p>}
+            </div>
+          </div>
         )}
 
         <button className="auth-btn secondary profile-logout" style={{ marginTop: '2rem' }} onClick={() => { logout(); navigate('/'); }}>

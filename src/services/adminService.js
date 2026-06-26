@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, getDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 // ── User Directory ─────────────────────────────────────────────
@@ -36,4 +36,17 @@ export async function logActivity(phone, page) {
 export async function getActivitySummary() {
   const snap = await getDocs(collection(db, 'activityLogs'));
   return snap.docs.map((d) => ({ phone: d.id, ...d.data() }));
+}
+
+// ── Test data purge ────────────────────────────────────────────
+export async function purgeTestData() {
+  const cols = ['notes', 'homework', 'classwork'];
+  let total = 0;
+  await Promise.all(cols.map(async (col) => {
+    const q = query(collection(db, col), where('isTest', '==', true));
+    const snap = await getDocs(q);
+    await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, col, d.id))));
+    total += snap.docs.length;
+  }));
+  return total;
 }

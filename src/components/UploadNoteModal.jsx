@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
 import { syllabusData } from '../data/syllabusData';
 import { uploadNotePDF, submitNote } from '../services/notesService';
+import { TEST_PHONE } from '../auth/roles';
 
 const MAX_MB = 30;
 
@@ -52,6 +53,7 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess }) {
         blobUrl:     url,
         uploaderPhone: currentUser.phone,
         uploaderName:  currentUser.name,
+        isTest: currentUser.phone === TEST_PHONE,
       });
 
       setProgress('');

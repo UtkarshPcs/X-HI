@@ -13,7 +13,7 @@ import { getPeriodsForDate, weekdayName } from '../data/routine';
 import { notifyClass, notifyClassSafe } from '../services/notify';
 import { statsForTopics, chapterTopics } from '../data/syllabusStats';
 import { isWorkingDay, fromDateKey } from '../data/attendanceUtils';
-import { ROLES } from '../auth/roles';
+import { ROLES, TEST_PHONE } from '../auth/roles';
 
 function canAccess(user) {
   return user && (user.isAdmin || user.role === ROLES.MONITOR || user.role === ROLES.ADMIN);
@@ -217,7 +217,7 @@ function HomeworkManager({ currentUser }) {
     if (!window.confirm(`Post homework for ${date} with ${tasks.length} task(s)?`)) return;
     setLoading(true);
     try {
-      await addHomework(date, tasks);
+      await addHomework(date, tasks, currentUser?.phone === TEST_PHONE);
       // Fire-and-forget push (admin only; safe no-op otherwise).
       const subjects = tasks.map((t) => t.subject).filter(Boolean).join(', ');
       notifyClassSafe(currentUser, {
@@ -752,7 +752,7 @@ function ClassworkManager({ currentUser }) {
     setSaving(true);
     setStatus('');
     try {
-      await setClasswork(date, rows, currentUser);
+      await setClasswork(date, rows, currentUser, currentUser?.phone === TEST_PHONE);
       // Fire-and-forget push (admin only; safe no-op for monitors).
       notifyClassSafe(currentUser, {
         title: '📝 Classwork Updated',

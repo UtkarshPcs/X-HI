@@ -137,6 +137,26 @@ export async function setCheckedTopics(phone, checkedKeys) {
 }
 
 
+// ── Test account helpers ───────────────────────────────────────
+
+export async function setTestAccountRole(role) {
+  await updateDoc(userRef('9999999999'), { activeRole: role });
+}
+
+export async function resetTestAccount() {
+  await updateDoc(userRef('9999999999'), {
+    email: null,
+    emailVerified: false,
+    attendance_absentDays: [],
+    checkedTopics: [],
+    completedHomework: [],
+    completedHolidayHomework_v2: [],
+    onboardingCompleted: false,
+    whatsNewSeen_v1: false,
+    activeRole: 'STUDENT',
+  });
+}
+
 // ── Broadcast key (admin push auth) ────────────────────────────
 // The serverless send endpoint can't verify a Firebase ID token (this app
 // uses custom phone+password auth), so an admin proves authority with a

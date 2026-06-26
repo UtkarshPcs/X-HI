@@ -2,7 +2,7 @@ import { collection, doc, setDoc, getDocs, query, orderBy } from 'firebase/fires
 import { db } from '../firebase';
 import { homeworkData } from '../data/homeworkData';
 
-export async function addHomework(dateStr, tasks) {
+export async function addHomework(dateStr, tasks, isTest = false) {
   const dateObj = new Date(dateStr);
   const id = dateObj.getTime().toString();
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -12,7 +12,8 @@ export async function addHomework(dateStr, tasks) {
     id: Number(id),
     date: displayDate,
     tasks: tasks,
-    timestamp: dateObj.getTime()
+    timestamp: dateObj.getTime(),
+    ...(isTest && { isTest: true }),
   });
 }
 
