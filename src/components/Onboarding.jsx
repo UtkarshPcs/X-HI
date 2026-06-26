@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
@@ -165,6 +165,8 @@ export default function Onboarding({ forceRun, forceRole, onCloseForceRun }) {
   const { currentUser, forceTour, clearTour, refreshUser } = useAuth();
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState([]);
+  // Ref that is set the moment we decide to NOT show the tour — survives re-renders
+  const doneRef = useRef(false);
 
   const effectiveForceRun  = forceRun  || !!forceTour;
   const effectiveForceRole = forceRole || forceTour?.role || null;
@@ -180,9 +182,14 @@ export default function Onboarding({ forceRun, forceRole, onCloseForceRun }) {
 
     if (currentUser.role === ROLES.ADMIN) return;
 
-    // localStorage is the authoritative fast-path — avoids re-triggering on every refreshUser call
+    // Already decided this session — don't re-evaluate
+    if (doneRef.current) return;
+
     const localKey = `onboarding_done_${currentUser.phone}`;
-    if (localStorage.getItem(localKey) || currentUser.onboardingCompleted) return;
+    if (localStorage.getItem(localKey) || currentUser.onboardingCompleted) {
+      doneRef.current = true;
+      return;
+    }
 
     setSteps(stepsForRole(currentUser));
     setRun(true);
@@ -192,7 +199,8 @@ export default function Onboarding({ forceRun, forceRole, onCloseForceRun }) {
     const { status } = data;
     if (![STATUS.FINISHED, STATUS.SKIPPED].includes(status)) return;
 
-    setRun(false); // stop immediately — prevents beacon artifact
+    setRun(false);
+    doneRef.current = true; // block any future useEffect re-trigger this session
 
     if (forceRun && onCloseForceRun) {
       onCloseForceRun();
@@ -200,12 +208,11 @@ export default function Onboarding({ forceRun, forceRole, onCloseForceRun }) {
       clearTour();
     } else if (currentUser) {
       const localKey = `onboarding_done_${currentUser.phone}`;
-      localStorage.setItem(localKey, '1'); // write immediately so refresh doesn't re-trigger
-      completeOnboarding(currentUser.phone)
-        .then(() => refreshUser(currentUser.phone)) // sync currentUser.onboardingCompleted
-        .catch(console.error);
+      localStorage.setItem(localKey, '1');
+      completeOnboarding(currentUser.phone).catch(console.error);
+      // No refreshUser here — avoids triggering useEffect again
     }
-  }, [currentUser, forceRun, forceTour, onCloseForceRun, clearTour, refreshUser]);
+  }, [currentUser, forceRun, forceTour, onCloseForceRun, clearTour]);
 
   if (!currentUser) return null;
 
