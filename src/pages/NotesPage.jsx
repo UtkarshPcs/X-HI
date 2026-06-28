@@ -5,7 +5,8 @@ import { ChevronRight, ArrowLeft, Upload, FileText, Clock, CheckCircle, XCircle,
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { syllabusData } from '../data/syllabusData';
-import { getNotesByChapter, getMyNotes, getPublishedNotes, getNoteById } from '../services/notesService';
+import { holidayData } from '../data/holidayData';
+import { getNotesByChapter, getMyNotes, getPublishedNotes, getNoteById, getNotesBySection } from '../services/notesService';
 import {
   getSparks, getSparkLog, spendSparks,
   getPurchasedChapters, purchaseChapter,
@@ -267,6 +268,72 @@ function TourTooltip({ index, step, backProps, closeProps, primaryProps, tooltip
   );
 }
 
+// ── Holiday Homework answers view ────────────────────────────
+function HHNotesView({ task, onUpload }) {
+  const [notes,   setNotes]   = useState(null);
+  const [viewing, setViewing] = useState(null);
+
+  useEffect(() => {
+    getNotesByChapter(task.chapterId)
+      .then(setNotes)
+      .catch(() => setNotes([]));
+  }, [task.chapterId]);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <h3 className="notes-chapter-title" style={{ margin: 0 }}>{task.chapterName} — Answers</h3>
+        <button
+          className="auth-btn primary"
+          onClick={onUpload}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.9rem', fontSize: '0.85rem' }}
+        >
+          <Upload size={14} /> Upload Answer
+        </button>
+      </div>
+
+      {notes === null ? (
+        <p className="notes-muted">Loading…</p>
+      ) : notes.length === 0 ? (
+        <div className="notes-empty">
+          <FileText size={32} color="var(--text-muted)" />
+          <p>No answers uploaded yet.</p>
+          <p style={{ fontSize: '0.85rem' }}>Be the first — earn <strong>4 ✦</strong> when approved!</p>
+        </div>
+      ) : (
+        <div className="notes-list">
+          {notes.map(note => (
+            <div key={note.id} className="notes-list-item">
+              <div className="notes-list-info">
+                <span className="notes-list-title">{note.title}</span>
+                {note.description && <span className="notes-list-desc">{note.description}</span>}
+                <span className="notes-list-meta">by {note.uploaderName} · {new Date(note.approvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+              </div>
+              <div className="notes-list-actions">
+                <button className="notes-view-btn" onClick={() => setViewing(note)}>
+                  <FileText size={14} /> View
+                </button>
+                <a
+                  href={note.blobUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="notes-view-btn"
+                  style={{ background: 'var(--surface-hover)', color: 'var(--text-primary)', border: '1px solid var(--border)', textDecoration: 'none' }}
+                >
+                  <Download size={13} />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {viewing && <NotesViewer note={viewing} onClose={() => setViewing(null)} />}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function NotesPage() {
   const { currentUser, openModal } = useAuth();
@@ -290,7 +357,8 @@ export default function NotesPage() {
   // UI
   const [logTab,      setLogTab]      = useState('browse');
   const [viewingNote, setViewingNote] = useState(null);
-  const [showUpload,  setShowUpload]  = useState(false);
+  const [showUpload,     setShowUpload]     = useState(false);
+  const [uploadHHTask,   setUploadHHTask]   = useState(null); // pre-fill HH task in modal
   const [tourRun,     setTourRun]     = useState(false);
 
   // Auto-run tour on first ever visit to Notes page
@@ -365,6 +433,8 @@ export default function NotesPage() {
     if (view === 'notes')         { setView('chapters'); setChapter(null); setChapterNotes([]); }
     else if (view === 'chapters') { setView('subjects'); setSubject(null); }
     else if (view === 'subjects') { setView('sections'); setSection(null); }
+    else if (view === 'hh-notes') { setView('hh-tasks'); setChapter(null); }
+    else if (view === 'hh-tasks') { setView('sections'); setSection(null); }
   }
 
   async function handleView(note) {
@@ -415,6 +485,7 @@ export default function NotesPage() {
 
   function onUploadSuccess() {
     setShowUpload(false);
+    setUploadHHTask(null);
     if (logTab === 'mysubmissions') {
       getMyNotes(currentUser.phone).then(setMyNotes).catch(() => {});
     }
@@ -532,6 +603,12 @@ export default function NotesPage() {
               {syllabusData.map(sec => (
                 <SectionCard key={sec.sectionId} section={sec} onClick={() => goSection(sec)} />
               ))}
+              {/* Holiday Homework section */}
+              <button className="notes-section-card" onClick={() => { setView('hh-tasks'); setSection({ sectionId: 'holiday-hw', sectionName: 'Holiday Homework' }); }}>
+                <span className="notes-section-name">🏖 Holiday Homework</span>
+                <span className="notes-section-meta">{holidayData.length} assignments · classmates' answers</span>
+                <ChevronRight size={16} className="notes-section-arrow" />
+              </button>
             </div>
           )}
 
@@ -592,6 +669,33 @@ export default function NotesPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ── HOLIDAY HOMEWORK: task list ── */}
+          {view === 'hh-tasks' && (
+            <div className="notes-list">
+              {holidayData.map(task => (
+                <button key={task.id} className="notes-row" onClick={() => { setChapter({ chapterId: `hh-${task.id}`, chapterName: task.subject }); setView('hh-notes'); }}>
+                  <span className="notes-row-name">{task.subject}</span>
+                  <span className="notes-row-meta" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {task.message}
+                  </span>
+                  <ChevronRight size={15} />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ── HOLIDAY HOMEWORK: answers for a task ── */}
+          {view === 'hh-notes' && chapter && (
+            <HHNotesView
+              task={chapter}
+              onUpload={() => {
+                const hhTask = holidayData.find(t => `hh-${t.id}` === chapter.chapterId);
+                setUploadHHTask(hhTask || null);
+                setShowUpload(true);
+              }}
+            />
           )}
         </>
       )}
@@ -684,7 +788,8 @@ export default function NotesPage() {
       {showUpload && (
         <UploadNoteModal
           currentUser={currentUser}
-          onClose={() => setShowUpload(false)}
+          defaultHHTask={uploadHHTask}
+          onClose={() => { setShowUpload(false); setUploadHHTask(null); }}
           onSuccess={onUploadSuccess}
         />
       )}

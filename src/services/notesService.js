@@ -20,6 +20,17 @@ export async function submitNote({ sectionId, subjectId, chapterId, sectionName,
   });
 }
 
+export async function getNotesBySection(sectionId) {
+  const q = query(
+    collection(db, COL),
+    where('sectionId', '==', sectionId),
+    where('status', '==', 'published')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.approvedAt || 0) - (a.approvedAt || 0));
+}
+
 export async function getNotesByChapter(chapterId) {
   const q = query(
     collection(db, COL),

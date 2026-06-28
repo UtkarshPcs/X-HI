@@ -1,23 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Sun, Download, CheckCircle, FileText, X, Lock } from 'lucide-react';
+import { Calendar, Sun, Download, CheckCircle, FileText, X, Lock, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { holidayData } from '../data/holidayData';
 import { useAuth } from '../auth/AuthContext';
 import { updateHolidayHomework, getHolidayHomework } from '../auth/authService';
+import { getNotesByChapter } from '../services/notesService';
+import UploadNoteModal from '../components/UploadNoteModal';
 
 // Build a flat list of all checkable items across every subject.
-// Multi-file subjects get one entry per file; single-file and project subjects get one entry total.
 function buildCheckItems() {
   const items = [];
   holidayData.forEach((task) => {
     if (task.files && task.files.length > 1) {
-      // One checkbox per individual file
       task.files.forEach((fileObj, idx) => {
         items.push({ key: `${task.id}-file-${idx}`, taskId: task.id, fileIdx: idx });
       });
     } else {
-      // Single checkbox for single-file or project tasks
       items.push({ key: `${task.id}`, taskId: task.id, fileIdx: null });
     }
   });
@@ -26,6 +25,107 @@ function buildCheckItems() {
 
 const checkItems = buildCheckItems();
 const totalItems = checkItems.length;
+
+// Per-task answers panel
+function AnswersPanel({ task, currentUser, openModal, onUploadClick }) {
+  const [answers,  setAnswers]  = useState(null); // null = not loaded
+  const [expanded, setExpanded] = useState(false);
+
+  async function load() {
+    if (answers !== null) return;
+    const notes = await getNotesByChapter(`hh-${task.id}`);
+    setAnswers(notes);
+  }
+
+  function toggle() {
+    if (!expanded) load();
+    setExpanded(v => !v);
+  }
+
+  const count = answers?.length ?? null;
+
+  return (
+    <div style={{ marginTop: '1rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
+      {/* Toggle row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <button
+          onClick={toggle}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, padding: 0,
+          }}
+        >
+          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+          Classmates' Answers{count !== null ? ` (${count})` : ''}
+        </button>
+
+        <button
+          onClick={() => {
+            if (!currentUser) { openModal(); return; }
+            onUploadClick(task);
+          }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.35rem',
+            background: 'var(--tertiary, #f59e0b)', border: 'none', borderRadius: 'var(--radius-sm)',
+            color: '#fff', fontWeight: 600, fontSize: '0.78rem',
+            padding: '0.35rem 0.75rem', cursor: 'pointer',
+            flexShrink: 0, transition: 'opacity 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          title="Upload your answer for this homework"
+        >
+          <Upload size={13} /> Upload Answer
+        </button>
+      </div>
+
+      {/* Answers list */}
+      {expanded && (
+        <div style={{ marginTop: '0.75rem' }}>
+          {answers === null ? (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Loading…</p>
+          ) : answers.length === 0 ? (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              No answers uploaded yet. Be the first — earn <strong>4 ✦</strong>!
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {answers.map(note => (
+                <a
+                  key={note.id}
+                  href={note.blobUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    background: 'var(--surface-hover)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.75rem',
+                    textDecoration: 'none', color: 'var(--text-primary)',
+                    fontSize: '0.83rem', transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-hover)'}
+                >
+                  <FileText size={14} color="var(--tertiary, #f59e0b)" style={{ flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {note.title}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+                      by {note.uploaderName}
+                    </div>
+                  </div>
+                  <Download size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function HolidayHomework() {
   const { currentUser, openModal } = useAuth();
@@ -43,22 +143,19 @@ export default function HolidayHomework() {
     return [];
   });
   const [selectedProject, setSelectedProject] = useState(null);
+  const [uploadTask,      setUploadTask]      = useState(null); // task to pre-fill in upload modal
 
   // Sync from DB if user logs in
   useEffect(() => {
     if (currentUser) {
       getHolidayHomework(currentUser.phone).then((keys) => {
-        // If DB has data, overwrite local state
         if (keys && keys.length > 0) {
           setCompletedKeys(keys);
           localStorage.setItem('completedHolidayHomework_v2', JSON.stringify(keys));
         } else {
-          // If DB is empty but we have local keys, sync local keys to DB
           const saved = localStorage.getItem('completedHolidayHomework_v2');
           let localKeys = [];
-          if (saved) {
-            try { localKeys = JSON.parse(saved); } catch { /* ignore */ }
-          }
+          if (saved) { try { localKeys = JSON.parse(saved); } catch { /* ignore */ } }
           if (localKeys.length > 0) {
             updateHolidayHomework(currentUser.phone, localKeys).catch(console.error);
           }
@@ -67,7 +164,6 @@ export default function HolidayHomework() {
     }
   }, [currentUser]);
 
-  // Handle Android hardware back button
   useEffect(() => {
     const handlePopState = () => {
       if (selectedProject) setSelectedProject(null);
@@ -83,9 +179,7 @@ export default function HolidayHomework() {
 
   const closeProjectDetails = () => {
     setSelectedProject(null);
-    if (window.history.state && window.history.state.modalOpen) {
-      window.history.back();
-    }
+    if (window.history.state && window.history.state.modalOpen) window.history.back();
   };
 
   const toggleKey = (key) => {
@@ -99,7 +193,6 @@ export default function HolidayHomework() {
     });
   };
 
-  // Helper: is every checklist key for a given taskId completed?
   const isTaskFullyDone = (task) => {
     const keys = checkItems.filter(item => item.taskId === task.id).map(i => i.key);
     return keys.length > 0 && keys.every(k => completedKeys.includes(k));
@@ -155,7 +248,6 @@ export default function HolidayHomework() {
                 {/* Header row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    {/* For single-checkbox tasks, show the check button here */}
                     {!isMultiFile && (
                       <button
                         onClick={() => toggleKey(`${task.id}`)}
@@ -215,7 +307,6 @@ export default function HolidayHomework() {
                           <FileText size={16} color="var(--tertiary)" /> View Project Details
                         </button>
                       ) : isMultiFile ? (
-                        // Multi-file: each file gets its own checkbox row
                         task.files.map((fileObj, idx) => {
                           const itemKey = `${task.id}-file-${idx}`;
                           const fileDone = completedKeys.includes(itemKey);
@@ -227,7 +318,6 @@ export default function HolidayHomework() {
                               padding: '0.65rem 0.75rem', borderRadius: 'var(--radius-sm)',
                               transition: 'all 0.2s ease'
                             }}>
-                              {/* Per-file checkbox */}
                               <button
                                 onClick={() => toggleKey(itemKey)}
                                 style={{
@@ -244,7 +334,6 @@ export default function HolidayHomework() {
                                   fill={fileDone ? 'var(--success, #10B981)' : 'none'}
                                   color={fileDone ? '#fff' : 'currentColor'} />
                               </button>
-                              {/* Download link */}
                               <a href={fileObj.url} download style={{
                                 flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem',
                                 color: fileDone ? 'var(--text-secondary)' : 'var(--text-primary)',
@@ -258,7 +347,6 @@ export default function HolidayHomework() {
                           );
                         })
                       ) : (
-                        // Single file
                         task.files.map((fileObj, idx) => (
                           <a key={idx} href={fileObj.url} download style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -277,12 +365,21 @@ export default function HolidayHomework() {
                     </div>
                   </div>
                 )}
+
+                {/* ── Answers section (always visible at bottom of card) ── */}
+                <AnswersPanel
+                  task={task}
+                  currentUser={currentUser}
+                  openModal={openModal}
+                  onUploadClick={setUploadTask}
+                />
               </div>
             );
           })}
         </div>
       </div>
 
+      {/* Project details modal */}
       {selectedProject && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -316,20 +413,26 @@ export default function HolidayHomework() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
               <span className="badge holiday" style={{ display: 'inline-block' }}>{selectedProject.subject}</span>
             </div>
-
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>Project Details</h2>
-
-            <div
-              className="markdown-content"
-              style={{
-                background: 'var(--background)', border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)', padding: '1.5rem',
-                color: 'var(--text-primary)', lineHeight: '1.7', fontSize: '1rem'
-              }}>
+            <div className="markdown-content" style={{
+              background: 'var(--background)', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)', padding: '1.5rem',
+              color: 'var(--text-primary)', lineHeight: '1.7', fontSize: '1rem'
+            }}>
               <ReactMarkdown>{selectedProject.projectData}</ReactMarkdown>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Upload answer modal */}
+      {uploadTask && (
+        <UploadNoteModal
+          currentUser={currentUser}
+          defaultHHTask={uploadTask}
+          onClose={() => setUploadTask(null)}
+          onSuccess={() => setUploadTask(null)}
+        />
       )}
     </>
   );
