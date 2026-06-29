@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2, Wrench, BookCopy } from 'lucide-react';
+import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2, Wrench, BookCopy, ClipboardList } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import NotificationHistory from './NotificationHistory';
@@ -118,6 +118,11 @@ export default function Navbar() {
                   <button className="nav-dropdown-item" onClick={() => go('/class-info')}>
                     <Users size={15} /> Class Info
                   </button>
+                  {currentUser.role !== ROLES.TEACHER && (
+                    <button className="nav-dropdown-item" onClick={() => go('/records')}>
+                      <ClipboardList size={15} /> My Records
+                    </button>
+                  )}
                   {currentUser.role !== ROLES.TEACHER && (
                     <button className="nav-dropdown-item" onClick={() => go('/holidays')}>
                       <CalendarHeart size={15} /> Holiday Homework

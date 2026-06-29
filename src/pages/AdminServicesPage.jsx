@@ -6,7 +6,7 @@ import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone } f
 import { getAllUsers, getActivitySummary, purgeTestData } from '../services/adminService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList } from 'lucide-react';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
 import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher } from '../services/teacherService';
@@ -25,6 +25,7 @@ const TABS = [
   { id: 'onboarding', label: 'Onboarding',       Icon: Settings },
   { id: 'test',       label: 'Test Account',     Icon: FlaskConical },
   { id: 'data',       label: 'Data Export',      Icon: Download },
+  { id: 'records',    label: 'Records',           Icon: ClipboardList },
 ];
 
 const ROLE_STYLE = {
@@ -881,6 +882,20 @@ export default function AdminServicesPage() {
         {tab === 'onboarding' && <OnboardingTab currentUser={currentUser} navigate={navigate} triggerTour={triggerTour} />}
         {tab === 'test'       && <TestAccountTab />}
         {tab === 'data'       && <DataExportTab />}
+        {tab === 'records'    && (
+          <div style={{ maxWidth: 480 }}>
+            <p className="as-muted" style={{ marginBottom: '1.25rem' }}>
+              Create and manage class record tables. Students see non-sensitive tables on their Records page; monitors fill them in.
+            </p>
+            <button
+              className="auth-btn primary"
+              onClick={() => navigate('/records-admin')}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <ClipboardList size={16} /> Open Records Admin
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

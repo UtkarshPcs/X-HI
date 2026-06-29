@@ -23,6 +23,9 @@ import MathsDashboard from './pages/MathsDashboard';
 import NotesPage from './pages/NotesPage';
 import NoticesPage from './pages/NoticesPage';
 import TeacherToolsPage from './pages/TeacherToolsPage';
+import RecordPage from './pages/RecordPage';
+import RecordMonitorPage from './pages/RecordMonitorPage';
+import RecordAdminPage from './pages/RecordAdminPage';
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -89,6 +92,9 @@ function AppInner() {
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/notices" element={<NoticesPage />} />
             <Route path="/teacher-tools" element={<TeacherToolsPage />} />
+            <Route path="/records" element={<RecordPage />} />
+            <Route path="/records-monitor" element={<RecordMonitorPage />} />
+            <Route path="/records-admin" element={<RecordAdminPage />} />
           </Routes>
         </main>
         <footer className="app-footer">

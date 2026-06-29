@@ -927,6 +927,17 @@ export default function AdminPanel() {
       <ClassworkManager currentUser={currentUser} />
       <SyllabusManager currentUser={currentUser} />
       {isAdminUser(currentUser) && <CalendarOverrideManager />}
+
+      {/* Records shortcut */}
+      <div className="glass-card" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1rem', fontWeight: 600 }}>
+          <ClipboardList size={18} style={{ color: 'var(--primary)' }} /> Records
+        </div>
+        <button className="auth-btn primary" style={{ padding: '0.4rem 1rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          onClick={() => navigate('/records-monitor')}>
+          Open Records <ChevronRight size={15} />
+        </button>
+      </div>
     </div>
   );
 }
