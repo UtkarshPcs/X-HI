@@ -48,7 +48,7 @@ export async function setCellValue(tableId, rollNo, colId, value) {
   await setDoc(doc(db, ENTRIES, docId), {
     tableId,
     rollNo,
-    [`values.${colId}`]: value,
+    values: { [colId]: value },
     updatedAt: serverTimestamp(),
   }, { merge: true });
 }
