@@ -4108,3 +4108,22 @@ a {
 
 /* Ensure the 8-button formatting toolbar wraps nicely on mobile */
 .fmt-toolbar { flex-wrap: wrap; }
+
+/* ─── Dashboard "My Records" promo card ──────────────────────── */
+.dash-new-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  padding: 0.12rem 0.45rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+.dash-records-card { transition: border-color 0.2s, box-shadow 0.2s; }
+.dash-records-card:hover {
+  border-color: rgba(139,92,246,0.4);
+  box-shadow: 0 0 24px -10px rgba(139,92,246,0.35);
+}

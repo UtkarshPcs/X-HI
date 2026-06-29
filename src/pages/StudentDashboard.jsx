@@ -327,6 +327,28 @@ export default function StudentDashboard() {
         )}
       </div>
 
+      {/* My Records — quick access nav card */}
+      <div
+        className="glass-card glow-hover dash-records-card"
+        style={{ cursor: 'pointer' }}
+        onClick={() => navigate('/records')}
+        title="View your class records"
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ClipboardList size={20} color="var(--primary)" />
+            My Records
+            <span className="dash-new-badge">NEW</span>
+          </h2>
+          <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            View records <ArrowRight size={13} />
+          </span>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>
+          Check your personal class records — attendance drives, fee status, submissions and more.
+        </p>
+      </div>
+
       {/* Today's / Latest homework card */}
       <div className="glass-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
