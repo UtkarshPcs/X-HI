@@ -35,6 +35,11 @@ export async function deleteTeacher(id) {
   await deleteDoc(ref(id));
 }
 
+// Phase 1: admin grants/revokes a teacher's access to the marks module.
+export async function setTeacherMarksAccess(id, canManageMarks) {
+  await updateDoc(ref(id), { canManageMarks: !!canManageMarks });
+}
+
 export async function loginTeacher(id, password) {
   const teacher = await getTeacher(id);
   if (!teacher) return null;

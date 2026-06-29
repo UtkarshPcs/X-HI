@@ -9,6 +9,7 @@ import { getAttendance } from '../auth/authService';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { notifyClassSafe } from '../services/notify';
+import MarksManager from '../components/MarksManager';
 
 // ── Notice Tool ───────────────────────────────────────────────
 function NoticeTool({ currentUser }) {
@@ -204,6 +205,9 @@ export default function TeacherToolsPage() {
           </span>
         </div>
       </div>
+
+      {/* Marks module — only for teachers granted access by admin */}
+      {currentUser.canManageMarks && <MarksManager currentUser={currentUser} />}
 
       {/* Notices tool — always expanded on the dedicated page */}
       <NoticeTool currentUser={currentUser} />

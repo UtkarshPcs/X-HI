@@ -9,7 +9,7 @@ import { getClosedDays } from '../services/calendarOverrideService';
 import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList } from 'lucide-react';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
-import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher } from '../services/teacherService';
+import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher, setTeacherMarksAccess } from '../services/teacherService';
 import { getPendingNotes, approveNote, rejectNote, deleteNote, getPublishedNotes } from '../services/notesService';
 import { earnSparks, SPARK_UPLOAD_REWARD } from '../services/sparksService';
 import { getAllClasswork } from '../services/classworkService';
@@ -659,6 +659,16 @@ function TeachersTab() {
     finally { setBusy(null); }
   }
 
+  async function handleToggleMarks(t) {
+    setBusy(t.id);
+    try {
+      const next = !t.canManageMarks;
+      await setTeacherMarksAccess(t.id, next);
+      setTeachers(prev => prev.map(x => x.id === t.id ? { ...x, canManageMarks: next } : x));
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
   if (teachers === null) return <p className="as-muted">Loading…</p>;
 
   return (
@@ -705,6 +715,14 @@ function TeachersTab() {
                 )}
               </div>
               <div className="marks-complaint-actions">
+                <button
+                  className={`marks-btn ${t.canManageMarks ? 'approve' : 'delete'}`}
+                  onClick={() => handleToggleMarks(t)}
+                  disabled={!!busy}
+                  title={t.canManageMarks ? 'Marks access ON — click to revoke' : 'Marks access OFF — click to grant'}
+                >
+                  <BarChart2 size={13} /> Marks: {t.canManageMarks ? 'On' : 'Off'}
+                </button>
                 <button className="marks-btn approve" onClick={() => { setEditingId(t.id); setNewPass(''); }} disabled={!!busy}>
                   <KeyRound size={13} /> Password
                 </button>
