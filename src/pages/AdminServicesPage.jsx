@@ -9,7 +9,14 @@ import { getClosedDays } from '../services/calendarOverrideService';
 import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList } from 'lucide-react';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
-import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher, setTeacherMarksAccess } from '../services/teacherService';
+import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher, setTeacherMarksAccess, setTeacherSyllabusSubjects } from '../services/teacherService';
+import { syllabusData } from '../data/syllabusData';
+import { getTables, setTeacherRecordTables } from '../services/recordsService';
+
+// Flat list of all subjects across all sections for the syllabus toggle UI
+const ALL_SUBJECTS = syllabusData.flatMap(sec =>
+  sec.subjects.map(sub => ({ subjectId: sub.subjectId, label: `${sub.subjectName} (${sec.sectionName})` }))
+);
 import { getPendingNotes, approveNote, rejectNote, deleteNote, getPublishedNotes } from '../services/notesService';
 import { earnSparks, SPARK_UPLOAD_REWARD } from '../services/sparksService';
 import { getAllClasswork } from '../services/classworkService';
@@ -619,8 +626,15 @@ function TeachersTab() {
   const [newPass, setNewPass]   = useState('');
   const [showAdd, setShowAdd]   = useState(false);
 
+  // Which teacher's syllabus panel is open
+  const [syllabusExpandedId, setSyllabusExpandedId] = useState(null);
+  // Which teacher's records panel is open
+  const [recordsExpandedId, setRecordsExpandedId] = useState(null);
+  const [allTables, setAllTables] = useState([]);
+
   useEffect(() => {
     getTeachers().then(setTeachers).catch(() => setTeachers([]));
+    getTables().then(setAllTables).catch(() => {});
   }, []);
 
   async function handleAdd(e) {
@@ -669,6 +683,32 @@ function TeachersTab() {
     finally { setBusy(null); }
   }
 
+  async function handleToggleSyllabusSubject(t, subjectId) {
+    const current = t.syllabusSubjects || [];
+    const next = current.includes(subjectId)
+      ? current.filter(id => id !== subjectId)
+      : [...current, subjectId];
+    setBusy(t.id + subjectId);
+    try {
+      await setTeacherSyllabusSubjects(t.id, next);
+      setTeachers(prev => prev.map(x => x.id === t.id ? { ...x, syllabusSubjects: next } : x));
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
+  async function handleToggleRecordTable(t, tableId) {
+    const current = t.recordTables || [];
+    const next = current.includes(tableId)
+      ? current.filter(id => id !== tableId)
+      : [...current, tableId];
+    setBusy(t.id + tableId);
+    try {
+      await setTeacherRecordTables(t.id, next);
+      setTeachers(prev => prev.map(x => x.id === t.id ? { ...x, recordTables: next } : x));
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
   if (teachers === null) return <p className="as-muted">Loading…</p>;
 
   return (
@@ -713,6 +753,51 @@ function TeachersTab() {
                     <button type="button" className="marks-btn delete" onClick={() => { setEditingId(null); setNewPass(''); }}>Cancel</button>
                   </form>
                 )}
+                {syllabusExpandedId === t.id && (
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Grant syllabus subject access:</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {ALL_SUBJECTS.map(({ subjectId, label }) => {
+                        const granted = (t.syllabusSubjects || []).includes(subjectId);
+                        return (
+                          <button
+                            key={subjectId}
+                            className={`marks-btn ${granted ? 'approve' : ''}`}
+                            style={{ fontSize: '0.75rem', opacity: busy === t.id + subjectId ? 0.5 : 1 }}
+                            onClick={() => handleToggleSyllabusSubject(t, subjectId)}
+                            disabled={!!busy}
+                          >
+                            {granted ? <Check size={11} /> : <Plus size={11} />} {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {recordsExpandedId === t.id && (
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Grant record table access:</p>
+                    {allTables.length === 0
+                      ? <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No record tables created yet.</p>
+                      : <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                          {allTables.map(table => {
+                            const granted = (t.recordTables || []).includes(table.id);
+                            return (
+                              <button
+                                key={table.id}
+                                className={`marks-btn ${granted ? 'approve' : ''}`}
+                                style={{ fontSize: '0.75rem', opacity: busy === t.id + table.id ? 0.5 : 1 }}
+                                onClick={() => handleToggleRecordTable(t, table.id)}
+                                disabled={!!busy}
+                              >
+                                {granted ? <Check size={11} /> : <Plus size={11} />} {table.title}
+                              </button>
+                            );
+                          })}
+                        </div>
+                    }
+                  </div>
+                )}
               </div>
               <div className="marks-complaint-actions">
                 <button
@@ -722,6 +807,22 @@ function TeachersTab() {
                   title={t.canManageMarks ? 'Marks access ON — click to revoke' : 'Marks access OFF — click to grant'}
                 >
                   <BarChart2 size={13} /> Marks: {t.canManageMarks ? 'On' : 'Off'}
+                </button>
+                <button
+                  className={`marks-btn ${syllabusExpandedId === t.id ? 'approve' : ''}`}
+                  onClick={() => setSyllabusExpandedId(id => id === t.id ? null : t.id)}
+                  disabled={!!busy}
+                  title="Manage syllabus subject access"
+                >
+                  <BookOpen size={13} /> Syllabus {(t.syllabusSubjects || []).length > 0 ? `(${t.syllabusSubjects.length})` : ''}
+                </button>
+                <button
+                  className={`marks-btn ${recordsExpandedId === t.id ? 'approve' : ''}`}
+                  onClick={() => setRecordsExpandedId(id => id === t.id ? null : t.id)}
+                  disabled={!!busy}
+                  title="Manage record table access"
+                >
+                  <ClipboardList size={13} /> Records {(t.recordTables || []).length > 0 ? `(${t.recordTables.length})` : ''}
                 </button>
                 <button className="marks-btn approve" onClick={() => { setEditingId(t.id); setNewPass(''); }} disabled={!!busy}>
                   <KeyRound size={13} /> Password

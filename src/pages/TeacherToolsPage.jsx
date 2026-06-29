@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Megaphone, Users, BarChart2, ArrowRight, Bold, Italic, List, Save, Pencil, Trash2, X } from 'lucide-react';
+import { Megaphone, Users, BarChart2, ArrowRight, Bold, Italic, List, Save, Pencil, Trash2, X, BookMarked, ClipboardList } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import FormatToolbar from '../components/FormatToolbar';
 import NoticeText from '../components/NoticeText';
@@ -14,6 +14,8 @@ import { getClosedDays } from '../services/calendarOverrideService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { notifyClassSafe } from '../services/notify';
 import MarksManager from '../components/MarksManager';
+import TeacherSyllabusView from '../components/TeacherSyllabusView';
+import TeacherRecordsView from '../components/TeacherRecordsView';
 
 // ── Notice Tool ───────────────────────────────────────────────
 function NoticeTool({ currentUser }) {
@@ -192,6 +194,26 @@ export default function TeacherToolsPage() {
 
       {/* Marks module — only for teachers granted access by admin */}
       {currentUser.canManageMarks && <MarksManager currentUser={currentUser} />}
+
+      {/* Syllabus module — only for teachers with at least one subject granted */}
+      {(currentUser.syllabusSubjects?.length > 0) && (
+        <div className="glass-card">
+          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <BookMarked size={20} color="var(--primary)" /> Syllabus Manager
+          </h2>
+          <TeacherSyllabusView syllabusSubjects={currentUser.syllabusSubjects} />
+        </div>
+      )}
+
+      {/* Records module — only for teachers with at least one table granted */}
+      {(currentUser.recordTables?.length > 0) && (
+        <div className="glass-card rec-page" style={{ padding: 0, background: 'none', boxShadow: 'none' }}>
+          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0', padding: '0 1.25rem' }}>
+            <ClipboardList size={20} color="var(--primary)" /> Records
+          </h2>
+          <TeacherRecordsView recordTables={currentUser.recordTables} />
+        </div>
+      )}
 
       {/* Notices tool — always expanded on the dedicated page */}
       <NoticeTool currentUser={currentUser} />

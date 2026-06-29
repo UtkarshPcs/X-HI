@@ -123,6 +123,11 @@ export default function Navbar() {
                       <ClipboardList size={15} /> My Records
                     </button>
                   )}
+                  {currentUser.role === ROLES.TEACHER && (currentUser.recordTables?.length > 0) && (
+                    <button className="nav-dropdown-item" onClick={() => go('/teacher-tools')}>
+                      <ClipboardList size={15} /> Records
+                    </button>
+                  )}
                   {currentUser.role !== ROLES.TEACHER && (
                     <button className="nav-dropdown-item" onClick={() => go('/holidays')}>
                       <CalendarHeart size={15} /> Holiday Homework

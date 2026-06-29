@@ -1,6 +1,6 @@
 import {
   collection, doc, addDoc, getDoc, getDocs, deleteDoc,
-  setDoc, query, orderBy, where, serverTimestamp,
+  setDoc, updateDoc, query, orderBy, where, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -54,4 +54,9 @@ export async function setCellValue(tableId, rollNo, colId, value) {
     values: { ...existing, [colId]: value },
     updatedAt: serverTimestamp(),
   });
+}
+
+// Admin grants/revokes which record table IDs a teacher can edit.
+export async function setTeacherRecordTables(teacherId, tableIds) {
+  await updateDoc(doc(db, 'teachers', teacherId), { recordTables: tableIds });
 }

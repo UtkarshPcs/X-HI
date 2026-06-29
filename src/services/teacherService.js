@@ -40,6 +40,11 @@ export async function setTeacherMarksAccess(id, canManageMarks) {
   await updateDoc(ref(id), { canManageMarks: !!canManageMarks });
 }
 
+// Phase 2: admin grants/revokes which syllabus subjectIds a teacher can manage.
+export async function setTeacherSyllabusSubjects(id, subjectIds) {
+  await updateDoc(ref(id), { syllabusSubjects: subjectIds });
+}
+
 export async function loginTeacher(id, password) {
   const teacher = await getTeacher(id);
   if (!teacher) return null;
