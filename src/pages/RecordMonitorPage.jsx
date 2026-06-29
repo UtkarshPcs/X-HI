@@ -73,7 +73,8 @@ function TableSection({ table }) {
     try {
       await setCellValue(table.id, rollNo, colId, value);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to save record cell:', err);
+      alert('Could not save this change: ' + (err?.message || err));
     }
   }
 

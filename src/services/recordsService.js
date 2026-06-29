@@ -1,6 +1,6 @@
 import {
-  collection, doc, addDoc, getDocs, deleteDoc,
-  setDoc, query, orderBy, where, serverTimestamp, FieldPath,
+  collection, doc, addDoc, getDoc, getDocs, deleteDoc,
+  setDoc, query, orderBy, where, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -40,19 +40,18 @@ export async function getMyEntries(rollNo) {
 }
 
 export async function setCellValue(tableId, rollNo, colId, value) {
-  // Single atomic write:
-  // - Creates the document if it doesn't exist
-  // - Merges ONLY the specified dot-path field (values.<colId>)
-  // - Never touches other columns already saved for this student
+  // Read-modify-write: simplest, unambiguous approach.
+  // 1. Read the current entry doc (if any)
+  // 2. Merge the single column change into the values object in JS
+  // 3. Write the whole document back
   const docRef = doc(db, ENTRIES, `${tableId}_${rollNo}`);
-  await setDoc(
-    docRef,
-    {
-      tableId,
-      rollNo,
-      [`values.${colId}`]: value,
-      updatedAt: serverTimestamp(),
-    },
-    { mergeFields: ['tableId', 'rollNo', `values.${colId}`, 'updatedAt'] }
-  );
+  const snap = await getDoc(docRef);
+  const existing = snap.exists() ? (snap.data().values || {}) : {};
+
+  await setDoc(docRef, {
+    tableId,
+    rollNo,
+    values: { ...existing, [colId]: value },
+    updatedAt: serverTimestamp(),
+  });
 }
