@@ -100,7 +100,7 @@ export default function TestScoresPage() {
   const [overrides, setOverrides] = useState({});
   const [myComplaints, setMyComplaints] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ test: 'test1', claimedMarks: '', reason: '' });
+  const [form, setForm] = useState({ test: 'test1', type: 'marks', claimedMarks: '', claimedStatus: 'present', reason: '' });
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState('');
 
@@ -142,24 +142,38 @@ export default function TestScoresPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setErr('');
-    const claimed = Number(form.claimedMarks);
-    if (isNaN(claimed) || claimed < 0 || claimed > MAX_MARKS) {
-      setErr(`Marks must be between 0 and ${MAX_MARKS}.`);
-      return;
+    if (form.type === 'marks') {
+      const claimed = Number(form.claimedMarks);
+      if (isNaN(claimed) || claimed < 0 || claimed > MAX_MARKS) {
+        setErr(`Marks must be between 0 and ${MAX_MARKS}.`);
+        return;
+      }
+      setSubmitting(true);
+      try {
+        await fileComplaint({
+          phone: currentUser.phone, rollNo: roll, name: currentUser.name,
+          test: form.test, claimedMarks: claimed,
+          currentMarks: form.test === 'test1' ? t1 : t2,
+          reason: form.reason,
+        });
+      } catch (e) { setErr(e.message); setSubmitting(false); return; }
+    } else {
+      // attendance complaint
+      setSubmitting(true);
+      try {
+        await fileComplaint({
+          phone: currentUser.phone, rollNo: roll, name: currentUser.name,
+          test: form.test, claimedMarks: form.claimedStatus === 'present' ? 'PRESENT' : 'ABSENT',
+          currentMarks: form.test === 'test1' ? (t1 === null ? 'absent' : 'present') : (t2 === null ? 'absent' : 'present'),
+          reason: `Attendance dispute: I was ${form.claimedStatus}. ${form.reason}`,
+          complaintType: 'attendance',
+        });
+      } catch (e) { setErr(e.message); setSubmitting(false); return; }
     }
-    setSubmitting(true);
-    try {
-      await fileComplaint({
-        phone: currentUser.phone, rollNo: roll, name: currentUser.name,
-        test: form.test, claimedMarks: claimed,
-        currentMarks: form.test === 'test1' ? t1 : t2,
-        reason: form.reason,
-      });
-      setMyComplaints(await getMyComplaint(currentUser.phone));
-      setShowForm(false);
-      setForm({ test: 'test1', claimedMarks: '', reason: '' });
-    } catch (e) { setErr(e.message); }
-    finally { setSubmitting(false); }
+    setMyComplaints(await getMyComplaint(currentUser.phone));
+    setShowForm(false);
+    setForm({ test: 'test1', type: 'marks', claimedMarks: '', claimedStatus: 'present', reason: '' });
+    setSubmitting(false);
   }
 
   return (
@@ -287,8 +301,17 @@ export default function TestScoresPage() {
         {showForm && (
           <form onSubmit={handleSubmit} className="ts-complaint-form">
             <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-              Report Incorrect Marks
+              Report an Issue
             </h4>
+
+            <label className="ts-label">Complaint type
+              <select className="as-select" style={{ width: '100%', marginTop: '0.3rem' }}
+                value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                <option value="marks">Wrong marks recorded</option>
+                <option value="attendance">Wrong attendance (present/absent)</option>
+              </select>
+            </label>
+
             <label className="ts-label">Which test?
               <select className="as-select" style={{ width: '100%', marginTop: '0.3rem' }}
                 value={form.test} onChange={e => setForm(f => ({ ...f, test: e.target.value }))}>
@@ -296,12 +319,24 @@ export default function TestScoresPage() {
                 <option value="test2">Test 2 (currently: {t2 === null ? 'Absent' : t2})</option>
               </select>
             </label>
-            <label className="ts-label">My actual marks (0–{MAX_MARKS})
-              <input className="auth-input" type="number" min="0" max={MAX_MARKS} placeholder="e.g. 8"
-                value={form.claimedMarks} onChange={e => setForm(f => ({ ...f, claimedMarks: e.target.value }))} required />
-            </label>
+
+            {form.type === 'marks' ? (
+              <label className="ts-label">My actual marks (0–{MAX_MARKS})
+                <input className="auth-input" type="number" min="0" max={MAX_MARKS} placeholder="e.g. 8"
+                  value={form.claimedMarks} onChange={e => setForm(f => ({ ...f, claimedMarks: e.target.value }))} required />
+              </label>
+            ) : (
+              <label className="ts-label">I was actually
+                <select className="as-select" style={{ width: '100%', marginTop: '0.3rem' }}
+                  value={form.claimedStatus} onChange={e => setForm(f => ({ ...f, claimedStatus: e.target.value }))}>
+                  <option value="present">Present</option>
+                  <option value="absent">Absent</option>
+                </select>
+              </label>
+            )}
+
             <label className="ts-label">Reason (optional)
-              <input className="auth-input" type="text" placeholder="e.g. marked absent but I was present"
+              <input className="auth-input" type="text" placeholder="e.g. I was present but marked absent"
                 value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} />
             </label>
             {err && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0 }}>{err}</p>}

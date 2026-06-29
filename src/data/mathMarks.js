@@ -12,7 +12,7 @@ export const MATH_MARKS_RAW = [
   { roll: 9,  name: "Sonali",         test1: 7,    test2: 7    },
   { roll: 10, name: "Yesh",           test1: 6,    test2: 6    },
   { roll: 11, name: "Isha",           test1: 6,    test2: 8    },
-  { roll: 12, name: "Ayush",          test1: 7,    test2: 6    },
+  { roll: 12, name: "Ayush",          test1: "Ab", test2: "Ab" },
   { roll: 13, name: "Aman Kishor",    test1: "Ab", test2: 10   },
   { roll: 14, name: "Kirti",          test1: 8,    test2: 0    },
   { roll: 15, name: "Suryanahu",      test1: 4,    test2: "Ab" },
