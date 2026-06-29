@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import NoticeText from './NoticeText';
+import CopyWhatsAppButton from './CopyWhatsAppButton';
 import { Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getNotices } from '../services/noticeService';
@@ -49,13 +50,12 @@ export default function NoticeBar() {
     <div className="glass-card notice-bar">
       <div className="notice-bar-head"><Megaphone size={15} /> Notices</div>
       <div className="notice-item">
-        <div className="markdown-content">
-          <ReactMarkdown>{notices[0].body}</ReactMarkdown>
-        </div>
+        <NoticeText>{notices[0].body}</NoticeText>
         <div className="notice-item-meta">
           <span>— {notices[0].authorName}</span>
           <span>{formatDate(notices[0].createdAtMs)}</span>
         </div>
+        <CopyWhatsAppButton body={notices[0].body} shareLink={`${window.location.origin}/api/notice-share?id=${notices[0].id}`} style={{ marginTop: '0.5rem' }} />
       </div>
       {notices.length > 1 && (
         <Link to="/notices" className="auth-link" style={{ alignSelf: 'flex-start' }}>

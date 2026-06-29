@@ -3,6 +3,10 @@ import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import FormatToolbar from '../components/FormatToolbar';
+import NoticeText from '../components/NoticeText';
+import CopyWhatsAppButton from '../components/CopyWhatsAppButton';
+import { stripFormatting } from '../utils/whatsappFormat';
 import SyllabusProgressBar from '../components/SyllabusProgressBar';
 import { addHomework } from '../services/homeworkService';
 import { getNotices, addNotice, updateNotice, deleteNotice } from '../services/noticeService';
@@ -50,32 +54,6 @@ function NoticesManager({ currentUser }) {
     setReloadKey((k) => k + 1);
   }, []);
 
-  // Insert markdown formatting around the current textarea selection.
-  function applyFormat(type) {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const selected = body.slice(start, end);
-    let inserted;
-
-    if (type === 'bold') {
-      inserted = `**${selected || 'bold text'}**`;
-    } else if (type === 'italic') {
-      inserted = `*${selected || 'italic text'}*`;
-    } else if (type === 'bullet') {
-      const lines = (selected || 'list item').split('\n');
-      inserted = lines.map((l) => `- ${l}`).join('\n');
-    }
-
-    const next = body.slice(0, start) + inserted + body.slice(end);
-    setBody(next);
-    // Restore focus and place caret after the inserted text.
-    requestAnimationFrame(() => {
-      el.focus();
-      try { el.setSelectionRange(start + inserted.length, start + inserted.length); } catch { /* noop */ }
-    });
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -87,7 +65,7 @@ function NoticesManager({ currentUser }) {
       } else {
         await addNotice({ body, authorName: currentUser.name, authorPhone: currentUser.phone });
         // Fire-and-forget push to the class (admin only; safe no-op otherwise).
-        const preview = body.trim().replace(/[#*_>`-]/g, '').replace(/\s+/g, ' ').slice(0, 120);
+        const preview = stripFormatting(body, 120);
         notifyClassSafe(currentUser, { title: '📢 New Notice', body: preview, url: '/', type: 'notice' });
       }
       setBody('');
@@ -130,15 +108,11 @@ function NoticesManager({ currentUser }) {
       </h2>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div className="fmt-toolbar">
-          <button type="button" className="fmt-btn" title="Bold" onClick={() => applyFormat('bold')}><Bold size={16} /></button>
-          <button type="button" className="fmt-btn" title="Italic" onClick={() => applyFormat('italic')}><Italic size={16} /></button>
-          <button type="button" className="fmt-btn" title="Bullet list" onClick={() => applyFormat('bullet')}><List size={16} /></button>
-        </div>
+        <FormatToolbar textareaRef={textareaRef} body={body} setBody={setBody} />
 
         <textarea
           ref={textareaRef}
-          placeholder="Write your notice… Use the toolbar for **bold**, *italic*, or bullet lists."
+          placeholder="Write your notice… Use the toolbar for *bold*, _italic_, lists and more (WhatsApp style)."
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={5}
@@ -149,8 +123,8 @@ function NoticesManager({ currentUser }) {
         {body.trim() && (
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
             <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>Preview</span>
-            <div className="markdown-content" style={{ marginTop: '0.5rem' }}>
-              <ReactMarkdown>{body}</ReactMarkdown>
+            <div style={{ marginTop: '0.5rem' }}>
+              <NoticeText>{body}</NoticeText>
             </div>
           </div>
         )}
@@ -180,7 +154,7 @@ function NoticesManager({ currentUser }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {notices.map((n) => (
               <div key={n.id} className="notice-item">
-                <div className="markdown-content"><ReactMarkdown>{n.body}</ReactMarkdown></div>
+                <NoticeText>{n.body}</NoticeText>
                 <div className="notice-item-meta">
                   <span>— {n.authorName}</span>
                   <span style={{ display: 'flex', gap: '0.5rem' }}>
@@ -188,6 +162,7 @@ function NoticesManager({ currentUser }) {
                     <button onClick={() => handleDelete(n.id)} title="Delete" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}><Trash2 size={15} /></button>
                   </span>
                 </div>
+                <CopyWhatsAppButton body={n.body} shareLink={`${window.location.origin}/api/notice-share?id=${n.id}`} style={{ marginTop: '0.5rem' }} />
               </div>
             ))}
           </div>

@@ -4087,3 +4087,24 @@ a {
   .mm-clear-btn { width: 26px; height: 26px; }
   .mm-saved-tick { display: none; }
 }
+
+/* ─── Notice "Copy for WhatsApp" button ──────────────────────── */
+.notice-wa-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(37,211,102,0.3);
+  background: rgba(37,211,102,0.08);
+  color: #25D366;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.notice-wa-copy:hover { background: rgba(37,211,102,0.16); }
+
+/* Ensure the 8-button formatting toolbar wraps nicely on mobile */
+.fmt-toolbar { flex-wrap: wrap; }

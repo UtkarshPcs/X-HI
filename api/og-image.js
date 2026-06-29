@@ -33,13 +33,15 @@ export default function handler(req) {
     const type = searchParams.get('type') || 'homework';
     const isClasswork = type === 'classwork';
     const isNotes     = type === 'notes';
+    const isNotice    = type === 'notice';
+    const isHome      = type === 'home';
     const title = clampText(searchParams.get('title') || '10th HI Portal', 48);
     const rawLines = (searchParams.get('lines') || '').split('|').map((l) => l.trim()).filter(Boolean).slice(0, 5);
 
-    const accent     = isNotes ? '#f59e0b' : isClasswork ? '#FF6D00' : '#8b5cf6';
-    const accentSoft = isNotes ? 'rgba(245,158,11,0.18)' : isClasswork ? 'rgba(255,109,0,0.18)' : 'rgba(139,92,246,0.18)';
-    const label      = isNotes ? 'NOTES' : isClasswork ? 'CLASSWORK' : 'HOMEWORK';
-    const emoji      = isNotes ? '📄' : isClasswork ? '📝' : '📋';
+    const accent     = isNotice ? '#ec4899' : isNotes ? '#f59e0b' : isClasswork ? '#FF6D00' : '#8b5cf6';
+    const accentSoft = isNotice ? 'rgba(236,72,153,0.18)' : isNotes ? 'rgba(245,158,11,0.18)' : isClasswork ? 'rgba(255,109,0,0.18)' : 'rgba(139,92,246,0.18)';
+    const label      = isHome ? 'PORTAL' : isNotice ? 'NOTICE' : isNotes ? 'NOTES' : isClasswork ? 'CLASSWORK' : 'HOMEWORK';
+    const emoji      = isHome ? '🎓' : isNotice ? '📢' : isNotes ? '📄' : isClasswork ? '📝' : '📋';
 
     const lineEls = rawLines.length
       ? rawLines.map((line) =>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Megaphone } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import NoticeText from '../components/NoticeText';
+import CopyWhatsAppButton from '../components/CopyWhatsAppButton';
 import { getNotices } from '../services/noticeService';
 
 function formatDate(ms) {
@@ -42,13 +43,12 @@ export default function NoticesPage() {
                   LATEST
                 </span>
               )}
-              <div className="markdown-content">
-                <ReactMarkdown>{n.body}</ReactMarkdown>
-              </div>
+              <NoticeText>{n.body}</NoticeText>
               <div className="notice-item-meta">
                 <span>— {n.authorName}</span>
                 <span>{formatDate(n.createdAtMs)}{n.updatedAtMs && n.updatedAtMs !== n.createdAtMs ? ' (edited)' : ''}</span>
               </div>
+              <CopyWhatsAppButton body={n.body} shareLink={`${window.location.origin}/api/notice-share?id=${n.id}`} style={{ marginTop: '0.5rem' }} />
             </div>
           ))}
         </div>

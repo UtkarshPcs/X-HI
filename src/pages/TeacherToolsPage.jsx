@@ -2,6 +2,10 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Megaphone, Users, BarChart2, ArrowRight, Bold, Italic, List, Save, Pencil, Trash2, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import FormatToolbar from '../components/FormatToolbar';
+import NoticeText from '../components/NoticeText';
+import CopyWhatsAppButton from '../components/CopyWhatsAppButton';
+import { stripFormatting } from '../utils/whatsappFormat';
 import { useAuth } from '../auth/AuthContext';
 import { getNotices, addNotice, updateNotice, deleteNotice } from '../services/noticeService';
 import { getAllUsers } from '../services/adminService';
@@ -32,23 +36,6 @@ function NoticeTool({ currentUser }) {
 
   const refresh = useCallback(() => { setLoading(true); setReloadKey(k => k + 1); }, []);
 
-  function applyFormat(type) {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end   = el.selectionEnd;
-    const sel   = body.slice(start, end);
-    let inserted;
-    if (type === 'bold')        inserted = `**${sel || 'bold text'}**`;
-    else if (type === 'italic') inserted = `*${sel || 'italic text'}*`;
-    else if (type === 'bullet') inserted = (sel || 'list item').split('\n').map(l => `- ${l}`).join('\n');
-    const next = body.slice(0, start) + inserted + body.slice(end);
-    setBody(next);
-    requestAnimationFrame(() => {
-      el.focus();
-      try { el.setSelectionRange(start + inserted.length, start + inserted.length); } catch { /* noop */ }
-    });
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -59,7 +46,7 @@ function NoticeTool({ currentUser }) {
         await updateNotice(editingId, { body });
       } else {
         await addNotice({ body, authorName: currentUser.name, authorPhone: currentUser.id });
-        const preview = body.trim().replace(/[#*_>`-]/g, '').replace(/\s+/g, ' ').slice(0, 120);
+        const preview = stripFormatting(body, 120);
         notifyClassSafe(currentUser, { title: '📢 New Notice', body: preview, url: '/', type: 'notice' });
       }
       setBody(''); setEditingId(null); refresh();
@@ -83,16 +70,12 @@ function NoticeTool({ currentUser }) {
       </h2>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div className="fmt-toolbar">
-          <button type="button" className="fmt-btn" title="Bold"        onClick={() => applyFormat('bold')}  ><Bold   size={16} /></button>
-          <button type="button" className="fmt-btn" title="Italic"      onClick={() => applyFormat('italic')}><Italic size={16} /></button>
-          <button type="button" className="fmt-btn" title="Bullet list" onClick={() => applyFormat('bullet')}><List   size={16} /></button>
-        </div>
+        <FormatToolbar textareaRef={textareaRef} body={body} setBody={setBody} />
         <textarea
           ref={textareaRef}
           value={body}
           onChange={e => setBody(e.target.value)}
-          placeholder="Write your notice… Use the toolbar for **bold**, *italic*, or bullet lists."
+          placeholder="Write your notice… Use the toolbar for *bold*, _italic_, lists and more (WhatsApp style)."
           rows={5}
           required
           style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'Inter, sans-serif' }}
@@ -100,7 +83,7 @@ function NoticeTool({ currentUser }) {
         {body.trim() && (
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem' }}>
             <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>Preview</span>
-            <div className="markdown-content" style={{ marginTop: '0.5rem' }}><ReactMarkdown>{body}</ReactMarkdown></div>
+            <div style={{ marginTop: '0.5rem' }}><NoticeText>{body}</NoticeText></div>
           </div>
         )}
         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -128,7 +111,7 @@ function NoticeTool({ currentUser }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {myNotices.map(n => (
               <div key={n.id} className="notice-item">
-                <div className="markdown-content"><ReactMarkdown>{n.body}</ReactMarkdown></div>
+                <NoticeText>{n.body}</NoticeText>
                 <div className="notice-item-meta">
                   <span>— {n.authorName}</span>
                   <span style={{ display: 'flex', gap: '0.5rem' }}>
@@ -142,6 +125,7 @@ function NoticeTool({ currentUser }) {
                     </button>
                   </span>
                 </div>
+                <CopyWhatsAppButton body={n.body} shareLink={`${window.location.origin}/api/notice-share?id=${n.id}`} style={{ marginTop: '0.5rem' }} />
               </div>
             ))}
           </div>
