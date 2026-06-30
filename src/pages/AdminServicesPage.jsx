@@ -199,7 +199,7 @@ function ActivityTab() {
       </div>
 
       {/* Per-user table */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '1.5rem 0 0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', margin: '1.5rem 0 0.75rem' }}>
         <h4 className="as-section-title" style={{ margin: 0 }}><Users size={15} /> Per-User Activity</h4>
         <select className="as-select" value={sort} onChange={e => setSort(e.target.value)}>
           <option value="lastSeen">Sort: Last Active</option>
@@ -692,9 +692,9 @@ function TeachersTab() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
         <h4 className="as-section-title" style={{ margin: 0 }}><GraduationCap size={14} /> Teacher Accounts ({teachers.length})</h4>
-        <button className="auth-btn secondary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.82rem' }}
+        <button className="auth-btn secondary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.82rem', flexShrink: 0 }}
           onClick={() => setShowAdd(o => !o)}>
           <Plus size={13} /> {showAdd ? 'Cancel' : 'Add Teacher'}
         </button>

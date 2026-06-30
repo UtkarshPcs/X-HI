@@ -4506,3 +4506,70 @@ a {
 
 /* ── UXCampaignAdmin ──────────────────────────────────────────────────────── */
 /* Uses existing .as-muted, .auth-btn — no extra styles needed                 */
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Global mobile layout fixes                                                  */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/* Reduce glass-card padding on small screens so content isn't squeezed */
+@media (max-width: 480px) {
+  .glass-card { padding: 1rem; }
+}
+
+/* Utility: card header row that wraps cleanly on narrow screens.
+   Used by "Title ... View all →" rows throughout the app. */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+.card-header-row .card-header-action {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Prevent long teacher names / subject labels from overflowing teacher chip row */
+.teacher-chip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Auth modal: ensure it doesn't overflow on very small screens */
+@media (max-width: 380px) {
+  .auth-modal {
+    width: calc(100vw - 1.5rem);
+    padding: 1.25rem 1rem;
+  }
+}
+
+/* Notif prompt: stack vertically on very small screens */
+@media (max-width: 420px) {
+  .notif-prompt {
+    flex-wrap: wrap;
+  }
+  .notif-prompt-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Merge banner: stack on small screens */
+@media (max-width: 480px) {
+  .merge-banner {
+    flex-wrap: wrap;
+  }
+}
+
+/* marks-banner: ensure body text doesn't overflow */
+.marks-banner-body p {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}

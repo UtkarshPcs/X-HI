@@ -230,7 +230,7 @@ function HomeworkManager({ currentUser }) {
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <label style={{ color: 'var(--text-secondary)' }}>Tasks</label>
             <button type="button" onClick={handleAddTask} className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>
               <Plus size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Add Task
@@ -902,7 +902,7 @@ export default function AdminPanel() {
       {isAdminUser(currentUser) && <CalendarOverrideManager />}
 
       {/* Records shortcut */}
-      <div className="glass-card" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem' }}>
+      <div className="glass-card" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', padding: '1rem 1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1rem', fontWeight: 600 }}>
           <ClipboardList size={18} style={{ color: 'var(--primary)' }} /> Records
         </div>

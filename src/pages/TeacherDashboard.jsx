@@ -81,11 +81,11 @@ export default function TeacherDashboard() {
 
       {/* Quick link to Teacher Tools */}
       <div className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/teacher-tools')}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 600, fontSize: '0.95rem' }}>
             <Wrench size={18} color="var(--primary)" /> Teacher Tools
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.82rem', flexShrink: 0 }}>
             Notices &amp; more <ArrowRight size={13} />
           </span>
         </div>

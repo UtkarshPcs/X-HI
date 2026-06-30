@@ -282,12 +282,12 @@ export default function StudentDashboard() {
         onClick={() => navigate('/syllabus')}
         title="View full syllabus progress"
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <BookMarked size={20} color="var(--primary)" />
             Syllabus Progress
           </h2>
-          <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
             View syllabus <ArrowRight size={13} />
           </span>
         </div>
@@ -327,7 +327,7 @@ export default function StudentDashboard() {
 
       {/* Today's / Latest homework card */}
       <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <BookOpen size={20} color="var(--primary)" />
             {isLatestToday ? "Today's Homework" : 'Latest Homework'}
@@ -335,7 +335,7 @@ export default function StudentDashboard() {
           <button
             className="auth-link"
             onClick={() => navigate('/homework')}
-            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}
           >
             View all <ArrowRight size={13} />
           </button>
@@ -392,7 +392,7 @@ export default function StudentDashboard() {
 
       {/* Latest classwork card */}
       <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <ClipboardList size={20} color="#FF6D00" />
             Latest Classwork
@@ -400,7 +400,7 @@ export default function StudentDashboard() {
           <button
             className="auth-link"
             onClick={() => navigate('/homework?tab=classwork')}
-            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}
           >
             View all <ArrowRight size={13} />
           </button>
@@ -440,12 +440,12 @@ export default function StudentDashboard() {
 
       {/* Notes teaser */}
       <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <BookCopy size={20} color="var(--primary)" /> Notes Exchange
           </h2>
           <button className="auth-link" onClick={() => navigate('/notes')}
-            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
             View all <ArrowRight size={13} />
           </button>
         </div>

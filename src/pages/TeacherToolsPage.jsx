@@ -207,14 +207,14 @@ export default function TeacherToolsPage() {
       {/* Records module — only for teachers with at least one table granted */}
       {(currentUser.recordTables?.length > 0) && (
         <div className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/teacher-records')}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 600, fontSize: '0.95rem' }}>
               <ClipboardList size={18} color="var(--primary)" /> Records
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>
                 {currentUser.recordTables.length} table{currentUser.recordTables.length !== 1 ? 's' : ''} assigned
               </span>
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.82rem', flexShrink: 0 }}>
               Edit &amp; update <ArrowRight size={13} />
             </span>
           </div>
