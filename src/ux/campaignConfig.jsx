@@ -23,7 +23,7 @@ import {
   BookMarked, ClipboardList, TrendingUp, Bell,
   BarChart2, GitMerge, Mail, HandMetal, Navigation,
   Compass, LayoutDashboard, Sparkles, CalendarCheck,
-  Wrench, Download,
+  Wrench, Download, GraduationCap,
 } from 'lucide-react';
 import { ROLES } from '../auth/roles';
 import {
@@ -371,6 +371,28 @@ const CAMPAIGNS = [
     content: {
       getSteps: () => NOTES_TOUR_STEPS,
       role: () => null,
+    },
+  },
+
+  // ── MEDIUM: Study Together Feature Announcement ───────────────────────────
+  {
+    id: 'study-together-announcement-v1',
+    type: 'banner',
+    priority: 65,
+    storage: 'local',
+    blocking: false,
+    dismissible: true,
+    condition: (user) => !!(
+      user &&
+      !localStorage.getItem(`ux_study-together-announcement-v1_${user.phone}`)
+    ),
+    content: {
+      variant: 'info',
+      icon: GraduationCap,
+      title: '🎓 New Feature: Study Together',
+      body: 'Create or join live study rooms around any YouTube lecture. Real-time chat, shared presence, and owner controls — all in one place.',
+      cta: 'Try it now',
+      ctaRoute: '/study-together',
     },
   },
 
