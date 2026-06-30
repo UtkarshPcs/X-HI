@@ -5,6 +5,7 @@ import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckC
 import { ROLES, TEST_PHONE } from '../auth/roles';
 import { saveEmail, setTestAccountRole, resetTestAccount } from '../auth/authService';
 import { sendEmailLink } from '../firebase';
+import { useToast } from '../ux/hooks/useToast';
 import packageJson from '../../package.json';
 
 export default function ProfilePage() {
@@ -12,6 +13,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const fileRef = useRef();
+  const { toast } = useToast();
   const [photo, setPhoto] = useState(null);
   const [loadedPhotoForPhone, setLoadedPhotoForPhone] = useState(null);
 
@@ -20,14 +22,15 @@ export default function ProfilePage() {
   const [emailBusy, setEmailBusy] = useState(false);
   const [emailMsg, setEmailMsg] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
+
   // Show success toast when returning from verification link
-  const [verifiedToast, setVerifiedToast] = useState(location.state?.emailVerified || false);
   useEffect(() => {
-    if (verifiedToast) {
-      const t = setTimeout(() => setVerifiedToast(false), 4000);
-      return () => clearTimeout(t);
+    if (location.state?.emailVerified) {
+      toast.success('Email verified successfully!');
+      // Clear the router state so it doesn't re-fire on refresh
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [verifiedToast]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!loading && !currentUser) navigate('/');
@@ -174,12 +177,6 @@ export default function ProfilePage() {
         {/* ── Email Section — students only ── */}
         {!isTeacher && (
         <div className="profile-email-section">
-          {verifiedToast && (
-            <div className="profile-email-toast">
-              <CheckCircle size={15} /> Email verified successfully!
-            </div>
-          )}
-
           <div className="profile-email-card">
             <div className="profile-email-header">
               <Mail size={15} />

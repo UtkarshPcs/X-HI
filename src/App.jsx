@@ -8,6 +8,8 @@ import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
 import ForegroundToast from './components/ForegroundToast';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import { UXProvider } from './ux/UXProvider';
+import UXRenderer from './ux/components/UXRenderer';
 import StudentDashboard from './pages/StudentDashboard';
 import Homework from './pages/Homework';
 import HolidayHomework from './pages/HolidayHomework';
@@ -137,6 +139,7 @@ function AppInner() {
       <WhatsNew />
       <InstallPrompt />
       <ForegroundToast />
+      <UXRenderer />
     </>
   );
 }
@@ -145,7 +148,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppInner />
+        <UXProvider>
+          <AppInner />
+        </UXProvider>
       </AuthProvider>
     </BrowserRouter>
   );

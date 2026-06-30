@@ -12,6 +12,7 @@ import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } 
 import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher, setTeacherMarksAccess, setTeacherSyllabusSubjects } from '../services/teacherService';
 import { syllabusData } from '../data/syllabusData';
 import { getTables, setTeacherRecordTables } from '../services/recordsService';
+import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -235,31 +236,9 @@ function ActivityTab() {
 }
 
 // ── Onboarding Tab ────────────────────────────────────────────
-function OnboardingTab({ currentUser, navigate, triggerTour }) {
-  return (
-    <div>
-      <p className="as-muted" style={{ marginBottom: '1rem' }}>Tours run on the dashboard — you'll be taken there first.</p>
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-        <button className="auth-btn secondary" style={{ flex: 1 }} onClick={() => { triggerTour(ROLES.STUDENT); navigate('/'); }}>Test Student Tour</button>
-        <button className="auth-btn secondary" style={{ flex: 1 }} onClick={() => { triggerTour(ROLES.MONITOR); navigate('/'); }}>Test Monitor Tour</button>
-        <button className="auth-btn secondary" style={{ flex: 1 }} onClick={() => { triggerTour(ROLES.TEACHER); navigate('/'); }}>Test Teacher Tour</button>
-      </div>
-      <button className="auth-btn secondary" style={{ width: '100%', marginTop: '0.25rem' }}
-        onClick={() => { localStorage.removeItem(`onboarding_done_${currentUser.phone}`); alert('Onboarding reset. Refresh to trigger.'); }}>
-        Reset Onboarding (for testing)
-      </button>
-      <button className="auth-btn secondary" style={{ width: '100%', marginTop: '0.5rem' }}
-        onClick={async () => {
-          localStorage.removeItem(`whatsnew_v1_${currentUser.phone}`);
-          try { await resetWhatsNew(currentUser.phone); } catch (e) { console.error(e); }
-          window.location.href = '/';
-        }}>
-        Show "What's New" Again (for testing)
-      </button>
-    </div>
-  );
+function OnboardingTab() {
+  return <UXCampaignAdmin />;
 }
-
 
 
 // ── Marks Complaints Tab ──────────────────────────────────────
@@ -998,7 +977,7 @@ export default function AdminServicesPage() {
         {tab === 'notes'      && <NotesReviewTab />}
         {tab === 'teachers'   && <TeachersTab />}
         {tab === 'merge'      && <MergeTab />}
-        {tab === 'onboarding' && <OnboardingTab currentUser={currentUser} navigate={navigate} triggerTour={triggerTour} />}
+        {tab === 'onboarding' && <OnboardingTab />}
         {tab === 'test'       && <TestAccountTab />}
         {tab === 'data'       && <DataExportTab />}
         {tab === 'records'    && (

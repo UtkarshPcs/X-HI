@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Joyride, STATUS } from 'react-joyride';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronRight, ArrowLeft, Upload, FileText, Clock, CheckCircle, XCircle, Zap, HelpCircle, Share2, Download, X } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
@@ -15,6 +14,9 @@ import {
 import { logActivity } from '../services/adminService';
 import NotesViewer from '../components/NotesViewer';
 import UploadNoteModal from '../components/UploadNoteModal';
+import TourRunner from '../ux/components/TourRunner';
+import { NOTES_TOUR_STEPS } from '../ux/campaignConfig';
+import { markCampaignSeen } from '../ux/campaignService';
 
 export function SparkIcon({ size = 14, color = 'currentColor' }) {
   return (
@@ -211,63 +213,6 @@ function SparkLogItem({ entry }) {
   );
 }
 
-// ── Joyride steps ─────────────────────────────────────────────
-const TOUR_STEPS = [
-  {
-    target: '[data-tour="spark-wallet"]',
-    title: '⚡ Your Sparks',
-    content: 'Sparks are your currency here. You start with 10. Spend them to read notes, earn them back by uploading your own.',
-    disableBeacon: true,
-    placement: 'bottom',
-  },
-  {
-    target: '[data-tour="tab-browse"]',
-    title: '📚 Browse Notes',
-    content: 'Tap here to find notes. Go Section → Subject → Chapter. Opening a chapter for the first time costs 2 Sparks — after that it\'s free forever.',
-    placement: 'bottom',
-  },
-  {
-    target: '[data-tour="tab-purchases"]',
-    title: '🔓 Your Purchases',
-    content: 'Every chapter you\'ve already unlocked lives here. Come back anytime to re-read them — totally free, no extra Sparks needed.',
-    placement: 'bottom',
-  },
-  {
-    target: '[data-tour="tab-mysubmissions"]',
-    title: '📤 My Submissions',
-    content: 'See the notes you\'ve uploaded here. Once the admin approves one, you automatically get +4 Sparks.',
-    placement: 'bottom',
-  },
-  {
-    target: '[data-tour="upload-fab"]',
-    title: '➕ Upload Notes',
-    content: 'Have good notes? Upload a PDF for any chapter. Submit it — if the admin approves, you earn 4 Sparks. Tap the ? anytime to see this guide again.',
-    placement: 'top',
-  },
-].map((s, i, arr) => ({ ...s, totalSteps: arr.length, disableBeacon: true }));
-
-// Simple tooltip matching the project's custom tooltip style
-function TourTooltip({ index, step, backProps, closeProps, primaryProps, tooltipProps, isLastStep }) {
-  return (
-    <div {...tooltipProps} className="custom-tooltip spring-up">
-      <div className="tooltip-header stagger-1">
-        <h3 className="tooltip-title" style={{ background: 'linear-gradient(135deg, var(--primary), #a78bfa)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
-          {step.title}
-        </h3>
-      </div>
-      <div className="tooltip-body stagger-2">{step.content}</div>
-      <div className="tooltip-footer stagger-3">
-        <div className="tooltip-progress">{index + 1} / {step.totalSteps}</div>
-        <div className="tooltip-controls">
-          {!isLastStep && <button {...closeProps} className="tooltip-skip">Skip</button>}
-          {index > 0 && <button {...backProps} className="tooltip-btn secondary">Back</button>}
-          <button {...primaryProps} className="tooltip-btn primary">{isLastStep ? 'Finish' : 'Next'}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Holiday Homework answers view ────────────────────────────
 function HHNotesView({ task, onUpload, currentUser, sparks, setSparks, purchasedChapters, setPurchasedChapters }) {
   const [notes,   setNotes]   = useState(null);
@@ -384,12 +329,12 @@ export default function NotesPage() {
   const [viewingNote, setViewingNote] = useState(null);
   const [showUpload,     setShowUpload]     = useState(false);
   const [uploadHHTask,   setUploadHHTask]   = useState(null); // pre-fill HH task in modal
-  const [tourRun,     setTourRun]     = useState(false);
+  const [tourRun, setTourRun] = useState(false);
 
-  // Auto-run tour on first ever visit to Notes page
+  // Auto-run tour on first ever visit to Notes page (via campaign service key)
   useEffect(() => {
     if (!currentUser || !isStudent) return;
-    const key = `notes_tour_done_${currentUser.phone}`;
+    const key = `ux_notes-tour-v1_${currentUser.phone}`;
     if (!localStorage.getItem(key)) setTourRun(true);
   }, [currentUser]);
 
@@ -516,11 +461,9 @@ export default function NotesPage() {
     }
   }
 
-  function handleTourEnd({ status }) {
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-      setTourRun(false);
-      localStorage.setItem(`notes_tour_done_${currentUser.phone}`, '1');
-    }
+  function handleTourEnd() {
+    setTourRun(false);
+    markCampaignSeen('notes-tour-v1', currentUser.phone, 'local').catch(() => {});
   }
 
   if (!currentUser) {
@@ -570,15 +513,13 @@ export default function NotesPage() {
   return (
     <div className="notes-page animate-fade-in">
 
-      <Joyride
-        steps={TOUR_STEPS}
+      <TourRunner
+        campaignId="notes-tour-v1"
+        steps={NOTES_TOUR_STEPS}
         run={tourRun}
-        continuous
-        showSkipButton
-        disableScrolling
-        tooltipComponent={TourTooltip}
-        callback={handleTourEnd}
-        styles={{ options: { overlayColor: 'rgba(0,0,0,0.65)', zIndex: 10000 } }}
+        variant="tour"
+        onComplete={handleTourEnd}
+        disableScrolling={false}
       />
 
       {/* Header */}
