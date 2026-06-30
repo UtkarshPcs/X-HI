@@ -4426,3 +4426,41 @@ a {
   .rtp-mobile-view .rec-view-cell  { min-width: 80px; text-align: right; }
   .rtp-mobile-view .rec-check-cell { width: 36px; height: 36px; font-size: 1rem; }
 }
+
+/* ── Study Together ──────────────────────────────────────────────────────── */
+
+/* spin keyframe used by loading spinner */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Desktop room layout: show side-by-side, hide mobile stack */
+.study-room-page .study-desktop-layout { display: flex; }
+.study-room-page .study-mobile-layout  { display: none; }
+
+/* On mobile (<= 768px): flip to stacked layout */
+@media (max-width: 768px) {
+  .study-room-page .study-desktop-layout { display: none !important; }
+  .study-room-page .study-mobile-layout  { display: flex !important; }
+}
+
+/* StudyRoomPage root: use full viewport height minus navbar */
+.study-room-root {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+/* Room card hover glow */
+.study-room-card:hover {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary), var(--shadow-glow);
+}
+
+/* Chat textarea focus ring */
+.study-chat-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(139,92,246,0.2);
+}

@@ -15,6 +15,7 @@ const PAGE_LABELS = {
   '/admin-services': 'Admin Services',
   '/notes':       'Notes Exchange',
   '/maths':       'Maths Dashboard',
+  '/study-together': 'Study Together',
 };
 
 export function useActivityLogger() {
