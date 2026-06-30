@@ -4171,6 +4171,7 @@ a {
 .dash-new-badge {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   font-size: 0.6rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -4179,6 +4180,7 @@ a {
   padding: 0.12rem 0.45rem;
   border-radius: 9999px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .dash-records-card { transition: border-color 0.2s, box-shadow 0.2s; }
 .dash-records-card:hover {
