@@ -31,7 +31,7 @@ export default function Navbar() {
   useEffect(() => {
     if (!currentUser) return;
     function check() {
-      getNotificationHistory(1).then(([latest]) => {
+      getNotificationHistory(1, currentUser.rollNo).then(([latest]) => {
         if (!latest) return;
         const seen = parseInt(localStorage.getItem(NOTIF_SEEN_KEY) || '0', 10);
         setHasUnread(latest.sentAt > seen);
@@ -195,7 +195,7 @@ export default function Navbar() {
                   <div className="nav-notif-header">
                     <Bell size={15} /> Notifications
                   </div>
-                  <NotificationHistory limit={3} onViewAll={() => { setNotifOpen(false); navigate('/notifications'); }} />
+                  <NotificationHistory limit={3} rollNo={currentUser?.rollNo} onViewAll={() => { setNotifOpen(false); navigate('/notifications'); }} />
                 </div>
               )}
             </div>

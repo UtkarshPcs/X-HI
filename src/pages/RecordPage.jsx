@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { getTables, getMyEntries } from '../services/recordsService';
-import { ClipboardList } from 'lucide-react';
+import { getTables, getMyEntries, addRecordRequest } from '../services/recordsService';
+import { ClipboardList, AlertCircle, X, Send } from 'lucide-react';
 
 function ValueDisplay({ type, value }) {
   if (value === undefined || value === null || value === '') return <span className="rec-muted">—</span>;
@@ -15,6 +15,12 @@ export default function RecordPage() {
   const navigate = useNavigate();
   const [tables, setTables]   = useState(null);
   const [entries, setEntries] = useState({});  // { tableId: { values } }
+
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTable, setSelectedTable] = useState('');
+  const [selectedCol, setSelectedCol] = useState('');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!loading && !currentUser) navigate('/');
@@ -37,11 +43,14 @@ export default function RecordPage() {
 
   return (
     <div className="rec-page">
-      <div className="rec-page-header">
+      <div className="rec-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="rec-page-title">
           <ClipboardList size={26} />
           <h1>My Records</h1>
         </div>
+        <button className="auth-btn secondary" onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <AlertCircle size={16} /> File complaint
+        </button>
       </div>
       <p className="rec-page-sub">Your class records, filled by monitors.</p>
 
@@ -80,6 +89,102 @@ export default function RecordPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Complaint Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertCircle size={20} /> Request Record Change
+              </h2>
+              <button className="icon-btn" onClick={() => setShowModal(false)}><X size={20} /></button>
+            </div>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!selectedTable || !selectedCol || !message.trim()) return;
+              setSubmitting(true);
+              try {
+                const tbl = tables.find(t => t.id === selectedTable);
+                const col = tbl.columns.find(c => c.id === selectedCol);
+                
+                await addRecordRequest({
+                  tableId: tbl.id,
+                  tableName: tbl.title,
+                  colId: col.id,
+                  colName: col.label,
+                  rollNo: currentUser.rollNo,
+                  studentName: currentUser.name,
+                  message: message.trim()
+                });
+                
+                alert('Request submitted! Monitor will review it.');
+                setShowModal(false);
+                setSelectedTable('');
+                setSelectedCol('');
+                setMessage('');
+              } catch (err) {
+                console.error(err);
+                alert('Failed to submit request.');
+              } finally {
+                setSubmitting(false);
+              }
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                <div>
+                  <label className="auth-label">Select Table</label>
+                  <select 
+                    className="auth-input" 
+                    value={selectedTable} 
+                    onChange={e => { setSelectedTable(e.target.value); setSelectedCol(''); }}
+                    required
+                  >
+                    <option value="">-- Choose Table --</option>
+                    {tables?.map(t => (
+                      <option key={t.id} value={t.id}>{t.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedTable && (
+                  <div>
+                    <label className="auth-label">Select Column</label>
+                    <select 
+                      className="auth-input" 
+                      value={selectedCol} 
+                      onChange={e => setSelectedCol(e.target.value)}
+                      required
+                    >
+                      <option value="">-- Choose Column --</option>
+                      {tables.find(t => t.id === selectedTable)?.columns.map(c => (
+                        <option key={c.id} value={c.id}>{c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="auth-label">Message</label>
+                  <textarea
+                    className="auth-input"
+                    placeholder="e.g. I have completed my holiday homework but it shows ✗ No."
+                    rows={4}
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    required
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+
+                <button type="submit" disabled={submitting} className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <Send size={16} /> {submitting ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

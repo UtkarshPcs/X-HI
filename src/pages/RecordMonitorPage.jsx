@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import { rollList } from '../auth/rollList';
-import { getTables, getEntries, setCellValue, updateTable } from '../services/recordsService';
-import { ClipboardList, Lock, ChevronDown, ChevronUp, Pencil, Check, X, Search } from 'lucide-react';
+import { getTables, getEntries, setCellValue, updateTable, getRecordRequests, deleteRecordRequest } from '../services/recordsService';
+import { ClipboardList, Lock, ChevronDown, ChevronUp, Pencil, Check, X, Search, Bell, Trash2 } from 'lucide-react';
 
 // ── Analytics card: shows column stats derived from entries ──────
 function AnalyticsCard({ table, entries, compact = false }) {
@@ -330,39 +330,149 @@ export default function RecordMonitorPage() {
   const { currentUser, loading } = useAuth();
   const navigate = useNavigate();
   const [tables, setTables] = useState(null);
+  const [activeTab, setActiveTab] = useState('records'); // 'records' | 'requests'
+  const [requests, setRequests] = useState([]);
+  const [loadingReqs, setLoadingReqs] = useState(false);
 
   useEffect(() => {
     if (!currentUser) return;
     if (!loading && currentUser && currentUser.role !== ROLES.MONITOR && currentUser.role !== ROLES.ADMIN) navigate('/');
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, loading]);
 
   function reload() {
     getTables().then(setTables).catch(console.error);
   }
 
-  useEffect(() => { reload(); }, []);
+  function loadRequests() {
+    setLoadingReqs(true);
+    getRecordRequests()
+      .then(setRequests)
+      .catch(console.error)
+      .finally(() => setLoadingReqs(false));
+  }
+
+  useEffect(() => { reload(); loadRequests(); }, []);
+
+  async function handleApproveRequest(req, newValue) {
+    if (!window.confirm(`Update ${req.colName} for ${req.studentName} to "${newValue}" and approve request?`)) return;
+    try {
+      await setCellValue(req.tableId, req.rollNo, req.colId, newValue);
+      await deleteRecordRequest(req.id);
+      
+      // Notify student
+      const { addStudentNotification } = await import('../services/notificationHistoryService');
+      await addStudentNotification({
+        rollNo: req.rollNo,
+        title: '✅ Record Update Approved',
+        body: `Your request for ${req.tableName} (${req.colName}) has been approved and updated to "${newValue}".`,
+        type: 'notice'
+      });
+
+      setRequests(prev => prev.filter(r => r.id !== req.id));
+      reload();
+      alert('Request approved and record updated!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to approve request.');
+    }
+  }
+
+  async function handleDeleteRequest(req) {
+    if (!window.confirm(`Delete request from ${req.studentName} without updating?`)) return;
+    try {
+      await deleteRecordRequest(req.id);
+      setRequests(prev => prev.filter(r => r.id !== req.id));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete request.');
+    }
+  }
 
   if (!currentUser) return null;
 
   return (
     <div className="rec-page">
-      <div className="rec-page-header">
+      <div className="rec-page-header" style={{ marginBottom: '1rem' }}>
         <div className="rec-page-title">
           <ClipboardList size={26} />
           <h1>Records — Monitor</h1>
         </div>
       </div>
 
-      {tables === null ? (
-        <p className="rec-muted">Loading…</p>
-      ) : tables.length === 0 ? (
-        <div className="rec-empty">
-          <ClipboardList size={40} />
-          <p>No record tables created yet. Ask the admin to create one.</p>
-        </div>
-      ) : (
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border)' }}>
+        <button 
+          onClick={() => setActiveTab('records')}
+          style={{ background: 'none', border: 'none', padding: '0.75rem 1rem', cursor: 'pointer', color: activeTab === 'records' ? 'var(--primary)' : 'var(--text-secondary)', borderBottom: activeTab === 'records' ? '2px solid var(--primary)' : '2px solid transparent', fontWeight: activeTab === 'records' ? 600 : 400, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          <ClipboardList size={18} /> Records
+        </button>
+        <button 
+          onClick={() => setActiveTab('requests')}
+          style={{ background: 'none', border: 'none', padding: '0.75rem 1rem', cursor: 'pointer', color: activeTab === 'requests' ? 'var(--primary)' : 'var(--text-secondary)', borderBottom: activeTab === 'requests' ? '2px solid var(--primary)' : '2px solid transparent', fontWeight: activeTab === 'requests' ? 600 : 400, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          <Bell size={18} /> Requests {requests.length > 0 && <span style={{ background: 'var(--primary)', color: '#000', borderRadius: '50%', width: '20px', height: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{requests.length}</span>}
+        </button>
+      </div>
+
+      {activeTab === 'records' && (
+        tables === null ? (
+          <p className="rec-muted">Loading…</p>
+        ) : tables.length === 0 ? (
+          <div className="rec-empty">
+            <ClipboardList size={40} />
+            <p>No record tables created yet. Ask the admin to create one.</p>
+          </div>
+        ) : (
+          <div className="rec-sections">
+            {tables.map(t => <TableSection key={t.id} table={t} onRenamed={reload} />)}
+          </div>
+        )
+      )}
+
+      {activeTab === 'requests' && (
         <div className="rec-sections">
-          {tables.map(t => <TableSection key={t.id} table={t} onRenamed={reload} />)}
+          {loadingReqs ? (
+            <p className="rec-muted">Loading requests...</p>
+          ) : requests.length === 0 ? (
+            <div className="rec-empty">
+              <Check size={40} />
+              <p>No pending record requests.</p>
+            </div>
+          ) : (
+            requests.map(req => (
+              <div key={req.id} className="rec-section-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{req.studentName} <span className="rec-muted">({req.rollNo})</span></h3>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                      Table: <strong>{req.tableName}</strong> • Column: <strong>{req.colName}</strong>
+                    </div>
+                  </div>
+                  <button className="icon-btn danger" onClick={() => handleDeleteRequest(req)} title="Delete Request"><Trash2 size={16} /></button>
+                </div>
+                
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                  {req.message}
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  {tables?.find(t => t.id === req.tableId)?.columns.find(c => c.id === req.colId)?.type === 'check' ? (
+                    <button className="auth-btn primary" onClick={() => handleApproveRequest(req, true)} style={{ padding: '0.5rem 1rem' }}>
+                      Approve & Mark as Checked
+                    </button>
+                  ) : (
+                    <form style={{ display: 'flex', gap: '0.5rem', width: '100%' }} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleApproveRequest(req, e.target.elements.val.value);
+                    }}>
+                      <input name="val" className="rec-input" style={{ flex: 1 }} placeholder="Enter new value..." required />
+                      <button type="submit" className="auth-btn primary" style={{ padding: '0.5rem 1rem' }}>Approve</button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>

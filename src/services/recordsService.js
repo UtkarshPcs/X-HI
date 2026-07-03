@@ -6,6 +6,7 @@ import { db } from '../firebase';
 
 const TABLES = 'records';
 const ENTRIES = 'record_entries';
+const REQUESTS = 'record_requests';
 
 export async function createTable({ title, description, sensitive, columns }) {
   const ref = await addDoc(collection(db, TABLES), {
@@ -69,4 +70,21 @@ export async function setCellValue(tableId, rollNo, colId, value) {
 // Admin grants/revokes which record table IDs a teacher can edit.
 export async function setTeacherRecordTables(teacherId, tableIds) {
   await updateDoc(doc(db, 'teachers', teacherId), { recordTables: tableIds });
+}
+
+// ── Student Requests ───────────────────────────────────────────
+export async function addRecordRequest(payload) {
+  return addDoc(collection(db, REQUESTS), {
+    ...payload,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function getRecordRequests() {
+  const snap = await getDocs(query(collection(db, REQUESTS), orderBy('createdAt', 'desc')));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function deleteRecordRequest(reqId) {
+  await deleteDoc(doc(db, REQUESTS, reqId));
 }

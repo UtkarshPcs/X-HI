@@ -26,16 +26,16 @@ function relativeTime(ms) {
  * Chronological list of every notification the class has been sent.
  * Read-only; shown inside a collapsible section on the Profile page.
  */
-export default function NotificationHistory({ limit, onViewAll }) {
+export default function NotificationHistory({ limit, onViewAll, rollNo }) {
   const [items, setItems] = useState(null);
 
   useEffect(() => {
     let active = true;
-    getNotificationHistory(50)
+    getNotificationHistory(50, rollNo)
       .then((data) => { if (active) setItems(data); })
       .catch((err) => { console.error(err); if (active) setItems([]); });
     return () => { active = false; };
-  }, []);
+  }, [rollNo]);
 
   if (items === null) {
     return (
