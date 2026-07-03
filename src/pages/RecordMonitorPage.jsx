@@ -172,8 +172,8 @@ function TableSection({ table, onRenamed }) {
 
   return (
     <div className="rec-section-card rtp-card">
-      <div className="rec-section-header" style={{ cursor: editing ? 'default' : 'pointer' }}>
-        <div className="rec-section-title" style={{ flex: 1 }}>
+      <div className="rec-section-header" style={{ cursor: editing ? 'default' : 'pointer', flexWrap: 'wrap' }}>
+        <div className="rec-section-title">
           {editing ? (
             <input
               className="rec-input"
@@ -181,7 +181,7 @@ function TableSection({ table, onRenamed }) {
               onChange={e => setTitle(e.target.value)}
               onClick={e => e.stopPropagation()}
               placeholder="Table name"
-              style={{ maxWidth: 240 }}
+              style={{ maxWidth: '100%', minWidth: 200 }}
             />
           ) : (
             <button className="rec-section-titlebtn" onClick={() => setOpen(v => !v)}>
@@ -190,24 +190,27 @@ function TableSection({ table, onRenamed }) {
             </button>
           )}
         </div>
-        {/* Analytics chips visible when collapsed and data loaded */}
-        {!editing && !open && !loading && (
-          <AnalyticsCard table={table} entries={entries} compact />
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {editing ? (
-            <>
-              <button className="rec-icon-btn" onClick={saveMeta} disabled={savingMeta} title="Save"><Check size={16} /></button>
-              <button className="rec-icon-btn danger" onClick={() => setEditing(false)} title="Cancel"><X size={16} /></button>
-            </>
-          ) : (
-            <>
-              <button className="rec-icon-btn" onClick={startEdit} title="Rename table & columns"><Pencil size={15} /></button>
-              <button className="rec-icon-btn" onClick={() => setOpen(v => !v)} title={open ? 'Collapse' : 'Expand'}>
-                {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
-            </>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          {!editing && !open && !loading && (
+            <AnalyticsCard table={table} entries={entries} compact />
           )}
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {editing ? (
+              <>
+                <button className="rec-icon-btn" onClick={saveMeta} disabled={savingMeta} title="Save"><Check size={16} /></button>
+                <button className="rec-icon-btn danger" onClick={() => setEditing(false)} title="Cancel"><X size={16} /></button>
+              </>
+            ) : (
+              <>
+                <button className="rec-icon-btn" onClick={startEdit} title="Rename table & columns"><Pencil size={15} /></button>
+                <button className="rec-icon-btn" onClick={() => setOpen(v => !v)} title={open ? 'Collapse' : 'Expand'}>
+                  {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
