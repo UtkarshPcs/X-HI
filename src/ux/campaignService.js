@@ -133,3 +133,19 @@ export async function resetAllCampaigns(phone, campaigns) {
     campaigns.map(c => resetCampaign(c.id, phone, c.storage))
   );
 }
+
+/**
+ * Snooze the notes tour for 7 days.
+ * Writes a timestamp to Firestore so the condition can check it cross-device.
+ */
+export async function snoozeNotesTour(phone) {
+  if (!phone) return;
+  const until = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now
+  localStorage.setItem(`ux_notes-tour-v1_${phone}`, `snooze_${until}`);
+  try {
+    await updateDoc(userRef(phone), { 'ux_notes-tour-v1_snooze': until });
+  } catch (err) {
+    console.warn('[UX] Failed to write notes tour snooze:', err);
+  }
+}
+

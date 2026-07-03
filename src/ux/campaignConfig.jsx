@@ -360,13 +360,20 @@ const CAMPAIGNS = [
     id: 'notes-tour-v1',
     type: 'tour',
     priority: 30,
-    storage: 'local',
+    storage: 'both',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
       user.role !== ROLES.TEACHER &&
-      !localStorage.getItem(`ux_notes-tour-v1_${user.phone}`)
+      !user[`ux_notes-tour-v1`] &&
+      !localStorage.getItem(`ux_notes-tour-v1_${user.phone}`) &&
+      // Snooze check: if snoozed, only show again after 7 days
+      (() => {
+        const snooze = user[`ux_notes-tour-v1_snooze`];
+        if (!snooze) return true;
+        return Date.now() > snooze;
+      })()
     ),
     content: {
       getSteps: () => NOTES_TOUR_STEPS,

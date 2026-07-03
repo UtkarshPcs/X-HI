@@ -16,7 +16,50 @@ import NotesViewer from '../components/NotesViewer';
 import UploadNoteModal from '../components/UploadNoteModal';
 import TourRunner from '../ux/components/TourRunner';
 import { NOTES_TOUR_STEPS } from '../ux/campaignConfig';
-import { markCampaignSeen } from '../ux/campaignService';
+import { markCampaignSeen, snoozeNotesTour } from '../ux/campaignService';
+
+/* ── Notes Tour Prompt Modal ─────────────────────────────────── */
+function TourPromptModal({ onStart, onSkip }) {
+  return (
+    <div className="complaint-overlay">
+      <div className="complaint-modal" style={{ maxWidth: 400 }}>
+        <div className="complaint-glow" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%)' }} />
+
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+          {/* Icon */}
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', color: 'var(--primary)' }}>
+            <HelpCircle size={26} />
+          </div>
+
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem', color: 'var(--text-primary)' }}>
+            Quick Notes Tour?
+          </h2>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 1.75rem', lineHeight: 1.6 }}>
+            First time here? Let us show you how to browse, unlock, and submit notes — takes about 30 seconds.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <button
+              className="complaint-submit-btn"
+              onClick={onStart}
+              style={{ width: '100%' }}
+            >
+              <Zap size={16} /> Let's go!
+            </button>
+            <button
+              onClick={onSkip}
+              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)', padding: '0.7rem', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.88rem', transition: 'border-color 0.2s, color 0.2s', width: '100%' }}
+              onMouseEnter={e => { e.target.style.borderColor = 'var(--text-muted)'; e.target.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.color = 'var(--text-muted)'; }}
+            >
+              Skip — don't show for 7 days
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function SparkIcon({ size = 14, color = 'currentColor' }) {
   return (
@@ -331,20 +374,35 @@ export default function NotesPage() {
   const [showUpload,     setShowUpload]     = useState(false);
   const [uploadHHTask,   setUploadHHTask]   = useState(null); // pre-fill HH task in modal
   const [tourRun, setTourRun] = useState(false);
+  const [showTourPrompt, setShowTourPrompt] = useState(false);
 
-  // Auto-run tour on first ever visit to Notes page (via campaign service key)
+  // Auto-prompt tour on first ever visit (replaced window.confirm with in-page modal)
   useEffect(() => {
     if (!currentUser || !isStudent) return;
-    const key = `ux_notes-tour-v1_${currentUser.phone}`;
-    if (!localStorage.getItem(key)) {
-      if (window.confirm("Would you like a quick tour of the Notes page?")) {
-        setTourRun(true);
-      } else {
-        localStorage.setItem(key, 'true');
-        markCampaignSeen('notes-tour-v1', currentUser.phone, 'local').catch(() => {});
-      }
+    const localKey = `ux_notes-tour-v1_${currentUser.phone}`;
+    const localVal = localStorage.getItem(localKey);
+    // Already permanently dismissed (completed or stored 'true')
+    if (localVal === 'true' || localVal === '1') return;
+    // Snoozed? Check expiry
+    if (localVal?.startsWith('snooze_')) {
+      const until = parseInt(localVal.split('_')[1], 10);
+      if (Date.now() < until) return; // still snoozed
     }
+    // Also check Firestore field (loaded via currentUser)
+    if (currentUser['ux_notes-tour-v1']) return;
+    // Show the prompt
+    setShowTourPrompt(true);
   }, [currentUser]);
+
+  function handleTourStart() {
+    setShowTourPrompt(false);
+    setTourRun(true);
+  }
+
+  function handleTourSkip() {
+    setShowTourPrompt(false);
+    snoozeNotesTour(currentUser.phone).catch(() => {});
+  }
 
   // Deep-link: ?noteId=<id> → auto drill-down to that chapter
   useEffect(() => {
@@ -475,7 +533,8 @@ export default function NotesPage() {
 
   function handleTourEnd() {
     setTourRun(false);
-    markCampaignSeen('notes-tour-v1', currentUser.phone, 'local').catch(() => {});
+    // Mark permanently seen in both localStorage and Firestore
+    markCampaignSeen('notes-tour-v1', currentUser.phone, 'both').catch(() => {});
   }
 
   if (!currentUser) {
@@ -524,6 +583,10 @@ export default function NotesPage() {
 
   return (
     <div className="notes-page animate-fade-in">
+
+      {showTourPrompt && (
+        <TourPromptModal onStart={handleTourStart} onSkip={handleTourSkip} />
+      )}
 
       <TourRunner
         campaignId="notes-tour-v1"
