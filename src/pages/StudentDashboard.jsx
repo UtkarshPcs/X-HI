@@ -233,6 +233,7 @@ export default function StudentDashboard() {
 
       {/* AI Personalization Section — renders only for logged-in students */}
       <AIDashboardSection userData={{
+        isReady: attendanceLoaded && !hwLoading && !cwLoading && syllabusStats !== null && holidayCompleted !== null,
         attendance: stats,
         absentDays,
         holidayCompleted,

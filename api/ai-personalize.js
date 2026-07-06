@@ -24,28 +24,18 @@ STRICT RULES:
 4. If a data field is missing or null, skip that insight entirely.
 5. No emojis in descriptions. Emojis in titles are allowed only if they feel natural.
 6. Be specific and personal, not generic. Reference the actual numbers and subjects from context.
-7. Maximum 5 cards. Maximum 3 priorityActions.
+7. Return exactly 1 card containing the most important insight or reminder for the student right now.
 
 Return exactly this JSON shape:
 {
-  "header": {
-    "title": "string (personalized greeting referencing time of day and student name)",
-    "subtitle": "string (one-line summary of their academic status today)"
-  },
   "cards": [
     {
       "type": "reminder|achievement|tip|insight|alert",
       "priority": "high|medium|low",
       "title": "string",
-      "description": "string (specific, not generic)"
+      "description": "string (specific, not generic. do not greet the user here)"
     }
-  ],
-  "motivation": "string (short, genuine motivational quote or personalized encouragement — no emojis)",
-  "priorityActions": ["string", "string", "string"],
-  "studyFocus": {
-    "subject": "string (the most important subject to focus on right now)",
-    "reason": "string (specific reason based on syllabus/homework data)"
-  }
+  ]
 }
 
 Card type guidelines:
@@ -55,12 +45,7 @@ Card type guidelines:
 - "insight": data observations (attendance trends, syllabus coverage stats)
 - "alert": attendance below 75%, overdue homework, critical warnings
 
-Priority guidelines:
-- "high": immediate action needed (alert conditions, today's due tasks)
-- "medium": should address soon (moderate progress items)
-- "low": informational or positive notes
-
-Sort cards by priority: high first, then medium, then low.
+Focus on the most urgent or impactful piece of data (e.g. poor attendance, incomplete homework, or a big achievement).
 Be encouraging but truthful. Never inflate numbers.`;
 
 // ─── In-Memory Rate Limit Store ───────────────────────────────────────────────
@@ -84,11 +69,7 @@ function hashIdentifier(str) {
 // ─── Validate AI Response Shape ───────────────────────────────────────────────
 function isValidAIResponse(obj) {
   if (!obj || typeof obj !== 'object') return false;
-  if (!obj.header || typeof obj.header.title !== 'string') return false;
   if (!Array.isArray(obj.cards)) return false;
-  if (typeof obj.motivation !== 'string') return false;
-  if (!Array.isArray(obj.priorityActions)) return false;
-  if (!obj.studyFocus || typeof obj.studyFocus.subject !== 'string') return false;
   return true;
 }
 
@@ -235,8 +216,7 @@ export default async function handler(req, res) {
   }
 
   // ── Enforce limits ────────────────────────────────────────────────────────────
-  parsed.cards = (parsed.cards || []).slice(0, 5);
-  parsed.priorityActions = (parsed.priorityActions || []).slice(0, 3);
+  parsed.cards = (parsed.cards || []).slice(0, 1);
 
   // Sort cards: high → medium → low
   const priorityOrder = { high: 0, medium: 1, low: 2 };

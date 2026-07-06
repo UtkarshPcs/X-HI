@@ -102,17 +102,15 @@ export function AIPersonalizationProvider({ children, userData }) {
     if (!currentUser) return;
     if (currentUser.role === 'teacher') return;
 
-    // Don't fetch if userData isn't hydrated yet (wait for attendance/hw to load)
-    if (!userData || !userData.attendance) return;
+    // Don't fetch if dashboard data isn't fully loaded yet
+    if (!userData || !userData.isReady) return;
 
     fetchPersonalization(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    // Re-run when user or key data fields change, but not on every userData reference change
+    // Re-run when user changes, or when dashboard data is finally fully loaded
     currentUser?.rollNo,
-    // Trigger re-fetch when meaningful data becomes available
-    userData?.attendance?.percentage,
-    userData?.syllabusStats?.completedPct,
+    userData?.isReady,
   ]);
 
   // ── Public refresh function ───────────────────────────────────────────────────

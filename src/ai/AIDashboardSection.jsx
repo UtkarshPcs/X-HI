@@ -13,37 +13,34 @@
 
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
-import { AIPersonalizationProvider } from './AIPersonalizationContext';
-import AIWelcomeBanner from './components/AIWelcomeBanner';
+import { AIPersonalizationProvider, useAIPersonalization } from './AIPersonalizationContext';
 import AICardGrid from './components/AICardGrid';
-import AIMotivationBanner from './components/AIMotivationBanner';
-import AIFocusCard from './components/AIFocusCard';
-import AIPriorityActions from './components/AIPriorityActions';
 
 /**
  * Inner component — assumes it is inside AIPersonalizationProvider.
  * This separation ensures hook ordering is correct.
  */
+import { Sparkles } from 'lucide-react';
+
 function AIDashboardContent() {
+  const { data, loading } = useAIPersonalization();
+
+  // Hide entirely while loading, or if no data returned from AI
+  if (loading || !data || !data.cards || data.cards.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="ai-dashboard-section"
       aria-label="AI Personalized Insights"
     >
-      {/* Welcome greeting + subtitle */}
-      <AIWelcomeBanner />
-
-      {/* AI insight cards (reminder, achievement, tip, insight, alert) */}
-      <AICardGrid />
-
-      {/* Two-column row: focus + motivation */}
-      <div className="ai-bottom-row">
-        <AIFocusCard />
-        <AIPriorityActions />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.1rem' }}>
+        <Sparkles size={16} color="#f59e0b" />
+        <h2 className="section-title" style={{ marginBottom: 0, color: '#f59e0b', fontSize: '0.95rem' }}>AI Insights</h2>
       </div>
 
-      {/* Motivational quote */}
-      <AIMotivationBanner />
+      <AICardGrid />
     </section>
   );
 }
