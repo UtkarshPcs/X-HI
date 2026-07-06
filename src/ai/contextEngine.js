@@ -8,6 +8,7 @@
  *  - Only the server-side endpoint (/api/ai-personalize) receives this object.
  *  - All data is aggregated/summarized — not raw Firestore records.
  */
+import { getPeriodsForDate } from '../data/routine';
 
 /**
  * Returns the time-of-day label for a given hour (0-23).
@@ -119,6 +120,20 @@ export function buildUserContext(user, data) {
     };
   }
 
+  // Pending homework from the past 7 days
+  const pendingHomework = [];
+  if (data.recentHomeworks && Array.isArray(data.recentHomeworks) && doneKeys instanceof Set) {
+    data.recentHomeworks.forEach(hw => {
+      if (!hw.tasks) return;
+      hw.tasks.forEach((task, idx) => {
+        const key = `${hw.id}_${idx}`;
+        if (!doneKeys.has(key)) {
+          pendingHomework.push({ date: hw.date, subject: task.subject });
+        }
+      });
+    });
+  }
+
   // Holiday homework section
   const hhSection =
     holidayCompleted != null && holidayTotal != null
@@ -152,17 +167,28 @@ export function buildUserContext(user, data) {
   const academic = {
     attendance: attSection,
     todayHomework: hwSection,
+    pendingRecentHomework: pendingHomework.length > 0 ? pendingHomework : null,
     holidayHomework: hhSection,
     syllabus: syllabusSection,
     latestClasswork: classworkSection,
   };
 
-  // ── Temporal ──────────────────────────────────────────────────────────────────
+  // ── Temporal & Routine ─────────────────────────────────────────────────────────
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowKey = toDateKey(tomorrow);
+  const tomorrowRoutine = getPeriodsForDate(tomorrowKey).map(p => p.subject);
+
   const temporal = {
     currentHour,
     dayOfWeek: getDayOfWeek(now),
     timeOfDay: getTimeOfDay(currentHour),
     date: toDateKey(now),
+    upcomingRoutine: {
+      date: tomorrowKey,
+      dayOfWeek: getDayOfWeek(tomorrow),
+      subjects: tomorrowRoutine.length > 0 ? tomorrowRoutine : ['No classes / Holiday']
+    }
   };
 
   return { profile, academic, temporal };

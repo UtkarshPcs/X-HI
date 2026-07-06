@@ -72,6 +72,7 @@ export default function StudentDashboard() {
 
   // Latest homework entry (today or last working day that has data)
   const [latestHw, setLatestHw] = useState(null); // { date, tasks[] }
+  const [recentHomeworks, setRecentHomeworks] = useState([]); // List of recent homeworks for AI analysis
   const [hwLoading, setHwLoading] = useState(true);
 
   // Latest classwork record (most recent day with recorded periods)
@@ -137,7 +138,10 @@ export default function StudentDashboard() {
         if (!active) return;
         // list is ordered desc by timestamp from Firestore
         const todayEntry = list.find((hw) => homeworkDateKey(hw.date) === tKey);
-        if (active) setLatestHw(todayEntry || list[0] || null);
+        if (active) {
+          setLatestHw(todayEntry || list[0] || null);
+          setRecentHomeworks(list.slice(0, 7)); // Pass last 7 days of homework to AI
+        }
       })
       .catch(console.error)
       .finally(() => { if (active) setHwLoading(false); });
@@ -239,6 +243,7 @@ export default function StudentDashboard() {
         holidayCompleted,
         holidayTotal: HOLIDAY_TOTAL,
         latestHw,
+        recentHomeworks,
         doneKeys,
         syllabusStats,
         latestClasswork,
