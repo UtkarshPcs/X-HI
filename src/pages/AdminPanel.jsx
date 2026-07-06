@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import FormatToolbar from '../components/FormatToolbar';
 import NoticeText from '../components/NoticeText';
@@ -21,6 +21,7 @@ import { ROLES, TEST_PHONE } from '../auth/roles';
 import { getAllUsers } from '../services/adminService';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getCTABannerConfig, saveCTABannerConfig, getCTAClicks } from '../services/ctaBannerService';
 
 function canAccess(user) {
   return user && (user.isAdmin || user.role === ROLES.MONITOR || user.role === ROLES.ADMIN);
@@ -923,6 +924,183 @@ function ProfileCompletionTracker() {
 }
 
 
+// ── CTA Banner Manager (admin-only) ────────────────────────────
+function CTABannerManager() {
+  const [config, setConfig]   = useState({ enabled: false, message: '', buttonText: '', buttonUrl: '' });
+  const [clicks, setClicks]   = useState(null);   // null = not loaded yet
+  const [saving, setSaving]   = useState(false);
+  const [saved,  setSaved]    = useState(false);
+  const [loadingClicks, setLoadingClicks] = useState(false);
+  const [showClicks, setShowClicks]       = useState(false);
+
+  useEffect(() => {
+    getCTABannerConfig()
+      .then((cfg) => { if (cfg) setConfig(cfg); })
+      .catch(console.error);
+  }, []);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true); setSaved(false);
+    try {
+      await saveCTABannerConfig(config);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      alert('Failed to save: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function loadClicks() {
+    setLoadingClicks(true);
+    try {
+      const data = await getCTAClicks();
+      setClicks(data);
+      setShowClicks(true);
+    } catch (err) {
+      alert('Failed to load clicks: ' + err.message);
+    } finally {
+      setLoadingClicks(false);
+    }
+  }
+
+  function relTime(ms) {
+    if (!ms) return '';
+    const diff = Date.now() - ms;
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return 'just now';
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h ago`;
+    const day = Math.floor(hr / 24);
+    if (day < 7) return `${day}d ago`;
+    return new Date(ms).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  }
+
+  const inputStyle = {
+    width: '100%', padding: '0.7rem 0.85rem', borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border)', background: 'var(--surface)',
+    color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box',
+  };
+
+  return (
+    <div className="glass-card" style={{ marginBottom: '2rem' }}>
+      <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', color: 'var(--text-primary)' }}>
+        <MousePointerClick size={20} /> CTA Banner
+      </h2>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
+        Shows a configurable announcement banner at the top of every page. Track who clicked the button.
+      </p>
+
+      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        {/* Enable toggle */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', userSelect: 'none' }}>
+          <input
+            type="checkbox"
+            checked={config.enabled}
+            onChange={(e) => setConfig((c) => ({ ...c, enabled: e.target.checked }))}
+            style={{ width: 16, height: 16, accentColor: 'var(--primary)', cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: config.enabled ? '#10b981' : 'var(--text-muted)' }}>
+            {config.enabled ? '🟢 Banner is ON' : '⚫ Banner is OFF'}
+          </span>
+        </label>
+
+        {/* Message */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Banner Message</label>
+          <input
+            style={inputStyle}
+            type="text"
+            placeholder="e.g. PT meeting on Monday at 10am!"
+            value={config.message}
+            onChange={(e) => setConfig((c) => ({ ...c, message: e.target.value }))}
+            maxLength={200}
+          />
+        </div>
+
+        {/* Button text */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Button Text</label>
+          <input
+            style={inputStyle}
+            type="text"
+            placeholder="e.g. OK  /  View Details  /  Register"
+            value={config.buttonText}
+            onChange={(e) => setConfig((c) => ({ ...c, buttonText: e.target.value }))}
+            maxLength={40}
+          />
+        </div>
+
+        {/* Button URL */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <LinkIcon size={13} /> Button Link <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(leave empty to stay on page)</span>
+          </label>
+          <input
+            style={inputStyle}
+            type="text"
+            placeholder="e.g. /notices  or  https://forms.gle/..."
+            value={config.buttonUrl}
+            onChange={(e) => setConfig((c) => ({ ...c, buttonUrl: e.target.value }))}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="auth-btn primary"
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <Save size={16} /> {saving ? 'Saving…' : saved ? '✓ Saved!' : 'Save Banner Config'}
+        </button>
+      </form>
+
+      {/* Click tracker */}
+      <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <MousePointerClick size={15} />
+            Who clicked the button{clicks ? ` (${clicks.length})` : ''}
+          </span>
+          <button
+            onClick={loadClicks}
+            disabled={loadingClicks}
+            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.3rem 0.6rem', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem' }}
+          >
+            <RefreshCw size={13} style={{ animation: loadingClicks ? 'spin 1s linear infinite' : 'none' }} />
+            {loadingClicks ? 'Loading…' : clicks === null ? 'Load' : 'Refresh'}
+          </button>
+        </div>
+
+        {showClicks && clicks !== null && (
+          clicks.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>No one has clicked yet.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {clicks.map((c) => (
+                <div key={c.id} style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.5rem 0.75rem',
+                  background: 'rgba(255,255,255,0.02)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border)',
+                }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', minWidth: 22, textAlign: 'right' }}>{c.rollNo}</span>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>{relTime(c.clickedAt)}</span>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPanel() {
   const { currentUser, loading } = useAuth();
   const navigate = useNavigate();
@@ -945,6 +1123,7 @@ export default function AdminPanel() {
 
       <NoticesManager currentUser={currentUser} />
       {isAdminUser(currentUser) && <BroadcastManager currentUser={currentUser} />}
+      {isAdminUser(currentUser) && <CTABannerManager />}
       <HomeworkManager currentUser={currentUser} />
       <ClassworkManager currentUser={currentUser} />
       <SyllabusManager currentUser={currentUser} />

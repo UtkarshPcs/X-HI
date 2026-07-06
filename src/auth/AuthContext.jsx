@@ -50,6 +50,11 @@ export function AuthProvider({ children }) {
     }
   }
 
+  /** Patch in-memory user with extra fields (no Firestore re-fetch). */
+  function updateCurrentUser(patch) {
+    setCurrentUser((prev) => prev ? { ...prev, ...patch } : prev);
+  }
+
   function openModal() { setModalOpen(true); }
   function closeModal() { setModalOpen(false); }
 
@@ -133,6 +138,7 @@ export function AuthProvider({ children }) {
       register, savePassword, login, logout, loginTeacherCtx,
       sendOtp, verifyOtp, resetPassword,
       refreshUser,
+      updateCurrentUser,
       forceTour,
       triggerTour: (role) => setForceTour({ role }),
       clearTour: () => setForceTour(null),

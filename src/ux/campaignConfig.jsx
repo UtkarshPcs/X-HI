@@ -218,14 +218,13 @@ const CAMPAIGNS = [
     id: 'onboarding-v1',
     type: 'tour',
     priority: 90,
-    storage: 'both',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
       user.role !== ROLES.ADMIN &&
-      !user.onboardingCompleted &&
-      !localStorage.getItem(`ux_onboarding-v1_${user.phone}`)
+      !user.onboardingCompleted
     ),
     content: {
       getSteps: (user) => getOnboardingSteps(user),
@@ -238,16 +237,14 @@ const CAMPAIGNS = [
     id: 'whats-new-v1',
     type: 'modal',
     priority: 80,
-    storage: 'both',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
       !user.whatsNewSeen_v1 &&
-      !localStorage.getItem(`ux_whats-new-v1_${user.phone}`) &&
-      // Wait for onboarding to finish first
-      (user.onboardingCompleted || user.role === ROLES.ADMIN ||
-       localStorage.getItem(`ux_onboarding-v1_${user.phone}`))
+      // Wait for onboarding to finish first (reads Firestore field, cross-device safe)
+      (user.onboardingCompleted || user.role === ROLES.ADMIN)
     ),
     content: {
       variant: 'whats-new',
@@ -268,15 +265,14 @@ const CAMPAIGNS = [
     id: 'marks-banner-v1',
     type: 'banner',
     priority: 70,
-    storage: 'local',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
       user.rollNo &&
       user.rollNo !== 0 &&
-      user.role !== ROLES.TEACHER &&
-      !localStorage.getItem(`ux_marks-banner-v1_${user.phone}`)
+      user.role !== ROLES.TEACHER
     ),
     content: {
       variant: 'info',
@@ -293,15 +289,14 @@ const CAMPAIGNS = [
     id: 'notif-prompt-v1',
     type: 'prompt',
     priority: 60,
-    storage: 'local',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
       isPushSupportedSync() &&
       !isIosNeedsInstall() &&
-      permissionState() === 'default' &&
-      !localStorage.getItem(`ux_notif-prompt-v1_${user.phone}`)
+      permissionState() === 'default'
     ),
     content: {
       variant: 'notification',
@@ -341,7 +336,7 @@ const CAMPAIGNS = [
     id: 'pwa-install-v1',
     type: 'prompt',
     priority: 40,
-    storage: 'local',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     // condition evaluated in InstallPrompt itself (needs browser event)
@@ -360,17 +355,16 @@ const CAMPAIGNS = [
     id: 'notes-tour-v1',
     type: 'tour',
     priority: 30,
-    storage: 'both',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
       user.role !== ROLES.TEACHER &&
-      !user[`ux_notes-tour-v1`] &&
-      !localStorage.getItem(`ux_notes-tour-v1_${user.phone}`) &&
-      // Snooze check: if snoozed, only show again after 7 days
+      !user['ux_notes-tour-v1'] &&
+      // Snooze check: if snoozed, only show again after 7 days (Firestore field)
       (() => {
-        const snooze = user[`ux_notes-tour-v1_snooze`];
+        const snooze = user['ux_notes-tour-v1_snooze'];
         if (!snooze) return true;
         return Date.now() > snooze;
       })()
@@ -386,12 +380,12 @@ const CAMPAIGNS = [
     id: 'study-together-announcement-v1',
     type: 'banner',
     priority: 65,
-    storage: 'local',
+    storage: 'firestore',
     blocking: false,
     dismissible: true,
     condition: (user) => !!(
       user &&
-      !localStorage.getItem(`ux_study-together-announcement-v1_${user.phone}`)
+      !user['ux_study-together-announcement-v1']
     ),
     content: {
       variant: 'info',

@@ -48,8 +48,19 @@ export function UXProvider({ children }) {
       .sort((a, b) => b.priority - a.priority);
 
     setQueue(active);
-  }, [currentUser?.phone, currentUser?.onboardingCompleted, currentUser?.whatsNewSeen_v1,
-      currentUser?.mergedAt, currentUser?.mergeBannerSeen, currentUser?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    currentUser?.phone,
+    currentUser?.onboardingCompleted,
+    currentUser?.whatsNewSeen_v1,
+    currentUser?.mergedAt,
+    currentUser?.mergeBannerSeen,
+    currentUser?.email,
+    currentUser?.['ux_marks-banner-v1'],
+    currentUser?.['ux_notif-prompt-v1'],
+    currentUser?.['ux_pwa-install-v1'],
+    currentUser?.['ux_notes-tour-v1'],
+    currentUser?.['ux_study-together-announcement-v1'],
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Campaign actions ──────────────────────────────────────────────────────
 

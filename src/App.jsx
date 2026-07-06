@@ -6,6 +6,7 @@ import Onboarding from './components/Onboarding';
 import WhatsNew from './components/WhatsNew';
 import InstallPrompt from './components/InstallPrompt';
 import NotificationPrompt from './components/NotificationPrompt';
+import CTABanner from './components/CTABanner';
 import ForegroundToast from './components/ForegroundToast';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { UXProvider } from './ux/UXProvider';
@@ -98,6 +99,7 @@ function AppInner() {
         <Navbar />
         <InAppPushManager />
         <main className="main-content">
+          <CTABanner />
           <NotificationPrompt />
           <Routes>
             <Route path="/" element={<StudentDashboard />} />

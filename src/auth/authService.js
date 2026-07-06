@@ -87,6 +87,13 @@ export async function resetWhatsNew(phone) {
   await updateDoc(userRef(phone), { whatsNewSeen_v1: false });
 }
 
+// ── CTA Banner "seen" flag ─────────────────────────────────────
+// Stores the banner's updatedAt timestamp. If it matches the current
+// banner config, the banner is never shown again (cross-device).
+export async function markBannerSeen(phone, updatedAt) {
+  await updateDoc(userRef(phone), { seenBannerVersion: updatedAt });
+}
+
 // ── Attendance ─────────────────────────────────────────────────
 // Stored on the user document as an array of absent date keys
 // (YYYY-MM-DD). All working days are implicitly "present"; only
