@@ -16,6 +16,7 @@ export default function StarLogin() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
   
   const [error, setError] = useState('');
@@ -55,6 +56,7 @@ export default function StarLogin() {
     try {
       if (isNewUser) {
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+        if (password !== confirmPassword) throw new Error("Passwords do not match.");
         await savePassword(phone.trim(), password);
       } else {
         await login(phone.trim(), password);
@@ -326,7 +328,7 @@ export default function StarLogin() {
             </div>
 
             <div className="star-input-group">
-              <label className="star-label">Password</label>
+              <label className="star-label">{isNewUser ? 'Create Password' : 'Password'}</label>
               <input 
                 type="password" 
                 className="star-input" 
@@ -337,6 +339,20 @@ export default function StarLogin() {
                 placeholder={isNewUser ? 'Minimum 6 characters' : 'Your password'} 
               />
             </div>
+
+            {isNewUser && (
+              <div className="star-input-group">
+                <label className="star-label">Confirm Password</label>
+                <input 
+                  type="password" 
+                  className="star-input" 
+                  value={confirmPassword} 
+                  onChange={e => setConfirmPassword(e.target.value)} 
+                  required 
+                  placeholder="Type password again" 
+                />
+              </div>
+            )}
             
             {error && <div className="star-error">
               <ShieldCheck size={16} /> {error}
