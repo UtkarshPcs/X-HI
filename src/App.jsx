@@ -36,7 +36,6 @@ import RecordTeacherPage from './pages/RecordTeacherPage';
 import StudyTogetherPage from './pages/StudyTogetherPage';
 import StudyRoomPage from './pages/StudyRoomPage';
 import StarBatchPage from './pages/StarBatchPage';
-import StarLogin from './pages/StarLogin';
 import StarBatchSyllabusPage from './pages/StarBatchSyllabusPage';
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
@@ -66,18 +65,14 @@ function AppInner() {
   useActivityLogger();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { refreshUser, currentUser, loading } = useAuth();
+  const { refreshUser } = useAuth();
   // pendingReset: { phone } — set when email-reset link is clicked; triggers reset form in AuthModal
   const [resetPhone, setResetPhone] = useState(null);
 
-  const isStarBatchOrPortal = currentUser?.role === 'STAR_BATCH_EXTERNAL' || pathname.startsWith('/star-batch') || pathname === '/star-login' || pathname.startsWith('/star-syllabus');
-
-  useEffect(() => {
-    if (loading) return;
-    if (currentUser?.role === 'STAR_BATCH_EXTERNAL' && !pathname.startsWith('/star-batch') && pathname !== '/star-login' && !pathname.startsWith('/star-syllabus')) {
-      navigate('/star-batch', { replace: true });
-    }
-  }, [currentUser, pathname, navigate, loading]);
+  // Star Batch is an internal-only feature now (no separate external role/
+  // login). Still suppress the normal app-wide popups while viewing the
+  // Star Batch portal/syllabus pages, since those are a focused sub-area.
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -139,7 +134,6 @@ function AppInner() {
             <Route path="/study-together" element={<StudyTogetherPage />} />
             <Route path="/study-together/:roomId" element={<StudyRoomPage />} />
             <Route path="/star-batch" element={<StarBatchPage />} />
-            <Route path="/star-login" element={<StarLogin />} />
             <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
           </Routes>
         </main>

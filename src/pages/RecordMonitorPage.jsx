@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useStarBatchRouteGuard } from '../auth/starBatchAccess';
 import { ROLES } from '../auth/roles';
 import { rollList } from '../auth/rollList';
 import { getTables, getEntries, setCellValue, updateTable, getRecordRequests, deleteRecordRequest } from '../services/recordsService';
@@ -328,7 +327,6 @@ function TableSection({ table, onRenamed }) {
 }
 
 export default function RecordMonitorPage() {
-  useStarBatchRouteGuard();
   const { currentUser, loading } = useAuth();
   const navigate = useNavigate();
   const [tables, setTables] = useState(null);

@@ -36,7 +36,7 @@ service cloud.firestore {
                     && request.resource.data.name is string;
       allow update: if (
         !("activeRole" in request.resource.data)
-        || request.resource.data.activeRole in ["STUDENT", "TEACHER", "MONITOR", "ADMIN", "STAR_BATCH_EXTERNAL"]
+        || request.resource.data.activeRole in ["STUDENT", "TEACHER", "MONITOR", "ADMIN"]
       );
       allow delete: if true; // used by adminService.deleteUserDoc — no safe way to restrict without real auth
     }

@@ -28,13 +28,14 @@ export default function StarBatchSyllabusPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  // Route guard: only users who have unlocked Star Batch may view or edit
-  // this page. Mirrors the check in StarBatchPage — do not access this page
-  // directly without going through the unlock flow first.
+  // Route guard: only allow-listed (isStarBatch) users who have also
+  // unlocked via the code may view or edit this page. Mirrors the check in
+  // StarBatchPage — do not access this page directly without both being
+  // admin-approved and having entered the code first.
   useEffect(() => {
     if (!currentUser) {
       navigate('/');
-    } else if (!currentUser.hasUnlockedStarBatch) {
+    } else if (!currentUser.isStarBatch || !currentUser.hasUnlockedStarBatch) {
       navigate('/star-batch');
     }
   }, [currentUser, navigate]);
@@ -42,7 +43,7 @@ export default function StarBatchSyllabusPage() {
   const activeSection = syllabusData.find(s => s.sectionId === sectionId) || null;
   const activeSubject = activeSection?.subjects.find(s => s.subjectId === subjectId) || null;
 
-  if (!currentUser || !currentUser.hasUnlockedStarBatch) return null;
+  if (!currentUser || !currentUser.isStarBatch || !currentUser.hasUnlockedStarBatch) return null;
 
   // Load questions when a chapter is expanded
   async function toggleChapter(chapterId) {

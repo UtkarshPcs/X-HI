@@ -4,41 +4,6 @@ import { db } from '../firebase';
 const STAR_BATCH_SETTINGS_REF = doc(db, 'settings', 'starbatch');
 const CODE_REGEX = /^\d{4}$/;
 
-// External Star Batch users get a unique roll in this range, distinct from
-// the real class roster (currently rolls 1-40). This replaces the old
-// hardcoded rollNo: 85 shared by every external signup.
-export const EXTERNAL_ROLL_MIN = 100;
-export const EXTERNAL_ROLL_MAX = 199;
-
-/**
- * Returns the next unused roll number in the external range (100-199),
- * based on the highest roll currently assigned. Starts at 100 if none exist.
- *
- * Note: this is a best-effort sequential assignment (read-then-write, not a
- * transaction). Two users registering in the same instant could theoretically
- * race and land on the same roll — acceptable risk for this app's scale, but
- * worth revisiting with a Firestore transaction if signups ever become
- * high-frequency/concurrent.
- */
-export async function getNextStarBatchRoll() {
-  const q = query(
-    collection(db, 'users'),
-    where('rollNo', '>=', EXTERNAL_ROLL_MIN),
-    where('rollNo', '<=', EXTERNAL_ROLL_MAX)
-  );
-  const snap = await getDocs(q);
-  let maxRoll = EXTERNAL_ROLL_MIN - 1;
-  snap.docs.forEach(d => {
-    const roll = Number(d.data().rollNo);
-    if (roll > maxRoll) maxRoll = roll;
-  });
-  const next = maxRoll + 1;
-  if (next > EXTERNAL_ROLL_MAX) {
-    throw new Error('Star Batch external roll range (100-199) is full. Contact the admin.');
-  }
-  return next;
-}
-
 // Ensure the config document exists
 async function ensureConfig() {
   const snap = await getDoc(STAR_BATCH_SETTINGS_REF);
@@ -107,16 +72,25 @@ export async function removeInternalStudent(rollNo) {
 }
 
 /**
- * Single source of truth for unlocking Star Batch access via the public 4-digit code.
- * Used by both the StarBatchPage unlock form and the StarLogin external-user flow.
+ * Single source of truth for unlocking Star Batch access via the 4-digit code.
+ * Star Batch is internal-only: the caller must already be on the admin's
+ * allow-list (isStarBatch === true, granted via addInternalStudent) before
+ * the code even matters. This prevents any logged-in student who merely
+ * learns the code from unlocking access — they must be admin-approved first.
  */
 export async function unlockStarBatchWithCode(phone, code) {
   if (!phone) throw new Error("Missing phone number.");
+
+  const userRef = doc(db, 'users', phone);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists() || !userSnap.data().isStarBatch) {
+    throw new Error("You are not on the Star Batch allow-list. Ask your admin to add you first.");
+  }
+
   const config = await getStarBatchConfig();
   if (config.code !== code) {
     throw new Error("Invalid code.");
   }
-  const userRef = doc(db, 'users', phone);
   await updateDoc(userRef, { hasUnlockedStarBatch: true });
 }
 

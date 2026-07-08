@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { BookMarked, ChevronRight, Lock, Loader2, Check, Info } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
-import { useStarBatchRouteGuard } from '../auth/starBatchAccess';
 import SyllabusProgressBar from '../components/SyllabusProgressBar';
 import { getSyllabus, getCompletedTopics } from '../services/syllabusService';
 import { getCheckedTopics, setCheckedTopics } from '../auth/authService';
@@ -24,7 +23,6 @@ import {
  * does not remount them and reset state on every parent render.
  */
 export default function SyllabusPage() {
-  useStarBatchRouteGuard();
   const { currentUser, openModal } = useAuth();
 
   const [sections, setSections] = useState(null); // null = loading

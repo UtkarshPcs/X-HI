@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useStarBatchRouteGuard } from '../auth/starBatchAccess';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell,
@@ -141,7 +140,6 @@ function HighlightRow({ s, color, rank, extra }) {
 
 // ─── Main component ───────────────────────────────────────────
 export default function MathsDashboard() {
-  useStarBatchRouteGuard();
   const [overrides, setOverrides] = useState({});
   const [search,    setSearch]    = useState('');
   const [sortKey,   setSortKey]   = useState('roll');

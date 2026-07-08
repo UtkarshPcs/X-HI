@@ -1,11 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { unlockStarBatchWithCode } from '../services/starBatchService';
-import { getAttendance, setAttendance } from '../auth/authService';
-import { getClosedDays } from '../services/calendarOverrideService';
-import AttendanceCalendar from '../components/AttendanceCalendar';
-import { Lock, Star, Sparkles, ChevronRight, CalendarCheck, GraduationCap, CalendarHeart } from 'lucide-react';
+import { Lock, Star, Sparkles, ChevronRight, ShieldAlert } from 'lucide-react';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 30_000;
@@ -19,12 +16,6 @@ export default function StarBatchPage() {
   const [attempts, setAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const lockTimerRef = useRef(null);
-  const attendanceRef = useRef(null);
-
-  // Attendance state — same pattern as StudentDashboard, scoped to this user.
-  const [absentDays, setAbsentDays] = useState([]);
-  const [attendanceLoaded, setAttendanceLoaded] = useState(false);
-  const [closedDays, setClosedDays] = useState([]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -33,38 +24,6 @@ export default function StarBatchPage() {
   }, [currentUser, navigate]);
 
   useEffect(() => () => clearTimeout(lockTimerRef.current), []);
-
-  // Load attendance + closed days once unlocked.
-  useEffect(() => {
-    if (!currentUser?.hasUnlockedStarBatch) return;
-    let cancelled = false;
-    Promise.all([getAttendance(currentUser.phone), getClosedDays()]).then(([days, closed]) => {
-      if (cancelled) return;
-      setAbsentDays(days);
-      setClosedDays(closed);
-      setAttendanceLoaded(true);
-    }).catch(() => {
-      if (!cancelled) setAttendanceLoaded(true);
-    });
-    return () => { cancelled = true; };
-  }, [currentUser?.hasUnlockedStarBatch, currentUser?.phone]);
-
-  // Scroll to the attendance section if the URL includes the #attendance anchor
-  // (used by the Navbar's "Attendance" link for external users).
-  useEffect(() => {
-    if (window.location.hash === '#attendance' && attendanceRef.current) {
-      attendanceRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [currentUser?.hasUnlockedStarBatch]);
-
-  const handleToggleAttendance = useCallback(async (dateKey) => {
-    if (!currentUser) return;
-    setAbsentDays(prev => {
-      const next = prev.includes(dateKey) ? prev.filter(d => d !== dateKey) : [...prev, dateKey];
-      setAttendance(currentUser.phone, next).catch(() => {});
-      return next;
-    });
-  }, [currentUser]);
 
   if (!currentUser) return null;
 
@@ -98,6 +57,25 @@ export default function StarBatchPage() {
     // Restrict to digits only, max 4 chars — code is numeric by convention.
     const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 4);
     setCode(digitsOnly);
+  }
+
+  // Star Batch is internal-only: access requires being on the admin's
+  // allow-list (isStarBatch === true, granted via Admin Services → Star
+  // Batch tab). Anyone not on the list — including via direct URL — sees a
+  // clear "not available" state instead of the code-entry form, since the
+  // code is a secondary gate on top of the allow-list, not a substitute for it.
+  if (!currentUser.isStarBatch) {
+    return (
+      <div className="dashboard" style={{ animation: 'fade-in 0.4s ease' }}>
+        <div className="as-card" style={{ maxWidth: 480, margin: '3rem auto', padding: '2.5rem 2rem', textAlign: 'center' }}>
+          <ShieldAlert size={40} color="#a8a29e" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ margin: '0 0 0.5rem' }}>Star Batch Not Available</h2>
+          <p className="as-muted" style={{ margin: 0 }}>
+            You don't currently have access to the Star Batch portal. Ask your admin to add you to the Star Batch allow-list.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!currentUser.hasUnlockedStarBatch) {
@@ -281,7 +259,7 @@ export default function StarBatchPage() {
       <div
         className="as-card star-quick-link"
         onClick={() => navigate('/star-syllabus')}
-        style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}
+        style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
       >
         <div>
           <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
@@ -290,46 +268,6 @@ export default function StarBatchPage() {
           <p className="as-muted" style={{ margin: 0 }}>Browse sections, subjects &amp; chapters. Add targeted questions per chapter.</p>
         </div>
         <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div
-          className="as-card star-quick-link"
-          onClick={() => navigate('/study-together')}
-          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-        >
-          <GraduationCap size={22} color="#fbbf24" style={{ flexShrink: 0 }} />
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Study Together</h4>
-            <p className="as-muted" style={{ margin: 0, fontSize: '0.8rem' }}>Join a live study room</p>
-          </div>
-        </div>
-        <div
-          className="as-card star-quick-link"
-          onClick={() => navigate('/holidays')}
-          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-        >
-          <CalendarHeart size={22} color="#fbbf24" style={{ flexShrink: 0 }} />
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Holiday Homework</h4>
-            <p className="as-muted" style={{ margin: 0, fontSize: '0.8rem' }}>View and track assignments</p>
-          </div>
-        </div>
-      </div>
-
-      <div ref={attendanceRef} className="as-card" style={{ padding: '1.5rem' }}>
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-          <CalendarCheck size={20} color="#fbbf24" /> Your Attendance
-        </h3>
-        {!attendanceLoaded ? (
-          <p className="as-muted">Loading attendance...</p>
-        ) : (
-          <AttendanceCalendar
-            absentDays={absentDays}
-            onToggle={handleToggleAttendance}
-            closedDays={closedDays}
-          />
-        )}
       </div>
     </div>
   );

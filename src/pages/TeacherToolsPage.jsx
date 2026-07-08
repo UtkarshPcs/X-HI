@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useStarBatchRouteGuard } from '../auth/starBatchAccess';
 import { Megaphone, Users, BarChart2, ArrowRight, Bold, Italic, List, Save, Pencil, Trash2, X, BookMarked, ClipboardList } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import FormatToolbar from '../components/FormatToolbar';
@@ -139,7 +138,6 @@ function NoticeTool({ currentUser }) {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function TeacherToolsPage() {
-  useStarBatchRouteGuard();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [classAvgAtt, setClassAvgAtt] = useState(null);

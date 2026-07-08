@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useStarBatchRouteGuard } from '../auth/starBatchAccess';
 import { ROLES, TEST_PHONE } from '../auth/roles';
 import { getUserRole } from '../auth/roles';
 import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone } from '../auth/authService';
@@ -48,7 +47,6 @@ const ROLE_STYLE = {
   ADMIN:    { color: '#ef4444', bg: 'rgba(239,68,68,0.1)',    Icon: ShieldAlert },
   MONITOR:  { color: '#3b82f6', bg: 'rgba(59,130,246,0.1)',   Icon: ShieldCheck },
   STUDENT:  { color: '#10b981', bg: 'rgba(16,185,129,0.1)',   Icon: User },
-  STAR_BATCH_EXTERNAL: { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', Icon: Star },
   OUTSIDER: { color: '#a8a29e', bg: 'rgba(168,162,158,0.1)',  Icon: UsersIcon },
 };
 
@@ -228,15 +226,7 @@ function UsersTab() {
       .catch(() => setUsers([]));
   }, []);
 
-  // Star Batch external users (rollNo 85, or 100-199) have their own
-  // dedicated section in the Star Batch tab — they are not part of the main
-  // 40-student class roster and should not be mixed into this list, since
-  // admin actions here (delete, roll-based lookups) assume real enrolled
-  // students.
-  const mainRoster = (users || []).filter(u => u.role !== ROLES.STAR_BATCH_EXTERNAL);
-  const externalCount = (users || []).length - mainRoster.length;
-
-  const filtered = mainRoster
+  const filtered = (users || [])
     .filter(u => u.name?.toLowerCase().includes(query.toLowerCase()) || String(u.rollNo).includes(query))
     .sort((a, b) => (a.rollNo || 999) - (b.rollNo || 999));
 
@@ -268,12 +258,7 @@ function UsersTab() {
         <p className="as-muted">Loading…</p>
       ) : (
         <>
-          <p className="as-muted" style={{ marginBottom: '0.75rem' }}>
-            {filtered.length} of {mainRoster.length} class users
-            {externalCount > 0 && (
-              <> · {externalCount} Star Batch external user{externalCount === 1 ? '' : 's'} (see Star Batch tab)</>
-            )}
-          </p>
+          <p className="as-muted" style={{ marginBottom: '0.75rem' }}>{filtered.length} of {users.length} users</p>
           <div className="as-table-wrap">
             <table className="as-table">
               <thead>
@@ -1142,7 +1127,6 @@ function DataExportTab() {
 
 // ── Page ──────────────────────────────────────────────────────
 export default function AdminServicesPage() {
-  useStarBatchRouteGuard();
   const { currentUser, triggerTour, loading } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('users');
@@ -1513,12 +1497,9 @@ function StarBatchTab() {
   const [newCode, setNewCode] = useState('');
   const [rollInput, setRollInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [externals, setExternals] = useState(null);
-  const [closedDays, setClosedDays] = useState([]);
 
   useEffect(() => {
     loadConfig();
-    loadExternals();
   }, []);
 
   function loadConfig() {
@@ -1527,17 +1508,6 @@ function StarBatchTab() {
       setConfig(c);
       setNewCode(c.code);
     }).finally(() => setLoading(false));
-  }
-
-  function loadExternals() {
-    Promise.all([getAllUsers(), getClosedDays()]).then(([u, c]) => {
-      const withRoles = u
-        .map(x => ({ ...x, role: getUserRole(x.rollNo) }))
-        .filter(x => x.role === ROLES.STAR_BATCH_EXTERNAL)
-        .sort((a, b) => (a.rollNo || 0) - (b.rollNo || 0));
-      setExternals(withRoles);
-      setClosedDays(c);
-    }).catch(() => setExternals([]));
   }
 
   async function handleSetCode() {
@@ -1565,7 +1535,6 @@ function StarBatchTab() {
       alert(e.message);
     } finally {
       loadConfig();
-      loadExternals();
       setBusy(false);
     }
   }
@@ -1579,7 +1548,6 @@ function StarBatchTab() {
       alert(e.message);
     } finally {
       loadConfig();
-      loadExternals();
       setBusy(false);
     }
   }
@@ -1614,49 +1582,6 @@ function StarBatchTab() {
           </div>
         ) : (
           <p className="as-muted">No internal students added.</p>
-        )}
-      </div>
-
-      <div className="as-card">
-        <h4 className="as-section-title"><Star size={15} /> Registered External Students</h4>
-        <p className="as-muted" style={{ marginTop: '0.25rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
-          Students who signed up via the Star Batch portal (unique rolls 100-199, or legacy roll 85). Shown here separately from the main class roster.
-        </p>
-        {externals === null ? (
-          <p className="as-muted">Loading...</p>
-        ) : externals.length === 0 ? (
-          <p className="as-muted">No external students registered yet.</p>
-        ) : (
-          <div className="as-table-wrap">
-            <table className="as-table">
-              <thead>
-                <tr>
-                  <th>Roll</th>
-                  <th>Name</th>
-                  <th>Unlocked</th>
-                  <th>Attendance</th>
-                  <th>Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {externals.map(u => {
-                  const att = calcAttendance(u.attendance_absentDays || [], undefined, closedDays);
-                  const c = att.percentage >= 75 ? '#6ee7b7' : att.percentage >= 60 ? '#fbbf24' : '#f87171';
-                  return (
-                    <tr key={u.id}>
-                      <td>{u.rollNo}</td>
-                      <td style={{ fontWeight: 500 }}>{u.name}</td>
-                      <td>{u.hasUnlockedStarBatch ? <span style={{ color: '#6ee7b7' }}>Yes</span> : <span style={{ color: '#f87171' }}>No</span>}</td>
-                      <td>
-                        <span style={{ color: c, fontWeight: 600 }}>{att.percentage}% <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.78rem' }}>({att.presentDays}/{att.totalDays})</span></span>
-                      </td>
-                      <td className="as-muted-cell">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
         )}
       </div>
     </div>

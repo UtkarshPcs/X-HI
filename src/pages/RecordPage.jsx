@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useStarBatchRouteGuard } from '../auth/starBatchAccess';
 import { getTables, getMyEntries, addRecordRequest } from '../services/recordsService';
 import { ClipboardList, AlertCircle, X, Send, ChevronDown, CheckCircle2 } from 'lucide-react';
 
@@ -157,7 +156,6 @@ function ComplaintModal({ tables, currentUser, onClose, onSuccess }) {
 }
 
 export default function RecordPage() {
-  useStarBatchRouteGuard();
   const { currentUser, loading } = useAuth();
   const navigate = useNavigate();
   const [tables, setTables]   = useState(null);
