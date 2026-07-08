@@ -37,6 +37,7 @@ import StudyTogetherPage from './pages/StudyTogetherPage';
 import StudyRoomPage from './pages/StudyRoomPage';
 import StarBatchPage from './pages/StarBatchPage';
 import StarLogin from './pages/StarLogin';
+import StarBatchSyllabusPage from './pages/StarBatchSyllabusPage';
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -69,11 +70,11 @@ function AppInner() {
   // pendingReset: { phone } — set when email-reset link is clicked; triggers reset form in AuthModal
   const [resetPhone, setResetPhone] = useState(null);
 
-  const isStarBatchOrPortal = currentUser?.role === 'STAR_BATCH_EXTERNAL' || pathname.startsWith('/star-batch') || pathname === '/star-login';
+  const isStarBatchOrPortal = currentUser?.role === 'STAR_BATCH_EXTERNAL' || pathname.startsWith('/star-batch') || pathname === '/star-login' || pathname.startsWith('/star-syllabus');
 
   useEffect(() => {
     if (loading) return;
-    if (currentUser?.role === 'STAR_BATCH_EXTERNAL' && !pathname.startsWith('/star-batch') && pathname !== '/star-login') {
+    if (currentUser?.role === 'STAR_BATCH_EXTERNAL' && !pathname.startsWith('/star-batch') && pathname !== '/star-login' && !pathname.startsWith('/star-syllabus')) {
       navigate('/star-batch', { replace: true });
     }
   }, [currentUser, pathname, navigate, loading]);
@@ -139,6 +140,7 @@ function AppInner() {
             <Route path="/study-together/:roomId" element={<StudyRoomPage />} />
             <Route path="/star-batch" element={<StarBatchPage />} />
             <Route path="/star-login" element={<StarLogin />} />
+            <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
           </Routes>
         </main>
         <footer className="app-footer">

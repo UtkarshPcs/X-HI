@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { unlockStarBatch } from '../services/starBatchService';
-import { Lock, Star, Sparkles } from 'lucide-react';
-import StarBatchSyllabus from '../components/StarBatchSyllabus';
+import { Lock, Star, Sparkles, BookOpen, ChevronRight } from 'lucide-react';
 
 export default function StarBatchPage() {
   const { currentUser, updateCurrentUser } = useAuth();
@@ -206,12 +205,20 @@ export default function StarBatchPage() {
         </div>
       </div>
       
-      <div className="as-card">
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-          <Star size={20} color="#fbbf24" /> Elite Syllabus & Questions
-        </h3>
-        <p className="as-muted">This area is isolated from the main portal. Add high-level topics and questions for each chapter below.</p>
-        <StarBatchSyllabus />
+      <div 
+        className="as-card" 
+        onClick={() => navigate('/star-syllabus')} 
+        style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(251,191,36,0.4)'}
+        onMouseLeave={e => e.currentTarget.style.borderColor = ''}
+      >
+        <div>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+            <Star size={20} color="#fbbf24" /> Elite Syllabus &amp; Questions
+          </h3>
+          <p className="as-muted" style={{ margin: 0 }}>Browse sections, subjects &amp; chapters. Add targeted questions per chapter.</p>
+        </div>
+        <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
       </div>
     </div>
   );
