@@ -35,31 +35,158 @@ export default function StarBatchPage() {
 
   if (!currentUser.hasUnlockedStarBatch) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '1rem' }}>
-        <div className="auth-modal" style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: 400 }}>
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-              <Lock size={32} color="#fbbf24" />
+      <div className="star-unlock-container">
+        <style>{`
+          .star-unlock-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: #09090b;
+            background-image: 
+              radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.05), transparent 40%),
+              radial-gradient(circle at 50% 100%, rgba(251, 191, 36, 0.03), transparent 40%);
+            border-radius: var(--radius-lg);
+            margin: 1rem;
+          }
+          
+          .star-unlock-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+  
+          @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+  
+          .star-unlock-header {
+            text-align: center;
+            margin-bottom: 2rem;
+          }
+  
+          .star-unlock-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            margin-bottom: 1.25rem;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
+          }
+  
+          .star-unlock-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 0.5rem;
+            letter-spacing: -0.02em;
+          }
+  
+          .star-unlock-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.4;
+          }
+  
+          .star-unlock-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.75rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            outline: none;
+            box-sizing: border-box;
+          }
+  
+          .star-unlock-input:focus {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+          }
+  
+          .star-unlock-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            border: none;
+            border-radius: 14px;
+            padding: 1.1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.3);
+          }
+  
+          .star-unlock-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.4);
+          }
+  
+          .star-unlock-btn:active:not(:disabled) {
+            transform: translateY(0);
+          }
+  
+          .star-unlock-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+          }
+        `}</style>
+  
+        <div className="star-unlock-card">
+          <div className="star-unlock-header">
+            <div className="star-unlock-icon">
+              <Lock size={28} color="#fbbf24" strokeWidth={2.5} />
             </div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Star Batch Access</h2>
-            <p className="as-muted" style={{ fontSize: '0.9rem' }}>Enter the 4-digit secret code to unlock the Elite Star Batch portal.</p>
+            <h2 className="star-unlock-title">Star Batch Access</h2>
+            <p className="star-unlock-subtitle">Enter the 4-digit secret code to unlock the Elite Star Batch portal.</p>
           </div>
-
-          <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+  
+          <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div>
               <input
                 type="text"
-                className="auth-input"
-                placeholder="4-digit code"
+                className="star-unlock-input"
+                placeholder="••••"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 maxLength={4}
                 required
-                style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem', fontWeight: '600' }}
+                autoComplete="off"
               />
             </div>
-            {error && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>}
-            <button type="submit" className="auth-btn primary" disabled={loading}>
+            {error && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', padding: '0.75rem', borderRadius: '10px', fontSize: '0.85rem', textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                {error}
+              </div>
+            )}
+            <button type="submit" className="star-unlock-btn" disabled={loading}>
               {loading ? 'Verifying...' : 'Unlock Portal'}
             </button>
           </form>
