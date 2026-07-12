@@ -14,6 +14,7 @@ export default function StarBatchTestModulePage() {
   const [tests, setTests] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function StarBatchTestModulePage() {
 
   async function fetchData() {
     setLoading(true);
+    setError(null);
     try {
       const [fetchedTests, fetchedHistory] = await Promise.all([
         getRecentTests(),
@@ -33,6 +35,7 @@ export default function StarBatchTestModulePage() {
       setHistory(fetchedHistory);
     } catch (e) {
       console.error(e);
+      setError(e.message || "Failed to load test data");
     } finally {
       setLoading(false);
     }
@@ -67,6 +70,16 @@ export default function StarBatchTestModulePage() {
       <div style={{ textAlign: 'center', padding: '3rem 0', color: 'rgba(255,255,255,0.4)' }}>
         <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
         Loading Test Data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '3rem 0', color: '#f87171' }}>
+        <XCircle size={32} style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
+        <p style={{ margin: 0, fontWeight: 600 }}>Error loading tests</p>
+        <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>{error}</p>
       </div>
     );
   }

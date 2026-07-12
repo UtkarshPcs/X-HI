@@ -63,9 +63,15 @@ export async function submitTestAttempt(attemptData) {
 }
 
 export async function getUserTestHistory(userId) {
-  const q = query(collection(db, 'starBatchTestAttempts'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'starBatchTestAttempts'), where('userId', '==', userId));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Sort descending by createdAt in JS to avoid composite index requirement
+  return docs.sort((a, b) => {
+    const timeA = a.createdAt?.toMillis() || 0;
+    const timeB = b.createdAt?.toMillis() || 0;
+    return timeB - timeA;
+  });
 }
 
 export async function getUserTestAttemptsForTest(userId, testId) {
