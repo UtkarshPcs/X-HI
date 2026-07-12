@@ -21,7 +21,7 @@ export default async function handler(req) {
     }
 
     const prompt = `
-You are an expert, encouraging high school academic coach. 
+You are an expert, analytical academic coach. 
 The student just completed an Elite Star Batch MCQ test.
 
 Here are the results:
@@ -29,11 +29,12 @@ Score: ${score} out of ${total}
 Topics they struggled with (answered incorrectly): ${weakTopics && weakTopics.length > 0 ? weakTopics.join(', ') : 'None, great job!'}
 Difficulty of wrong answers: ${wrongDifficulties && wrongDifficulties.length > 0 ? wrongDifficulties.join(', ') : 'N/A'}
 
-Write a short, highly motivating, and highly personalized review (max 4-5 sentences) summarizing their performance. 
-- If the score is high, praise them and advise them to keep it up.
-- If they made mistakes on 'Easy' questions, gently remind them to avoid silly mistakes and read carefully.
-- If they struggled on 'Hard' questions, encourage them that these are meant to be challenging and point out the specific topics to revise.
-- Keep the tone elite, professional, yet warm. 
+Write a direct, highly analytical, and actionable review (max 4 sentences) summarizing their performance. 
+- Do NOT be overly fluffy or purely encouraging. Focus on exactly what they need to fix.
+- Explicitly tell the user which topics they need to focus on and revise based on their mistakes.
+- If they made mistakes on 'Easy' questions, explicitly warn them about silly mistakes in those specific topics.
+- If the score is perfect, you can briefly praise them and tell them they have mastered these topics.
+Keep the tone elite, professional, and brutally helpful. 
 Do NOT output markdown. Just plain text.
     `.trim();
 

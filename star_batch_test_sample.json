@@ -1,0 +1,44 @@
+{
+  "chapterId": "science-0-c0",
+  "subjectId": "science-0",
+  "sectionId": "science",
+  "title": "Light: Reflection and Refraction - Complete Mastery Test",
+  "questions": [
+    {
+      "text": "The radius of curvature of a spherical mirror is 20 cm. What is its focal length?",
+      "options": [
+        "10 cm",
+        "20 cm",
+        "40 cm",
+        "5 cm"
+      ],
+      "correctOptionIndex": 0,
+      "difficulty": "Easy",
+      "topic": "Spherical Mirrors"
+    },
+    {
+      "text": "Which of the following lenses would you prefer to use while reading small letters found in a dictionary?",
+      "options": [
+        "A convex lens of focal length 50 cm",
+        "A concave lens of focal length 50 cm",
+        "A convex lens of focal length 5 cm",
+        "A concave lens of focal length 5 cm"
+      ],
+      "correctOptionIndex": 2,
+      "difficulty": "Medium",
+      "topic": "Image Formation by Lenses"
+    },
+    {
+      "text": "No matter how far you stand from a mirror, your image appears erect. The mirror is likely to be:",
+      "options": [
+        "Plane",
+        "Concave",
+        "Convex",
+        "Either plane or convex"
+      ],
+      "correctOptionIndex": 3,
+      "difficulty": "Hard",
+      "topic": "Image Formation by Mirrors"
+    }
+  ]
+}

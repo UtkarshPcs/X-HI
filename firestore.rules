@@ -97,6 +97,8 @@ service cloud.firestore {
     match /student_notifications/{id} { allow read, write: if true; }
     match /ctaBannerClicks/{id}   { allow read, write: if true; }
     match /test_data/{id}         { allow read, write: if true; }
+    match /starBatchTests/{id}    { allow read, write: if true; }
+    match /starBatchTestAttempts/{id} { allow read, write: if true; }
 
     // ---- Default deny ---------------------------------------------------
     // Anything not explicitly matched above (including collections an

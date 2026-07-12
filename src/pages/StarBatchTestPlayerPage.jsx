@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { getTestById, submitTestAttempt, getUserTestAttemptsForTest } from '../services/starBatchTestService';
+import { getTestById, submitTestAttempt, getUserTestAttemptsForTest, getTestAverageScore } from '../services/starBatchTestService';
 import { Loader2, ArrowLeft, CheckCircle, XCircle, Sparkles, Target } from 'lucide-react';
 
 export default function StarBatchTestPlayerPage() {
@@ -17,6 +17,7 @@ export default function StarBatchTestPlayerPage() {
   const [answers, setAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [averageScore, setAverageScore] = useState(null);
 
   useEffect(() => {
     if (!currentUser) navigate('/');
@@ -27,8 +28,12 @@ export default function StarBatchTestPlayerPage() {
   async function fetchTest() {
     setLoading(true);
     try {
-      const data = await getTestById(testId);
-      const attempts = await getUserTestAttemptsForTest(currentUser.id || currentUser.phone, testId);
+      const [data, attempts, avg] = await Promise.all([
+        getTestById(testId),
+        getUserTestAttemptsForTest(currentUser.id || currentUser.phone, testId),
+        getTestAverageScore(testId)
+      ]);
+      setAverageScore(avg);
       
       let seenIndices = new Set();
       attempts.forEach(a => {
@@ -127,6 +132,7 @@ export default function StarBatchTestPlayerPage() {
       });
 
       setResult({ score, total: activeQuestions.length, aiReview });
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } catch (e) {
       alert('Failed to submit test. Please try again.');
     } finally {
@@ -184,16 +190,40 @@ export default function StarBatchTestPlayerPage() {
       </div>
 
       {result && (
-        <div className="tp-result-card" style={{ animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-          <Target size={40} color="#fbbf24" style={{ margin: '0 auto' }} />
-          <div className="tp-score">{result.score} <span style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.4)' }}>/ {result.total}</span></div>
-          <h2 style={{ margin: 0, color: '#fff' }}>Test Completed!</h2>
-          
-          <div className="tp-ai-review">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fbbf24', fontWeight: 700, marginBottom: '0.5rem' }}>
-              <Sparkles size={18} /> AI Coach Insights
+        <div style={{ animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)', marginBottom: '2rem' }}>
+          <div className="tp-result-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+            <Target size={40} color="#fbbf24" style={{ margin: '0 auto' }} />
+            <h2 style={{ margin: 0, color: '#fff' }}>Test Completed!</h2>
+            
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px' }}>Your Score</div>
+                <div className="tp-score">{result.score} <span style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.4)' }}>/ {result.total}</span></div>
+              </div>
+              
+              <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+              
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px' }}>Percentage</div>
+                <div className="tp-score" style={{ color: '#10b981' }}>{Math.round((result.score / result.total) * 100)}%</div>
+              </div>
+
+              <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+              
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px' }}>Peer Average</div>
+                <div className="tp-score" style={{ color: '#38bdf8' }}>{averageScore !== null ? `${Math.round(averageScore)}%` : 'N/A'}</div>
+              </div>
             </div>
-            {result.aiReview}
+          </div>
+          
+          <div className="tp-result-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fbbf24', fontWeight: 800, fontSize: '1.2rem', marginBottom: '1rem', justifyContent: 'center' }}>
+              <Sparkles size={20} /> AI Coach Insights
+            </div>
+            <p style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.6, color: '#f1f5f9', textAlign: 'left' }}>
+              {result.aiReview}
+            </p>
           </div>
         </div>
       )}

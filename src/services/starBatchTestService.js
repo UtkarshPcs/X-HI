@@ -77,3 +77,21 @@ export async function getUserTestAttemptsForTest(userId, testId) {
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
+
+export async function getTestAverageScore(testId) {
+  const q = query(collection(db, 'starBatchTestAttempts'), where('testId', '==', testId));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  
+  let totalPercentage = 0;
+  let validCount = 0;
+  snap.docs.forEach(d => {
+    const data = d.data();
+    if (data.total > 0) {
+      totalPercentage += (data.score / data.total) * 100;
+      validCount++;
+    }
+  });
+  
+  return validCount > 0 ? totalPercentage / validCount : null;
+}

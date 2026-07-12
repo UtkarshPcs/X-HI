@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { unlockStarBatchWithCode } from '../services/starBatchService';
-import { Lock, Star, Sparkles, ChevronRight, ShieldAlert } from 'lucide-react';
+import { Lock, Star, Sparkles, ChevronRight, ShieldAlert, Target } from 'lucide-react';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 30_000;
@@ -256,18 +256,34 @@ export default function StarBatchPage() {
         </div>
       </div>
 
-      <div
-        className="as-card star-quick-link"
-        onClick={() => navigate('/star-syllabus')}
-        style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-      >
-        <div>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-            <Star size={20} color="#fbbf24" /> Elite Syllabus &amp; Questions
-          </h3>
-          <p className="as-muted" style={{ margin: 0 }}>Browse sections, subjects &amp; chapters. Add targeted questions per chapter.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div
+          className="as-card star-quick-link"
+          onClick={() => navigate('/star-syllabus')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <Star size={20} color="#fbbf24" /> Elite Syllabus &amp; Questions
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>Browse sections, subjects &amp; chapters. Add targeted questions per chapter.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
         </div>
-        <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+
+        <div
+          className="as-card star-quick-link"
+          onClick={() => navigate('/star-tests')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <Target size={20} color="#fbbf24" /> Elite Testing Module
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>Take tests, view past scores, and check your AI-powered performance report.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+        </div>
       </div>
     </div>
   );
