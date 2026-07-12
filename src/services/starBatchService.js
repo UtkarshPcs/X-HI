@@ -29,7 +29,7 @@ export async function setStarBatchCode(code) {
  * Returns the DocumentSnapshot's doc (with .ref) or null if not found.
  */
 async function findUserDocByRoll(roll) {
-  const q = query(collection(db, 'users'), where('rollNo', '==', roll));
+  const q = query(collection(db, 'users'), where('rollNo', 'in', [roll, String(roll)]));
   const snap = await getDocs(q);
   return snap.empty ? null : snap.docs[0];
 }

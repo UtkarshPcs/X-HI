@@ -26,6 +26,10 @@ export async function getUserByPhone(phone) {
 export async function registerUser({ name, phone, rollNo }) {
   const existing = await getUserByPhone(phone);
   if (existing) throw new Error('Phone already registered. Please login.');
+  
+  let isStarBatch = false;
+  let hasUnlockedStarBatch = false;
+  
   // Prevent duplicate roll numbers (0 = outsider/unassigned, always allowed to repeat).
   if (rollNo !== 0) {
     const allSnap = await getDocs(collection(db, 'users'));
@@ -34,11 +38,24 @@ export async function registerUser({ name, phone, rollNo }) {
       return Number(u.rollNo) === Number(rollNo) && !u.mergedInto;
     });
     if (dup) throw new Error('This roll number is already registered.');
+    
+    // Check if the admin pre-approved this roll number for Star Batch
+    const settingsSnap = await getDoc(doc(db, 'settings', 'starbatch'));
+    if (settingsSnap.exists()) {
+      const settingsData = settingsSnap.data();
+      if (settingsData.internalRolls && settingsData.internalRolls.includes(Number(rollNo))) {
+        isStarBatch = true;
+        hasUnlockedStarBatch = true;
+      }
+    }
   }
+  
   await setDoc(userRef(phone), {
     name,
     phone,
     rollNo,
+    isStarBatch,
+    hasUnlockedStarBatch,
     passwordHash: null,
     createdAt: Date.now(),
   });
