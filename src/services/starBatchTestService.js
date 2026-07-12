@@ -14,10 +14,32 @@ async function processSingleTest(testData) {
   
   if (existingTest) {
     const ref = doc(db, 'starBatchTests', existingTest.id);
-    await setDoc(ref, {
-      questions: [...existingTest.questions, ...testData.questions],
-      title: testData.title || existingTest.title
-    }, { merge: true });
+    
+    // Deduplication logic: generate a unique key based on text and image
+    const getQKey = (q) => {
+      const text = (q.text || q.questionText || '').trim().toLowerCase();
+      const img = (q.imageUrl || '').trim();
+      return `${text}|${img}`;
+    };
+
+    const existingKeys = new Set(existingTest.questions.map(getQKey));
+    const newUniqueQuestions = [];
+
+    for (const q of testData.questions) {
+      const key = getQKey(q);
+      // Skip empty or purely duplicate questions
+      if (key !== '|' && !existingKeys.has(key)) {
+        existingKeys.add(key);
+        newUniqueQuestions.push(q);
+      }
+    }
+
+    if (newUniqueQuestions.length > 0) {
+      await setDoc(ref, {
+        questions: [...existingTest.questions, ...newUniqueQuestions],
+        title: testData.title || existingTest.title
+      }, { merge: true });
+    }
     return existingTest.id;
   }
 
