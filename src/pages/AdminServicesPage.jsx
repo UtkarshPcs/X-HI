@@ -17,7 +17,7 @@ import { getTables, setTeacherRecordTables } from '../services/recordsService';
 import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/inAppNoticeService';
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
-import { uploadTestJSON } from '../services/starBatchTestService';
+import { uploadTestJSON, getAllTestAttempts, getRecentTests } from '../services/starBatchTestService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -1499,6 +1499,10 @@ function StarBatchTab() {
   const [rollInput, setRollInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  
+  const [attempts, setAttempts] = useState([]);
+  const [usersMap, setUsersMap] = useState({});
+  const [testsMap, setTestsMap] = useState({});
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -1543,10 +1547,28 @@ function StarBatchTab() {
 
   function loadConfig() {
     setLoading(true);
-    getStarBatchConfig().then(c => {
+    Promise.all([
+      getStarBatchConfig(),
+      getAllTestAttempts(),
+      getAllUsers(),
+      getRecentTests()
+    ]).then(([c, atts, usersList, testsList]) => {
       setConfig(c);
       setNewCode(c.code);
-    }).finally(() => setLoading(false));
+      setAttempts(atts);
+      
+      const uMap = {};
+      usersList.forEach(u => {
+        const name = u.name || String(u.rollNo);
+        if (u.id) uMap[u.id] = name;
+        if (u.phone) uMap[u.phone] = name;
+      });
+      setUsersMap(uMap);
+      
+      const tMap = {};
+      testsList.forEach(t => tMap[t.id] = t.title);
+      setTestsMap(tMap);
+    }).catch(e => console.error(e)).finally(() => setLoading(false));
   }
 
   async function handleSetCode() {
@@ -1666,6 +1688,47 @@ function StarBatchTab() {
           />
         </div>
         {busy && <div style={{ color: '#fbbf24', marginTop: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>Uploading test... Please wait.</div>}
+      </div>
+
+      <div className="as-card">
+        <h4 className="as-section-title"><Activity size={15} /> Student Test Scores</h4>
+        {attempts.length === 0 ? (
+          <p className="as-muted">No tests taken yet.</p>
+        ) : (
+          <div className="as-table-wrap">
+            <table className="as-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Test Name</th>
+                  <th>Score</th>
+                  <th>Accuracy</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attempts.map(att => {
+                  const student = usersMap[att.userId] || att.userId || 'Unknown';
+                  const testTitle = testsMap[att.testId] || att.chapterId || 'Unknown Test';
+                  const accuracy = att.total > 0 ? Math.round((att.score / att.total) * 100) : 0;
+                  return (
+                    <tr key={att.id}>
+                      <td style={{ fontWeight: 500 }}>{student}</td>
+                      <td>{testTitle}</td>
+                      <td style={{ fontWeight: 600 }}>{att.score} / {att.total}</td>
+                      <td>
+                        <span style={{ color: accuracy >= 80 ? '#10b981' : accuracy >= 50 ? '#fbbf24' : '#ef4444', fontWeight: 600 }}>
+                          {accuracy}%
+                        </span>
+                      </td>
+                      <td className="as-muted-cell">{att.createdAt?.toDate ? att.createdAt.toDate().toLocaleDateString('en-IN') : new Date(att.createdAt).toLocaleDateString('en-IN')}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

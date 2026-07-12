@@ -269,9 +269,12 @@ export default function StarBatchTestModulePage() {
                     <div>
                       <h3 className="tm-card-title">{test.title}</h3>
                       <div className="tm-card-meta">
-                        <span>{Math.min(test.questions.length, 10)} Questions</span>
-                        <span>{isCompleted ? 'Completed' : 'Not Attempted'}</span>
+                        <span>{test.questions.length} Questions in Bank</span>
+                        <span>{isCompleted ? 'Attempted' : 'Not Attempted'}</span>
                       </div>
+                      <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', margin: '0.75rem 0 0 0', lineHeight: 1.4 }}>
+                        Generates a unique 10-question test on every attempt.
+                      </p>
                     </div>
                     <button 
                       className="tm-btn" 
@@ -279,7 +282,7 @@ export default function StarBatchTestModulePage() {
                       style={isCompleted ? { background: 'rgba(255,255,255,0.1)', color: '#fff' } : {}}
                     >
                       <Play size={16} fill={isCompleted ? 'none' : 'currentColor'} /> 
-                      {isCompleted ? 'New Practice Test' : 'Start Test'}
+                      Generate New Test
                     </button>
                   </div>
                 );
