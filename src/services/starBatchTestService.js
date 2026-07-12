@@ -68,8 +68,8 @@ export async function getUserTestHistory(userId) {
   const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   // Sort descending by createdAt in JS to avoid composite index requirement
   return docs.sort((a, b) => {
-    const timeA = a.createdAt?.toMillis() || 0;
-    const timeB = b.createdAt?.toMillis() || 0;
+    const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+    const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
     return timeB - timeA;
   });
 }
