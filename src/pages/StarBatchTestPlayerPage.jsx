@@ -18,6 +18,7 @@ export default function StarBatchTestPlayerPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [averageScore, setAverageScore] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   useEffect(() => {
     if (!currentUser) navigate('/');
@@ -178,6 +179,12 @@ export default function StarBatchTestPlayerPage() {
         .tp-submit { width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border: none; border-radius: 12px; padding: 1.1rem; color: #000; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; margin-top: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
         .tp-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(245,158,11,0.3); }
         .tp-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .tp-nav-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.1rem; color: #fff; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; }
+        .tp-nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+        .tp-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .tp-nav-btn.primary { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: #fbbf24; }
+        .tp-nav-btn.primary:hover:not(:disabled) { background: rgba(251,191,36,0.25); }
 
         .tp-result-card { background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(245,158,11,0.05) 100%); border: 1px solid rgba(251,191,36,0.3); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; text-align: center; }
         .tp-score { font-size: 4rem; font-weight: 900; color: #fbbf24; line-height: 1; margin: 1rem 0; }
@@ -228,58 +235,113 @@ export default function StarBatchTestPlayerPage() {
         </div>
       )}
 
-      <div>
-        {activeQuestions.map((q, qIndex) => {
-          return (
-            <div key={qIndex} className="tp-q-card">
-              <div className="tp-q-meta">
-                <span>Q{qIndex + 1}</span>
-                {q.difficulty && <span>• {q.difficulty}</span>}
-                {q.topic && <span>• {q.topic}</span>}
-              </div>
-              <p className="tp-q-text">{q.text}</p>
+      {!result ? (
+        <div style={{ animation: 'fade-in 0.3s ease' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', fontWeight: 600 }}>
+            <span>Question {currentQuestionIndex + 1} of {activeQuestions.length}</span>
+            <span>{Object.keys(answers).length} / {activeQuestions.length} Answered</span>
+          </div>
+          
+          <div className="tp-q-card">
+            <div className="tp-q-meta">
+              <span>Q{currentQuestionIndex + 1}</span>
+              {activeQuestions[currentQuestionIndex].difficulty && <span>• {activeQuestions[currentQuestionIndex].difficulty}</span>}
+              {activeQuestions[currentQuestionIndex].topic && <span>• {activeQuestions[currentQuestionIndex].topic}</span>}
+            </div>
+            <p className="tp-q-text">{activeQuestions[currentQuestionIndex].text}</p>
 
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {q.options.map((opt, optIndex) => {
-                  const isSelected = answers[qIndex] === optIndex;
-                  const isCorrectOption = q.correctOptionIndex === optIndex;
-                  
-                  let optClass = '';
-                  if (result) {
-                    optClass = 'disabled ';
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {activeQuestions[currentQuestionIndex].options.map((opt, optIndex) => {
+                const isSelected = answers[currentQuestionIndex] === optIndex;
+                let optClass = isSelected ? 'selected ' : '';
+                return (
+                  <div 
+                    key={optIndex} 
+                    className={`tp-opt ${optClass}`}
+                    onClick={() => handleOptionSelect(currentQuestionIndex, optIndex)}
+                  >
+                    <div className="tp-opt-circle">
+                      {String.fromCharCode(65 + optIndex)}
+                    </div>
+                    <span style={{ flex: 1, color: isSelected ? '#fff' : '#e2e8f0' }}>{opt}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+            <button 
+              className="tp-nav-btn" 
+              onClick={() => setCurrentQuestionIndex(prev => prev - 1)} 
+              disabled={currentQuestionIndex === 0}
+            >
+              Previous
+            </button>
+            
+            {currentQuestionIndex < activeQuestions.length - 1 ? (
+              <button 
+                className="tp-nav-btn primary" 
+                onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+              >
+                Next
+              </button>
+            ) : (
+              <button 
+                className="tp-submit" 
+                onClick={handleSubmit} 
+                disabled={isSubmitting || Object.keys(answers).length < activeQuestions.length}
+                style={{ flex: 1, marginTop: 0 }}
+              >
+                {isSubmitting ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : 'Submit Test'}
+              </button>
+            )}
+          </div>
+          {Object.keys(answers).length < activeQuestions.length && currentQuestionIndex === activeQuestions.length - 1 && (
+            <div style={{ textAlign: 'center', marginTop: '1rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+              You must answer all {activeQuestions.length} questions before submitting.
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{ marginTop: '2rem' }}>
+          <h3 style={{ color: '#fff', fontSize: '1.25rem', marginBottom: '1.5rem' }}>Review Answers</h3>
+          {activeQuestions.map((q, qIndex) => {
+            return (
+              <div key={qIndex} className="tp-q-card">
+                <div className="tp-q-meta">
+                  <span>Q{qIndex + 1}</span>
+                  {q.difficulty && <span>• {q.difficulty}</span>}
+                  {q.topic && <span>• {q.topic}</span>}
+                </div>
+                <p className="tp-q-text">{q.text}</p>
+
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {q.options.map((opt, optIndex) => {
+                    const isSelected = answers[qIndex] === optIndex;
+                    const isCorrectOption = q.correctOptionIndex === optIndex;
+                    
+                    let optClass = 'disabled ';
                     if (isCorrectOption) optClass += 'correct ';
                     else if (isSelected) optClass += 'incorrect ';
-                  } else {
-                    if (isSelected) optClass += 'selected ';
-                  }
 
-                  return (
-                    <div 
-                      key={optIndex} 
-                      className={`tp-opt ${optClass}`}
-                      onClick={() => handleOptionSelect(qIndex, optIndex)}
-                    >
-                      <div className="tp-opt-circle">
-                        {result && isCorrectOption ? <CheckCircle size={16} color="#fff" /> : result && isSelected && !isCorrectOption ? <XCircle size={16} color="#fff" /> : String.fromCharCode(65 + optIndex)}
+                    return (
+                      <div 
+                        key={optIndex} 
+                        className={`tp-opt ${optClass}`}
+                      >
+                        <div className="tp-opt-circle">
+                          {isCorrectOption ? <CheckCircle size={16} color="#fff" /> : isSelected && !isCorrectOption ? <XCircle size={16} color="#fff" /> : String.fromCharCode(65 + optIndex)}
+                        </div>
+                        <span style={{ flex: 1, color: isSelected || isCorrectOption ? '#fff' : '#e2e8f0' }}>{opt}</span>
                       </div>
-                      <span style={{ flex: 1, color: isSelected || (result && isCorrectOption) ? '#fff' : '#e2e8f0' }}>{opt}</span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {!result && (
-        <button 
-          className="tp-submit" 
-          onClick={handleSubmit} 
-          disabled={isSubmitting || Object.keys(answers).length < activeQuestions.length}
-        >
-          {isSubmitting ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : 'Submit Test'}
-        </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
