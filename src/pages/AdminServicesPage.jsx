@@ -17,6 +17,7 @@ import { getTables, setTeacherRecordTables } from '../services/recordsService';
 import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/inAppNoticeService';
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
+import { uploadTestJSON } from '../services/starBatchTestService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -1583,6 +1584,38 @@ function StarBatchTab() {
         ) : (
           <p className="as-muted">No internal students added.</p>
         )}
+      </div>
+
+      <div className="as-card">
+        <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter MCQ Test</h4>
+        <p className="as-muted" style={{ marginBottom: '1rem' }}>Upload a valid JSON file containing chapterId, subjectId, sectionId, title, and a questions array.</p>
+        <input 
+          type="file" 
+          accept=".json" 
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+              const text = await file.text();
+              const json = JSON.parse(text);
+              await uploadTestJSON(json);
+              alert("Test uploaded successfully!");
+            } catch (err) {
+              alert("Failed to upload test: " + err.message);
+            } finally {
+              e.target.value = '';
+            }
+          }}
+          style={{ 
+            background: 'rgba(255,255,255,0.03)', 
+            padding: '1rem', 
+            borderRadius: '8px', 
+            border: '1px dashed rgba(255,255,255,0.1)',
+            width: '100%',
+            cursor: 'pointer',
+            color: '#fff'
+          }} 
+        />
       </div>
     </div>
   );

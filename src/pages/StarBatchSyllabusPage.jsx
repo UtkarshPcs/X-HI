@@ -10,6 +10,7 @@ import {
   reportQuestion,
   bulkUploadStarBatchQuestions
 } from '../services/starBatchSyllabusService';
+import { getTestByChapter } from '../services/starBatchTestService';
 import { useAuth } from '../auth/AuthContext';
 import { getUserRole, ROLES } from '../auth/roles';
 
@@ -361,7 +362,10 @@ export default function StarBatchSyllabusPage() {
   const [filterSection, setFilterSection] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
   const [filterChapter, setFilterChapter] = useState('');
+  const [filterMarks,   setFilterMarks]   = useState('');
   const [searchQuery,   setSearchQuery]   = useState('');
+  const [showBookmarked, setShowBookmarked] = useState(false);
+  const [chapterTestId, setChapterTestId] = useState(null);
 
   const [showQuickUpload, setShowQuickUpload] = useState(false);
 
@@ -371,6 +375,16 @@ export default function StarBatchSyllabusPage() {
     else if (!currentUser.isStarBatch || !currentUser.hasUnlockedStarBatch) navigate('/star-batch');
     else fetchQuestions();
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    if (filterChapter) {
+      getTestByChapter(filterChapter).then(test => {
+        setChapterTestId(test ? test.id : null);
+      }).catch(() => setChapterTestId(null));
+    } else {
+      setChapterTestId(null);
+    }
+  }, [filterChapter]);
 
   async function fetchQuestions() {
     setLoading(true); setError('');
@@ -419,6 +433,8 @@ export default function StarBatchSyllabusPage() {
     return questions.filter(q => {
       if (filterSubject && q.subjectId !== filterSubject) return false;
       if (filterChapter && q.chapterId !== filterChapter) return false;
+      if (filterMarks && q.marks !== filterMarks) return false;
+      if (showBookmarked && !(q.bookmarkedBy || []).includes(currentUser.id)) return false;
       if (searchQuery) {
         const sq = searchQuery.toLowerCase();
         const textMatch = q.questionText?.toLowerCase().includes(sq) || q.topicName?.toLowerCase().includes(sq);
@@ -426,9 +442,9 @@ export default function StarBatchSyllabusPage() {
       }
       return true;
     });
-  }, [questions, filterSubject, filterChapter, searchQuery]);
+  }, [questions, filterSubject, filterChapter, filterMarks, showBookmarked, searchQuery, currentUser.id]);
 
-  const isFiltering = filterSection || filterSubject || filterChapter || searchQuery;
+  const isFiltering = filterSection || filterSubject || filterChapter || filterMarks || showBookmarked || searchQuery;
   const displayedQuestions = isFiltering ? filteredQuestions : filteredQuestions.slice(0, 10);
 
   async function handleBookmark(id, isBookmarked) {
@@ -549,12 +565,55 @@ export default function StarBatchSyllabusPage() {
             <option value="">All Chapters</option>
             {activeSection?.subjects.find(s => s.subjectId === filterSubject)?.chapters.map(c => <option key={c.chapterId} value={c.chapterId}>{c.chapterName}</option>)}
           </select>
+          <select className="qb-filter-select" value={filterMarks} onChange={e => setFilterMarks(e.target.value)}>
+            <option value="">All Marks</option>
+            {MARKS_OPTIONS.map(m => <option key={m} value={m}>{m} {m === 'Unknown' ? '' : 'Marks'}</option>)}
+          </select>
+          {chapterTestId && (
+            <button 
+              onClick={() => navigate(`/star-tests/${chapterTestId}`)}
+              style={{
+                background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                color: '#000',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.6rem 1.2rem',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(245,158,11,0.3)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Take Chapter Test
+            </button>
+          )}
         </div>
         <div className="qb-filter-row">
           <div className="qb-search">
             <Search size={16} color="rgba(255,255,255,0.4)" />
             <input type="text" placeholder="Search keywords or topics..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           </div>
+          <button 
+            onClick={() => setShowBookmarked(!showBookmarked)}
+            style={{
+              background: showBookmarked ? 'rgba(251,191,36,0.15)' : 'rgba(0,0,0,0.3)',
+              border: `1px solid ${showBookmarked ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}`,
+              color: showBookmarked ? '#fbbf24' : '#e2e8f0',
+              borderRadius: '8px',
+              padding: '0.6rem 0.8rem',
+              fontSize: '0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              flexShrink: 0
+            }}
+          >
+            <Bookmark size={16} fill={showBookmarked ? 'currentColor' : 'none'} />
+            Bookmarked
+          </button>
         </div>
       </div>
 

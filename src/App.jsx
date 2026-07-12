@@ -37,6 +37,8 @@ import StudyTogetherPage from './pages/StudyTogetherPage';
 import StudyRoomPage from './pages/StudyRoomPage';
 import StarBatchPage from './pages/StarBatchPage';
 import StarBatchSyllabusPage from './pages/StarBatchSyllabusPage';
+import StarBatchTestModulePage from './pages/StarBatchTestModulePage';
+import StarBatchTestPlayerPage from './pages/StarBatchTestPlayerPage';
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -72,7 +74,7 @@ function AppInner() {
   // Star Batch is an internal-only feature now (no separate external role/
   // login). Still suppress the normal app-wide popups while viewing the
   // Star Batch portal/syllabus pages, since those are a focused sub-area.
-  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus');
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -135,6 +137,8 @@ function AppInner() {
             <Route path="/study-together/:roomId" element={<StudyRoomPage />} />
             <Route path="/star-batch" element={<StarBatchPage />} />
             <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
+            <Route path="/star-tests" element={<StarBatchTestModulePage />} />
+            <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />
           </Routes>
         </main>
         <footer className="app-footer">
