@@ -1499,6 +1499,7 @@ function StarBatchTab() {
   const [rollInput, setRollInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [pendingUpload, setPendingUpload] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [allBankTests, setAllBankTests] = useState([]);
   const [usersMap, setUsersMap] = useState({});
@@ -1538,8 +1539,42 @@ function StarBatchTab() {
     try {
       const text = await file.text();
       const json = JSON.parse(text);
-      await uploadTestJSON(json);
+      
+      let summary = [];
+      if (Array.isArray(json)) {
+        summary = json.map(test => ({
+          chapterId: test.chapterId || 'Unknown',
+          title: test.title || test.chapterId || 'Untitled',
+          count: Array.isArray(test.questions) ? test.questions.length : 0
+        }));
+      } else {
+        summary = [{
+          chapterId: json.chapterId || 'Unknown',
+          title: json.title || json.chapterId || 'Untitled',
+          count: Array.isArray(json.questions) ? json.questions.length : 0
+        }];
+      }
+      
+      setPendingUpload({
+        data: json,
+        summary: summary,
+        totalQuestions: summary.reduce((acc, curr) => acc + curr.count, 0)
+      });
+    } catch (err) {
+      alert("Failed to parse JSON file: " + err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmUpload = async () => {
+    if (!pendingUpload) return;
+    setBusy(true);
+    try {
+      await uploadTestJSON(pendingUpload.data);
       alert("Test uploaded successfully!");
+      setPendingUpload(null);
+      loadConfig();
     } catch (err) {
       alert("Failed to upload test: " + err.message);
     } finally {
@@ -1657,45 +1692,62 @@ function StarBatchTab() {
       <div className="as-card">
         <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter MCQ Test</h4>
         <p className="as-muted" style={{ marginBottom: '1rem' }}>Upload a valid JSON file containing chapterId, subjectId, sectionId, title, and a questions array.</p>
-        <div 
-          onDragEnter={handleDrag} 
-          onDragLeave={handleDrag} 
-          onDragOver={handleDrag} 
-          onDrop={handleDrop}
-          style={{
-            background: dragActive ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255,255,255,0.03)', 
-            padding: '3rem 1rem', 
-            borderRadius: '12px', 
-            border: `2px dashed ${dragActive ? '#fbbf24' : 'rgba(255,255,255,0.2)'}`,
-            width: '100%',
-            textAlign: 'center',
-            transition: 'all 0.2s',
-            position: 'relative'
-          }}
-        >
-          <div style={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: dragActive ? '#fbbf24' : '#e2e8f0' }}>
-            <FileText size={32} style={{ opacity: 0.8 }} />
-            <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Drag & Drop your JSON file here</div>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>or click to browse</div>
+        
+        {pendingUpload ? (
+          <div style={{ marginTop: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <h5 style={{ margin: '0 0 0.5rem 0', color: '#fbbf24', fontSize: '1.05rem' }}>Upload Summary</h5>
+            <p className="as-muted" style={{ margin: '0 0 1rem 0' }}>Total {pendingUpload.totalQuestions} questions will be added across {pendingUpload.summary.length} chapters.</p>
+            <ul style={{ paddingLeft: '1.5rem', margin: '0 0 1.5rem 0', color: '#e2e8f0', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              {pendingUpload.summary.map((item, idx) => (
+                <li key={idx}><strong>{item.title}</strong> ({item.chapterId}): <span style={{color: '#10b981', fontWeight: 600}}>+{item.count}</span> questions</li>
+              ))}
+            </ul>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="auth-btn primary" onClick={confirmUpload} disabled={busy}>Approve & Upload</button>
+              <button className="auth-btn" onClick={() => setPendingUpload(null)} disabled={busy} style={{ background: 'transparent', border: '1px solid var(--border)' }}>Cancel</button>
+            </div>
           </div>
-          <input 
-            type="file" 
-            accept=".json" 
-            disabled={busy}
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                handleFile(e.target.files[0]);
-              }
-              e.target.value = '';
+        ) : (
+          <div 
+            onDragEnter={handleDrag} 
+            onDragLeave={handleDrag} 
+            onDragOver={handleDrag} 
+            onDrop={handleDrop}
+            style={{
+              background: dragActive ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255,255,255,0.03)', 
+              padding: '3rem 1rem', 
+              borderRadius: '12px', 
+              border: `2px dashed ${dragActive ? '#fbbf24' : 'rgba(255,255,255,0.2)'}`,
+              width: '100%',
+              textAlign: 'center',
+              transition: 'all 0.2s',
+              position: 'relative'
             }}
-            style={{ 
-              position: 'absolute',
-              top: 0, left: 0, width: '100%', height: '100%',
-              opacity: 0, cursor: 'pointer'
-            }} 
-          />
-        </div>
-        {busy && <div style={{ color: '#fbbf24', marginTop: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>Uploading test... Please wait.</div>}
+          >
+            <div style={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: dragActive ? '#fbbf24' : '#e2e8f0' }}>
+              <FileText size={32} style={{ opacity: 0.8 }} />
+              <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Drag & Drop your JSON file here</div>
+              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>or click to browse</div>
+            </div>
+            <input 
+              type="file" 
+              accept=".json" 
+              disabled={busy}
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  handleFile(e.target.files[0]);
+                }
+                e.target.value = '';
+              }}
+              style={{ 
+                position: 'absolute',
+                top: 0, left: 0, width: '100%', height: '100%',
+                opacity: 0, cursor: 'pointer'
+              }} 
+            />
+          </div>
+        )}
+        {busy && <div style={{ color: '#fbbf24', marginTop: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>Processing test... Please wait.</div>}
       </div>
 
       <div className="as-card">
