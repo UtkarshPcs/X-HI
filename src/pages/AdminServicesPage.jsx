@@ -17,7 +17,7 @@ import { getTables, setTeacherRecordTables } from '../services/recordsService';
 import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/inAppNoticeService';
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
-import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests } from '../services/starBatchTestService';
+import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions } from '../services/starBatchTestService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -42,6 +42,7 @@ const TABS = [
   { id: 'testdata',   label: 'Test Data',         Icon: Beaker },
   { id: 'push',       label: 'Pop-up Notifications', Icon: Megaphone },
   { id: 'starbatch',  label: 'Star Batch',       Icon: Star },
+  { id: 'mathfixer',  label: 'Math Fixer',       Icon: Sparkles },
 ];
 
 const ROLE_STYLE = {
@@ -1127,6 +1128,166 @@ function DataExportTab() {
 }
 
 // ── Page ──────────────────────────────────────────────────────
+function MathFixerTab() {
+  const [tests, setTests] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fixing, setFixing] = useState(false);
+  const [changes, setChanges] = useState([]);
+
+  const fixMathString = (str) => {
+    if (!str || typeof str !== 'string') return str;
+    let s = str;
+    s = s.replace(/\x0Crac/g, '\\frac'); 
+    s = s.replace(/\brac\s*(?=\{)/g, '\\frac'); 
+    s = s.replace(/\x09imes/g, '\\times'); 
+    s = s.replace(/\bimes\b/g, '\\times'); 
+    s = s.replace(/\bsqrt\s*(?=\{)/g, '\\sqrt'); 
+    
+    // Automatically wrap common unescaped blocks if they aren't wrapped in $. 
+    // We only wrap if we explicitly see a fixed command like \frac or \sqrt, and there's no $ nearby.
+    // A safe hack: if we modified the string and it contains no $, we can blindly wrap the whole thing or just leave it.
+    // We will let the user review it in the diff.
+    if (s !== str && !s.includes('$')) {
+      s = `$${s}$`;
+    }
+    return s;
+  };
+
+  const scanDatabase = async () => {
+    setLoading(true);
+    setChanges([]);
+    try {
+      const allTests = await getAllTests();
+      const detectedChanges = [];
+
+      allTests.forEach(test => {
+        if (!test.questions) return;
+        let testModified = false;
+        const newQuestions = test.questions.map((q, qIndex) => {
+          let qModified = false;
+          const newQ = { ...q };
+
+          const fixedText = fixMathString(q.text);
+          if (fixedText !== q.text) {
+            newQ.text = fixedText;
+            qModified = true;
+          }
+
+          if (q.options) {
+            newQ.options = q.options.map((opt) => {
+              const fixedOpt = fixMathString(opt);
+              if (fixedOpt !== opt) qModified = true;
+              return fixedOpt;
+            });
+          }
+
+          if (qModified) testModified = true;
+          return newQ;
+        });
+
+        if (testModified) {
+          detectedChanges.push({
+            testId: test.id,
+            chapterId: test.chapterId,
+            title: test.title,
+            originalQuestions: test.questions,
+            newQuestions: newQuestions
+          });
+        }
+      });
+      setChanges(detectedChanges);
+      setTests(allTests);
+    } catch (err) {
+      alert("Error scanning tests: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFixes = async () => {
+    if (!window.confirm(`Are you sure you want to update ${changes.length} tests in the database?`)) return;
+    setFixing(true);
+    try {
+      for (const change of changes) {
+        await updateTestQuestions(change.testId, change.newQuestions);
+      }
+      alert("All math fixes applied successfully!");
+      scanDatabase();
+    } catch (err) {
+      alert("Failed to apply fixes: " + err.message);
+    } finally {
+      setFixing(false);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="as-card">
+        <h4 className="as-section-title"><Sparkles size={15} /> Database Math Fixer</h4>
+        <p className="as-muted" style={{ marginBottom: '1.5rem' }}>
+          Scans all Star Batch Tests for broken LaTeX caused by JSON escaping (e.g., <code>rac</code> instead of <code>\frac</code>) and automatically suggests fixes.
+        </p>
+        <button className="auth-btn primary" onClick={scanDatabase} disabled={loading || fixing} style={{ alignSelf: 'flex-start', padding: '0.6rem 1.2rem' }}>
+          {loading ? 'Scanning Database...' : 'Scan Database for Broken Math'}
+        </button>
+      </div>
+
+      {changes.length > 0 && (
+        <div className="as-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h4 className="as-section-title" style={{ margin: 0 }}><AlertCircle size={15} color="#fbbf24" /> {changes.length} Tests Require Fixes</h4>
+            <button className="auth-btn" onClick={applyFixes} disabled={fixing} style={{ background: '#10b981', color: '#fff', padding: '0.5rem 1rem' }}>
+              {fixing ? 'Applying...' : 'Apply All Fixes to Database'}
+            </button>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {changes.map((c, idx) => (
+              <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem' }}>
+                <h5 style={{ margin: '0 0 1rem', color: '#fbbf24' }}>{c.title} ({c.chapterId})</h5>
+                {c.newQuestions.map((nq, qIdx) => {
+                  const oq = c.originalQuestions[qIdx];
+                  const qChanged = nq.text !== oq.text || nq.options.some((opt, oIdx) => opt !== oq.options[oIdx]);
+                  if (!qChanged) return null;
+                  
+                  return (
+                    <div key={qIdx} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Question {qIdx + 1}</div>
+                      {nq.text !== oq.text && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                          <div style={{ color: '#ef4444', textDecoration: 'line-through' }}>{oq.text}</div>
+                          <div style={{ color: '#10b981' }}>{nq.text}</div>
+                        </div>
+                      )}
+                      {nq.options.map((opt, oIdx) => {
+                        if (opt !== oq.options[oIdx]) {
+                          return (
+                            <div key={oIdx} style={{ display: 'flex', gap: '0.5rem', fontSize: '0.85rem', marginLeft: '1rem', marginTop: '0.25rem' }}>
+                              <span style={{ color: '#ef4444', textDecoration: 'line-through' }}>{oq.options[oIdx]}</span>
+                              <span style={{ color: '#10b981' }}>→ {opt}</span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {changes.length === 0 && !loading && tests.length > 0 && (
+        <div className="as-card" style={{ textAlign: 'center', color: '#10b981', padding: '3rem 1rem' }}>
+          <CheckCircle size={32} style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
+          Database is clean! No broken math detected.
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminServicesPage() {
   const { currentUser, triggerTour, loading } = useAuth();
   const navigate = useNavigate();

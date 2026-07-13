@@ -205,3 +205,4 @@ export async function saveMacroReport(userId, reportData) {
   }, { merge: true });
 }
 
+\nexport async function updateTestQuestions(testId, questions) {\n  const ref = doc(db, 'starBatchTests', testId);\n  await setDoc(ref, { questions }, { merge: true });\n}
