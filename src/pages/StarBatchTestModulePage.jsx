@@ -53,6 +53,7 @@ export default function StarBatchTestModulePage() {
   }
 
   const filteredTests = tests.filter(t => 
+    t.questions?.length >= 20 &&
     t.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
