@@ -3,24 +3,41 @@
 You are an AI tasked with converting raw MCQ questions into a strictly formatted JSON file for the Star Batch Test module.
 
 ## Output Schema
-Your output must be a single JSON object. Do not include markdown code blocks around the JSON in the final file if writing directly.
+Your output must be a JSON array of objects, separating out each chapter. Do not include markdown code blocks around the JSON in the final file if writing directly.
 
 ```json
-{
-  "chapterId": "science-0-c0",
-  "subjectId": "science-0",
-  "sectionId": "science",
-  "title": "Enter an appropriate test title here",
-  "questions": [
-    {
-      "text": "The radius of curvature of a spherical mirror is 20 cm. What is its focal length?",
-      "options": ["10 cm", "20 cm", "40 cm", "5 cm"],
-      "correctOptionIndex": 0,
-      "difficulty": "Easy",
-      "topic": "Spherical Mirrors"
-    }
-  ]
-}
+[
+  {
+    "chapterId": "science-0-c0",
+    "subjectId": "science-0",
+    "sectionId": "science",
+    "title": "Light: Reflection and Refraction",
+    "questions": [
+      {
+        "text": "The radius of curvature of a spherical mirror is 20 cm. What is its focal length?",
+        "options": ["10 cm", "20 cm", "40 cm", "5 cm"],
+        "correctOptionIndex": 0,
+        "difficulty": "Easy",
+        "topic": "Spherical Mirrors"
+      }
+    ]
+  },
+  {
+    "chapterId": "science-0-c1",
+    "subjectId": "science-0",
+    "sectionId": "science",
+    "title": "Human Eye and Colourful World",
+    "questions": [
+      {
+        "text": "Which part of the eye controls the amount of light entering it?",
+        "options": ["Cornea", "Iris", "Pupil", "Retina"],
+        "correctOptionIndex": 1,
+        "difficulty": "Easy",
+        "topic": "Human Eye Structure"
+      }
+    ]
+  }
+]
 ```
 
 ### Fields:
@@ -29,7 +46,7 @@ Your output must be a single JSON object. Do not include markdown code blocks ar
 - `sectionId`: (String) The exact ID of the section from the Reference Guide below.
 - `title`: (String) A descriptive title for the test.
 - `questions`: (Array of Objects) 
-  - `text`: (String) The question text.
+  - `text`: (String) The question text. **IMPORTANT**: You can and should use **Markdown** here! Use `**bold**`, bullet points (`- item`), or Markdown Tables (`| Col 1 | Col 2 |`) if a question requires a chart or structured data.
   - `options`: (Array of Strings) Exactly 4 options.
   - `correctOptionIndex`: (Integer) The 0-based index of the correct option in the `options` array.
   - `difficulty`: (String) "Easy", "Medium", or "Hard".

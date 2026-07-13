@@ -5,7 +5,8 @@ import { getTestById, submitTestAttempt, getUserTestAttemptsForTest, getTestAver
 import { Loader2, ArrowLeft, CheckCircle, XCircle, Sparkles, Target, BarChart2, Zap, AlertCircle, BookOpen, Clock, Activity, Flag, Crosshair, ChevronDown, ChevronUp } from 'lucide-react';
 
 import TestAnalyticsDashboard from '../components/TestAnalyticsDashboard';
-
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 export default function StarBatchTestPlayerPage() {
   const { testId } = useParams();
   const { currentUser } = useAuth();
@@ -253,7 +254,11 @@ export default function StarBatchTestPlayerPage() {
             <div className="tp-q-meta">
               <span>Q{currentQuestionIndex + 1}</span>
             </div>
-            <p className="tp-q-text">{activeQuestions[currentQuestionIndex].text}</p>
+            <div className="tp-q-text markdown-body custom-md" style={{ marginBottom: '1.25rem' }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {activeQuestions[currentQuestionIndex].text}
+              </ReactMarkdown>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {activeQuestions[currentQuestionIndex].options.map((opt, optIndex) => {
