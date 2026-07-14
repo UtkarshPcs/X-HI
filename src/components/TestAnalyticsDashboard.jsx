@@ -1,14 +1,69 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, Sparkles, AlertCircle, BookOpen, Clock, Activity, Flag, Crosshair, ChevronDown, ChevronUp, BarChart2, Target, Zap, List } from 'lucide-react';
+import { CheckCircle, XCircle, Sparkles, AlertCircle, BookOpen, Clock, Activity, Flag, Crosshair, ChevronDown, ChevronUp, BarChart2, Target, Zap, List, Bookmark } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
+import { addBookmark, removeBookmark, checkIsBookmarked } from '../services/starBatchBookmarkService';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
-export default function TestAnalyticsDashboard({ result, activeQuestions, answers, averageScore }) {
+export default function TestAnalyticsDashboard({ result, activeQuestions, answers, averageScore, test }) {
+  const { currentUser } = useAuth();
   const [expandedMistakes, setExpandedMistakes] = useState({});
   const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [bookmarkedQs, setBookmarkedQs] = useState({});
+  const [bookmarkingQs, setBookmarkingQs] = useState({});
+
+  useEffect(() => {
+    if (!currentUser || !test || !activeQuestions) return;
+    const fetchBookmarks = async () => {
+      const userId = currentUser.id || currentUser.phone;
+      const statuses = {};
+      await Promise.all(activeQuestions.map(async (q) => {
+        const docId = `${test.chapterId}_${q.originalIndex}`;
+        try {
+          statuses[q.originalIndex] = await checkIsBookmarked(userId, docId);
+        } catch(e) {}
+      }));
+      setBookmarkedQs(statuses);
+    };
+    fetchBookmarks();
+  }, [currentUser, test, activeQuestions]);
+
+  const handleBookmarkToggle = async (e, q) => {
+    e.stopPropagation();
+    if (!currentUser || !test || bookmarkingQs[q.originalIndex]) return;
+    
+    setBookmarkingQs(prev => ({...prev, [q.originalIndex]: true}));
+    const userId = currentUser.id || currentUser.phone;
+    const docId = `${test.chapterId}_${q.originalIndex}`;
+    const isBookmarked = bookmarkedQs[q.originalIndex];
+
+    try {
+      if (isBookmarked) {
+        await removeBookmark(userId, docId);
+        setBookmarkedQs(prev => ({...prev, [q.originalIndex]: false}));
+      } else {
+        await addBookmark(userId, {
+          chapterId: test.chapterId,
+          testId: test.id,
+          questionIndex: q.originalIndex,
+          questionText: q.text,
+          options: q.options,
+          correctOptionIndex: q.correctOptionIndex,
+          topic: q.topic || '',
+          difficulty: q.difficulty || 'Medium',
+          testTitle: test.title || ''
+        });
+        setBookmarkedQs(prev => ({...prev, [q.originalIndex]: true}));
+      }
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setBookmarkingQs(prev => ({...prev, [q.originalIndex]: false}));
+    }
+  };
 
   const toggleMistake = (idx) => {
     setExpandedMistakes(prev => ({ ...prev, [idx]: !prev[idx] }));
@@ -307,18 +362,26 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                     style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent' }}
                   >
                     <div>
-                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.2rem', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.2rem', alignItems: 'center', flexWrap: 'wrap' }}>
                         <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontWeight: 700 }}>Q{q.idx + 1}</span>
                         {q.userAns === q.correctOptionIndex ? (
                            <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 700 }}><CheckCircle size={12}/> Correct</span>
                         ) : (
                            <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 700 }}><XCircle size={12}/> Incorrect</span>
                         )}
-                        <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.7rem', color: '#e2e8f0', marginLeft: '0.5rem' }}>{q.topic || 'General'}</span>
+                        <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.7rem', color: '#e2e8f0', marginLeft: '0.2rem' }}>{q.topic || 'General'}</span>
                         <span style={{ background: q.difficulty === 'Easy' ? '#10b98120' : q.difficulty === 'Medium' ? '#fbbf2420' : '#ef444420', color: q.difficulty === 'Easy' ? '#10b981' : q.difficulty === 'Medium' ? '#fbbf24' : '#ef4444', padding: '2px 8px', borderRadius: '10px', fontSize: '0.7rem' }}>{q.difficulty || 'Medium'}</span>
                         {result.questionTimes && result.questionTimes[q.idx] !== undefined && (
                           <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.2rem', marginLeft: '0.5rem' }}><Clock size={12} /> {result.questionTimes[q.idx]}s</span>
                         )}
+                        <button 
+                          onClick={(e) => handleBookmarkToggle(e, q)}
+                          disabled={bookmarkingQs[q.originalIndex]}
+                          style={{ background: 'transparent', border: 'none', color: bookmarkedQs[q.originalIndex] ? '#fbbf24' : 'rgba(255,255,255,0.3)', cursor: bookmarkingQs[q.originalIndex] ? 'default' : 'pointer', padding: '0', display: 'flex', alignItems: 'center', marginLeft: 'auto', transition: 'all 0.2s' }}
+                          title={bookmarkedQs[q.originalIndex] ? "Remove Bookmark" : "Bookmark this question"}
+                        >
+                          <Bookmark size={14} fill={bookmarkedQs[q.originalIndex] ? '#fbbf24' : 'none'} />
+                        </button>
                       </div>
                       <div style={{ color: '#fff', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '60vw' }}>
                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{q.text.split('\n')[0]}</ReactMarkdown>

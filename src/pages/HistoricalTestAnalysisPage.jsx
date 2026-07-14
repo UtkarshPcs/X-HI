@@ -131,6 +131,7 @@ export default function HistoricalTestAnalysisPage() {
         }}
         activeQuestions={activeQuestions}
         answers={answers}
+        test={testData}
       />
     </div>
   );

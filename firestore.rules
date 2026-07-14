@@ -41,6 +41,10 @@ service cloud.firestore {
       allow delete: if true; // used by adminService.deleteUserDoc — no safe way to restrict without real auth
     }
 
+    match /users/{phone}/starBatchBookmarks/{bookmarkId} {
+      allow read, write: if true;
+    }
+
     // ---- settings/starbatch -----------------------------------------------
     // Star Batch config: { code: string, internalRolls: number[] }
     match /settings/starbatch {

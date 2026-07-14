@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllTests, getMacroReport, saveMacroReport, subscribeToUserHistory } from '../services/starBatchTestService';
 import { getUserBookmarks } from '../services/starBatchBookmarkService';
 import { syllabusData } from '../data/syllabusData';
-import { Target, Play, TrendingUp, Search, Loader2, Star, CheckCircle, XCircle, ChevronDown, ChevronUp, BookOpen, Calendar, ArrowRight, BrainCircuit, Sparkles, AlertCircle, Clock, Flag, Bookmark, X } from 'lucide-react';
+import { Target, Play, TrendingUp, Search, Loader2, Star, CheckCircle, XCircle, ChevronDown, ChevronUp, BookOpen, Calendar, ArrowRight, ArrowLeft, BrainCircuit, Sparkles, AlertCircle, Clock, Flag, Bookmark, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -34,6 +34,12 @@ export default function StarBatchTestModulePage() {
   const [selectedBookmark, setSelectedBookmark] = useState(null);
   const [showCorrectOpt, setShowCorrectOpt] = useState(false);
   const [bookmarkSearchQuery, setBookmarkSearchQuery] = useState('');
+  
+  const [bookmarkView, setBookmarkView] = useState('question'); // 'question' | 'syllabus'
+  const [syllabusLevel, setSyllabusLevel] = useState(1);
+  const [selectedSection, setSelectedSection] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedChapter, setSelectedChapter] = useState(null);
 
   useEffect(() => {
     if (!currentUser) navigate('/');
@@ -97,19 +103,33 @@ export default function StarBatchTestModulePage() {
     .slice(0, 3)
     .map(entry => entry[0]);
 
-  // Grouping logic for History Drill-down
   const chapterToSubjectMap = {};
   const subjectNameMap = {};
   const chapterNameMap = {};
+  const subjectToSectionMap = {};
+  const sectionNameMap = {};
   
   syllabusData.forEach(section => {
+    sectionNameMap[section.sectionId] = section.sectionName;
     section.subjects.forEach(subject => {
+      subjectToSectionMap[subject.subjectId] = section.sectionId;
       subjectNameMap[subject.subjectId] = subject.subjectName;
       subject.chapters.forEach(chapter => {
         chapterToSubjectMap[chapter.chapterId] = subject.subjectId;
         chapterNameMap[chapter.chapterId] = chapter.chapterName;
       });
     });
+  });
+
+  const bookmarkCounts = { chapters: {}, subjects: {}, sections: {} };
+  bookmarks.forEach(b => {
+    const cId = b.chapterId;
+    const subId = chapterToSubjectMap[cId];
+    const secId = subjectToSectionMap[subId];
+
+    if (cId) bookmarkCounts.chapters[cId] = (bookmarkCounts.chapters[cId] || 0) + 1;
+    if (subId) bookmarkCounts.subjects[subId] = (bookmarkCounts.subjects[subId] || 0) + 1;
+    if (secId) bookmarkCounts.sections[secId] = (bookmarkCounts.sections[secId] || 0) + 1;
   });
 
   const filteredBookmarks = bookmarks.filter(b => {
@@ -248,7 +268,7 @@ export default function StarBatchTestModulePage() {
         .tm-search { display: flex; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0 1rem; margin-bottom: 1.5rem; max-width: 400px; }
         .tm-search input { width: 100%; background: none; border: none; color: #fff; padding: 0.8rem 0.5rem; outline: none; font-size: 0.9rem; }
 
-        .tm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .tm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
         .tm-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; }
         .tm-card:hover { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.02); transform: translateY(-2px); }
         .tm-card-title { font-size: 1.1rem; font-weight: 700; color: #f1f5f9; margin: 0; }
@@ -598,46 +618,160 @@ export default function StarBatchTestModulePage() {
 
       {activeTab === 'bookmarks' && (
         <div style={{ animation: 'fade-in 0.3s ease' }}>
-          <div className="tm-search">
-            <Search size={18} color="rgba(255,255,255,0.4)" />
-            <input 
-              type="text" 
-              placeholder="Search bookmarks by subject, chapter, or text..." 
-              value={bookmarkSearchQuery} 
-              onChange={e => setBookmarkSearchQuery(e.target.value)} 
-            />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '0.2rem', flexWrap: 'wrap', gap: '0.2rem' }}>
+              <button 
+                onClick={() => { setBookmarkView('question'); setSyllabusLevel(1); }} 
+                style={{ background: bookmarkView === 'question' ? 'rgba(255,255,255,0.1)' : 'transparent', color: bookmarkView === 'question' ? '#fff' : 'rgba(255,255,255,0.5)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                Question View
+              </button>
+              <button 
+                onClick={() => setBookmarkView('syllabus')} 
+                style={{ background: bookmarkView === 'syllabus' ? 'rgba(255,255,255,0.1)' : 'transparent', color: bookmarkView === 'syllabus' ? '#fff' : 'rgba(255,255,255,0.5)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                Syllabus View
+              </button>
+            </div>
           </div>
 
-          {filteredBookmarks.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', padding: '3rem 0' }}>
-              No bookmarks found.
-            </div>
-          ) : (
-            <div className="tm-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-              {filteredBookmarks.map(b => (
-                <div key={b.id} className="tm-card" onClick={() => { setSelectedBookmark(b); setShowCorrectOpt(false); }} style={{ cursor: 'pointer' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      <Bookmark size={16} fill="#fbbf24" color="#fbbf24" />
-                      <span style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        {subjectNameMap[chapterToSubjectMap[b.chapterId]] || 'Subject'}
-                      </span>
-                    </div>
-                    <h3 className="tm-card-title" style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>
-                      {chapterNameMap[b.chapterId] || b.testTitle || b.chapterId}
-                    </h3>
-                    <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                         {b.questionText.split('\n')[0]}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                  <div className="tm-card-meta">
-                    <span>Q{b.questionIndex + 1}</span>
-                    <span>{b.difficulty || 'Medium'}</span>
-                  </div>
+          {bookmarkView === 'question' ? (
+            <>
+              <div className="tm-search">
+                <Search size={18} color="rgba(255,255,255,0.4)" />
+                <input 
+                  type="text" 
+                  placeholder="Search bookmarks by subject, chapter, or text..." 
+                  value={bookmarkSearchQuery} 
+                  onChange={e => setBookmarkSearchQuery(e.target.value)} 
+                />
+              </div>
+
+              {filteredBookmarks.length === 0 ? (
+                <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', padding: '3rem 0' }}>
+                  No bookmarks found.
                 </div>
-              ))}
+              ) : (
+                <div className="tm-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
+                  {filteredBookmarks.map(b => (
+                    <div key={b.id} className="tm-card" onClick={() => { setSelectedBookmark(b); setShowCorrectOpt(false); }} style={{ cursor: 'pointer' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                          <Bookmark size={16} fill="#fbbf24" color="#fbbf24" />
+                          <span style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {subjectNameMap[chapterToSubjectMap[b.chapterId]] || 'Subject'}
+                          </span>
+                        </div>
+                        <h3 className="tm-card-title" style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>
+                          {chapterNameMap[b.chapterId] || b.testTitle || b.chapterId}
+                        </h3>
+                        <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                             {b.questionText.split('\n')[0]}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                      <div className="tm-card-meta">
+                        <span>Q{b.questionIndex + 1}</span>
+                        <span>{b.difficulty || 'Medium'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ animation: 'fade-in 0.3s ease' }}>
+              {syllabusLevel > 1 && (
+                <div 
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', cursor: 'pointer', fontWeight: 600, width: 'fit-content' }} 
+                  onClick={() => {
+                    if (syllabusLevel === 4) setSyllabusLevel(3);
+                    else if (syllabusLevel === 3) setSyllabusLevel(2);
+                    else if (syllabusLevel === 2) setSyllabusLevel(1);
+                  }}
+                >
+                  <ArrowLeft size={18} /> Back
+                </div>
+              )}
+
+              {syllabusLevel === 1 && (
+                <div className="tm-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
+                  {syllabusData.map(section => (
+                    <div key={section.sectionId} className="tm-card" onClick={() => { setSelectedSection(section); setSyllabusLevel(2); }} style={{ cursor: 'pointer' }}>
+                      <div>
+                        <h3 className="tm-card-title">{section.sectionName}</h3>
+                      </div>
+                      <div className="tm-card-meta">
+                        <span>{bookmarkCounts.sections[section.sectionId] || 0} Bookmarks</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {syllabusLevel === 2 && selectedSection && (
+                <div className="tm-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
+                  {selectedSection.subjects.map(subject => (
+                    <div key={subject.subjectId} className="tm-card" onClick={() => { setSelectedSubject(subject); setSyllabusLevel(3); }} style={{ cursor: 'pointer' }}>
+                      <div>
+                        <h3 className="tm-card-title">{subject.subjectName}</h3>
+                      </div>
+                      <div className="tm-card-meta">
+                        <span>{bookmarkCounts.subjects[subject.subjectId] || 0} Bookmarks</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {syllabusLevel === 3 && selectedSubject && (
+                <div className="tm-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
+                  {selectedSubject.chapters.map(chapter => (
+                    <div key={chapter.chapterId} className="tm-card" onClick={() => { setSelectedChapter(chapter); setSyllabusLevel(4); }} style={{ cursor: 'pointer' }}>
+                      <div>
+                        <h3 className="tm-card-title">{chapter.chapterName}</h3>
+                      </div>
+                      <div className="tm-card-meta">
+                        <span>{bookmarkCounts.chapters[chapter.chapterId] || 0} Bookmarks</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {syllabusLevel === 4 && selectedChapter && (
+                <div className="tm-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}>
+                  {bookmarks.filter(b => b.chapterId === selectedChapter.chapterId).length === 0 ? (
+                    <div style={{ color: 'rgba(255,255,255,0.4)', gridColumn: '1 / -1' }}>No bookmarks in this chapter.</div>
+                  ) : (
+                    bookmarks.filter(b => b.chapterId === selectedChapter.chapterId).map(b => (
+                      <div key={b.id} className="tm-card" onClick={() => { setSelectedBookmark(b); setShowCorrectOpt(false); }} style={{ cursor: 'pointer' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                            <Bookmark size={16} fill="#fbbf24" color="#fbbf24" />
+                            <span style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              {subjectNameMap[chapterToSubjectMap[b.chapterId]] || 'Subject'}
+                            </span>
+                          </div>
+                          <h3 className="tm-card-title" style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>
+                            {chapterNameMap[b.chapterId] || b.testTitle || b.chapterId}
+                          </h3>
+                          <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                               {b.questionText.split('\n')[0]}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
+                        <div className="tm-card-meta">
+                          <span>Q{b.questionIndex + 1}</span>
+                          <span>{b.difficulty || 'Medium'}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

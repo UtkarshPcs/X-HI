@@ -73,8 +73,25 @@ export default function StarBatchTestPlayerPage() {
       setAverageScore(avg);
       
       let seenIndices = new Set();
+      let wrongIndices = new Set();
+      
       attempts.forEach(a => {
-        (a.seenIndices || []).forEach(idx => seenIndices.add(idx));
+        const aSeenIndices = a.seenIndices || [];
+        const aResponses = a.responses || {};
+        
+        aSeenIndices.forEach((origIdx, i) => {
+           seenIndices.add(origIdx);
+           
+           const q = data.questions[origIdx];
+           if (q) {
+             const userAns = aResponses[i];
+             if (userAns !== q.correctOptionIndex) {
+               wrongIndices.add(origIdx);
+             } else {
+               wrongIndices.delete(origIdx); // Remove from wrong if answered correctly later
+             }
+           }
+        });
       });
 
       const shuffle = (array) => {
@@ -87,8 +104,9 @@ export default function StarBatchTestPlayerPage() {
       };
 
       const allQuestions = data.questions.map((q, idx) => ({...q, originalIndex: idx, difficulty: q.difficulty || 'Medium'}));
-      let unseen = shuffle(allQuestions.filter(q => !seenIndices.has(q.originalIndex)));
-      let seen = shuffle(allQuestions.filter(q => seenIndices.has(q.originalIndex)));
+      // Prioritize completely unseen questions AND previously incorrectly answered questions
+      let unseen = shuffle(allQuestions.filter(q => !seenIndices.has(q.originalIndex) || wrongIndices.has(q.originalIndex)));
+      let seen = shuffle(allQuestions.filter(q => seenIndices.has(q.originalIndex) && !wrongIndices.has(q.originalIndex)));
 
       const multiplier = count / 10;
       let targetE = 0, targetM = 0, targetH = 0;
@@ -332,6 +350,7 @@ export default function StarBatchTestPlayerPage() {
           activeQuestions={activeQuestions} 
           answers={answers} 
           averageScore={averageScore} 
+          test={test}
         />
       ) : (
         <div style={{ animation: 'fade-in 0.3s ease' }}>
