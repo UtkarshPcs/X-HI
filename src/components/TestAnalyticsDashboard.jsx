@@ -384,7 +384,7 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                         </button>
                       </div>
                       <div style={{ color: '#fff', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '60vw' }}>
-                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{q.text.split('\n')[0]}</ReactMarkdown>
+                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{(q.text || '').split('\n')[0]}</ReactMarkdown>
                       </div>
                     </div>
                     <div>{isExpanded ? <ChevronUp size={20} color="rgba(255,255,255,0.5)"/> : <ChevronDown size={20} color="rgba(255,255,255,0.5)"/>}</div>
@@ -399,7 +399,7 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                       </div>
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-                        {q.options.map((opt, oIdx) => {
+                        {(q.options || []).map((opt, oIdx) => {
                           const isCorrect = oIdx === q.correctOptionIndex;
                           const isSelected = oIdx === q.userAns;
                           let bgColor = 'rgba(255,255,255,0.03)';

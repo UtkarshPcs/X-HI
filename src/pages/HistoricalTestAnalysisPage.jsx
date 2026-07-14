@@ -69,9 +69,15 @@ export default function HistoricalTestAnalysisPage() {
   }
 
   // Reconstruct active questions based on seenIndices
-  const seenIndices = attempt.seenIndices || [];
+  let seenIndices = attempt.seenIndices;
+  if (!seenIndices || seenIndices.length === 0) {
+    seenIndices = Array.from({length: attempt.total || 0}, (_, i) => i);
+  }
+  
   const activeQuestions = seenIndices.map(idx => {
-    return { ...testData.questions[idx], originalIndex: idx };
+    const q = testData.questions?.[idx];
+    if (!q) return null;
+    return { ...q, originalIndex: idx };
   }).filter(q => q && q.text); // Filter out any undefined just in case
 
   // Map answers to the correct indexes expected by Mistake Analysis
