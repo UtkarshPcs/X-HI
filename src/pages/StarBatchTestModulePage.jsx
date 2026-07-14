@@ -817,7 +817,7 @@ export default function StarBatchTestModulePage() {
             </button>
 
             <div style={{ padding: '2rem 1.5rem' }}>
-              <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingRight: '3.5rem' }}>
                 <span style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Bookmark size={14} fill="#fbbf24" />
                   {subjectNameMap[chapterToSubjectMap[selectedBookmark.chapterId]] || 'Subject'} • {chapterNameMap[selectedBookmark.chapterId] || selectedBookmark.testTitle} • Q{selectedBookmark.questionIndex + 1}
