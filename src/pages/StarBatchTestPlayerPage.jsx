@@ -109,12 +109,12 @@ export default function StarBatchTestPlayerPage() {
       let seen = shuffle(allQuestions.filter(q => seenIndices.has(q.originalIndex) && !wrongIndices.has(q.originalIndex)));
 
       const multiplier = count / 10;
-      let targetE = 0, targetM = 0, targetH = 0;
+      let targetE = 0, targetM = 0, targetH = 0, targetSH = 0;
       switch(level) {
         case 'easy': targetE = 8 * multiplier; targetM = 2 * multiplier; break;
         case 'medium': targetM = 6 * multiplier; targetE = 2 * multiplier; targetH = 2 * multiplier; break;
         case 'hard': targetH = 6 * multiplier; targetM = 4 * multiplier; break;
-        case 'difficult': targetH = 10 * multiplier; break;
+        case 'difficult': targetH = 6 * multiplier; targetSH = 4 * multiplier; break;
         default: targetM = 6 * multiplier; targetE = 2 * multiplier; targetH = 2 * multiplier;
       }
 
@@ -139,6 +139,7 @@ export default function StarBatchTestPlayerPage() {
       addQuestions('Easy', targetE);
       addQuestions('Medium', targetM);
       addQuestions('Hard', targetH);
+      addQuestions('Super Difficult', targetSH);
 
       // Fill remaining spots if we didn't find enough exact difficulty matches
       let totalAdded = selected.length;

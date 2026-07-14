@@ -234,14 +234,18 @@ export async function getPendingReportedQuestions() {
 export async function resolveReportedQuestion(reportId, action, testId, originalIndex) {
   // action: 'approve' or 'reject'
   // If approve, we mark the question in the test bank as isDeleted = true
-  if (action === 'approve') {
+  if (action === 'approve' || action === 'make_super_difficult') {
     const testDocRef = doc(db, 'starBatchTests', testId);
     const snap = await getDoc(testDocRef);
     if (snap.exists()) {
       const data = snap.data();
       const newQuestions = [...data.questions];
       if (newQuestions[originalIndex]) {
-        newQuestions[originalIndex].isDeleted = true;
+        if (action === 'approve') {
+          newQuestions[originalIndex].isDeleted = true;
+        } else if (action === 'make_super_difficult') {
+          newQuestions[originalIndex].difficulty = 'Super Difficult';
+        }
       }
       await setDoc(testDocRef, { questions: newQuestions }, { merge: true });
     }

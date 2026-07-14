@@ -1326,9 +1326,12 @@ function ReportedQuestionsTab() {
           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
             <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{r.questionText}</ReactMarkdown>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button className="auth-btn" onClick={() => handleAction(r, 'approve')} disabled={!!busy} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
               Approve (Delete Question)
+            </button>
+            <button className="auth-btn" onClick={() => handleAction(r, 'make_super_difficult')} disabled={!!busy} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: '#8b5cf6', borderColor: '#8b5cf6' }}>
+              Make Super Difficult
             </button>
             <button className="auth-btn secondary" onClick={() => handleAction(r, 'reject')} disabled={!!busy} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
               Reject (Keep Question)
