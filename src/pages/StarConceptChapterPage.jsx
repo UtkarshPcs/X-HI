@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { syllabusData } from '../data/syllabusData';
-import { ArrowLeft, Clock, BookOpen, Plus, Loader2, FileJson, X, Image as ImageIcon, Trash2, Download, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Clock, BookOpen, Plus, Loader2, FileJson, X, Image as ImageIcon, Trash2, Download, ExternalLink, Layers, ChevronRight, ChevronLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -27,9 +27,8 @@ export default function StarConceptChapterPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('syllabus'); // 'syllabus' or 'recent'
+  const [activeTab, setActiveTab] = useState('syllabus'); // 'syllabus' or 'flashcards'
   const [concepts, setConcepts] = useState([]);
-  const [recentConcepts, setRecentConcepts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState([]);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
@@ -49,10 +48,8 @@ export default function StarConceptChapterPage() {
     setLoading(true);
     try {
       const all = await getConceptsByChapter(chapterId);
-      const recent = await getRecentConcepts(chapterId, 10);
       const st = await getContributionStats(chapterId);
       setConcepts(all);
-      setRecentConcepts(recent);
       setStats(st);
     } catch (e) {
       console.error(e);
@@ -198,8 +195,8 @@ export default function StarConceptChapterPage() {
         <div className={`chp-tab ${activeTab === 'syllabus' ? 'active' : ''}`} onClick={() => setActiveTab('syllabus')}>
           <BookOpen size={16} /> Syllabus View
         </div>
-        <div className={`chp-tab ${activeTab === 'recent' ? 'active' : ''}`} onClick={() => setActiveTab('recent')}>
-          <Clock size={16} /> Recent
+        <div className={`chp-tab ${activeTab === 'flashcards' ? 'active' : ''}`} onClick={() => setActiveTab('flashcards')}>
+          <Layers size={16} /> Flashcards
         </div>
       </div>
 
@@ -217,11 +214,7 @@ export default function StarConceptChapterPage() {
               <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem 0' }}>No concepts uploaded yet. Be the first to contribute!</div>
             )
           ) : (
-            recentConcepts.length > 0 ? (
-              recentConcepts.map(c => <ConceptCard key={c.id} concept={c} isAdmin={isAdmin} onDeleteSuccess={fetchData} />)
-            ) : (
-              <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem 0' }}>No recent concepts found.</div>
-            )
+            <FlashcardPractice concepts={concepts} />
           )}
         </div>
       )}
@@ -580,6 +573,178 @@ function UserUploadModal({ onClose, chapterId, currentUser, onSuccess }) {
           </button>
         </form>
       </div>
+    </div>
+  );
+}
+
+function FlashcardPractice({ concepts }) {
+  const [isPracticing, setIsPracticing] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showImage, setShowImage] = useState(false);
+  
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  if (concepts.length === 0) {
+    return <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem 0' }}>No concepts to practice yet.</div>;
+  }
+
+  if (!isPracticing) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(251,191,36,0.1)', color: '#fbbf24', marginBottom: '1.5rem' }}>
+          <Layers size={32} />
+        </div>
+        <h2 style={{ color: '#fff', fontSize: '1.5rem', margin: '0 0 1rem' }}>Flashcard Practice</h2>
+        <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem', lineHeight: 1.5 }}>
+          Test your memory. Tap the card to flip it and reveal the details. Swipe left or right to navigate through the entire chapter.
+        </p>
+        <button 
+          onClick={() => { setIsPracticing(true); setCurrentIndex(0); setIsFlipped(false); }}
+          style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: '#000', border: 'none', borderRadius: '30px', padding: '1rem 2.5rem', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(251,191,36,0.3)' }}
+        >
+          Start Practice
+        </button>
+      </div>
+    );
+  }
+
+  const minSwipeDistance = 50;
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) nextCard();
+    if (distance < -minSwipeDistance) prevCard();
+  };
+
+  function nextCard() {
+    if (currentIndex < concepts.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+    }
+  }
+  function prevCard() {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+    }
+  }
+
+  async function downloadImage(url) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `flashcard_image.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      window.open(url, '_blank');
+    }
+  }
+
+  const concept = concepts[currentIndex];
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '1rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', fontWeight: 600 }}>
+        <button onClick={() => setIsPracticing(false)} style={{ background: 'none', border: 'none', color: '#fbbf24', cursor: 'pointer', fontWeight: 600, padding: 0 }}>Quit Practice</button>
+        <span>Card {currentIndex + 1} of {concepts.length}</span>
+      </div>
+
+      <div 
+        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+        style={{ width: '100%', perspective: '1000px', cursor: 'pointer' }}
+      >
+        <div 
+          onClick={() => setIsFlipped(!isFlipped)}
+          style={{ 
+            width: '100%', minHeight: '400px', 
+            position: 'relative', transition: 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)', transformStyle: 'preserve-3d',
+            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+          }}
+        >
+          {/* Front */}
+          <div style={{ 
+            position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden',
+            background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+          }}>
+            <h2 style={{ fontSize: '1.8rem', color: '#fff', margin: '0 0 1rem' }}>{concept.title}</h2>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>Tap to reveal</p>
+          </div>
+
+          {/* Back */}
+          <div style={{ 
+            position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden',
+            background: 'rgba(15,23,42,0.95)',
+            border: '1px solid rgba(251,191,36,0.3)', borderRadius: '16px',
+            transform: 'rotateY(180deg)',
+            display: 'flex', flexDirection: 'column', padding: '2rem', overflowY: 'auto',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ marginBottom: '1.5rem', textAlign: 'center', paddingBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <h3 style={{ margin: '0 0 0.5rem', color: '#f8fafc', fontSize: '1.2rem' }}>{concept.title}</h3>
+              {concept.description && <p style={{ color: '#fbbf24', fontStyle: 'italic', margin: 0, fontSize: '0.95rem' }}>{concept.description}</p>}
+            </div>
+            
+            {concept.imageUrl && (
+              <div 
+                onClick={(e) => { e.stopPropagation(); setShowImage(true); }}
+                style={{ margin: '0 auto 1.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#fbbf24', fontWeight: 600, border: '1px solid rgba(251,191,36,0.2)' }}
+              >
+                <ImageIcon size={18} /> View Attached Image
+              </div>
+            )}
+
+            {concept.content && (
+              <div className="concept-body" style={{ flex: 1 }}>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                  {concept.content}
+                </ReactMarkdown>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+        <button 
+          onClick={prevCard} disabled={currentIndex === 0}
+          style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: currentIndex === 0 ? 'rgba(255,255,255,0.2)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentIndex === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+        ><ChevronLeft size={24} /></button>
+        <button 
+          onClick={nextCard} disabled={currentIndex === concepts.length - 1}
+          style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: currentIndex === concepts.length - 1 ? 'rgba(255,255,255,0.2)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentIndex === concepts.length - 1 ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+        ><ChevronRight size={24} /></button>
+      </div>
+
+      {showImage && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100000, background: 'rgba(0,0,0,0.9)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem' }}>
+            <button onClick={() => downloadImage(concept.imageUrl)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
+              <Download size={18} /> Download
+            </button>
+            <button onClick={() => setShowImage(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.6rem', borderRadius: '8px', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+          </div>
+          <img src={concept.imageUrl} alt="Full Concept" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '8px' }} />
+        </div>
+      )}
     </div>
   );
 }
