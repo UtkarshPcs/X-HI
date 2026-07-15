@@ -261,45 +261,146 @@ function ConceptCard({ concept }) {
 }
 
 function AdminBatchUpload({ chapterId, onUploadSuccess, currentUser }) {
-  const fileInputRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [parsedConcepts, setParsedConcepts] = useState(null);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
-  async function handleBulkUpload(e) {
-    const file = e.target.files[0];
+  function reset() {
+    setParsedConcepts(null);
+    setError('');
+    setIsUploading(false);
+  }
+
+  function close() {
+    if (isUploading) return;
+    setIsOpen(false);
+    reset();
+  }
+
+  async function handleFile(file) {
     if (!file) return;
-
-    if (!window.confirm("Are you sure you want to bulk upload these concepts?")) {
-      e.target.value = '';
-      return;
-    }
-
-    setIsUploading(true);
+    setError('');
+    setParsedConcepts(null);
+    
     try {
       const text = await file.text();
       const json = JSON.parse(text);
-      if (!json.concepts || !Array.isArray(json.concepts)) throw new Error('Invalid JSON schema. Expected { "concepts": [...] }');
-      await bulkUploadConcepts(chapterId, json.concepts, currentUser);
-      alert('Bulk upload successful!');
-      onUploadSuccess();
+      if (!json.concepts || !Array.isArray(json.concepts)) {
+        throw new Error('Invalid JSON schema. Expected { "concepts": [...] }');
+      }
+      setParsedConcepts(json.concepts);
     } catch (err) {
-      alert('Bulk upload failed: ' + err.message);
-    } finally {
+      setError('Failed to parse JSON: ' + err.message);
+    }
+  }
+
+  function onDrag(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  }
+
+  function handleChange(e) {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  }
+
+  async function handleApprove() {
+    if (!parsedConcepts) return;
+    setIsUploading(true);
+    try {
+      await bulkUploadConcepts(chapterId, parsedConcepts, currentUser);
+      onUploadSuccess();
+      close();
+    } catch (err) {
+      setError('Bulk upload failed: ' + err.message);
       setIsUploading(false);
-      e.target.value = '';
     }
   }
 
   return (
     <>
-      <input type="file" accept=".json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleBulkUpload} />
       <button 
-        onClick={() => fileInputRef.current?.click()} 
-        disabled={isUploading} 
+        onClick={() => setIsOpen(true)} 
         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
       >
-        {isUploading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <FileJson size={16} />}
+        <FileJson size={16} />
         Batch Upload JSON
       </button>
+
+      {isOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', width: '100%', maxWidth: '500px', padding: '1.5rem', animation: 'slideDown 0.2s ease' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem' }}>Batch Upload Concepts</h2>
+              <button onClick={close} disabled={isUploading} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            {!parsedConcepts ? (
+              <div 
+                onDragEnter={onDrag}
+                onDragLeave={onDrag}
+                onDragOver={onDrag}
+                onDrop={onDrop}
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: `2px dashed ${dragActive ? '#fbbf24' : 'rgba(255,255,255,0.2)'}`,
+                  background: dragActive ? 'rgba(251,191,36,0.05)' : 'rgba(255,255,255,0.02)',
+                  borderRadius: '12px',
+                  padding: '3rem 1rem',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <input ref={fileInputRef} type="file" accept=".json" onChange={handleChange} style={{ display: 'none' }} />
+                <FileJson size={32} color={dragActive ? '#fbbf24' : 'rgba(255,255,255,0.4)'} style={{ marginBottom: '1rem' }} />
+                <div style={{ color: '#e2e8f0', fontWeight: 600, marginBottom: '0.5rem' }}>Drag & drop your JSON file here</div>
+                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>or click to select file</div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '2rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(16,185,129,0.1)', color: '#10b981', marginBottom: '1rem' }}>
+                  <FileJson size={24} />
+                </div>
+                <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.25rem' }}>Ready to Upload</h3>
+                <p style={{ margin: '0 0 1.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem' }}>
+                  Exactly <strong style={{ color: '#fbbf24', fontSize: '1.1rem' }}>{parsedConcepts.length}</strong> formulas/concepts will be added to this chapter.
+                </p>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button onClick={reset} disabled={isUploading} style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={handleApprove} disabled={isUploading} style={{ flex: 2, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}>
+                    {isUploading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : null}
+                    {isUploading ? 'Uploading...' : 'Approve & Upload'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {error && <div style={{ marginTop: '1rem', padding: '0.8rem', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</div>}
+          </div>
+        </div>
+      )}
     </>
   );
 }
