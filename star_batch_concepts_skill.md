@@ -33,7 +33,8 @@ The output must be a single JSON object with the following structure:
 - `description` (String): A one-sentence summary of the concept.
 - `content` (String): The main body of the concept using Markdown and LaTeX.
 - `tags` (Array of Strings): 2-4 relevant tags (lowercase).
-
+- CRITICAL: All math formulas MUST be wrapped in  $$  (block) or  $  (inline). Furthermore, because this is JSON, every single backslash 
+  │ in LaTeX MUST be escaped with a double backslash (e.g.  \\frac{1}{2} ).
 ## Formatting Rules
 1. **Markdown**: Use standard Markdown (headings, lists, bold, italics).
 2. **LaTeX (Math)**: 

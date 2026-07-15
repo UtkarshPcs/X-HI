@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const CONCEPTS_COLLECTION = 'starBatchConcepts';
@@ -57,6 +57,14 @@ export async function uploadConcept(data, currentUser) {
 
   await setDoc(conceptRef, conceptData);
   return { id: conceptRef.id, ...conceptData };
+}
+
+/**
+ * Delete a concept (Admin only in UI)
+ */
+export async function deleteConcept(conceptId) {
+  const conceptRef = doc(db, CONCEPTS_COLLECTION, conceptId);
+  await deleteDoc(conceptRef);
 }
 
 /**

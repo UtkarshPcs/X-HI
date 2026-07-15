@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { syllabusData } from '../data/syllabusData';
-import { ArrowLeft, Clock, BookOpen, Plus, Loader2, FileJson, X, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Clock, BookOpen, Plus, Loader2, FileJson, X, Image as ImageIcon, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import { getConceptsByChapter, getRecentConcepts, bulkUploadConcepts, uploadConcept, getContributionStats } from '../services/starBatchConceptsService';
+import { getConceptsByChapter, getRecentConcepts, bulkUploadConcepts, uploadConcept, getContributionStats, deleteConcept } from '../services/starBatchConceptsService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { getUserRole, ROLES } from '../auth/roles';
 
@@ -207,13 +207,13 @@ export default function StarConceptChapterPage() {
         <div>
           {activeTab === 'syllabus' ? (
             concepts.length > 0 ? (
-              concepts.map(c => <ConceptCard key={c.id} concept={c} />)
+              concepts.map(c => <ConceptCard key={c.id} concept={c} isAdmin={isAdmin} onDeleteSuccess={fetchData} />)
             ) : (
               <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem 0' }}>No concepts uploaded yet. Be the first to contribute!</div>
             )
           ) : (
             recentConcepts.length > 0 ? (
-              recentConcepts.map(c => <ConceptCard key={c.id} concept={c} />)
+              recentConcepts.map(c => <ConceptCard key={c.id} concept={c} isAdmin={isAdmin} onDeleteSuccess={fetchData} />)
             ) : (
               <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem 0' }}>No recent concepts found.</div>
             )
@@ -233,10 +233,36 @@ export default function StarConceptChapterPage() {
   );
 }
 
-function ConceptCard({ concept }) {
+function ConceptCard({ concept, isAdmin, onDeleteSuccess }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!window.confirm("Are you sure you want to delete this concept?")) return;
+    setIsDeleting(true);
+    try {
+      await deleteConcept(concept.id);
+      onDeleteSuccess();
+    } catch (err) {
+      alert("Failed to delete: " + err.message);
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <div className="concept-card">
-      <h3 className="concept-title">{concept.title}</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <h3 className="concept-title">{concept.title}</h3>
+        {isAdmin && (
+          <button 
+            onClick={handleDelete}
+            disabled={isDeleting}
+            style={{ background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', padding: '0.4rem', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Delete Concept"
+          >
+            {isDeleting ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={16} />}
+          </button>
+        )}
+      </div>
       {concept.description && <p className="concept-desc">{concept.description}</p>}
       
       <div className="concept-body">
