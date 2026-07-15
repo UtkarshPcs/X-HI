@@ -317,7 +317,17 @@ function AdminBatchUpload({ chapterId, onUploadSuccess, currentUser }) {
       if (!json.concepts || !Array.isArray(json.concepts)) {
         throw new Error('Invalid JSON schema. Expected { "concepts": [...] }');
       }
-      setParsedConcepts(json.concepts);
+
+      // Cleanup over-escaped LaTeX from AI generation 
+      // (If AI outputs \\\\frac in JSON, it becomes \\frac in memory. We reduce it to \frac so KaTeX can read it.)
+      const cleanedConcepts = json.concepts.map(c => {
+        if (c.content) {
+          c.content = c.content.replace(/\\\\/g, '\\');
+        }
+        return c;
+      });
+
+      setParsedConcepts(cleanedConcepts);
     } catch (err) {
       setError('Failed to parse JSON: ' + err.message);
     }
