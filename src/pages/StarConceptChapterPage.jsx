@@ -9,6 +9,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { getConceptsByChapter, getRecentConcepts, bulkUploadConcepts, uploadConcept, getContributionStats } from '../services/starBatchConceptsService';
+import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 
 // Function to generate consistent colors based on string (for user avatars)
 function stringToColor(str) {
@@ -306,26 +307,40 @@ function UserUploadModal({ onClose, chapterId, currentUser, onSuccess }) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [content, setContent] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) return setError('Title and Content are required.');
+    if (!title.trim() && !imageFile) return setError('Please provide a title or upload an image.');
     
     setIsSubmitting(true); setError('');
     try {
+      let imageUrl = null;
+      if (imageFile) {
+        imageUrl = await uploadImageToCloudinary(imageFile);
+      }
+
       await uploadConcept({
         chapterId,
-        title,
+        title: title || 'Image Upload',
         description: desc,
-        content
+        content,
+        imageUrl
       }, currentUser);
       onSuccess();
       onClose();
     } catch(err) {
       setError(err.message);
       setIsSubmitting(false);
+    }
+  }
+
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
     }
   }
 
@@ -359,6 +374,12 @@ function UserUploadModal({ onClose, chapterId, currentUser, onSuccess }) {
             style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.8rem', color: '#fff', fontSize: '0.95rem', minHeight: '150px', resize: 'vertical', fontFamily: 'monospace' }}
           />
           
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.8rem', color: '#fff', fontSize: '0.95rem' }}>
+            <ImageIcon size={18} />
+            <span>{imageFile ? imageFile.name : 'Upload Image (optional)'}</span>
+            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+          </label>
+
           {error && <div style={{ color: '#f87171', fontSize: '0.85rem' }}>{error}</div>}
           
           <button 
