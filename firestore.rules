@@ -105,6 +105,7 @@ service cloud.firestore {
     match /starBatchTestAttempts/{id} { allow read, write: if true; }
     match /starBatchMacroReports/{id} { allow read, write: if true; }
     match /starBatchReportedQuestions/{id} { allow read, write: if true; }
+    match /starBatchConcepts/{id} { allow read, write: if true; }
 
     // ---- Default deny ---------------------------------------------------
     // Anything not explicitly matched above (including collections an
