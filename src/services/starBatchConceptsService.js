@@ -9,27 +9,24 @@ const CONCEPTS_COLLECTION = 'starBatchConcepts';
 export async function getConceptsByChapter(chapterId) {
   const q = query(
     collection(db, CONCEPTS_COLLECTION),
-    where('chapterId', '==', chapterId),
-    where('approved', '==', true),
-    orderBy('createdAt', 'desc')
+    where('chapterId', '==', chapterId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const allDocs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  
+  // Filter and sort in memory to prevent Firestore missing composite index errors
+  const approvedDocs = allDocs.filter(d => d.approved === true);
+  approvedDocs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+  
+  return approvedDocs;
 }
 
 /**
  * Get recent concepts for a chapter.
  */
 export async function getRecentConcepts(chapterId, maxCount = 10) {
-  const q = query(
-    collection(db, CONCEPTS_COLLECTION),
-    where('chapterId', '==', chapterId),
-    where('approved', '==', true),
-    orderBy('createdAt', 'desc'),
-    limit(maxCount)
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const allApproved = await getConceptsByChapter(chapterId);
+  return allApproved.slice(0, maxCount);
 }
 
 /**
