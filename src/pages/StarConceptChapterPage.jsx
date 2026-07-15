@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { getConceptsByChapter, getRecentConcepts, bulkUploadConcepts, uploadConcept, getContributionStats } from '../services/starBatchConceptsService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
+import { getUserRole, ROLES } from '../auth/roles';
 
 // Function to generate consistent colors based on string (for user avatars)
 function stringToColor(str) {
@@ -34,7 +35,7 @@ export default function StarConceptChapterPage() {
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-  const isAdmin = currentUser?.activeRole === 'ADMIN' || currentUser?.rollNo === 0;
+  const isAdmin = getUserRole(currentUser?.rollNo) === ROLES.ADMIN || currentUser?.activeRole === 'ADMIN';
 
   useEffect(() => {
     if (!currentUser || !currentUser.isStarBatch || !currentUser.hasUnlockedStarBatch) {
