@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { syllabusData } from '../data/syllabusData';
-import { ArrowLeft, Clock, BookOpen, Plus, Loader2, FileJson, X, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { ArrowLeft, Clock, BookOpen, Plus, Loader2, FileJson, X, Image as ImageIcon, Trash2, Download, ExternalLink } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -121,6 +121,11 @@ export default function StarConceptChapterPage() {
         .concept-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; color: rgba(255,255,255,0.4); }
         .concept-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
         .concept-tag { background: rgba(255,255,255,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; }
+        
+        /* Image Attachment */
+        .concept-attachment { margin: 1rem 0; padding: 0.8rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; display: inline-flex; align-items: center; gap: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .concept-attachment:hover { background: rgba(255,255,255,0.06); }
+        .concept-attachment img { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; }
       `}</style>
 
       <div className="chp-header">
@@ -235,6 +240,7 @@ export default function StarConceptChapterPage() {
 
 function ConceptCard({ concept, isAdmin, onDeleteSuccess }) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showImage, setShowImage] = useState(false);
 
   async function handleDelete() {
     if (!window.confirm("Are you sure you want to delete this concept?")) return;
@@ -245,6 +251,23 @@ function ConceptCard({ concept, isAdmin, onDeleteSuccess }) {
     } catch (err) {
       alert("Failed to delete: " + err.message);
       setIsDeleting(false);
+    }
+  }
+
+  async function downloadImage(url) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `concept_image_${concept.id}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      window.open(url, '_blank');
     }
   }
 
@@ -265,14 +288,28 @@ function ConceptCard({ concept, isAdmin, onDeleteSuccess }) {
       </div>
       {concept.description && <p className="concept-desc">{concept.description}</p>}
       
-      <div className="concept-body">
-        <ReactMarkdown 
-          remarkPlugins={[remarkGfm, remarkMath]} 
-          rehypePlugins={[rehypeKatex]}
-        >
-          {concept.content}
-        </ReactMarkdown>
-      </div>
+      {concept.imageUrl && (
+        <div className="concept-attachment" onClick={() => setShowImage(true)}>
+          <img src={concept.imageUrl} alt="Attachment thumbnail" />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.9rem', color: '#fbbf24', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ImageIcon size={14} /> Attached Image
+            </span>
+            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Click to view</span>
+          </div>
+        </div>
+      )}
+
+      {concept.content && (
+        <div className="concept-body">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm, remarkMath]} 
+            rehypePlugins={[rehypeKatex]}
+          >
+            {concept.content}
+          </ReactMarkdown>
+        </div>
+      )}
 
       <div className="concept-meta">
         <div className="concept-tags">
@@ -282,6 +319,20 @@ function ConceptCard({ concept, isAdmin, onDeleteSuccess }) {
           By {concept.contributorName} • {concept.createdAt ? new Date(concept.createdAt.toMillis()).toLocaleDateString() : 'Just now'}
         </div>
       </div>
+
+      {showImage && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100000, background: 'rgba(0,0,0,0.9)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem' }}>
+            <button onClick={() => downloadImage(concept.imageUrl)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
+              <Download size={18} /> Download
+            </button>
+            <button onClick={() => setShowImage(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.6rem', borderRadius: '8px', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+          </div>
+          <img src={concept.imageUrl} alt="Full Concept" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '8px' }} />
+        </div>
+      )}
     </div>
   );
 }
