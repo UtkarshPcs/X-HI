@@ -180,13 +180,21 @@ export default function PeriodicTestAnalyticsDashboard({ result, activeQuestions
       {/* 4. AI Insights */}
       <div style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '16px', padding: '1.5rem' }}>
         <h3 style={{ margin: '0 0 1rem 0', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Sparkles size={18}/> AI Insights</h3>
-        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#e2e8f0', fontSize: '0.95rem', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        <div style={{ margin: 0, color: '#e2e8f0', fontSize: '0.95rem', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           {Array.isArray(aiReview) && aiReview.length > 0 ? (
-            aiReview.map((insight, i) => <li key={i}>{insight}</li>)
+            <ul style={{ margin: 0, paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {aiReview.map((insight, i) => (
+                <li key={i}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">{insight}</ReactMarkdown>
+                </li>
+              ))}
+            </ul>
           ) : (
-             typeof aiReview === 'string' ? <li>{aiReview}</li> : <li>Keep up the great work and review your mistakes carefully.</li>
+             typeof aiReview === 'string' ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">{aiReview}</ReactMarkdown>
+             ) : <p style={{ margin: 0 }}>Keep up the great work and review your mistakes carefully.</p>
           )}
-        </ul>
+        </div>
       </div>
 
       {/* 5. Question Review */}
@@ -298,9 +306,36 @@ export default function PeriodicTestAnalyticsDashboard({ result, activeQuestions
 
                       {(q.explanation || q.concept || q.misconception) && (
                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', borderLeft: '3px solid #3b82f6', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          {q.concept && <div><span style={{ color: '#38bdf8', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Concept: </span><span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{q.concept}</span></div>}
-                          {q.explanation && <div><span style={{ color: '#38bdf8', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Explanation: </span><span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{q.explanation}</span></div>}
-                          {q.misconception && <div><span style={{ color: '#f43f5e', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Common Misconception: </span><span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{q.misconception}</span></div>}
+                          {q.concept && (
+                            <div>
+                              <span style={{ color: '#38bdf8', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Concept: </span>
+                              <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
+                                  {q.concept}
+                                </ReactMarkdown>
+                              </div>
+                            </div>
+                          )}
+                          {q.explanation && (
+                            <div>
+                              <span style={{ color: '#38bdf8', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Explanation: </span>
+                              <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
+                                  {q.explanation}
+                                </ReactMarkdown>
+                              </div>
+                            </div>
+                          )}
+                          {q.misconception && (
+                            <div>
+                              <span style={{ color: '#f43f5e', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Common Misconception: </span>
+                              <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
+                                  {q.misconception}
+                                </ReactMarkdown>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
