@@ -87,7 +87,6 @@ export default function FeatureLaunchPopup() {
         justifyContent: 'center',
         padding: '1rem'
       }}
-      onClick={handleDismiss}
     >
       <div 
         className="feature-launch-card"
