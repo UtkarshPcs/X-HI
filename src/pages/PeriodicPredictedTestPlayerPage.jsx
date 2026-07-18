@@ -27,6 +27,9 @@ export default function PeriodicPredictedTestPlayerPage() {
   const [result, setResult] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
+  const [showQuitModal, setShowQuitModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+
   const [timeLeft, setTimeLeft] = useState(TEST_DURATION);
   const [questionTimes, setQuestionTimes] = useState({});
 
@@ -53,9 +56,7 @@ export default function PeriodicPredictedTestPlayerPage() {
     if (result) {
       navigate('/periodic-predicted');
     } else {
-      if (window.confirm("Are you sure you want to quit the Test? Your progress won't be saved.")) {
-        navigate('/periodic-predicted');
-      }
+      setShowQuitModal(true);
     }
   };
 
@@ -125,7 +126,9 @@ export default function PeriodicPredictedTestPlayerPage() {
   }
 
   async function handleSubmit(autoSubmit = false) {
-    if (!autoSubmit && !window.confirm('Are you sure you want to submit?')) return;
+    if (!autoSubmit) {
+      setShowSubmitModal(false);
+    }
     
     setIsSubmitting(true);
     let score = 0;
@@ -312,7 +315,7 @@ export default function PeriodicPredictedTestPlayerPage() {
             ) : (
               <button 
                 className="tp-submit" 
-                onClick={() => handleSubmit(false)} 
+                onClick={() => setShowSubmitModal(true)} 
                 disabled={isSubmitting}
                 style={{ flex: 1, marginTop: 0 }}
               >
@@ -322,6 +325,36 @@ export default function PeriodicPredictedTestPlayerPage() {
           </div>
         </div>
       )}
+
+      {/* Custom Modals */}
+      {showQuitModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: 'rgba(30, 41, 59, 0.85)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '2rem', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', animation: 'slideUp 0.3s ease' }}>
+            <h3 style={{ color: '#fff', fontSize: '1.25rem', marginTop: 0, marginBottom: '1rem' }}>Quit Test?</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.5 }}>Are you sure you want to quit the Test? Your progress won't be saved.</p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button onClick={() => setShowQuitModal(false)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>Cancel</button>
+              <button onClick={() => navigate('/periodic-predicted')} style={{ flex: 1, padding: '0.75rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', color: '#ef4444', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'}>Quit</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSubmitModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: 'rgba(30, 41, 59, 0.85)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '2rem', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', animation: 'slideUp 0.3s ease' }}>
+            <h3 style={{ color: '#fff', fontSize: '1.25rem', marginTop: 0, marginBottom: '1rem' }}>Submit Test?</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.5 }}>
+              You have answered <strong style={{color: '#fbbf24'}}>{Object.keys(answers).length}</strong> out of <strong style={{color: '#fbbf24'}}>{activeQuestions.length}</strong> questions. Are you ready to submit?
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button onClick={() => setShowSubmitModal(false)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>Resume</button>
+              <button onClick={() => handleSubmit(false)} style={{ flex: 1, padding: '0.75rem', background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', border: 'none', borderRadius: '12px', color: '#000', fontWeight: 700, cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>Submit</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
