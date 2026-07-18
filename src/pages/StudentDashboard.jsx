@@ -15,6 +15,7 @@ import ProfileCompletionBanner from '../components/ProfileCompletionBanner';
 import CampaignBanner from '../ux/components/CampaignBanner';
 import TestDataDashCard from '../components/TestDataDashCard';
 import PeriodicPredictedDashCard from '../components/PeriodicPredictedDashCard';
+import FeatureLaunchPopup from '../components/FeatureLaunchPopup';
 import { getHomework } from '../services/homeworkService';
 import { getNotices } from '../services/noticeService';
 import { getClosedDays } from '../services/calendarOverrideService';
@@ -557,6 +558,8 @@ export default function StudentDashboard() {
           onMonthStatsChange={(stats) => setCurrentMonthPct(stats.percentage)} 
         />
       </div>
+
+      <FeatureLaunchPopup />
     </div>
   );
 }

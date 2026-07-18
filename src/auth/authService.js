@@ -227,3 +227,10 @@ export async function ensureBroadcastKey(phone) {
   await updateDoc(userRef(phone), { broadcastKey: key });
   return key;
 }
+
+// ── Feature Launch Popup "seen" flag ──────────────────────────
+export async function markFeaturePopupSeen(phone, updatedAt) {
+  const { doc, updateDoc } = await import('firebase/firestore');
+  const { db } = await import('../firebase');
+  await updateDoc(doc(db, 'users', phone), { seenFeaturePopupVersion: updatedAt });
+}
