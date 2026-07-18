@@ -2101,6 +2101,7 @@ function PeriodicPredictedAdminTab() {
   const [fileContent, setFileContent] = useState('');
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const [isDragging, setIsDragging] = useState(false);
 
   const loadMeta = async () => {
     try {
@@ -2121,7 +2122,34 @@ function PeriodicPredictedAdminTab() {
     const reader = new FileReader();
     reader.onload = (evt) => {
       setFileContent(evt.target.result);
-      setMsg({ type: '', text: '' });
+      setMsg({ type: 'success', text: `Loaded file: ${file.name}` });
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    if (file.name && !file.name.endsWith('.json')) {
+      setMsg({ type: 'error', text: 'Please drop a .json file only.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      setFileContent(evt.target.result);
+      setMsg({ type: 'success', text: `Loaded file: ${file.name}` });
     };
     reader.readAsText(file);
   };
@@ -2181,14 +2209,36 @@ function PeriodicPredictedAdminTab() {
 
         <div className="input-group" style={{ marginBottom: '1.5rem' }}>
           <label style={{ color: '#e2e8f0', marginBottom: '0.5rem', display: 'block', fontWeight: 600 }}>2. Upload Test JSON File</label>
-          <input 
-            type="file" 
-            id="periodic-file-upload" 
-            accept=".json" 
-            onChange={handleFileUpload} 
-            className="auth-input" 
-            style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.2)' }} 
-          />
+          <div 
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            style={{ 
+              border: `2px dashed ${isDragging ? '#f59e0b' : 'rgba(255,255,255,0.2)'}`, 
+              borderRadius: '12px', 
+              padding: '2.5rem 1rem', 
+              textAlign: 'center',
+              background: isDragging ? 'rgba(245, 158, 11, 0.05)' : 'rgba(0,0,0,0.2)',
+              transition: 'all 0.2s',
+              cursor: 'pointer'
+            }}
+            onClick={() => document.getElementById('periodic-file-upload').click()}
+          >
+            <input 
+              type="file" 
+              id="periodic-file-upload" 
+              accept=".json" 
+              onChange={handleFileUpload} 
+              style={{ display: 'none' }} 
+            />
+            <Download size={32} color={isDragging ? '#f59e0b' : 'rgba(255,255,255,0.4)'} style={{ margin: '0 auto 1rem' }} />
+            <h4 style={{ color: isDragging ? '#f59e0b' : '#f8fafc', margin: '0 0 0.5rem' }}>
+              {isDragging ? 'Drop JSON file here' : 'Drag & Drop JSON file here'}
+            </h4>
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>
+              or click to browse from your computer
+            </p>
+          </div>
         </div>
 
         {msg.text && (
