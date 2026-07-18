@@ -73,6 +73,12 @@ export default function FeatureLaunchPopup() {
     }
   };
 
+  return <FeatureLaunchUI config={config} onDismiss={handleDismiss} onAction={handleAction} />;
+}
+
+export function FeatureLaunchUI({ config, onDismiss, onAction }) {
+  if (!config) return null;
+
   const popupContent = (
     <div 
       className="feature-launch-overlay animate-fade-in"
@@ -106,7 +112,7 @@ export default function FeatureLaunchPopup() {
         onClick={e => e.stopPropagation()} // Prevent closing when clicking inside
       >
         <button 
-          onClick={handleDismiss}
+          onClick={onDismiss}
           style={{
             position: 'absolute', top: '12px', right: '12px',
             background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%',
@@ -142,7 +148,7 @@ export default function FeatureLaunchPopup() {
           </div>
 
           <button 
-            onClick={handleAction}
+            onClick={onAction}
             style={{
               width: '100%',
               padding: '1rem',

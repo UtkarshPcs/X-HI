@@ -24,6 +24,7 @@ import { db } from '../firebase';
 import { getCTABannerConfig, saveCTABannerConfig, getCTAClicks } from '../services/ctaBannerService';
 import { getFeatureLaunches, createFeatureLaunch, deleteFeatureLaunch } from '../services/featureLaunchService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
+import { FeatureLaunchUI } from '../components/FeatureLaunchPopup';
 
 function canAccess(user) {
   return user && (user.isAdmin || user.role === ROLES.MONITOR || user.role === ROLES.ADMIN);
@@ -1113,6 +1114,7 @@ function FeatureLaunchManager() {
   const [imageFile, setImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [previewing, setPreviewing] = useState(false);
 
   useEffect(() => {
     loadPopups();
@@ -1254,15 +1256,36 @@ function FeatureLaunchManager() {
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="auth-btn primary"
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}
-        >
-          <Plus size={16} /> {saving ? 'Creating…' : 'Create & Launch Popup'}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <button
+            type="button"
+            onClick={() => setPreviewing(true)}
+            className="auth-btn"
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', flex: 1, background: 'rgba(255,255,255,0.1)' }}
+          >
+            <Eye size={16} /> Preview Popup
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="auth-btn primary"
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', flex: 1 }}
+          >
+            <Plus size={16} /> {saving ? 'Creating…' : 'Create & Launch'}
+          </button>
+        </div>
       </form>
+      
+      {previewing && (
+        <FeatureLaunchUI 
+          config={{
+            ...config,
+            imageUrl: imageFile ? URL.createObjectURL(imageFile) : config.imageUrl
+          }} 
+          onDismiss={() => setPreviewing(false)} 
+          onAction={() => setPreviewing(false)} 
+        />
+      )}
     </div>
   );
 }
