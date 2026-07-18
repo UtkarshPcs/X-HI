@@ -14,6 +14,7 @@ import MarksBanner from '../components/MarksBanner';
 import ProfileCompletionBanner from '../components/ProfileCompletionBanner';
 import CampaignBanner from '../ux/components/CampaignBanner';
 import TestDataDashCard from '../components/TestDataDashCard';
+import PeriodicPredictedDashCard from '../components/PeriodicPredictedDashCard';
 import { getHomework } from '../services/homeworkService';
 import { getNotices } from '../services/noticeService';
 import { getClosedDays } from '../services/calendarOverrideService';
@@ -312,6 +313,7 @@ export default function StudentDashboard() {
       <MarksBanner />
       <MergeBanner />
       <CampaignBanner campaignId="email-reminder-v1" />
+      <PeriodicPredictedDashCard />
       <TestDataDashCard />
       <NoticeBar />
 

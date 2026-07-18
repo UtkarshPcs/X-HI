@@ -7,7 +7,7 @@ import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone } f
 import { getAllUsers, getActivitySummary, purgeTestData, deleteUserDoc } from '../services/adminService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -22,6 +22,7 @@ import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
+import { uploadPeriodicTest, getPeriodicTestsMeta } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -48,6 +49,7 @@ const TABS = [
   { id: 'starbatch',  label: 'Star Batch',       Icon: Star },
   { id: 'mathfixer',  label: 'Math Fixer',       Icon: Sparkles },
   { id: 'reportedQs', label: 'Reported Questions', Icon: Flag },
+  { id: 'periodicPredicted', label: 'Predicted Analysis', Icon: Target },
 ];
 
 const ROLE_STYLE = {
@@ -1399,9 +1401,10 @@ export default function AdminServicesPage() {
         )}
         {tab === 'testdata'   && <TestDataTab />}
         {tab === 'push'       && <PushNoticesTab />}
-        {tab === 'starbatch'  && <StarBatchTab />}
-        {tab === 'mathfixer'  && <MathFixerTab />}
-        {tab === 'reportedQs' && <ReportedQuestionsTab />}
+        { tab === 'starbatch'  && <StarBatchTab /> }
+        { tab === 'mathfixer'  && <MathFixerTab /> }
+        { tab === 'reportedQs' && <ReportedQuestionsTab /> }
+        { tab === 'periodicPredicted' && <PeriodicPredictedAdminTab /> }
       </div>
     </div>
   );
@@ -2083,6 +2086,125 @@ function StarBatchTab() {
             </table>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Periodic Predicted Admin Tab
+──────────────────────────────────────────────────────────────*/
+function PeriodicPredictedAdminTab() {
+  const SUBJECTS = ['Science', 'Maths', 'SST', 'English', 'Hindi', 'IT'];
+  const [meta, setMeta] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
+  const [fileContent, setFileContent] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [msg, setMsg] = useState({ type: '', text: '' });
+
+  const loadMeta = async () => {
+    try {
+      const data = await getPeriodicTestsMeta();
+      setMeta(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    loadMeta();
+  }, []);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      setFileContent(evt.target.result);
+      setMsg({ type: '', text: '' });
+    };
+    reader.readAsText(file);
+  };
+
+  const handleUploadTest = async () => {
+    if (!fileContent) {
+      setMsg({ type: 'error', text: 'Please select a JSON file first.' });
+      return;
+    }
+    
+    setUploading(true);
+    setMsg({ type: '', text: '' });
+    
+    try {
+      const parsed = JSON.parse(fileContent);
+      if (!Array.isArray(parsed) || parsed.length !== 20) {
+        throw new Error('JSON must be an array of exactly 20 questions.');
+      }
+      
+      const newSetNumber = await uploadPeriodicTest(selectedSubject, parsed);
+      setMsg({ type: 'success', text: `Successfully uploaded Set ${newSetNumber} for ${selectedSubject}.` });
+      setFileContent('');
+      document.getElementById('periodic-file-upload').value = '';
+      loadMeta();
+    } catch (e) {
+      setMsg({ type: 'error', text: e.message || 'Error uploading test' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div style={{ animation: 'fade-in 0.3s ease' }}>
+      <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+        <Target size={22} color="#f59e0b" /> Predicted Analysis Tests
+      </h2>
+      <p className="as-muted" style={{ marginBottom: '1.5rem' }}>Upload JSON arrays of exactly 20 questions for specific subjects.</p>
+
+      {meta && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
+          {SUBJECTS.map(sub => (
+            <div key={sub} className="as-card" style={{ padding: '1.25rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <h4 style={{ margin: '0 0 0.5rem', color: '#f8fafc', fontSize: '1.05rem' }}>{sub}</h4>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Sets uploaded: <strong style={{ color: '#f59e0b', fontSize: '1.1rem' }}>{meta[sub] || 0}</strong></p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="as-card" style={{ maxWidth: '600px', background: 'rgba(255,255,255,0.02)' }}>
+        <div className="input-group" style={{ marginBottom: '1.25rem' }}>
+          <label style={{ color: '#e2e8f0', marginBottom: '0.5rem', display: 'block', fontWeight: 600 }}>1. Select Subject</label>
+          <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className="auth-input" style={{ background: 'rgba(0,0,0,0.2)' }}>
+            {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+
+        <div className="input-group" style={{ marginBottom: '1.5rem' }}>
+          <label style={{ color: '#e2e8f0', marginBottom: '0.5rem', display: 'block', fontWeight: 600 }}>2. Upload Test JSON File</label>
+          <input 
+            type="file" 
+            id="periodic-file-upload" 
+            accept=".json" 
+            onChange={handleFileUpload} 
+            className="auth-input" 
+            style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.2)' }} 
+          />
+        </div>
+
+        {msg.text && (
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', borderRadius: '12px', background: msg.type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', color: msg.type === 'error' ? '#ef4444' : '#10b981', border: `1px solid ${msg.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}`, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {msg.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle size={18} />} {msg.text}
+          </div>
+        )}
+
+        <button 
+          className="auth-btn primary" 
+          onClick={handleUploadTest} 
+          disabled={uploading || !fileContent}
+          style={{ width: '100%', padding: '1rem', background: !fileContent ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: !fileContent ? 'rgba(255,255,255,0.3)' : '#000', border: 'none' }}
+        >
+          {uploading ? 'Uploading and Formatting...' : `Upload Set ${meta ? (meta[selectedSubject] || 0) + 1 : 1} for ${selectedSubject}`}
+        </button>
       </div>
     </div>
   );

@@ -42,6 +42,8 @@ import StarBatchTestPlayerPage from './pages/StarBatchTestPlayerPage';
 import HistoricalTestAnalysisPage from './pages/HistoricalTestAnalysisPage';
 import StarBatchConceptsHub from './pages/StarBatchConceptsHub';
 import StarConceptChapterPage from './pages/StarConceptChapterPage';
+import PeriodicPredictedAnalysisPage from './pages/PeriodicPredictedAnalysisPage';
+import PeriodicPredictedTestPlayerPage from './pages/PeriodicPredictedTestPlayerPage';
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -145,6 +147,8 @@ function AppInner() {
             <Route path="/star-tests/history/:attemptId" element={<HistoricalTestAnalysisPage />} />
             <Route path="/star-concepts" element={<StarBatchConceptsHub />} />
             <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />
+            <Route path="/periodic-predicted" element={<PeriodicPredictedAnalysisPage />} />
+            <Route path="/periodic-predicted/test/:subject/:setNumber" element={<PeriodicPredictedTestPlayerPage />} />
           </Routes>
         </main>
         <footer className="app-footer">
