@@ -20,13 +20,13 @@ export async function getCTABannerConfig() {
  * Save / update the CTA banner config (admin only — no server validation here,
  * the admin panel is already access-controlled).
  */
-export async function saveCTABannerConfig({ enabled, message, buttonText, buttonUrl }) {
+export async function saveCTABannerConfig(config, resetVisibility = false) {
   await setDoc(doc(db, CONFIG_DOC), {
-    enabled:    !!enabled,
-    message:    message    || '',
-    buttonText: buttonText || 'OK',
-    buttonUrl:  buttonUrl  || '',   // empty = stay on page
-    updatedAt:  Date.now(),
+    enabled:    !!config.enabled,
+    message:    config.message    || '',
+    buttonText: config.buttonText || 'OK',
+    buttonUrl:  config.buttonUrl  || '',   // empty = stay on page
+    updatedAt:  resetVisibility ? Date.now() : (config.updatedAt || Date.now()),
   });
 }
 

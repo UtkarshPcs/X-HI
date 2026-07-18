@@ -930,6 +930,7 @@ function CTABannerManager() {
   const [clicks, setClicks]   = useState(null);   // null = not loaded yet
   const [saving, setSaving]   = useState(false);
   const [saved,  setSaved]    = useState(false);
+  const [resetVisibility, setResetVisibility] = useState(false);
   const [loadingClicks, setLoadingClicks] = useState(false);
   const [showClicks, setShowClicks]       = useState(false);
 
@@ -943,7 +944,11 @@ function CTABannerManager() {
     e.preventDefault();
     setSaving(true); setSaved(false);
     try {
-      await saveCTABannerConfig(config);
+      await saveCTABannerConfig(config, resetVisibility);
+      if (resetVisibility) {
+        setConfig(c => ({ ...c, updatedAt: Date.now() }));
+      }
+      setResetVisibility(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -1047,6 +1052,24 @@ function CTABannerManager() {
             onChange={(e) => setConfig((c) => ({ ...c, buttonUrl: e.target.value }))}
           />
         </div>
+
+        {/* Reset Visibility Checkbox */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', userSelect: 'none', background: 'rgba(239, 68, 68, 0.05)', padding: '0.75rem', borderRadius: '8px', border: '1px dashed rgba(239, 68, 68, 0.2)', marginTop: '0.5rem' }}>
+          <input
+            type="checkbox"
+            checked={resetVisibility}
+            onChange={(e) => setResetVisibility(e.target.checked)}
+            style={{ width: 16, height: 16, accentColor: '#ef4444', cursor: 'pointer' }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: resetVisibility ? '#ef4444' : 'var(--text-primary)' }}>
+              Force Show to All Users
+            </span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Checking this deletes previous "seens" so everyone sees this banner again.
+            </span>
+          </div>
+        </label>
 
         <button
           type="submit"
