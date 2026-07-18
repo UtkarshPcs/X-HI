@@ -265,7 +265,7 @@ export default function PeriodicPredictedTestPlayerPage() {
             </div>
             <div className="tp-q-text markdown-body custom-md" style={{ marginBottom: '1.25rem' }}>
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {activeQuestions[currentQuestionIndex].text}
+                {activeQuestions[currentQuestionIndex].text || activeQuestions[currentQuestionIndex].Question || activeQuestions[currentQuestionIndex].questionText || '*Question text missing*'}
               </ReactMarkdown>
             </div>
 
