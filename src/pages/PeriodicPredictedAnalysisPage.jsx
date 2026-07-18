@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { getPeriodicTestsMeta, getUserPeriodicAttempts } from '../services/periodicPredictedService';
-import { Loader2, ArrowLeft, Target, BarChart2, BookOpen, Clock, CalendarDays, ChevronRight } from 'lucide-react';
+import { Loader2, ArrowLeft, Target, BarChart2, BookOpen, Clock, CalendarDays, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 
 const SUBJECTS = ['Science', 'Maths', 'SST', 'English', 'Hindi', 'IT'];
 
@@ -15,7 +15,7 @@ export default function PeriodicPredictedAnalysisPage() {
   const [attempts, setAttempts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [retakeModalSubject, setRetakeModalSubject] = useState(null);
+  const [expandedSubject, setExpandedSubject] = useState(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -163,7 +163,7 @@ export default function PeriodicPredictedAnalysisPage() {
                     onClick={() => {
                       if (!canTake) return;
                       if (isRetake) {
-                        setRetakeModalSubject(sub);
+                        setExpandedSubject(expandedSubject === sub ? null : sub);
                       } else {
                         navigate(`/periodic-predicted/test/${sub}/${targetSet}`);
                       }
@@ -176,21 +176,43 @@ export default function PeriodicPredictedAnalysisPage() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                     }}
                   >
-                    {btnText} {canTake && !isRetake && <ChevronRight size={14} />}
+                    {btnText} 
+                    {canTake && !isRetake && <ChevronRight size={14} />}
+                    {canTake && isRetake && (expandedSubject === sub ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
                   </button>
                   
                   {userMax > 0 && userMax < adminMax && (
                     <button
-                      onClick={() => setRetakeModalSubject(sub)}
+                      onClick={() => setExpandedSubject(expandedSubject === sub ? null : sub)}
                       style={{
                         width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s',
-                        background: 'transparent', color: 'rgba(255,255,255,0.4)'
+                        background: 'transparent', color: 'rgba(255,255,255,0.4)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem'
                       }}
                       onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
                       onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.background = 'transparent'; }}
                     >
-                      Retake past sets
+                      Retake past sets {expandedSubject === sub ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                     </button>
+                  )}
+
+                  {expandedSubject === sub && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.25rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', animation: 'fade-in 0.2s ease' }}>
+                      {Array.from({ length: Math.min(meta[sub] || 0, maxAttemptedSets[sub] || 0) }).map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => navigate(`/periodic-predicted/test/${sub}/${i + 1}`)}
+                          style={{
+                            padding: '0.6rem 0.75rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.2)'; e.currentTarget.style.color = '#f59e0b'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><BookOpen size={14} /> Set {i + 1}</div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.8 }}>Give Set</span>
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
@@ -201,41 +223,6 @@ export default function PeriodicPredictedAnalysisPage() {
 
       {activeTab === 'report' && (
         <ReportCardTab attempts={attempts || []} />
-      )}
-
-      {/* Retake Modal */}
-      {retakeModalSubject && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div style={{ background: 'rgba(30, 41, 59, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '2rem', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', animation: 'slideUp 0.3s ease' }}>
-            <h3 style={{ color: '#fff', fontSize: '1.25rem', marginTop: 0, marginBottom: '0.5rem' }}>Retake {retakeModalSubject}</h3>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>Select a previously completed set to retake. The questions will be shuffled!</p>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', maxHeight: '40vh', overflowY: 'auto', marginBottom: '1.5rem', paddingRight: '0.5rem' }}>
-              {Array.from({ length: Math.min(meta[retakeModalSubject] || 0, maxAttemptedSets[retakeModalSubject] || 0) }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigate(`/periodic-predicted/test/${retakeModalSubject}/${i + 1}`)}
-                  style={{
-                    padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.15)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.3)'; e.currentTarget.style.color = '#f59e0b'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
-                >
-                  <BookOpen size={14} /> Set {i + 1}
-                </button>
-              ))}
-            </div>
-
-            <button 
-              onClick={() => setRetakeModalSubject(null)} 
-              style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }} 
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} 
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
