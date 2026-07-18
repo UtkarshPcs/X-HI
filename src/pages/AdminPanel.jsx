@@ -22,7 +22,7 @@ import { getAllUsers } from '../services/adminService';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getCTABannerConfig, saveCTABannerConfig, getCTAClicks } from '../services/ctaBannerService';
-import { getFeatureLaunchConfig, saveFeatureLaunchConfig } from '../services/featureLaunchService';
+import { getFeatureLaunches, createFeatureLaunch, deleteFeatureLaunch } from '../services/featureLaunchService';
 
 function canAccess(user) {
   return user && (user.isAdmin || user.role === ROLES.MONITOR || user.role === ROLES.ADMIN);
@@ -945,13 +945,11 @@ function CTABannerManager() {
     e.preventDefault();
     setSaving(true); setSaved(false);
     try {
-      await saveCTABannerConfig(config, resetVisibility);
-      if (resetVisibility) {
-        setConfig(c => ({ ...c, updatedAt: Date.now() }));
-      }
-      setResetVisibility(false);
+      await saveCTABannerConfig(config);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+      setClicks([]); // Reset clicks view
+      setShowClicks(false);
     } catch (err) {
       alert('Failed to save: ' + err.message);
     } finally {
@@ -1054,31 +1052,13 @@ function CTABannerManager() {
           />
         </div>
 
-        {/* Reset Visibility Checkbox */}
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', userSelect: 'none', background: 'rgba(239, 68, 68, 0.05)', padding: '0.75rem', borderRadius: '8px', border: '1px dashed rgba(239, 68, 68, 0.2)', marginTop: '0.5rem' }}>
-          <input
-            type="checkbox"
-            checked={resetVisibility}
-            onChange={(e) => setResetVisibility(e.target.checked)}
-            style={{ width: 16, height: 16, accentColor: '#ef4444', cursor: 'pointer' }}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: resetVisibility ? '#ef4444' : 'var(--text-primary)' }}>
-              Force Show to All Users
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Checking this deletes previous "seens" so everyone sees this banner again.
-            </span>
-          </div>
-        </label>
-
         <button
           type="submit"
           disabled={saving}
           className="auth-btn primary"
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}
         >
-          <Save size={16} /> {saving ? 'Saving…' : saved ? '✓ Saved!' : 'Save Banner Config'}
+          <Save size={16} /> {saving ? 'Saving…' : saved ? '✓ Saved!' : 'Launch New CTA (Resets Clicks)'}
         </button>
       </form>
 
@@ -1127,32 +1107,49 @@ function CTABannerManager() {
 
 // ── Feature Launch Popup Manager (admin-only) ────────────────────────────
 function FeatureLaunchManager() {
-  const [config, setConfig] = useState({ enabled: false, imageUrl: '', markdownText: '', buttonText: '', redirectPage: '' });
+  const [popups, setPopups] = useState([]);
+  const [config, setConfig] = useState({ imageUrl: '', markdownText: '', buttonText: 'Check it out!', redirectPage: '/' });
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [resetVisibility, setResetVisibility] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getFeatureLaunchConfig()
-      .then((cfg) => { if (cfg) setConfig(cfg); })
-      .catch(console.error);
+    loadPopups();
   }, []);
 
-  async function handleSave(e) {
-    e.preventDefault();
-    setSaving(true); setSaved(false);
+  async function loadPopups() {
+    setLoading(true);
     try {
-      await saveFeatureLaunchConfig(config, resetVisibility);
-      if (resetVisibility) {
-        setConfig(c => ({ ...c, updatedAt: Date.now() }));
-      }
-      setResetVisibility(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      const data = await getFeatureLaunches();
+      setPopups(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    if (!config.markdownText) return alert("Markdown text is required.");
+    setSaving(true);
+    try {
+      await createFeatureLaunch(config);
+      setConfig({ imageUrl: '', markdownText: '', buttonText: 'Check it out!', redirectPage: '/' });
+      await loadPopups();
     } catch (err) {
       alert('Failed to save: ' + err.message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Are you sure you want to permanently delete this popup?")) return;
+    try {
+      await deleteFeatureLaunch(id);
+      await loadPopups();
+    } catch (err) {
+      alert('Failed to delete: ' + err.message);
     }
   }
 
@@ -1165,25 +1162,38 @@ function FeatureLaunchManager() {
   return (
     <div className="glass-card" style={{ marginBottom: '2rem' }}>
       <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', color: 'var(--text-primary)' }}>
-        <Sparkles size={20} /> Feature Launch Popup
+        <Sparkles size={20} /> Feature Launch Popups
       </h2>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
-        Show a large, dismissible popup on the dashboard with a beautiful cover image, markdown description, and redirect button. Perfect for announcing new features.
+        Create one-time popups to announce new features. Each creation is independent.
       </p>
 
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', userSelect: 'none' }}>
-          <input
-            type="checkbox"
-            checked={config.enabled}
-            onChange={(e) => setConfig((c) => ({ ...c, enabled: e.target.checked }))}
-            style={{ width: 16, height: 16, accentColor: 'var(--primary)', cursor: 'pointer' }}
-          />
-          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: config.enabled ? '#10b981' : 'var(--text-muted)' }}>
-            {config.enabled ? '🟢 Popup is ON' : '⚫ Popup is OFF'}
-          </span>
-        </label>
+      {/* List of active popups */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Active Popups</h3>
+        {loading ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Loading...</p>
+        ) : popups.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>No active popups.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {popups.map(p => (
+              <div key={p.id} style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {p.id} • {new Date(p.createdAt).toLocaleDateString()}</span>
+                  <button onClick={() => handleDelete(p.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                </div>
+                {p.imageUrl && <img src={p.imageUrl} alt="Banner" style={{ width: '100%', maxHeight: 100, objectFit: 'cover', borderRadius: '4px', marginBottom: '0.5rem' }} />}
+                <p style={{ fontSize: '0.88rem', margin: 0, color: 'var(--text-primary)' }}>{p.markdownText.substring(0, 100)}...</p>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--primary)' }}>Redirects to: {p.redirectPage}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
+      <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>Create New Popup</h3>
+      <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cover Image URL (Optional)</label>
           <input
@@ -1196,8 +1206,9 @@ function FeatureLaunchManager() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Markdown Content</label>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Markdown Content *</label>
           <textarea
+            required
             style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
             placeholder="## Big News!&#10;Describe the new feature here..."
             value={config.markdownText}
@@ -1233,30 +1244,13 @@ function FeatureLaunchManager() {
           </div>
         </div>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', userSelect: 'none', background: 'rgba(239, 68, 68, 0.05)', padding: '0.75rem', borderRadius: '8px', border: '1px dashed rgba(239, 68, 68, 0.2)', marginTop: '0.5rem' }}>
-          <input
-            type="checkbox"
-            checked={resetVisibility}
-            onChange={(e) => setResetVisibility(e.target.checked)}
-            style={{ width: 16, height: 16, accentColor: '#ef4444', cursor: 'pointer' }}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: resetVisibility ? '#ef4444' : 'var(--text-primary)' }}>
-              Force Show to All Users
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Checking this deletes previous "seens" so everyone sees this popup again.
-            </span>
-          </div>
-        </label>
-
         <button
           type="submit"
           disabled={saving}
           className="auth-btn primary"
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}
         >
-          <Save size={16} /> {saving ? 'Saving…' : saved ? '✓ Saved!' : 'Save Popup Config'}
+          <Plus size={16} /> {saving ? 'Creating…' : 'Create & Launch Popup'}
         </button>
       </form>
     </div>

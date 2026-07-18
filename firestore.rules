@@ -41,10 +41,6 @@ service cloud.firestore {
       allow delete: if true; // used by adminService.deleteUserDoc — no safe way to restrict without real auth
     }
 
-    match /users/{phone}/starBatchBookmarks/{bookmarkId} {
-      allow read, write: if true;
-    }
-
     // ---- settings/starbatch -----------------------------------------------
     // Star Batch config: { code: string, internalRolls: number[] }
     match /settings/starbatch {
@@ -104,8 +100,15 @@ service cloud.firestore {
     match /starBatchTests/{id}    { allow read, write: if true; }
     match /starBatchTestAttempts/{id} { allow read, write: if true; }
     match /starBatchMacroReports/{id} { allow read, write: if true; }
+    match /users/{phone}/starBatchBookmarks/{bookmarkId} {                                                                              
+          allow read, write: if true;                                                                                                       
+        }
     match /starBatchReportedQuestions/{id} { allow read, write: if true; }
     match /starBatchConcepts/{id} { allow read, write: if true; }
+    match /periodic_predicted_tests/{id} { allow read, write: if true; }                                                                
+    match /periodic_predicted_attempts/{id} { allow read, write: if true; }
+    match /appConfig/{id} { allow read, write: if true; }
+     match /featureLaunches/{id} { allow read, write: if true; }
 
     // ---- Default deny ---------------------------------------------------
     // Anything not explicitly matched above (including collections an

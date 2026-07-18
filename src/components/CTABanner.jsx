@@ -9,13 +9,10 @@ import { markBannerSeen } from '../auth/authService';
  * Globally-mounted configurable announcement banner.
  * Admin controls: message, button label, optional URL.
  *
- * One-time display — cross-device:
- *   On click or dismiss, writes `seenBannerVersion = updatedAt` to the
- *   user's Firestore doc. Since the user doc is fetched at login and
- *   stored in currentUser, no extra network call is needed to check it.
- *   If admin saves a new config (new updatedAt), it resets for everyone.
- *
- * Unauthenticated users: banner is shown but click is not tracked.
+ * One-time display — cross-device + local storage optimization:
+ *   We check Local Storage first to prevent UI flashing. 
+ *   If not in Local Storage, we check currentUser.seenCtaBannerId.
+ *   On click or dismiss, writes `seenCtaBannerId` to the user's Firestore doc and Local Storage.
  */
 export default function CTABanner() {
   const { currentUser, updateCurrentUser } = useAuth();
@@ -31,13 +28,22 @@ export default function CTABanner() {
         const cfg = await getCTABannerConfig();
         if (!active) return;
 
-        if (!cfg || !cfg.enabled) {
+        if (!cfg || !cfg.enabled || !cfg.id) {
           setConfig(false);
           return;
         }
 
-        // Already permanently dismissed this version (cross-device via Firestore)
-        if (currentUser && currentUser.seenBannerVersion === cfg.updatedAt) {
+        // Check Local Storage first for immediate dismissal (prevents flashing)
+        const localSeen = localStorage.getItem('seenCtaBannerId');
+        if (localSeen === cfg.id) {
+          setConfig(false);
+          return;
+        }
+
+        // Check Cloud State
+        if (currentUser && currentUser.seenCtaBannerId === cfg.id) {
+          // Keep Local Storage in sync for next time
+          localStorage.setItem('seenCtaBannerId', cfg.id);
           setConfig(false);
           return;
         }
@@ -55,16 +61,16 @@ export default function CTABanner() {
 
   /**
    * Permanently hide this banner version:
-   *  1. Update in-memory currentUser instantly (no flicker on re-render).
-   *  2. Persist to Firestore in the background (non-blocking).
+   *  1. Save to Local Storage immediately.
+   *  2. Update in-memory currentUser instantly (no flicker on re-render).
+   *  3. Persist to Firestore in the background (non-blocking).
    */
   function permanentlyClose() {
     setVisible(false);
+    localStorage.setItem('seenCtaBannerId', config.id);
     if (currentUser?.phone) {
-      // Instant in-memory patch — zero latency for the user
-      updateCurrentUser({ seenBannerVersion: config.updatedAt });
-      // Background Firestore write — cross-device persistence
-      markBannerSeen(currentUser.phone, config.updatedAt).catch(() => {});
+      updateCurrentUser({ seenCtaBannerId: config.id });
+      markBannerSeen(currentUser.phone, config.id).catch(() => {});
     }
   }
 

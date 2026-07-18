@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, collection, setDoc, updateDoc, query, where } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, setDoc, updateDoc, query, where, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 
 async function sha256(text) {
@@ -107,8 +107,8 @@ export async function resetWhatsNew(phone) {
 // ── CTA Banner "seen" flag ─────────────────────────────────────
 // Stores the banner's updatedAt timestamp. If it matches the current
 // banner config, the banner is never shown again (cross-device).
-export async function markBannerSeen(phone, updatedAt) {
-  await updateDoc(userRef(phone), { seenBannerVersion: updatedAt });
+export async function markBannerSeen(phone, id) {
+  await updateDoc(userRef(phone), { seenCtaBannerId: id });
 }
 
 // ── Attendance ─────────────────────────────────────────────────
@@ -229,8 +229,6 @@ export async function ensureBroadcastKey(phone) {
 }
 
 // ── Feature Launch Popup "seen" flag ──────────────────────────
-export async function markFeaturePopupSeen(phone, updatedAt) {
-  const { doc, updateDoc } = await import('firebase/firestore');
-  const { db } = await import('../firebase');
-  await updateDoc(doc(db, 'users', phone), { seenFeaturePopupVersion: updatedAt });
+export async function markFeaturePopupSeen(phone, id) {
+  await updateDoc(doc(db, 'users', phone), { seenFeaturePopups: arrayUnion(id) });
 }

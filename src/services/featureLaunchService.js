@@ -1,21 +1,26 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, getDocs, collection, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
-const CONFIG_DOC = 'appConfig/featureLaunch';
+const LAUNCHES_COL = 'featureLaunches';
 
-export async function getFeatureLaunchConfig() {
-  const snap = await getDoc(doc(db, CONFIG_DOC));
-  return snap.exists() ? snap.data() : null;
+export async function getFeatureLaunches() {
+  const q = query(collection(db, LAUNCHES_COL), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-export async function saveFeatureLaunchConfig(config, resetVisibility = false) {
+export async function createFeatureLaunch(config) {
+  const id = Date.now().toString();
   const data = {
-    enabled:      !!config.enabled,
     imageUrl:     config.imageUrl || '',
     markdownText: config.markdownText || '',
     buttonText:   config.buttonText || 'Check it out!',
     redirectPage: config.redirectPage || '/',
-    updatedAt:    resetVisibility ? Date.now() : (config.updatedAt || Date.now()),
+    createdAt:    Date.now(),
   };
-  await setDoc(doc(db, CONFIG_DOC), data);
+  await setDoc(doc(db, LAUNCHES_COL, id), data);
+}
+
+export async function deleteFeatureLaunch(id) {
+  await deleteDoc(doc(db, LAUNCHES_COL, id));
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { X, Sparkles } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
-import { getFeatureLaunchConfig } from '../services/featureLaunchService';
+import { getFeatureLaunches } from '../services/featureLaunchService';
 import { markFeaturePopupSeen } from '../auth/authService';
 
 export default function FeatureLaunchPopup() {
@@ -15,28 +15,53 @@ export default function FeatureLaunchPopup() {
   useEffect(() => {
     if (!currentUser) return;
     
-    getFeatureLaunchConfig().then((cfg) => {
-      if (!cfg || !cfg.enabled) return;
-      
-      // Check if user has already seen this version
-      if (currentUser.seenFeaturePopupVersion === cfg.updatedAt) {
-        return;
+    let active = true;
+    (async () => {
+      try {
+        const popups = await getFeatureLaunches();
+        if (!active) return;
+
+        // Cloud seen popups
+        const cloudSeen = currentUser.seenFeaturePopups || [];
+
+        // Find the first popup (newest first, since getFeatureLaunches returns desc)
+        // that hasn't been seen in Local Storage OR Cloud.
+        const unseenPopup = popups.find(p => {
+          const localSeen = localStorage.getItem('seenFeaturePopup_' + p.id);
+          if (localSeen === 'true') return false;
+          if (cloudSeen.includes(p.id)) {
+            // Keep local storage in sync
+            localStorage.setItem('seenFeaturePopup_' + p.id, 'true');
+            return false;
+          }
+          return true;
+        });
+
+        if (!unseenPopup) {
+          setConfig(null);
+          return;
+        }
+
+        setConfig(unseenPopup);
+        // Slight delay for animation
+        setTimeout(() => setVisible(true), 500);
+      } catch (err) {
+        console.error(err);
       }
-      
-      setConfig(cfg);
-      
-      // Slight delay for animation
-      setTimeout(() => setVisible(true), 500);
-    }).catch(console.error);
+    })();
+
+    return () => { active = false; };
   }, [currentUser]);
 
   if (!config || !visible) return null;
 
   const handleDismiss = () => {
     setVisible(false);
+    localStorage.setItem('seenFeaturePopup_' + config.id, 'true');
     if (currentUser) {
-      updateCurrentUser({ seenFeaturePopupVersion: config.updatedAt });
-      markFeaturePopupSeen(currentUser.phone, config.updatedAt).catch(() => {});
+      const currentSeen = currentUser.seenFeaturePopups || [];
+      updateCurrentUser({ seenFeaturePopups: [...currentSeen, config.id] });
+      markFeaturePopupSeen(currentUser.phone, config.id).catch(() => {});
     }
   };
 

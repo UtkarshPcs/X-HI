@@ -1,5 +1,5 @@
 import {
-  doc, getDoc, setDoc, collection, addDoc,
+  doc, getDoc, setDoc, collection, addDoc, deleteDoc,
   getDocs, query, orderBy, where,
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -20,13 +20,19 @@ export async function getCTABannerConfig() {
  * Save / update the CTA banner config (admin only — no server validation here,
  * the admin panel is already access-controlled).
  */
-export async function saveCTABannerConfig(config, resetVisibility = false) {
+export async function saveCTABannerConfig(config) {
+  // Wipe all old clicks when a new banner is launched
+  const oldClicks = await getDocs(collection(db, CLICKS_COL));
+  const deletePromises = oldClicks.docs.map(d => deleteDoc(doc(db, CLICKS_COL, d.id)));
+  await Promise.all(deletePromises);
+
   await setDoc(doc(db, CONFIG_DOC), {
+    id:         Date.now().toString(),
     enabled:    !!config.enabled,
     message:    config.message    || '',
     buttonText: config.buttonText || 'OK',
-    buttonUrl:  config.buttonUrl  || '',   // empty = stay on page
-    updatedAt:  resetVisibility ? Date.now() : (config.updatedAt || Date.now()),
+    buttonUrl:  config.buttonUrl  || '',
+    updatedAt:  Date.now(),
   });
 }
 
