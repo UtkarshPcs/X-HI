@@ -22,7 +22,7 @@ Generate exactly 20 objects in this format inside a root array:
 ```json
 [
   {
-    "text": "What is the SI unit of Force?",
+    "question": "What is the SI unit of Force?",
     "options": ["Joule", "Newton", "Pascal", "Watt"],
     "correctOptionIndex": 1,
     "topic": "Physics",
@@ -32,7 +32,7 @@ Generate exactly 20 objects in this format inside a root array:
     "misconception": "Many confuse Joule (unit of Energy/Work) with Newton (unit of Force)."
   },
   {
-    "text": "Calculate the area of a circle with radius 7cm. (Use π = 22/7)",
+    "question": "Calculate the area of a circle with radius 7cm. (Use π = 22/7)",
     "options": ["154 cm²", "44 cm²", "144 cm²", "22 cm²"],
     "correctOptionIndex": 0,
     "topic": "Mensuration",
