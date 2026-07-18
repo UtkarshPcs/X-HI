@@ -23,6 +23,7 @@ import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getCTABannerConfig, saveCTABannerConfig, getCTAClicks } from '../services/ctaBannerService';
 import { getFeatureLaunches, createFeatureLaunch, deleteFeatureLaunch } from '../services/featureLaunchService';
+import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 
 function canAccess(user) {
   return user && (user.isAdmin || user.role === ROLES.MONITOR || user.role === ROLES.ADMIN);
@@ -1108,7 +1109,8 @@ function CTABannerManager() {
 // ── Feature Launch Popup Manager (admin-only) ────────────────────────────
 function FeatureLaunchManager() {
   const [popups, setPopups] = useState([]);
-  const [config, setConfig] = useState({ imageUrl: '', markdownText: '', buttonText: 'Check it out!', redirectPage: '/' });
+  const [config, setConfig] = useState({ markdownText: '', buttonText: 'Check it out!', redirectPage: '/' });
+  const [imageFile, setImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -1133,8 +1135,16 @@ function FeatureLaunchManager() {
     if (!config.markdownText) return alert("Markdown text is required.");
     setSaving(true);
     try {
-      await createFeatureLaunch(config);
-      setConfig({ imageUrl: '', markdownText: '', buttonText: 'Check it out!', redirectPage: '/' });
+      let uploadedUrl = '';
+      if (imageFile) {
+        uploadedUrl = await uploadImageToCloudinary(imageFile);
+      }
+      await createFeatureLaunch({ ...config, imageUrl: uploadedUrl });
+      setConfig({ markdownText: '', buttonText: 'Check it out!', redirectPage: '/' });
+      setImageFile(null);
+      // Reset the file input visually
+      const fileInput = document.getElementById('feature-launch-image-upload');
+      if (fileInput) fileInput.value = '';
       await loadPopups();
     } catch (err) {
       alert('Failed to save: ' + err.message);
@@ -1195,13 +1205,13 @@ function FeatureLaunchManager() {
       <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>Create New Popup</h3>
       <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cover Image URL (Optional)</label>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cover Image (Optional)</label>
           <input
+            id="feature-launch-image-upload"
             style={inputStyle}
-            type="text"
-            placeholder="e.g. https://example.com/banner.jpg"
-            value={config.imageUrl}
-            onChange={(e) => setConfig((c) => ({ ...c, imageUrl: e.target.value }))}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files[0] || null)}
           />
         </div>
 
