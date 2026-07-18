@@ -14,6 +14,7 @@ export default function PeriodicPredictedAnalysisPage() {
   const [meta, setMeta] = useState(null);
   const [attempts, setAttempts] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -33,7 +34,13 @@ export default function PeriodicPredictedAnalysisPage() {
           setLoading(false);
         }
       })
-      .catch(console.error);
+      .catch(err => {
+        console.error(err);
+        if (active) {
+          setError(err.message || 'Failed to load data. Please check your connection or permissions.');
+          setLoading(false);
+        }
+      });
 
     return () => { active = false; };
   }, [currentUser, navigate]);
@@ -43,6 +50,16 @@ export default function PeriodicPredictedAnalysisPage() {
       <div style={{ textAlign: 'center', padding: '5rem 0', color: 'rgba(255,255,255,0.5)' }}>
         <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
         Loading Analysis Data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '5rem 0', color: '#ef4444' }}>
+        <h3 style={{ margin: '0 0 0.5rem' }}>Error Loading Data</h3>
+        <p style={{ fontSize: '0.9rem', color: 'rgba(239, 68, 68, 0.8)' }}>{error}</p>
+        <button onClick={() => navigate('/')} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', color: '#fff', cursor: 'pointer' }}>Go Back</button>
       </div>
     );
   }

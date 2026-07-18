@@ -106,12 +106,16 @@ export async function submitPeriodicAttempt(userId, data) {
  */
 export async function getUserPeriodicAttempts(userId) {
   const attemptsRef = collection(db, COLLECTION_ATTEMPTS);
-  const q = query(attemptsRef, where('userId', '==', userId), orderBy('timestamp', 'desc'));
+  const q = query(attemptsRef, where('userId', '==', userId));
   const snapshot = await getDocs(q);
   
   const attempts = [];
   snapshot.forEach(docSnap => {
     attempts.push({ id: docSnap.id, ...docSnap.data() });
   });
+  
+  // Sort descending by timestamp in frontend to avoid Firestore composite index
+  attempts.sort((a, b) => b.timestamp - a.timestamp);
+  
   return attempts;
 }
