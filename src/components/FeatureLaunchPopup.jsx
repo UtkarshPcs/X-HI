@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { X, Sparkles } from 'lucide-react';
@@ -72,7 +73,7 @@ export default function FeatureLaunchPopup() {
     }
   };
 
-  return (
+  const popupContent = (
     <div 
       className="feature-launch-overlay animate-fade-in"
       style={{
@@ -169,4 +170,6 @@ export default function FeatureLaunchPopup() {
       </div>
     </div>
   );
+
+  return createPortal(popupContent, document.body);
 }
