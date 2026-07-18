@@ -88,7 +88,7 @@ export default function ClassInfo() {
       </div>
 
       <div className="bento-section mt-2">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0 }}>Student Register</h2>
           <button
             onClick={handleCopy}

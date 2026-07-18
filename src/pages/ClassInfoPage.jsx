@@ -15,7 +15,9 @@ export default function ClassInfoPage() {
 
   return (
     <div className="profile-page">
-      <ClassInfo />
+      <div className="profile-classinfo-wrap">
+        <ClassInfo />
+      </div>
     </div>
   );
 }
