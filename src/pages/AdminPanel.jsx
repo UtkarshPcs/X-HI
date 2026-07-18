@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon } from 'lucide-react';
+import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import FormatToolbar from '../components/FormatToolbar';
 import NoticeText from '../components/NoticeText';
