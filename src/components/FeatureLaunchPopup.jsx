@@ -92,13 +92,15 @@ export default function FeatureLaunchPopup() {
       <div 
         className="feature-launch-card"
         style={{
-          background: 'rgba(30, 41, 59, 0.95)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'rgba(20, 25, 40, 0.55)',
+          backdropFilter: 'blur(24px) saturate(150%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
           borderRadius: '24px',
           width: '100%',
           maxWidth: '480px',
           overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.05)',
+          boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.05)',
           position: 'relative',
           animation: 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
@@ -125,7 +127,7 @@ export default function FeatureLaunchPopup() {
               alt="Feature Banner" 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to top, rgba(30, 41, 59, 0.95), transparent)' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to top, rgba(20, 25, 40, 0.55), transparent)' }} />
           </div>
         )}
 
