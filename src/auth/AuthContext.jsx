@@ -18,22 +18,41 @@ export function AuthProvider({ children }) {
 
   // Restore session from localStorage on mount
   useEffect(() => {
+    // 1. Instant restore from cache if available (eliminates loading screen)
+    const cachedStr = localStorage.getItem('auth_user_cache');
+    if (cachedStr) {
+      try {
+        const cachedUser = JSON.parse(cachedStr);
+        setCurrentUser(cachedUser);
+        setLoading(false); // Unlock the app immediately
+      } catch (e) {
+        console.warn('Failed to parse auth cache', e);
+      }
+    }
+
+    // 2. Background refresh to ensure data is up to date
     const teacherSession = localStorage.getItem('teacher_session');
     if (teacherSession) {
       getTeacher(teacherSession)
         .then(t => {
-          if (t) setCurrentUser({ ...t, role: ROLES.TEACHER });
+          if (t) {
+            const u = { ...t, role: ROLES.TEACHER };
+            setCurrentUser(u);
+            localStorage.setItem('auth_user_cache', JSON.stringify(u));
+          }
         })
         .finally(() => setLoading(false));
       return;
     }
+    
     const saved = localStorage.getItem('auth_phone');
     if (saved) {
       getUserByPhone(saved)
         .then((user) => { 
           if (user) {
             user.role = user.phone === TEST_PHONE ? (user.activeRole || ROLES.STUDENT) : getUserRole(user.rollNo);
-            setCurrentUser(user); 
+            setCurrentUser(user);
+            localStorage.setItem('auth_user_cache', JSON.stringify(user));
           }
         })
         .finally(() => setLoading(false));
@@ -47,12 +66,16 @@ export function AuthProvider({ children }) {
     if (user) {
       user.role = user.phone === TEST_PHONE ? (user.activeRole || ROLES.STUDENT) : getUserRole(user.rollNo);
       setCurrentUser(user);
+      localStorage.setItem('auth_user_cache', JSON.stringify(user));
     }
   }
 
-  /** Patch in-memory user with extra fields (no Firestore re-fetch). */
   function updateCurrentUser(patch) {
-    setCurrentUser((prev) => prev ? { ...prev, ...patch } : prev);
+    setCurrentUser((prev) => {
+      const next = prev ? { ...prev, ...patch } : prev;
+      if (next) localStorage.setItem('auth_user_cache', JSON.stringify(next));
+      return next;
+    });
   }
 
   function openModal() { setModalOpen(true); }
@@ -68,6 +91,7 @@ export function AuthProvider({ children }) {
     if (user) user.role = getUserRole(user.rollNo);
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
+    if (user) localStorage.setItem('auth_user_cache', JSON.stringify(user));
   }
 
   async function login(phone, password) {
@@ -81,6 +105,7 @@ export function AuthProvider({ children }) {
     setCurrentUser(result);
     // If they logged in via alternate phone, persist the primary phone for session restore
     localStorage.setItem('auth_phone', result.phone);
+    localStorage.setItem('auth_user_cache', JSON.stringify(result));
     return result;
   }
 
@@ -90,6 +115,7 @@ export function AuthProvider({ children }) {
     setCurrentUser(null);
     localStorage.removeItem('auth_phone');
     localStorage.removeItem('teacher_session');
+    localStorage.removeItem('auth_user_cache');
     auth.signOut().catch(() => {});
   }
 
@@ -99,6 +125,7 @@ export function AuthProvider({ children }) {
     const user = { ...teacher, role: ROLES.TEACHER };
     setCurrentUser(user);
     localStorage.setItem('teacher_session', id);
+    localStorage.setItem('auth_user_cache', JSON.stringify(user));
     return user;
   }
 
@@ -128,6 +155,7 @@ export function AuthProvider({ children }) {
     if (user) user.role = getUserRole(user.rollNo);
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
+    if (user) localStorage.setItem('auth_user_cache', JSON.stringify(user));
   }
 
   return (

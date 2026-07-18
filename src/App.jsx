@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import Onboarding from './components/Onboarding';
@@ -12,38 +12,38 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import { UXProvider } from './ux/UXProvider';
 import InAppPushManager from './components/InAppPushManager';
 import UXRenderer from './ux/components/UXRenderer';
-import StudentDashboard from './pages/StudentDashboard';
-import Homework from './pages/Homework';
-import HolidayHomework from './pages/HolidayHomework';
-import SchoolCalendar from './pages/SchoolCalendar';
-import ProfilePage from './pages/ProfilePage';
-import AdminPanel from './pages/AdminPanel';
-import SyllabusPage from './pages/SyllabusPage';
-import ClassInfoPage from './pages/ClassInfoPage';
-import AdminServicesPage from './pages/AdminServicesPage';
-import TestScoresPage from './pages/TestScoresPage';
-import NotificationsPage from './pages/NotificationsPage';
-import MathsDashboard from './pages/MathsDashboard';
-import NotesPage from './pages/NotesPage';
-import NoticesPage from './pages/NoticesPage';
-import ManageNoticesPage from './pages/ManageNoticesPage';
-import TeacherToolsPage from './pages/TeacherToolsPage';
-import TestDataPage from './pages/TestDataPage';
-import RecordPage from './pages/RecordPage';
-import RecordMonitorPage from './pages/RecordMonitorPage';
-import RecordAdminPage from './pages/RecordAdminPage';
-import RecordTeacherPage from './pages/RecordTeacherPage';
-import StudyTogetherPage from './pages/StudyTogetherPage';
-import StudyRoomPage from './pages/StudyRoomPage';
-import StarBatchPage from './pages/StarBatchPage';
-import StarBatchSyllabusPage from './pages/StarBatchSyllabusPage';
-import StarBatchTestModulePage from './pages/StarBatchTestModulePage';
-import StarBatchTestPlayerPage from './pages/StarBatchTestPlayerPage';
-import HistoricalTestAnalysisPage from './pages/HistoricalTestAnalysisPage';
-import StarBatchConceptsHub from './pages/StarBatchConceptsHub';
-import StarConceptChapterPage from './pages/StarConceptChapterPage';
-import PeriodicPredictedAnalysisPage from './pages/PeriodicPredictedAnalysisPage';
-import PeriodicPredictedTestPlayerPage from './pages/PeriodicPredictedTestPlayerPage';
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
+const Homework = lazy(() => import('./pages/Homework'));
+const HolidayHomework = lazy(() => import('./pages/HolidayHomework'));
+const SchoolCalendar = lazy(() => import('./pages/SchoolCalendar'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const SyllabusPage = lazy(() => import('./pages/SyllabusPage'));
+const ClassInfoPage = lazy(() => import('./pages/ClassInfoPage'));
+const AdminServicesPage = lazy(() => import('./pages/AdminServicesPage'));
+const TestScoresPage = lazy(() => import('./pages/TestScoresPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const MathsDashboard = lazy(() => import('./pages/MathsDashboard'));
+const NotesPage = lazy(() => import('./pages/NotesPage'));
+const NoticesPage = lazy(() => import('./pages/NoticesPage'));
+const ManageNoticesPage = lazy(() => import('./pages/ManageNoticesPage'));
+const TeacherToolsPage = lazy(() => import('./pages/TeacherToolsPage'));
+const TestDataPage = lazy(() => import('./pages/TestDataPage'));
+const RecordPage = lazy(() => import('./pages/RecordPage'));
+const RecordMonitorPage = lazy(() => import('./pages/RecordMonitorPage'));
+const RecordAdminPage = lazy(() => import('./pages/RecordAdminPage'));
+const RecordTeacherPage = lazy(() => import('./pages/RecordTeacherPage'));
+const StudyTogetherPage = lazy(() => import('./pages/StudyTogetherPage'));
+const StudyRoomPage = lazy(() => import('./pages/StudyRoomPage'));
+const StarBatchPage = lazy(() => import('./pages/StarBatchPage'));
+const StarBatchSyllabusPage = lazy(() => import('./pages/StarBatchSyllabusPage'));
+const StarBatchTestModulePage = lazy(() => import('./pages/StarBatchTestModulePage'));
+const StarBatchTestPlayerPage = lazy(() => import('./pages/StarBatchTestPlayerPage'));
+const HistoricalTestAnalysisPage = lazy(() => import('./pages/HistoricalTestAnalysisPage'));
+const StarBatchConceptsHub = lazy(() => import('./pages/StarBatchConceptsHub'));
+const StarConceptChapterPage = lazy(() => import('./pages/StarConceptChapterPage'));
+const PeriodicPredictedAnalysisPage = lazy(() => import('./pages/PeriodicPredictedAnalysisPage'));
+const PeriodicPredictedTestPlayerPage = lazy(() => import('./pages/PeriodicPredictedTestPlayerPage'));
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -116,40 +116,42 @@ function AppInner() {
         <main className="main-content">
           {!isStarBatchOrPortal && <CTABanner />}
           {!isStarBatchOrPortal && <NotificationPrompt />}
-          <Routes>
-            <Route path="/" element={<StudentDashboard />} />
-            <Route path="/homework" element={<Homework />} />
-            <Route path="/holidays" element={<HolidayHomework />} />
-            <Route path="/calendar" element={<SchoolCalendar />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/syllabus" element={<SyllabusPage />} />
-            <Route path="/class-info" element={<ClassInfoPage />} />
-            <Route path="/admin-services" element={<AdminServicesPage />} />
-            <Route path="/test-scores" element={<TestScoresPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/maths" element={<MathsDashboard />} />
-            <Route path="/notes" element={<NotesPage />} />
-            <Route path="/notices" element={<NoticesPage />} />
-            <Route path="/manage-notices" element={<ManageNoticesPage />} />
-            <Route path="/teacher-tools" element={<TeacherToolsPage />} />
-            <Route path="/test-data" element={<TestDataPage />} />
-            <Route path="/records" element={<RecordPage />} />
-            <Route path="/records-monitor" element={<RecordMonitorPage />} />
-            <Route path="/records-admin" element={<RecordAdminPage />} />
-            <Route path="/teacher-records" element={<RecordTeacherPage />} />
-            <Route path="/study-together" element={<StudyTogetherPage />} />
-            <Route path="/study-together/:roomId" element={<StudyRoomPage />} />
-            <Route path="/star-batch" element={<StarBatchPage />} />
-            <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
-            <Route path="/star-tests" element={<StarBatchTestModulePage />} />
-            <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />
-            <Route path="/star-tests/history/:attemptId" element={<HistoricalTestAnalysisPage />} />
-            <Route path="/star-concepts" element={<StarBatchConceptsHub />} />
-            <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />
-            <Route path="/periodic-predicted" element={<PeriodicPredictedAnalysisPage />} />
-            <Route path="/periodic-predicted/test/:subject/:setNumber" element={<PeriodicPredictedTestPlayerPage />} />
-          </Routes>
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><div className="loader" /></div>}>
+            <Routes>
+              <Route path="/" element={<StudentDashboard />} />
+              <Route path="/homework" element={<Homework />} />
+              <Route path="/holidays" element={<HolidayHomework />} />
+              <Route path="/calendar" element={<SchoolCalendar />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/syllabus" element={<SyllabusPage />} />
+              <Route path="/class-info" element={<ClassInfoPage />} />
+              <Route path="/admin-services" element={<AdminServicesPage />} />
+              <Route path="/test-scores" element={<TestScoresPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/maths" element={<MathsDashboard />} />
+              <Route path="/notes" element={<NotesPage />} />
+              <Route path="/notices" element={<NoticesPage />} />
+              <Route path="/manage-notices" element={<ManageNoticesPage />} />
+              <Route path="/teacher-tools" element={<TeacherToolsPage />} />
+              <Route path="/test-data" element={<TestDataPage />} />
+              <Route path="/records" element={<RecordPage />} />
+              <Route path="/records-monitor" element={<RecordMonitorPage />} />
+              <Route path="/records-admin" element={<RecordAdminPage />} />
+              <Route path="/teacher-records" element={<RecordTeacherPage />} />
+              <Route path="/study-together" element={<StudyTogetherPage />} />
+              <Route path="/study-together/:roomId" element={<StudyRoomPage />} />
+              <Route path="/star-batch" element={<StarBatchPage />} />
+              <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
+              <Route path="/star-tests" element={<StarBatchTestModulePage />} />
+              <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />
+              <Route path="/star-tests/history/:attemptId" element={<HistoricalTestAnalysisPage />} />
+              <Route path="/star-concepts" element={<StarBatchConceptsHub />} />
+              <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />
+              <Route path="/periodic-predicted" element={<PeriodicPredictedAnalysisPage />} />
+              <Route path="/periodic-predicted/test/:subject/:setNumber" element={<PeriodicPredictedTestPlayerPage />} />
+            </Routes>
+          </Suspense>
         </main>
         <footer className="app-footer">
           <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
