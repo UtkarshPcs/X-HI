@@ -51,4 +51,5 @@ Generate exactly 20 objects in this format inside a root array:
 - [ ] Are all `correctOptionIndex` values between 0 and 3?
 - [ ] Are all `topic` strings exactly matching the allowed sub-topics for the target subject?
 - [ ] Are `difficulty` values restricted to "Easy", "Medium", or "Hard"?
-- [ ] Are math formulas formatted properly using LaTeX enclosed in `$` or `$$` if needed? (e.g. `$x^2 + y^2 = r^2$`)
+- [ ] Are math formulas formatted properly using LaTeX enclosed in `$` or `$$`?
+- [ ] **CRITICAL JSON ESCAPING:** Did you double-escape all LaTeX backslashes? (e.g. `\\frac{1}{2}` instead of `\frac{1}{2}`, `\\sqrt{x}` instead of `\sqrt{x}`). Failure to double-escape will result in invalid JSON!
