@@ -15,6 +15,7 @@ export default function PeriodicPredictedAnalysisPage() {
   const [attempts, setAttempts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retakeModalSubject, setRetakeModalSubject] = useState(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -131,18 +132,17 @@ export default function PeriodicPredictedAnalysisPage() {
             if (adminMax > 0) {
               if (userMax < adminMax) {
                 targetSet = userMax + 1;
-                btnText = `Give Set ${targetSet} Test`;
+                btnText = `Give Set ${targetSet}`;
                 canTake = true;
               } else {
-                targetSet = adminMax;
-                btnText = `Retake Set ${targetSet}`;
+                btnText = `Retake a Set`;
                 canTake = true;
                 isRetake = true;
               }
             }
 
             return (
-              <div key={sub} className="glass-card glow-hover" style={{ padding: '1.25rem' }}>
+              <div key={sub} className="glass-card glow-hover" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
@@ -157,19 +157,42 @@ export default function PeriodicPredictedAnalysisPage() {
                   </div>
                 </div>
                 
-                <button
-                  disabled={!canTake}
-                  onClick={() => canTake && navigate(`/periodic-predicted/test/${sub}/${targetSet}`)}
-                  style={{
-                    width: '100%', padding: '0.75rem', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.9rem', cursor: canTake ? 'pointer' : 'not-allowed', transition: 'all 0.2s',
-                    background: canTake ? (isRetake ? 'rgba(255,255,255,0.05)' : 'rgba(245, 158, 11, 0.15)') : 'rgba(255,255,255,0.03)',
-                    color: canTake ? (isRetake ? 'var(--text-secondary)' : '#f59e0b') : 'var(--text-muted)',
-                    border: canTake && isRetake ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
-                  }}
-                >
-                  {btnText} {canTake && !isRetake && <ChevronRight size={14} />}
-                </button>
+                <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <button
+                    disabled={!canTake}
+                    onClick={() => {
+                      if (!canTake) return;
+                      if (isRetake) {
+                        setRetakeModalSubject(sub);
+                      } else {
+                        navigate(`/periodic-predicted/test/${sub}/${targetSet}`);
+                      }
+                    }}
+                    style={{
+                      width: '100%', padding: '0.75rem', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.9rem', cursor: canTake ? 'pointer' : 'not-allowed', transition: 'all 0.2s',
+                      background: canTake ? (isRetake ? 'rgba(255,255,255,0.05)' : 'rgba(245, 158, 11, 0.15)') : 'rgba(255,255,255,0.03)',
+                      color: canTake ? (isRetake ? 'var(--text-secondary)' : '#f59e0b') : 'var(--text-muted)',
+                      border: canTake && isRetake ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                    }}
+                  >
+                    {btnText} {canTake && !isRetake && <ChevronRight size={14} />}
+                  </button>
+                  
+                  {userMax > 0 && userMax < adminMax && (
+                    <button
+                      onClick={() => setRetakeModalSubject(sub)}
+                      style={{
+                        width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s',
+                        background: 'transparent', color: 'rgba(255,255,255,0.4)'
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      Retake past sets
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -178,6 +201,41 @@ export default function PeriodicPredictedAnalysisPage() {
 
       {activeTab === 'report' && (
         <ReportCardTab attempts={attempts || []} />
+      )}
+
+      {/* Retake Modal */}
+      {retakeModalSubject && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: 'rgba(30, 41, 59, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '2rem', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', animation: 'slideUp 0.3s ease' }}>
+            <h3 style={{ color: '#fff', fontSize: '1.25rem', marginTop: 0, marginBottom: '0.5rem' }}>Retake {retakeModalSubject}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>Select a previously completed set to retake. The questions will be shuffled!</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', maxHeight: '40vh', overflowY: 'auto', marginBottom: '1.5rem', paddingRight: '0.5rem' }}>
+              {Array.from({ length: Math.min(meta[retakeModalSubject] || 0, maxAttemptedSets[retakeModalSubject] || 0) }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => navigate(`/periodic-predicted/test/${retakeModalSubject}/${i + 1}`)}
+                  style={{
+                    padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.15)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.3)'; e.currentTarget.style.color = '#f59e0b'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
+                >
+                  <BookOpen size={14} /> Set {i + 1}
+                </button>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setRetakeModalSubject(null)} 
+              style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }} 
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} 
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
