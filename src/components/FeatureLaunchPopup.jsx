@@ -89,7 +89,7 @@ export function FeatureLaunchUI({ config, onDismiss, onAction }) {
       style={{
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         backdropFilter: 'blur(12px)',
         zIndex: 99999,
         display: 'flex',
@@ -101,7 +101,7 @@ export function FeatureLaunchUI({ config, onDismiss, onAction }) {
       <div 
         className="feature-launch-card"
         style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%)',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
           backdropFilter: 'blur(32px) saturate(200%)',
           WebkitBackdropFilter: 'blur(32px) saturate(200%)',
           border: '1px solid rgba(255, 255, 255, 0.15)',
@@ -137,7 +137,7 @@ export function FeatureLaunchUI({ config, onDismiss, onAction }) {
               alt="Feature Banner" 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent)' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to top, rgba(15, 20, 30, 0.8), transparent)' }} />
           </div>
         )}
 
@@ -149,7 +149,13 @@ export function FeatureLaunchUI({ config, onDismiss, onAction }) {
           )}
           
           <div className="feature-launch-markdown" style={{ color: 'rgba(255,255,255,0.92)', fontSize: '1.05rem', lineHeight: 1.65, marginBottom: '2.5rem' }}>
-            <ReactMarkdown>{processedMarkdown}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                p: ({node, ...props}) => <p style={{ marginBottom: '1rem', marginTop: 0 }} {...props} />
+              }}
+            >
+              {processedMarkdown}
+            </ReactMarkdown>
           </div>
 
           <button 
