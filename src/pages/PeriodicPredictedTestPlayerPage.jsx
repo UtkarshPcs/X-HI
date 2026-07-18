@@ -29,6 +29,7 @@ export default function PeriodicPredictedTestPlayerPage() {
 
   const [showQuitModal, setShowQuitModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [isReviewMode, setIsReviewMode] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(TEST_DURATION);
   const [questionTimes, setQuestionTimes] = useState({});
@@ -128,9 +129,14 @@ export default function PeriodicPredictedTestPlayerPage() {
   async function handleSubmit(autoSubmit = false) {
     if (!autoSubmit) {
       setShowSubmitModal(false);
+      setIsReviewMode(false);
     }
     
     setIsSubmitting(true);
+    
+    // Artificial delay to build suspense
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
     let score = 0;
     const weakTopics = [];
     const difficultyStats = { Easy: { correct: 0, total: 0 }, Medium: { correct: 0, total: 0 }, Hard: { correct: 0, total: 0 } };
@@ -255,6 +261,74 @@ export default function PeriodicPredictedTestPlayerPage() {
           activeQuestions={activeQuestions} 
           answers={answers} 
         />
+      ) : isSubmitting ? (
+         <div style={{ textAlign: 'center', padding: '10rem 0', color: '#fbbf24', animation: 'pulse 2s infinite' }}>
+           <Loader2 size={48} style={{ animation: 'spin 1.5s linear infinite', margin: '0 auto 1.5rem' }} />
+           <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>AI is analyzing your performance...</h2>
+           <p style={{ color: 'rgba(255,255,255,0.6)', marginTop: '0.5rem' }}>Calculating topic strengths, weaknesses, and insights</p>
+         </div>
+      ) : isReviewMode ? (
+         <div style={{ animation: 'fade-in 0.3s ease' }}>
+            <h2 style={{ color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Review Your Answers</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>You can change your answers below before making the final submission.</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+              {activeQuestions.map((q, qIndex) => (
+                <div key={qIndex} className="tp-q-card" style={{ marginBottom: 0, borderLeft: answers[qIndex] !== undefined ? '4px solid #10b981' : '4px solid #ef4444' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                     <span className="tp-q-meta" style={{ margin: 0 }}>Q{qIndex + 1}</span>
+                     {answers[qIndex] === undefined && <span style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 700, padding: '2px 8px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px' }}>Unanswered</span>}
+                   </div>
+                   <div className="tp-q-text markdown-body custom-md" style={{ marginBottom: '1rem', fontSize: '1rem' }}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        {(q.text || q.question || q.Question || q.questionText || '*Question text missing*')}
+                      </ReactMarkdown>
+                   </div>
+                   <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {q.options.map((opt, optIndex) => {
+                         const isSelected = answers[qIndex] === optIndex;
+                         return (
+                           <div 
+                             key={optIndex} 
+                             className={`tp-opt ${isSelected ? 'selected' : ''}`}
+                             onClick={() => handleOptionSelect(qIndex, optIndex)}
+                             style={{ padding: '0.75rem', marginBottom: '0.5rem' }}
+                           >
+                             <div className="tp-opt-circle" style={{ width: '20px', height: '20px', fontSize: '0.7rem' }}>
+                               {String.fromCharCode(65 + optIndex)}
+                             </div>
+                             <span style={{ flex: 1, color: isSelected ? '#fff' : '#e2e8f0', fontSize: '0.9rem' }} className="markdown-body custom-md-opt">
+                               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                 {opt}
+                               </ReactMarkdown>
+                             </span>
+                           </div>
+                         );
+                      })}
+                   </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button 
+                className="tp-nav-btn" 
+                onClick={() => {
+                  setIsReviewMode(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
+              >
+                Back to Test
+              </button>
+              <button 
+                className="tp-submit" 
+                onClick={() => handleSubmit(false)} 
+                style={{ flex: 1, marginTop: 0 }}
+              >
+                Final Submit
+              </button>
+            </div>
+         </div>
       ) : (
         <div style={{ animation: 'fade-in 0.3s ease' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', fontWeight: 600 }}>
@@ -315,11 +389,14 @@ export default function PeriodicPredictedTestPlayerPage() {
             ) : (
               <button 
                 className="tp-submit" 
-                onClick={() => setShowSubmitModal(true)} 
+                onClick={() => {
+                  setIsReviewMode(true);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
                 disabled={isSubmitting}
                 style={{ flex: 1, marginTop: 0 }}
               >
-                {isSubmitting ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : 'Submit Test'}
+                Review & Submit
               </button>
             )}
           </div>
