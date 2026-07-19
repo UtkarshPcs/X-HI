@@ -357,3 +357,56 @@ export async function saveSubjectReportCard(userId, subject, payload) {
   const docRef = doc(db, 'periodic_report_cards', `${userId}_${subject}`);
   await setDoc(docRef, { ...payload, updatedAt: Date.now() });
 }
+
+/**
+ * Admin utility to backfill legacy tests with canonical concepts.
+ */
+export async function backfillLegacyConcepts(subject) {
+  const allowedTopics = PERIODIC_TOPIC_TAXONOMY[subject] || [];
+  if (allowedTopics.length === 0) throw new Error('No taxonomy defined for this subject yet.');
+
+  const testsRef = collection(db, COLLECTION_TESTS);
+  const q = query(testsRef, where('subject', '==', subject));
+  const snap = await getDocs(q);
+
+  const questionsToFix = [];
+  const testDocs = [];
+  
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    testDocs.push({ id: docSnap.id, data });
+    (data.questions || []).forEach((q, idx) => {
+      if (!q.concept || !allowedTopics.includes(q.concept)) {
+        questionsToFix.push({ docId: docSnap.id, qIdx: idx, id: `${docSnap.id}_${idx}`, text: q.question });
+      }
+    });
+  });
+
+  if (questionsToFix.length === 0) return { updatedCount: 0 };
+
+  const res = await fetch('/api/ai-backfill-concepts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subject, questions: questionsToFix, topics: allowedTopics })
+  });
+
+  if (!res.ok) throw new Error(await res.text());
+  const { mapping } = await res.json();
+
+  let updatedCount = 0;
+  for (const td of testDocs) {
+    let changed = false;
+    td.data.questions.forEach((q, idx) => {
+      const mappingId = `${td.id}_${idx}`;
+      if (mapping[mappingId]) {
+        q.concept = mapping[mappingId];
+        changed = true;
+        updatedCount++;
+      }
+    });
+    if (changed) {
+      await setDoc(doc(db, COLLECTION_TESTS, td.id), td.data, { merge: true });
+    }
+  }
+  return { updatedCount };
+}

@@ -23,7 +23,7 @@ import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig } from '../services/periodicPredictedService';
+import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -2410,64 +2410,12 @@ function PeriodicPredictedAdminTab() {
               if (!window.confirm(`This will use AI to assign canonical topics to all legacy ${deleteSubject} questions. Proceed?`)) return;
               setDeleting(true);
               try {
-                const { collection, query, where, getDocs, doc, setDoc } = await import('firebase/firestore');
-                const { db } = await import('../firebase');
-                const { PERIODIC_TOPIC_TAXONOMY } = await import('../data/periodicTopicTaxonomy');
-                
-                const allowedTopics = PERIODIC_TOPIC_TAXONOMY[deleteSubject] || [];
-                if (allowedTopics.length === 0) {
-                  alert('No taxonomy defined for this subject yet.');
-                  setDeleting(false);
-                  return;
-                }
-
-                const q = query(collection(db, 'periodic_predicted_tests'), where('subject', '==', deleteSubject));
-                const snap = await getDocs(q);
-                
-                const questionsToFix = [];
-                const testDocs = [];
-                snap.forEach(docSnap => {
-                  const data = docSnap.data();
-                  testDocs.push({ id: docSnap.id, data });
-                  (data.questions || []).forEach((q, idx) => {
-                    if (!q.concept || !allowedTopics.includes(q.concept)) {
-                      questionsToFix.push({ docId: docSnap.id, qIdx: idx, id: `${docSnap.id}_${idx}`, text: q.question });
-                    }
-                  });
-                });
-
-                if (questionsToFix.length === 0) {
+                const { updatedCount } = await backfillLegacyConcepts(deleteSubject);
+                if (updatedCount === 0) {
                   alert('All questions already have valid canonical concepts!');
-                  setDeleting(false);
-                  return;
+                } else {
+                  alert(`Successfully backfilled ${updatedCount} questions!`);
                 }
-
-                const res = await fetch('/api/ai-backfill-concepts', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ subject: deleteSubject, questions: questionsToFix, topics: allowedTopics })
-                });
-
-                if (!res.ok) throw new Error(await res.text());
-                const { mapping } = await res.json();
-
-                let updatedCount = 0;
-                for (const td of testDocs) {
-                  let changed = false;
-                  td.data.questions.forEach((q, idx) => {
-                    const mappingId = `${td.id}_${idx}`;
-                    if (mapping[mappingId]) {
-                      q.concept = mapping[mappingId];
-                      changed = true;
-                      updatedCount++;
-                    }
-                  });
-                  if (changed) {
-                    await setDoc(doc(db, 'periodic_predicted_tests', td.id), td.data, { merge: true });
-                  }
-                }
-
-                alert(`Successfully backfilled ${updatedCount} questions!`);
               } catch (err) {
                 console.error(err);
                 alert('Error: ' + err.message);
