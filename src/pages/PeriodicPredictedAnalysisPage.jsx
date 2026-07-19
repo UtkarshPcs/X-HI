@@ -229,6 +229,9 @@ export default function PeriodicPredictedAnalysisPage() {
 }
 
 function ReportCardTab({ attempts }) {
+  const SUBJECTS = ['Science', 'Maths', 'SST', 'English', 'Hindi', 'IT'];
+  const [selectedSubject, setSelectedSubject] = useState(null);
+
   if (attempts.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.1)' }}>
@@ -239,65 +242,111 @@ function ReportCardTab({ attempts }) {
     );
   }
 
-  // Calculate overall average
-  const totalScore = attempts.reduce((acc, curr) => acc + curr.score, 0);
-  const totalMax = attempts.reduce((acc, curr) => acc + curr.total, 0);
-  const overallAvg = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BarChart2 size={20} color="#10b981" /> Overall Average
-          </h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Across all {attempts.length} test attempts
-          </p>
-        </div>
-        <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981' }}>
-          {overallAvg}%
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', padding: '0 0.5rem' }}>Attempt History</h3>
+  if (selectedSubject) {
+    const subjectAttempts = attempts.filter(a => a.subject === selectedSubject);
+    const totalScore = subjectAttempts.reduce((acc, curr) => acc + curr.score, 0);
+    const totalMax = subjectAttempts.reduce((acc, curr) => acc + curr.total, 0);
+    const avg = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
+    
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fade-in 0.2s ease' }}>
+        <button 
+          onClick={() => setSelectedSubject(null)}
+          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: 0, fontSize: '0.9rem', width: 'fit-content' }}
+        >
+          <ArrowLeft size={16} /> Back to Subjects
+        </button>
         
-        {attempts.map(a => {
-          const pct = Math.round((a.score / a.total) * 100);
-          const date = new Date(a.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-          const time = new Date(a.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-          
-          return (
-            <div key={a.id} className="glass-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{a.score}</span>
-                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ {a.total}</span>
-              </div>
-              
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.3rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem', color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {a.subject} <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>— Set {a.setNumber}</span>
-                  </h4>
-                  <span style={{ fontWeight: 700, color: pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444', fontSize: '0.9rem' }}>
-                    {pct}%
-                  </span>
+        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BarChart2 size={20} color="#10b981" /> {selectedSubject} Average
+            </h2>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              Across {subjectAttempts.length} test attempt{subjectAttempts.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: avg >= 80 ? '#10b981' : avg >= 50 ? '#f59e0b' : '#ef4444' }}>
+            {avg}%
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', padding: '0 0.5rem' }}>Attempt History</h3>
+          {subjectAttempts.map(a => {
+            const pct = Math.round((a.score / a.total) * 100);
+            const date = new Date(a.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            const time = new Date(a.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            
+            return (
+              <div key={a.id} className="glass-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{a.score}</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ {a.total}</span>
                 </div>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <CalendarDays size={12} /> {date}
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Clock size={12} /> {time}
-                  </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.3rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {a.subject} <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>— Set {a.setNumber}</span>
+                    </h4>
+                    <span style={{ fontWeight: 700, color: pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444', fontSize: '0.9rem' }}>
+                      {pct}%
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <CalendarDays size={12} /> {date}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <Clock size={12} /> {time}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {SUBJECTS.map(sub => {
+        const subjectAttempts = attempts.filter(a => a.subject === sub);
+        
+        const totalScore = subjectAttempts.reduce((acc, curr) => acc + curr.score, 0);
+        const totalMax = subjectAttempts.reduce((acc, curr) => acc + curr.total, 0);
+        const avg = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
+        
+        return (
+          <div 
+            key={sub} 
+            className="glass-card glow-hover" 
+            onClick={() => subjectAttempts.length > 0 && setSelectedSubject(sub)}
+            style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: subjectAttempts.length > 0 ? 'pointer' : 'default', opacity: subjectAttempts.length > 0 ? 1 : 0.6 }}
+          >
+            <div>
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', color: '#f8fafc' }}>{sub}</h3>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                {subjectAttempts.length} attempt{subjectAttempts.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            {subjectAttempts.length > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: avg >= 80 ? '#10b981' : avg >= 50 ? '#f59e0b' : '#ef4444' }}>
+                  {avg}%
+                </span>
+                <ChevronRight size={18} color="var(--text-muted)" />
+              </div>
+            ) : (
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Not taken</span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
