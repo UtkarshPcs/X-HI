@@ -22,7 +22,7 @@ import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest } from '../services/periodicPredictedService';
+import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, getAllRecentPeriodicAttempts } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -2106,11 +2106,24 @@ function PeriodicPredictedAdminTab() {
   const [deleteSubject, setDeleteSubject] = useState(SUBJECTS[0]);
   const [deleteSetNumber, setDeleteSetNumber] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [recentAttempts, setRecentAttempts] = useState(null);
+  const [usersMap, setUsersMap] = useState({});
 
   const loadMeta = async () => {
     try {
-      const data = await getPeriodicTestsMeta();
+      const [data, attempts, allUsers] = await Promise.all([
+        getPeriodicTestsMeta(),
+        getAllRecentPeriodicAttempts(30),
+        getAllUsers()
+      ]);
       setMeta(data);
+      setRecentAttempts(attempts);
+      const uMap = {};
+      allUsers.forEach(u => {
+        uMap[u.id] = u.name;
+        if (u.phone) uMap[u.phone] = u.name;
+      });
+      setUsersMap(uMap);
     } catch (e) {
       console.error(e);
     }
@@ -2316,6 +2329,47 @@ function PeriodicPredictedAdminTab() {
           {deleting ? 'Deleting...' : `Delete Set ${deleteSetNumber || '?'} for ${deleteSubject}`}
         </button>
       </div>
+
+      {recentAttempts && recentAttempts.length > 0 && (
+        <div className="as-card" style={{ background: 'rgba(255,255,255,0.02)', marginTop: '2rem' }}>
+          <h3 style={{ margin: '0 0 1rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Activity size={18} color="#10b981" /> Recent Test Attempts
+          </h3>
+          <div className="as-table-wrap">
+            <table className="as-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Subject</th>
+                  <th>Set</th>
+                  <th>Score</th>
+                  <th>Time Taken</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentAttempts.map(a => {
+                  const pct = Math.round((a.score / a.total) * 100);
+                  const color = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+                  const dateObj = new Date(a.timestamp);
+                  return (
+                    <tr key={a.id}>
+                      <td style={{ fontWeight: 500 }}>{usersMap[a.userId] || a.userId}</td>
+                      <td>{a.subject}</td>
+                      <td>Set {a.setNumber}</td>
+                      <td>
+                        <span style={{ color, fontWeight: 700 }}>{a.score}/{a.total} ({pct}%)</span>
+                      </td>
+                      <td className="as-muted-cell">{a.timeConsumed ? `${Math.floor(a.timeConsumed/60)}m ${a.timeConsumed%60}s` : '—'}</td>
+                      <td className="as-muted-cell">{dateObj.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

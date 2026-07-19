@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, orderBy, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, orderBy, deleteDoc, limit } from 'firebase/firestore';
 
 const COLLECTION_TESTS = 'periodic_predicted_tests';
 const COLLECTION_ATTEMPTS = 'periodic_predicted_attempts';
@@ -127,4 +127,20 @@ export async function deletePeriodicTest(subject, setNumber) {
   const testId = `${subject}_Set${setNumber}`;
   const docRef = doc(db, COLLECTION_TESTS, testId);
   await deleteDoc(docRef);
+}
+
+/**
+ * Fetch the most recent periodic test attempts across all users.
+ */
+export async function getAllRecentPeriodicAttempts(limitCount = 30) {
+  const attemptsRef = collection(db, COLLECTION_ATTEMPTS);
+  const q = query(attemptsRef, orderBy('timestamp', 'desc'), limit(limitCount));
+  const snapshot = await getDocs(q);
+  
+  const attempts = [];
+  snapshot.forEach(docSnap => {
+    attempts.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  
+  return attempts;
 }
