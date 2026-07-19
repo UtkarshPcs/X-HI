@@ -104,13 +104,21 @@ export const PERIODIC_TOPIC_TAXONOMY = {
   Hindi: [],
 };
 
+const ALIASES = {
+  Maths: {
+    'Number System': 'Real Numbers (General)',
+    'Algebra': 'Polynomials (General)',
+  }
+};
+
 /**
  * Resolves a raw `concept` string from a question to the canonical taxonomy name.
  *
  * Resolution order:
- *  1. Exact match  → return canonical name
- *  2. Case-insensitive match → return canonical name (preserves casing)
- *  3. No match → return the raw string as-is (graceful fallback for unknown concepts)
+ *  1. Alias match (for mapping older broad topics to nicer names)
+ *  2. Exact match  → return canonical name
+ *  3. Case-insensitive match → return canonical name (preserves casing)
+ *  4. No match → return the raw string as-is (graceful fallback for unknown concepts)
  *
  * @param {string} subject    - e.g. 'Maths', 'Science'
  * @param {string} rawConcept - the concept value from the question document
@@ -118,17 +126,28 @@ export const PERIODIC_TOPIC_TAXONOMY = {
  */
 export function resolveToCanonical(subject, rawConcept) {
   if (!rawConcept) return 'General';
+  
+  // 1. Check for known legacy aliases
+  if (ALIASES[subject]) {
+    // Check case-insensitive alias match
+    const lowerRaw = rawConcept.toLowerCase();
+    const aliasKey = Object.keys(ALIASES[subject]).find(k => k.toLowerCase() === lowerRaw);
+    if (aliasKey) {
+      return ALIASES[subject][aliasKey];
+    }
+  }
+
   const list = PERIODIC_TOPIC_TAXONOMY[subject] || [];
   if (list.length === 0) return rawConcept; // no taxonomy for this subject yet
 
-  // 1. Exact match
+  // 2. Exact match
   if (list.includes(rawConcept)) return rawConcept;
 
-  // 2. Case-insensitive match
+  // 3. Case-insensitive match
   const lower = rawConcept.toLowerCase();
   const ciMatch = list.find(t => t.toLowerCase() === lower);
   if (ciMatch) return ciMatch;
 
-  // 3. Fallback — show the raw concept (still useful information for the student)
+  // 4. Fallback — show the raw concept (still useful information for the student)
   return rawConcept;
 }
