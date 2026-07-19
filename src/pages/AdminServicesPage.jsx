@@ -22,7 +22,7 @@ import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadPeriodicTest, getPeriodicTestsMeta } from '../services/periodicPredictedService';
+import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -2103,6 +2103,10 @@ function PeriodicPredictedAdminTab() {
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [isDragging, setIsDragging] = useState(false);
 
+  const [deleteSubject, setDeleteSubject] = useState(SUBJECTS[0]);
+  const [deleteSetNumber, setDeleteSetNumber] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
   const loadMeta = async () => {
     try {
       const data = await getPeriodicTestsMeta();
@@ -2181,6 +2185,27 @@ function PeriodicPredictedAdminTab() {
     }
   };
 
+  const handleDeleteTest = async () => {
+    if (!deleteSetNumber || isNaN(deleteSetNumber)) {
+      setMsg({ type: 'error', text: 'Please enter a valid set number.' });
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to delete Set ${deleteSetNumber} of ${deleteSubject}? This action cannot be undone.`)) return;
+
+    setDeleting(true);
+    setMsg({ type: '', text: '' });
+    try {
+      await deletePeriodicTest(deleteSubject, parseInt(deleteSetNumber));
+      setMsg({ type: 'success', text: `Successfully deleted Set ${deleteSetNumber} for ${deleteSubject}.` });
+      setDeleteSetNumber('');
+      loadMeta();
+    } catch (e) {
+      setMsg({ type: 'error', text: e.message || 'Error deleting test' });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div style={{ animation: 'fade-in 0.3s ease' }}>
       <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
@@ -2254,6 +2279,41 @@ function PeriodicPredictedAdminTab() {
           style={{ width: '100%', padding: '1rem', background: !fileContent ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: !fileContent ? 'rgba(255,255,255,0.3)' : '#000', border: 'none' }}
         >
           {uploading ? 'Uploading and Formatting...' : `Upload Set ${meta ? (meta[selectedSubject] || 0) + 1 : 1} for ${selectedSubject}`}
+        </button>
+      </div>
+
+      <div className="as-card" style={{ maxWidth: '600px', background: 'rgba(255,255,255,0.02)', marginTop: '2rem' }}>
+        <h3 style={{ margin: '0 0 1rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Trash2 size={18} /> Delete a Test Set</h3>
+        <p className="as-muted" style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>If a test was uploaded by mistake, you can delete it here. Students who have already attempted it will keep their marks on the report card, but it will no longer be available for new attempts.</p>
+        
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div className="input-group" style={{ flex: 1 }}>
+            <label style={{ color: '#e2e8f0', marginBottom: '0.5rem', display: 'block', fontWeight: 600 }}>Subject</label>
+            <select value={deleteSubject} onChange={e => setDeleteSubject(e.target.value)} className="auth-input" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="input-group" style={{ flex: 1 }}>
+            <label style={{ color: '#e2e8f0', marginBottom: '0.5rem', display: 'block', fontWeight: 600 }}>Set Number</label>
+            <input 
+              type="number" 
+              min="1"
+              value={deleteSetNumber}
+              onChange={e => setDeleteSetNumber(e.target.value)}
+              className="auth-input"
+              style={{ background: 'rgba(0,0,0,0.2)' }}
+              placeholder="e.g. 1"
+            />
+          </div>
+        </div>
+
+        <button 
+          className="auth-btn" 
+          onClick={handleDeleteTest} 
+          disabled={deleting || !deleteSetNumber}
+          style={{ width: '100%', padding: '1rem', background: (!deleteSetNumber || deleting) ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
+        >
+          {deleting ? 'Deleting...' : `Delete Set ${deleteSetNumber || '?'} for ${deleteSubject}`}
         </button>
       </div>
     </div>

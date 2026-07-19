@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, orderBy, deleteDoc } from 'firebase/firestore';
 
 const COLLECTION_TESTS = 'periodic_predicted_tests';
 const COLLECTION_ATTEMPTS = 'periodic_predicted_attempts';
@@ -118,4 +118,13 @@ export async function getUserPeriodicAttempts(userId) {
   attempts.sort((a, b) => b.timestamp - a.timestamp);
   
   return attempts;
+}
+
+/**
+ * Delete a specific periodic test by subject and set number.
+ */
+export async function deletePeriodicTest(subject, setNumber) {
+  const testId = `${subject}_Set${setNumber}`;
+  const docRef = doc(db, COLLECTION_TESTS, testId);
+  await deleteDoc(docRef);
 }
