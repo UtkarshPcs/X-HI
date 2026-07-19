@@ -144,3 +144,19 @@ export async function getAllRecentPeriodicAttempts(limitCount = 30) {
   
   return attempts;
 }
+
+const CONFIG_DOC = 'periodic_predicted_config/main';
+
+export async function getPeriodicConfig() {
+  const docRef = doc(db, 'system_configs', 'periodic_predicted');
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+  return { isHidden: false };
+}
+
+export async function setPeriodicConfig(config) {
+  const docRef = doc(db, 'system_configs', 'periodic_predicted');
+  await setDoc(docRef, config, { merge: true });
+}

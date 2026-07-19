@@ -22,6 +22,7 @@ import { getClosedDays } from '../services/calendarOverrideService';
 import { getSyllabus, getCompletedTopics } from '../services/syllabusService';
 import { getAllClasswork } from '../services/classworkService';
 import { getPublishedNotes } from '../services/notesService';
+import { getPeriodicConfig } from '../services/periodicPredictedService';
 import { allTopics, statsForTopics, toSets } from '../data/syllabusStats';
 import { calcAttendance, calcYearAttendance, todayKey, toDateKey } from '../data/attendanceUtils';
 import { holidayData } from '../data/holidayData';
@@ -96,6 +97,8 @@ export default function StudentDashboard() {
   
   // Recent notices for AI context
   const [recentNotices, setRecentNotices] = useState([]);
+
+  const [periodicConfig, setPeriodicConfigState] = useState({ isHidden: false });
 
   useEffect(() => {
     if (!currentUser) return;
@@ -200,9 +203,8 @@ export default function StudentDashboard() {
   // Fetch 3 most recent published notes once
   useEffect(() => {
     if (!currentUser) return;
-    getPublishedNotes()
-      .then(all => setRecentNotes(all.slice(0, 3)))
-      .catch(() => setRecentNotes([]));
+    getPublishedNotes().then(res => setRecentNotes(res.slice(0, 3))).catch(console.error);
+    getPeriodicConfig().then(setPeriodicConfigState).catch(console.error);
   }, [currentUser]);
 
   // Fetch recent notices
@@ -314,7 +316,7 @@ export default function StudentDashboard() {
       <MarksBanner />
       <MergeBanner />
       <CampaignBanner campaignId="email-reminder-v1" />
-      <PeriodicPredictedDashCard />
+      {!periodicConfig.isHidden && <PeriodicPredictedDashCard />}
       <TestDataDashCard />
       <NoticeBar />
 

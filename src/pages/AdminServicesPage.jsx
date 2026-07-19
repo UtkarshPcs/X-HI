@@ -22,7 +22,7 @@ import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, getAllRecentPeriodicAttempts } from '../services/periodicPredictedService';
+import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -2108,16 +2108,20 @@ function PeriodicPredictedAdminTab() {
   const [deleting, setDeleting] = useState(false);
   const [recentAttempts, setRecentAttempts] = useState(null);
   const [usersMap, setUsersMap] = useState({});
+  const [isHidden, setIsHidden] = useState(false);
+  const [togglingConfig, setTogglingConfig] = useState(false);
 
   const loadMeta = async () => {
     try {
-      const [data, attempts, allUsers] = await Promise.all([
+      const [data, attempts, allUsers, config] = await Promise.all([
         getPeriodicTestsMeta(),
         getAllRecentPeriodicAttempts(30),
-        getAllUsers()
+        getAllUsers(),
+        getPeriodicConfig()
       ]);
       setMeta(data);
       setRecentAttempts(attempts);
+      setIsHidden(config.isHidden);
       const uMap = {};
       allUsers.forEach(u => {
         uMap[u.id] = u.name;
@@ -2126,6 +2130,20 @@ function PeriodicPredictedAdminTab() {
       setUsersMap(uMap);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleToggleVisibility = async () => {
+    setTogglingConfig(true);
+    try {
+      const newHidden = !isHidden;
+      await setPeriodicConfig({ isHidden: newHidden });
+      setIsHidden(newHidden);
+      setMsg({ type: 'success', text: `Predicted Analysis is now ${newHidden ? 'hidden from' : 'visible on'} student dashboards.` });
+    } catch (e) {
+      setMsg({ type: 'error', text: 'Failed to update visibility.' });
+    } finally {
+      setTogglingConfig(false);
     }
   };
 
@@ -2221,8 +2239,18 @@ function PeriodicPredictedAdminTab() {
 
   return (
     <div style={{ animation: 'fade-in 0.3s ease' }}>
-      <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
-        <Target size={22} color="#f59e0b" /> Predicted Analysis Tests
+      <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', color: '#fff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Target size={22} color="#f59e0b" /> Predicted Analysis Tests
+        </div>
+        <button 
+          onClick={handleToggleVisibility} 
+          disabled={togglingConfig}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: isHidden ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: isHidden ? '#10b981' : '#ef4444', border: `1px solid ${isHidden ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`, padding: '0.4rem 0.8rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+        >
+          {isHidden ? <ToggleLeft size={16} /> : <ToggleRight size={16} />} 
+          {isHidden ? 'Show on Dashboard' : 'Hide from Dashboard'}
+        </button>
       </h2>
       <p className="as-muted" style={{ marginBottom: '1.5rem' }}>Upload JSON arrays of exactly 20 questions for specific subjects.</p>
 
