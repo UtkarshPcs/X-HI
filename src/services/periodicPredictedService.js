@@ -384,22 +384,29 @@ export async function backfillLegacyConcepts(subject) {
 
   if (questionsToFix.length === 0) return { updatedCount: 0 };
 
-  const res = await fetch('/api/ai-backfill-concepts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ subject, questions: questionsToFix, topics: allowedTopics })
-  });
+  const chunkSize = 20;
+  const allMappings = {};
+  
+  for (let i = 0; i < questionsToFix.length; i += chunkSize) {
+    const chunk = questionsToFix.slice(i, i + chunkSize);
+    const res = await fetch('/api/ai-backfill-concepts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, questions: chunk, topics: allowedTopics })
+    });
 
-  if (!res.ok) throw new Error(await res.text());
-  const { mapping } = await res.json();
+    if (!res.ok) throw new Error(await res.text());
+    const { mapping } = await res.json();
+    Object.assign(allMappings, mapping);
+  }
 
   let updatedCount = 0;
   for (const td of testDocs) {
     let changed = false;
     td.data.questions.forEach((q, idx) => {
       const mappingId = `${td.id}_${idx}`;
-      if (mapping[mappingId]) {
-        q.concept = mapping[mappingId];
+      if (allMappings[mappingId]) {
+        q.concept = allMappings[mappingId];
         changed = true;
         updatedCount++;
       }
