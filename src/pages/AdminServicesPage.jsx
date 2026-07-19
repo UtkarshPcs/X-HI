@@ -2200,13 +2200,25 @@ function PeriodicPredictedAdminTab() {
     setMsg({ type: '', text: '' });
     
     try {
-      const parsed = JSON.parse(fileContent);
+      // Auto-fix 4 backslashes to 2 backslashes (e.g. \\\\alpha -> \\alpha)
+      let processedContent = fileContent.replace(/\\\\\\\\/g, '\\\\');
+      
+      let parsed;
+      try {
+        parsed = JSON.parse(processedContent);
+      } catch (parseError) {
+        if (parseError.message.includes('Bad escaped character') || parseError.message.includes('Unexpected token')) {
+          throw new Error('Invalid JSON format. If you used LaTeX, make sure you use double backslashes (e.g., \\\\alpha instead of \\alpha). Raw Error: ' + parseError.message);
+        }
+        throw parseError;
+      }
+
       if (!Array.isArray(parsed) || parsed.length !== 20) {
         throw new Error('JSON must be an array of exactly 20 questions.');
       }
       
       const newSetNumber = await uploadPeriodicTest(selectedSubject, parsed);
-      setMsg({ type: 'success', text: `Successfully uploaded Set ${newSetNumber} for ${selectedSubject}.` });
+      setMsg({ type: 'success', text: `Successfully uploaded Set ${newSetNumber} for ${selectedSubject}.${fileContent !== processedContent ? ' (Auto-fixed 4x backslashes)' : ''}` });
       setFileContent('');
       document.getElementById('periodic-file-upload').value = '';
       loadMeta();
