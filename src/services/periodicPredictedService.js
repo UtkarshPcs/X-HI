@@ -127,6 +127,37 @@ export async function deletePeriodicTest(subject, setNumber) {
   const testId = `${subject}_Set${setNumber}`;
   const docRef = doc(db, COLLECTION_TESTS, testId);
   await deleteDoc(docRef);
+
+  // Fetch all subsequent sets for this subject to shift them down
+  const testsRef = collection(db, COLLECTION_TESTS);
+  const q = query(testsRef, where('subject', '==', subject));
+  const snapshot = await getDocs(q);
+  
+  const setsToShift = [];
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    if (data.setNumber > setNumber) {
+      setsToShift.push({ id: docSnap.id, ...data });
+    }
+  });
+
+  // Sort ascending so we process Set 3 -> Set 2, then Set 4 -> Set 3
+  setsToShift.sort((a, b) => a.setNumber - b.setNumber);
+
+  for (const test of setsToShift) {
+    const newSetNumber = test.setNumber - 1;
+    const newTestId = `${subject}_Set${newSetNumber}`;
+    
+    const newData = { ...test };
+    delete newData.id;
+    newData.setNumber = newSetNumber;
+    
+    // Create the shifted doc
+    await setDoc(doc(db, COLLECTION_TESTS, newTestId), newData);
+    
+    // Delete the old doc
+    await deleteDoc(doc(db, COLLECTION_TESTS, test.id));
+  }
 }
 
 /**
