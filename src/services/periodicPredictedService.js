@@ -161,6 +161,37 @@ export async function deletePeriodicTest(subject, setNumber) {
 }
 
 /**
+ * Repairs the sequence of tests for a given subject (fixes any missing gaps).
+ */
+export async function repairPeriodicTestSequence(subject) {
+  const testsRef = collection(db, COLLECTION_TESTS);
+  const q = query(testsRef, where('subject', '==', subject));
+  const snapshot = await getDocs(q);
+  
+  const allSets = [];
+  snapshot.forEach(docSnap => {
+    allSets.push({ id: docSnap.id, ...docSnap.data() });
+  });
+
+  allSets.sort((a, b) => a.setNumber - b.setNumber);
+
+  let expectedSetNumber = 1;
+  for (const test of allSets) {
+    if (test.setNumber !== expectedSetNumber) {
+      const newTestId = `${subject}_Set${expectedSetNumber}`;
+      
+      const newData = { ...test };
+      delete newData.id;
+      newData.setNumber = expectedSetNumber;
+      
+      await setDoc(doc(db, COLLECTION_TESTS, newTestId), newData);
+      await deleteDoc(doc(db, COLLECTION_TESTS, test.id));
+    }
+    expectedSetNumber++;
+  }
+}
+
+/**
  * Fetch the most recent periodic test attempts across all users.
  */
 export async function getAllRecentPeriodicAttempts(limitCount = 30) {

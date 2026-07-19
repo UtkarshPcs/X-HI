@@ -23,7 +23,7 @@ import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig } from '../services/periodicPredictedService';
+import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
 const ALL_SUBJECTS = syllabusData.flatMap(sec =>
@@ -2250,6 +2250,27 @@ function PeriodicPredictedAdminTab() {
     }
   };
 
+  const handleRepairSequence = async () => {
+    if (!deleteSubject) {
+      setMsg({ type: 'error', text: 'Select a subject to repair.' });
+      return;
+    }
+    const confirm = window.confirm(`Are you sure you want to auto-repair gaps in ${deleteSubject}? This will shift sets down to close any gaps left by older deletions.`);
+    if (!confirm) return;
+
+    setDeleting(true);
+    setMsg({ type: '', text: '' });
+    try {
+      await repairPeriodicTestSequence(deleteSubject);
+      setMsg({ type: 'success', text: `Repaired sequence for ${deleteSubject}. All gaps are now closed!` });
+      loadMeta();
+    } catch (e) {
+      setMsg({ type: 'error', text: e.message || 'Failed to repair sequence' });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div style={{ animation: 'fade-in 0.3s ease' }}>
       <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', color: '#fff' }}>
@@ -2361,14 +2382,26 @@ function PeriodicPredictedAdminTab() {
           </div>
         </div>
 
-        <button 
-          className="auth-btn" 
-          onClick={handleDeleteTest} 
-          disabled={deleting || !deleteSetNumber}
-          style={{ width: '100%', padding: '1rem', background: (!deleteSetNumber || deleting) ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
-        >
-          {deleting ? 'Deleting...' : `Delete Set ${deleteSetNumber || '?'} for ${deleteSubject}`}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            className="auth-btn" 
+            onClick={handleDeleteTest} 
+            disabled={deleting || !deleteSetNumber}
+            style={{ flex: 1, padding: '1rem', background: (!deleteSetNumber || deleting) ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
+          >
+            {deleting ? 'Deleting...' : `Delete Set ${deleteSetNumber || '?'} for ${deleteSubject}`}
+          </button>
+          
+          <button 
+            className="auth-btn" 
+            onClick={handleRepairSequence} 
+            disabled={deleting}
+            style={{ flex: 1, padding: '1rem', background: deleting ? 'rgba(245, 158, 11, 0.2)' : 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+            title="Fixes missing gaps (e.g. if Set 2 is deleted, Set 3 becomes Set 2)"
+          >
+            {deleting ? 'Working...' : `Repair Gaps for ${deleteSubject}`}
+          </button>
+        </div>
       </div>
 
       {recentAttempts && recentAttempts.length > 0 && (
