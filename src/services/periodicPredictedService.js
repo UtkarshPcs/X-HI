@@ -387,6 +387,9 @@ export async function backfillLegacyConcepts(subject) {
   const chunkSize = 20;
   const allMappings = {};
   
+  // Helper for rate-limiting
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  
   for (let i = 0; i < questionsToFix.length; i += chunkSize) {
     const chunk = questionsToFix.slice(i, i + chunkSize);
     const res = await fetch('/api/ai-backfill-concepts', {
@@ -398,6 +401,11 @@ export async function backfillLegacyConcepts(subject) {
     if (!res.ok) throw new Error(await res.text());
     const { mapping } = await res.json();
     Object.assign(allMappings, mapping);
+
+    // Wait 4 seconds between chunks to avoid Groq 429 rate limits
+    if (i + chunkSize < questionsToFix.length) {
+      await delay(4000);
+    }
   }
 
   let updatedCount = 0;
