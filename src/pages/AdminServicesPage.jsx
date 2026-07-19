@@ -2402,6 +2402,84 @@ function PeriodicPredictedAdminTab() {
             {deleting ? 'Working...' : `Repair Gaps for ${deleteSubject}`}
           </button>
         </div>
+
+        <div style={{ marginTop: '1rem' }}>
+          <button 
+            className="auth-btn" 
+            onClick={async () => {
+              if (!window.confirm(`This will use AI to assign canonical topics to all legacy ${deleteSubject} questions. Proceed?`)) return;
+              setDeleting(true);
+              try {
+                const { collection, query, where, getDocs, doc, setDoc } = await import('firebase/firestore');
+                const { db } = await import('../firebase');
+                const { PERIODIC_TOPIC_TAXONOMY } = await import('../data/periodicTopicTaxonomy');
+                
+                const allowedTopics = PERIODIC_TOPIC_TAXONOMY[deleteSubject] || [];
+                if (allowedTopics.length === 0) {
+                  alert('No taxonomy defined for this subject yet.');
+                  setDeleting(false);
+                  return;
+                }
+
+                const q = query(collection(db, 'periodic_predicted_tests'), where('subject', '==', deleteSubject));
+                const snap = await getDocs(q);
+                
+                const questionsToFix = [];
+                const testDocs = [];
+                snap.forEach(docSnap => {
+                  const data = docSnap.data();
+                  testDocs.push({ id: docSnap.id, data });
+                  (data.questions || []).forEach((q, idx) => {
+                    if (!q.concept || !allowedTopics.includes(q.concept)) {
+                      questionsToFix.push({ docId: docSnap.id, qIdx: idx, id: `${docSnap.id}_${idx}`, text: q.question });
+                    }
+                  });
+                });
+
+                if (questionsToFix.length === 0) {
+                  alert('All questions already have valid canonical concepts!');
+                  setDeleting(false);
+                  return;
+                }
+
+                const res = await fetch('/api/ai-backfill-concepts', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ subject: deleteSubject, questions: questionsToFix, topics: allowedTopics })
+                });
+
+                if (!res.ok) throw new Error(await res.text());
+                const { mapping } = await res.json();
+
+                let updatedCount = 0;
+                for (const td of testDocs) {
+                  let changed = false;
+                  td.data.questions.forEach((q, idx) => {
+                    const mappingId = `${td.id}_${idx}`;
+                    if (mapping[mappingId]) {
+                      q.concept = mapping[mappingId];
+                      changed = true;
+                      updatedCount++;
+                    }
+                  });
+                  if (changed) {
+                    await setDoc(doc(db, 'periodic_predicted_tests', td.id), td.data, { merge: true });
+                  }
+                }
+
+                alert(`Successfully backfilled ${updatedCount} questions!`);
+              } catch (err) {
+                console.error(err);
+                alert('Error: ' + err.message);
+              }
+              setDeleting(false);
+            }} 
+            disabled={deleting}
+            style={{ width: '100%', padding: '1rem', background: deleting ? 'rgba(168, 85, 247, 0.2)' : 'rgba(168, 85, 247, 0.15)', color: '#a855f7', border: '1px solid rgba(168, 85, 247, 0.3)' }}
+          >
+            {deleting ? 'Backfilling...' : `AI Backfill Topics for ${deleteSubject}`}
+          </button>
+        </div>
       </div>
 
       {recentAttempts && recentAttempts.length > 0 && (

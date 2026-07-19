@@ -44,9 +44,9 @@ function TopicPill({ item, color, bgColor }) {
       </span>
       <span style={{
         fontSize: '0.8rem', fontWeight: 800, color: color,
-        flexShrink: 0, minWidth: '38px', textAlign: 'right',
+        flexShrink: 0, minWidth: '45px', textAlign: 'right',
       }}>
-        {item.pct}%
+        {item.wrong === 0 ? '0' : `${item.wrong} ✕`}
       </span>
     </div>
   );

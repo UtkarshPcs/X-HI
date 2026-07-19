@@ -245,19 +245,27 @@ export async function getAllTestsForSubject(subject) {
   return tests;
 }
 
+import { PERIODIC_TOPIC_TAXONOMY } from '../data/periodicTopicTaxonomy';
+
 /**
- * Compute per-concept accuracy stats using the most-recent attempt per set.
+ * Compute per-concept wrong answer stats using the most-recent attempt per set.
+ * Pre-seeds ALL canonical topics for the subject so they are always displayed.
  * Groups wrong answers by their canonical concept name from the taxonomy.
- *
- * Resolution: q.concept → resolveToCanonical → canonical name
- * Fallback:   q.concept missing → q.topic → 'General'
  *
  * @param {string} subject
  * @param {Object} allTests  - { setNumber: testDoc } from getAllTestsForSubject
  * @param {Array}  attempts  - all attempts for this subject (any order)
- * @returns {Object} { "Refraction of Light": { correct: 3, total: 5 }, ... }
+ * @returns {Object} { "Prime Factorisation": { wrong: 2 }, ... }
  */
 export function computeConceptStats(subject, allTests, attempts) {
+  const conceptStats = {};
+  
+  // Pre-seed all canonical topics for this subject
+  const topics = PERIODIC_TOPIC_TAXONOMY[subject] || [];
+  topics.forEach(t => {
+    conceptStats[t] = { wrong: 0 };
+  });
+
   // Pick the most-recent attempt per set number
   const latestPerSet = {};
   attempts.forEach(attempt => {
@@ -267,8 +275,6 @@ export function computeConceptStats(subject, allTests, attempts) {
     }
   });
 
-  const conceptStats = {};
-
   Object.entries(latestPerSet).forEach(([setNum, attempt]) => {
     const testData = allTests[parseInt(setNum)];
     if (!testData) return;
@@ -277,15 +283,11 @@ export function computeConceptStats(subject, allTests, attempts) {
     const wrongSet = new Set(attempt.wrongIndices || []);
 
     allQuestions.forEach((q, originalIdx) => {
-      // Resolve concept: use q.concept → q.topic → 'General'
-      const raw = q.concept || q.topic || 'General';
-      const canonical = resolveToCanonical(subject, raw);
-
-      if (!conceptStats[canonical]) conceptStats[canonical] = { correct: 0, total: 0 };
-      conceptStats[canonical].total += 1;
-      // If this question index is NOT in wrongSet, the answer was correct
-      if (!wrongSet.has(originalIdx)) {
-        conceptStats[canonical].correct += 1;
+      if (wrongSet.has(originalIdx)) {
+        const raw = q.concept || q.topic || 'General';
+        const canonical = resolveToCanonical(subject, raw);
+        if (!conceptStats[canonical]) conceptStats[canonical] = { wrong: 0 };
+        conceptStats[canonical].wrong += 1;
       }
     });
   });
@@ -294,12 +296,12 @@ export function computeConceptStats(subject, allTests, attempts) {
 }
 
 /**
- * Classify concept stats into Strong / Medium / Weak tiers.
+ * Classify concept stats into Strong / Medium / Weak tiers based on absolute wrong counts.
  *
  * Thresholds:
- *  Strong  ≥ 75%
- *  Medium  40–74%
- *  Weak    < 40%
+ *  Strong:  0 wrong
+ *  Medium:  1 to 3 wrong
+ *  Weak:    > 3 wrong
  *
  * @param {Object} conceptStats - from computeConceptStats
  * @returns {{ strong: Array, medium: Array, weak: Array }}
@@ -307,19 +309,23 @@ export function computeConceptStats(subject, allTests, attempts) {
 export function classifyConceptStats(conceptStats) {
   const strong = [], medium = [], weak = [];
 
-  Object.entries(conceptStats).forEach(([concept, { correct, total }]) => {
-    if (total === 0) return; // guard against division by zero
-    const pct = Math.round((correct / total) * 100);
-    const item = { concept, correct, total, pct };
-    if (pct >= 75) strong.push(item);
-    else if (pct >= 40) medium.push(item);
+  Object.entries(conceptStats).forEach(([concept, { wrong }]) => {
+    // Ignore legacy "General" or alias topics if they ended up with 0 wrong,
+    // so we don't clutter the board with "Number System" holding 0 wrong.
+    // We only want the canonical 14 topics if they have 0 wrong.
+    const isCanonical = Object.values(PERIODIC_TOPIC_TAXONOMY).flat().includes(concept);
+    if (!isCanonical && wrong === 0) return;
+
+    const item = { concept, wrong };
+    if (wrong === 0) strong.push(item);
+    else if (wrong <= 3) medium.push(item);
     else weak.push(item);
   });
 
-  // Sort: strong (best first), medium (best first), weak (worst first = most urgent)
-  strong.sort((a, b) => b.pct - a.pct);
-  medium.sort((a, b) => b.pct - a.pct);
-  weak.sort((a, b) => a.pct - b.pct);
+  // Sort by wrong count: weak (highest wrong first), medium (highest wrong first), strong (alphabetical)
+  strong.sort((a, b) => a.concept.localeCompare(b.concept));
+  medium.sort((a, b) => b.wrong - a.wrong);
+  weak.sort((a, b) => b.wrong - a.wrong);
 
   return { strong, medium, weak };
 }
