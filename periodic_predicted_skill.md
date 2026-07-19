@@ -16,6 +16,20 @@ Use only these exact strings for the `topic` field:
 - **Hindi:** `Reading Comprehension`, `Grammar`, `Literature`, `Writing Skills`
 - **IT:** `Computer Systems`, `Networking`, `Database`, `Programming`
 
+## Concept Field — Canonical Names (REQUIRED)
+
+The `concept` field MUST use **exactly** one of the strings listed below for the target subject.
+Using exact canonical names ensures the Topic Mastery Report Card correctly tracks student weaknesses.
+
+**Maths:**
+`Prime Factorisation` | `HCF and LCM (Prime Factorisation Method)` | `HCF × LCM Relationship Formula` | `Numbers Ending with Digit 0 (Analysis)` | `Composite Number Verification` | `HCF/LCM Applied Word Problems` | `Prime Divisibility Theorem` | `Irrationality Proofs (√2, √3, √5)` | `Rational + Irrational Combinations` | `Degrees and Classification of Polynomials` | `Zeroes of a Polynomial` | `Geometric Representation of Polynomials` | `Sum and Product of Zeroes` | `Forming Quadratic Polynomial from Zeroes`
+
+**Science:**
+`Chemical Reactions and Equations` | `Balancing Chemical Equations` | `Combination Reactions` | `Decomposition Reactions` | `Displacement Reactions` | `Double Displacement Reactions` | `Oxidation and Reduction` | `Oxidising and Reducing Agents` | `Corrosion` | `Rancidity` | `Life Processes and Nutrition` | `Human Digestive System` | `Respiration (Aerobic and Anaerobic)` | `Human Respiratory System` | `Transportation and Circulatory System` | `Human Heart and Double Circulation` | `Blood Components and Blood Vessels` | `Lymph` | `Transport in Plants (Xylem and Phloem)` | `Transpiration` | `Excretion and Excretory System` | `Nephron and Urine Formation` | `Dialysis (Artificial Kidney)` | `Laws of Reflection` | `Spherical Mirrors and Image Formation` | `Mirror Formula and Magnification` | `Sign Convention and Ray Diagrams` | `Refraction of Light` | `Refractive Index and Snell's Law` | `Lenses (Convex and Concave)` | `Lens Formula and Magnification` | `Power of a Lens` | `Numerical Problems on Light`
+
+**IT:**
+`Methods and Types of Communication` | `Communication Process and Body Language` | `Feedback in Communication` | `Principles of Effective Communication` | `Barriers in Communication` | `Parts of Speech and Capitalisation` | `Punctuation` | `Sentence Construction and Types` | `Parts of a Sentence` | `Active and Passive Voice` | `Paragraph Writing` | `Styles in a Document` | `Inserting and Managing Images` | `Document Templates` | `Table of Contents (ToC)` | `Track Changes and Document Review`
+
 ## JSON Schema Example
 Generate exactly 20 objects in this format inside a root array:
 

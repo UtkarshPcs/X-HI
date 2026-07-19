@@ -1,5 +1,6 @@
 import { db } from '../firebase';
 import { collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, orderBy, deleteDoc, limit } from 'firebase/firestore';
+import { resolveToCanonical } from '../data/periodicTopicTaxonomy';
 
 const COLLECTION_TESTS = 'periodic_predicted_tests';
 const COLLECTION_ATTEMPTS = 'periodic_predicted_attempts';
@@ -221,4 +222,132 @@ export async function getPeriodicConfig() {
 export async function setPeriodicConfig(config) {
   const docRef = doc(db, 'system_configs', 'periodic_predicted');
   await setDoc(docRef, config, { merge: true });
+}
+
+// ─── Topic Mastery Report Card ───────────────────────────────────────────────
+
+/**
+ * Fetch all test documents for a subject, keyed by setNumber.
+ * Used to resolve wrongIndices → concept names for the topic mastery report.
+ *
+ * @param {string} subject
+ * @returns {Object} { 1: testDoc, 2: testDoc, ... }
+ */
+export async function getAllTestsForSubject(subject) {
+  const testsRef = collection(db, COLLECTION_TESTS);
+  const q = query(testsRef, where('subject', '==', subject));
+  const snapshot = await getDocs(q);
+  const tests = {};
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    tests[data.setNumber] = data;
+  });
+  return tests;
+}
+
+/**
+ * Compute per-concept accuracy stats using the most-recent attempt per set.
+ * Groups wrong answers by their canonical concept name from the taxonomy.
+ *
+ * Resolution: q.concept → resolveToCanonical → canonical name
+ * Fallback:   q.concept missing → q.topic → 'General'
+ *
+ * @param {string} subject
+ * @param {Object} allTests  - { setNumber: testDoc } from getAllTestsForSubject
+ * @param {Array}  attempts  - all attempts for this subject (any order)
+ * @returns {Object} { "Refraction of Light": { correct: 3, total: 5 }, ... }
+ */
+export function computeConceptStats(subject, allTests, attempts) {
+  // Pick the most-recent attempt per set number
+  const latestPerSet = {};
+  attempts.forEach(attempt => {
+    const prev = latestPerSet[attempt.setNumber];
+    if (!prev || attempt.timestamp > prev.timestamp) {
+      latestPerSet[attempt.setNumber] = attempt;
+    }
+  });
+
+  const conceptStats = {};
+
+  Object.entries(latestPerSet).forEach(([setNum, attempt]) => {
+    const testData = allTests[parseInt(setNum)];
+    if (!testData) return;
+
+    const allQuestions = (testData.questions || []).filter(q => !q.isDeleted);
+    const wrongSet = new Set(attempt.wrongIndices || []);
+
+    allQuestions.forEach((q, originalIdx) => {
+      // Resolve concept: use q.concept → q.topic → 'General'
+      const raw = q.concept || q.topic || 'General';
+      const canonical = resolveToCanonical(subject, raw);
+
+      if (!conceptStats[canonical]) conceptStats[canonical] = { correct: 0, total: 0 };
+      conceptStats[canonical].total += 1;
+      // If this question index is NOT in wrongSet, the answer was correct
+      if (!wrongSet.has(originalIdx)) {
+        conceptStats[canonical].correct += 1;
+      }
+    });
+  });
+
+  return conceptStats;
+}
+
+/**
+ * Classify concept stats into Strong / Medium / Weak tiers.
+ *
+ * Thresholds:
+ *  Strong  ≥ 75%
+ *  Medium  40–74%
+ *  Weak    < 40%
+ *
+ * @param {Object} conceptStats - from computeConceptStats
+ * @returns {{ strong: Array, medium: Array, weak: Array }}
+ */
+export function classifyConceptStats(conceptStats) {
+  const strong = [], medium = [], weak = [];
+
+  Object.entries(conceptStats).forEach(([concept, { correct, total }]) => {
+    if (total === 0) return; // guard against division by zero
+    const pct = Math.round((correct / total) * 100);
+    const item = { concept, correct, total, pct };
+    if (pct >= 75) strong.push(item);
+    else if (pct >= 40) medium.push(item);
+    else weak.push(item);
+  });
+
+  // Sort: strong (best first), medium (best first), weak (worst first = most urgent)
+  strong.sort((a, b) => b.pct - a.pct);
+  medium.sort((a, b) => b.pct - a.pct);
+  weak.sort((a, b) => a.pct - b.pct);
+
+  return { strong, medium, weak };
+}
+
+/**
+ * Read the cached Topic Mastery Report Card for a user + subject from Firestore.
+ * Returns null if not found.
+ * The cache document also acts as an "unlock token" — its existence means the
+ * student has previously completed all sets for this subject.
+ *
+ * @param {string} userId
+ * @param {string} subject
+ * @returns {Object|null}
+ */
+export async function getSubjectReportCard(userId, subject) {
+  const docRef = doc(db, 'periodic_report_cards', `${userId}_${subject}`);
+  const snap = await getDoc(docRef);
+  return snap.exists() ? snap.data() : null;
+}
+
+/**
+ * Save / update the Topic Mastery Report Card cache for a user + subject.
+ *
+ * @param {string} userId
+ * @param {string} subject
+ * @param {Object} payload  - { narrative, studyTips, hash }
+ */
+export async function saveSubjectReportCard(userId, subject, payload) {
+  const docRef = doc(db, 'periodic_report_cards', `${userId}_${subject}`);
+  await setDoc(docRef, { ...payload, updatedAt: Date.now() });
 }

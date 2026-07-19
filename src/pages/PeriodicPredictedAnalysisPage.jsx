@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { getPeriodicTestsMeta, getUserPeriodicAttempts } from '../services/periodicPredictedService';
 import { Loader2, ArrowLeft, Target, BarChart2, BookOpen, Clock, CalendarDays, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import TopicMasteryReportCard from '../components/TopicMasteryReportCard';
 
 const SUBJECTS = ['Science', 'Maths', 'SST', 'English', 'Hindi', 'IT'];
 
@@ -222,13 +223,17 @@ export default function PeriodicPredictedAnalysisPage() {
       )}
 
       {activeTab === 'report' && (
-        <ReportCardTab attempts={attempts || []} />
+        <ReportCardTab
+          attempts={attempts || []}
+          meta={meta || {}}
+          userId={currentUser?.id || currentUser?.phone || currentUser?.uid || ''}
+        />
       )}
     </div>
   );
 }
 
-function ReportCardTab({ attempts }) {
+function ReportCardTab({ attempts, meta, userId }) {
   const SUBJECTS = ['Science', 'Maths', 'SST', 'English', 'Hindi', 'IT'];
   const [selectedSubject, setSelectedSubject] = useState(null);
 
@@ -308,6 +313,14 @@ function ReportCardTab({ attempts }) {
             );
           })}
         </div>
+
+        {/* Topic Mastery Report Card — unlocks once all sets are completed */}
+        <TopicMasteryReportCard
+          subject={selectedSubject}
+          attempts={subjectAttempts}
+          meta={meta}
+          userId={userId}
+        />
       </div>
     );
   }
