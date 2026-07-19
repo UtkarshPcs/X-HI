@@ -12,6 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { fetchDuplicates, mergeProfiles } from '../services/mergeService';
 import { getComplaints, updateComplaintStatus, applyOverride, deleteComplaint } from '../services/marksService';
 import { getTeachers, addTeacher, updateTeacherPassword, deleteTeacher, setTeacherMarksAccess, setTeacherSyllabusSubjects } from '../services/teacherService';
