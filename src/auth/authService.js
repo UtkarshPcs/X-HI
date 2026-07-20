@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, collection, setDoc, updateDoc, query, where, arrayUnion, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, setDoc, updateDoc, query, where, arrayUnion, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 async function sha256(text) {
@@ -280,4 +280,51 @@ export async function updateCustomAccountPassword(phone, newPassword) {
 
 export async function deleteCustomAccount(phone) {
   await deleteDoc(doc(db, 'users', phone));
+}
+
+// ── Access Codes ───────────────────────────────────────────────
+
+export async function getAllAccessCodes() {
+  const snap = await getDoc(doc(db, 'settings', 'accessCodes'));
+  return snap.exists() ? snap.data() : {};
+}
+
+export async function verifyAndMarkAccessCode(phone, rollNo, enteredCode) {
+  const snap = await getDoc(doc(db, 'settings', 'accessCodes'));
+  if (!snap.exists()) throw new Error('Access codes not set up yet. Contact Utkarsh.');
+  const codes = snap.data();
+  const expected = codes[String(rollNo)];
+  if (!expected) throw new Error('No code set for roll ' + rollNo + '. Contact Utkarsh.');
+  if (enteredCode.trim() !== String(expected))
+    throw new Error('Incorrect code. Ask Utkarsh on WhatsApp for your 6-digit code.');
+  await updateDoc(doc(db, 'users', phone), { accessCodeVerified: true });
+}
+
+export async function saveAccessCodes(codesMap) {
+  await setDoc(doc(db, 'settings', 'accessCodes'), codesMap);
+}
+
+export async function resetAccessCodeVerificationForRoll(rollNo) {
+  const snap = await getDocs(
+    query(collection(db, 'users'), where('rollNo', '==', Number(rollNo)))
+  );
+  await Promise.all(
+    snap.docs.map(d => updateDoc(doc(db, 'users', d.id), { accessCodeVerified: false }))
+  );
+}
+
+// ── Monitor Role Config ────────────────────────────────────────
+
+export function subscribeMonitorRolls(callback) {
+  return onSnapshot(doc(db, 'settings', 'roleConfig'), (snap) => {
+    if (snap.exists() && snap.data().monitors) {
+      callback(snap.data().monitors);
+    } else {
+      callback([1, 9, 35, 37]); // Default fallback
+    }
+  });
+}
+
+export async function saveMonitorRolls(rollsArray) {
+  await setDoc(doc(db, 'settings', 'roleConfig'), { monitors: rollsArray });
 }

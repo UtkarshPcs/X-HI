@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
-import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword } from './authService';
+import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword, subscribeMonitorRolls } from './authService';
 import { getUserRole, ROLES, TEST_PHONE } from './roles';
 import { removeToken } from '../services/pushService';
 import { loginTeacher, getTeacher } from '../services/teacherService';
@@ -12,9 +12,43 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [monitorRolls, setMonitorRolls] = useState([1, 9, 35, 37]);
   const [forceTour, setForceTour] = useState(null); // { role } | null
   const confirmationRef = useRef(null);
   const recaptchaRef = useRef(null);
+
+  // Helper — resolves role using current Firestore-loaded monitor list
+  function resolveRole(user, monitors = monitorRolls) {
+    if (user.phone === TEST_PHONE) return user.activeRole || ROLES.STUDENT;
+    return getUserRole(user.rollNo, monitors);
+  }
+
+  // Helper — is this user always-verified (admin, custom account, teacher, test)?
+  function isAutoVerified(user, monitors = monitorRolls) {
+    const role = resolveRole(user, monitors);
+    return role === ROLES.ADMIN || role === ROLES.TEACHER
+        || user.isCustomAccount === true
+        || user.phone === TEST_PHONE;
+  }
+
+  // 1. Live subscription to monitor rolls
+  useEffect(() => {
+    const unsubscribe = subscribeMonitorRolls((rolls) => {
+      setMonitorRolls(rolls);
+      // If someone is currently logged in, re-evaluate their role instantly
+      setCurrentUser(prev => {
+        if (!prev) return prev;
+        const newRole = resolveRole(prev, rolls);
+        if (prev.role !== newRole) {
+          const updated = { ...prev, role: newRole };
+          localStorage.setItem('auth_user_cache', JSON.stringify(updated));
+          return updated;
+        }
+        return prev;
+      });
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Restore session from localStorage on mount
   useEffect(() => {
@@ -50,7 +84,8 @@ export function AuthProvider({ children }) {
       getUserByPhone(saved)
         .then((user) => { 
           if (user) {
-            user.role = user.phone === TEST_PHONE ? (user.activeRole || ROLES.STUDENT) : getUserRole(user.rollNo);
+            user.role = resolveRole(user, monitorRolls);
+            user.accessCodeVerified = user.accessCodeVerified === true || isAutoVerified(user, monitorRolls);
             setCurrentUser(user);
             localStorage.setItem('auth_user_cache', JSON.stringify(user));
           }
@@ -64,7 +99,8 @@ export function AuthProvider({ children }) {
   async function refreshUser(phone) {
     const user = await getUserByPhone(phone);
     if (user) {
-      user.role = user.phone === TEST_PHONE ? (user.activeRole || ROLES.STUDENT) : getUserRole(user.rollNo);
+      user.role = resolveRole(user, monitorRolls);
+      user.accessCodeVerified = user.accessCodeVerified === true || isAutoVerified(user, monitorRolls);
       setCurrentUser(user);
       localStorage.setItem('auth_user_cache', JSON.stringify(user));
     }
@@ -88,7 +124,10 @@ export function AuthProvider({ children }) {
   async function savePassword(phone, password) {
     await setPassword(phone, password);
     const user = await getUserByPhone(phone);
-    if (user) user.role = getUserRole(user.rollNo);
+    if (user) {
+      user.role = resolveRole(user, monitorRolls);
+      user.accessCodeVerified = user.accessCodeVerified === true || isAutoVerified(user, monitorRolls);
+    }
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
     if (user) localStorage.setItem('auth_user_cache', JSON.stringify(user));
@@ -101,7 +140,8 @@ export function AuthProvider({ children }) {
       // Post-merge: redirect to password reset with primary phone
       throw Object.assign(new Error('NEEDS_PASSWORD_RESET'), { primaryPhone: result.phone });
     }
-    result.role = result.phone === TEST_PHONE ? (result.activeRole || ROLES.STUDENT) : getUserRole(result.rollNo);
+    result.role = resolveRole(result, monitorRolls);
+    result.accessCodeVerified = result.accessCodeVerified === true || isAutoVerified(result, monitorRolls);
     setCurrentUser(result);
     // If they logged in via alternate phone, persist the primary phone for session restore
     localStorage.setItem('auth_phone', result.phone);
@@ -152,7 +192,10 @@ export function AuthProvider({ children }) {
   async function resetPassword(phone, newPassword) {
     await updatePassword(phone, newPassword);
     const user = await getUserByPhone(phone);
-    if (user) user.role = getUserRole(user.rollNo);
+    if (user) {
+      user.role = resolveRole(user, monitorRolls);
+      user.accessCodeVerified = user.accessCodeVerified === true || isAutoVerified(user, monitorRolls);
+    }
     setCurrentUser(user);
     localStorage.setItem('auth_phone', phone);
     if (user) localStorage.setItem('auth_user_cache', JSON.stringify(user));

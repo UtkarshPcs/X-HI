@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-ro
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
+import AccessCodeGate from './components/AccessCodeGate';
 import Onboarding from './components/Onboarding';
 import WhatsNew from './components/WhatsNew';
 import InstallPrompt from './components/InstallPrompt';
@@ -169,6 +170,7 @@ function AppInner() {
         </footer>
       </div>
       <AuthModal resetPhone={resetPhone} onResetConsumed={() => setResetPhone(null)} />
+      <AccessCodeGate />
       {!isStarBatchOrPortal && (
         <>
           <Onboarding />

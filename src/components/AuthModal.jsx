@@ -4,7 +4,8 @@ import { useAuth } from '../auth/AuthContext';
 import { TEST_PHONE } from '../auth/roles';
 import { matchStudent } from '../auth/nameMatch';
 import { getUserByPhone } from '../auth/authService';
-import { sendEmailLink } from '../firebase';
+import { sendEmailLink, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { getTeachers } from '../services/teacherService';
 import { GraduationCap, User } from 'lucide-react';
 
@@ -58,6 +59,7 @@ export default function AuthModal({ resetPhone, onResetConsumed }) {
   const [phone,     setPhone]     = useState('');
   const [name,      setName]      = useState('');
   const [rollNo,    setRollNo]    = useState('');
+  const [accessCode, setAccessCode] = useState('');
   const [password,  setPassword]  = useState('');
   const [password2, setPassword2] = useState('');
   const [otpPhone,  setOtpPhone]  = useState(''); // phone used for reset
@@ -85,7 +87,7 @@ export default function AuthModal({ resetPhone, onResetConsumed }) {
 
   function reset() {
     setStep(S.PICK); setErr('');
-    setPhone(''); setName(''); setRollNo('');
+    setPhone(''); setName(''); setRollNo(''); setAccessCode('');
     setPassword(''); setPassword2(''); setOtpPhone('');
     setTeacherId(''); setTPassword('');
   }
@@ -107,11 +109,30 @@ export default function AuthModal({ resetPhone, onResetConsumed }) {
   async function handleRegister(e) {
     e.preventDefault(); setErr('');
     const roll = parseInt(rollNo, 10);
-    if (phone.trim() !== TEST_PHONE && !matchStudent(name, roll)) {
-      setErr('Name or roll number doesn\'t match our records. Check and try again.');
+    
+    if (roll === 0) {
+      setErr('Roll 0 accounts are created by the admin only. Contact Utkarsh on WhatsApp.');
       return;
     }
+    
     setBusy(true);
+
+    if (roll !== 23) {
+      const snap = await getDoc(doc(db, 'settings', 'accessCodes'));
+      const codes = snap.exists() ? snap.data() : {};
+      if (codes[String(roll)] && accessCode.trim() !== String(codes[String(roll)])) {
+        setErr('Incorrect access code. Message Utkarsh on WhatsApp for your code.');
+        setBusy(false);
+        return;
+      }
+    }
+
+    if (phone.trim() !== TEST_PHONE && !matchStudent(name, roll)) {
+      setErr('Name or roll number doesn\'t match our records. Check and try again.');
+      setBusy(false);
+      return;
+    }
+    
     try {
       await register(name.trim(), phone.trim(), roll);
       setStep(S.SET_PASS);
@@ -238,6 +259,21 @@ export default function AuthModal({ resetPhone, onResetConsumed }) {
             <label>Roll Number</label>
             <input value={rollNo} onChange={e => setRollNo(e.target.value)}
               placeholder="1 – 40" type="number" min={1} max={40} required />
+            <label>Access Code</label>
+            <input
+              value={accessCode}
+              onChange={e => setAccessCode(e.target.value)}
+              placeholder="6-digit code from Utkarsh"
+              maxLength={6}
+              required
+            />
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '-0.25rem 0 0.5rem' }}>
+              💬 Don't have it?{' '}
+              <a href="https://wa.me/918102783645" target="_blank" rel="noopener noreferrer"
+                 style={{ color: '#25D366', fontWeight: 600 }}>
+                Message Utkarsh on WhatsApp
+              </a>
+            </p>
             <p className="auth-sub" style={{ fontSize: '0.78rem', marginTop: '-0.25rem' }}>
               Phone: {phone} · <button type="button" className="auth-link" style={{ fontSize: '0.78rem' }} onClick={() => setStep(S.PHONE)}>Change</button>
             </p>

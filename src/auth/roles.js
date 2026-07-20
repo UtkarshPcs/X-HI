@@ -7,10 +7,10 @@ export const ROLES = {
 
 export const TEST_PHONE = '9999999999';
 
-const MONITORS = [1, 9, 35, 37];
+export const DEFAULT_MONITORS = [1, 9, 35, 37];
 const ADMINS   = [23];
 
-export function getUserRole(rollNo) {
+export function getUserRole(rollNo, monitors = DEFAULT_MONITORS) {
   const roll = parseInt(rollNo, 10);
   // Star Batch is now an internal-only feature gated by the isStarBatch flag
   // and the admin allow-list (see starBatchService.js), not a separate role.
@@ -19,6 +19,6 @@ export function getUserRole(rollNo) {
   // without special treatment.
   if (!roll || roll <= 0) return ROLES.STUDENT;
   if (ADMINS.includes(roll))   return ROLES.ADMIN;
-  if (MONITORS.includes(roll)) return ROLES.MONITOR;
+  if (monitors.includes(roll)) return ROLES.MONITOR;
   return ROLES.STUDENT;
 }

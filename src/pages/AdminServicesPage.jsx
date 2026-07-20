@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES, TEST_PHONE } from '../auth/roles';
 import { getUserRole } from '../auth/roles';
-import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone, createCustomAccount, listCustomAccounts, updateCustomAccountPassword, deleteCustomAccount } from '../auth/authService';
+import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone, createCustomAccount, listCustomAccounts, updateCustomAccountPassword, deleteCustomAccount, getAllAccessCodes, saveAccessCodes, resetAccessCodeVerificationForRoll, saveMonitorRolls } from '../auth/authService';
 import { getAllUsers, getActivitySummary, purgeTestData, deleteUserDoc } from '../services/adminService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -52,6 +54,8 @@ const TABS = [
   { id: 'reportedQs', label: 'Reported Questions', Icon: Flag },
   { id: 'periodicPredicted', label: 'Predicted Analysis', Icon: Target },
   { id: 'customAccounts',    label: 'Custom Accounts',    Icon: UserPlus },
+  { id: 'accessCodes',       label: 'Access Codes',       Icon: ShieldCheck },
+  { id: 'monitorRoles',      label: 'Monitor Roles',      Icon: UsersIcon },
 ];
 
 const ROLE_STYLE = {
@@ -1770,6 +1774,8 @@ export default function AdminServicesPage() {
         { tab === 'reportedQs' && <ReportedQuestionsTab /> }
         { tab === 'periodicPredicted' && <PeriodicPredictedAdminTab /> }
         { tab === 'customAccounts'    && <CustomAccountsTab /> }
+        { tab === 'accessCodes'       && <AccessCodesTab /> }
+        { tab === 'monitorRoles'      && <MonitorRolesTab /> }
       </div>
     </div>
   );
@@ -2834,6 +2840,229 @@ function PeriodicPredictedAdminTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Access Codes Tab
+──────────────────────────────────────────────────────────────*/
+function AccessCodesTab() {
+  const [codes, setCodes] = useState({});
+  const [busy, setBusy] = useState(false);
+  
+  useEffect(() => { loadCodes(); }, []);
+  
+  async function loadCodes() {
+    try {
+      const data = await getAllAccessCodes();
+      setCodes(data || {});
+    } catch (e) {
+      alert('Failed to load codes: ' + e.message);
+    }
+  }
+
+  function generateCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
+  }
+
+  async function handleGenerateAll() {
+    if (!window.confirm("This will overwrite ALL existing access codes. Are you sure?")) return;
+    setBusy(true);
+    try {
+      const newCodes = {};
+      for (let i = 1; i <= 40; i++) newCodes[String(i)] = generateCode();
+      await saveAccessCodes(newCodes);
+      setCodes(newCodes);
+      alert('All codes generated successfully.');
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRegen(rollNo) {
+    if (!window.confirm(`Generate new code for Roll ${rollNo}? Existing users won't be logged out, but you should also Reset their verification.`)) return;
+    setBusy(true);
+    try {
+      const newCodes = { ...codes, [String(rollNo)]: generateCode() };
+      await saveAccessCodes(newCodes);
+      setCodes(newCodes);
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleReset(rollNo) {
+    if (!window.confirm(`Force users with Roll ${rollNo} to re-enter their code?`)) return;
+    setBusy(true);
+    try {
+      await resetAccessCodeVerificationForRoll(rollNo);
+      alert(`Roll ${rollNo} verifications reset.`);
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleCopyAll() {
+    let text = "🔑 *Access Codes for 10th HI*\n\n";
+    for (let i = 1; i <= 40; i++) {
+      if (codes[String(i)]) text += `Roll ${String(i).padStart(2, '0')}: ${codes[String(i)]}\n`;
+    }
+    navigator.clipboard.writeText(text);
+    alert('Codes copied to clipboard!');
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '600px' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+        <button className="auth-btn primary" onClick={handleGenerateAll} disabled={busy}>
+          🎲 Generate All Codes
+        </button>
+        <button className="auth-btn secondary" onClick={handleCopyAll} disabled={busy || Object.keys(codes).length === 0}>
+          📋 Copy All as List
+        </button>
+      </div>
+
+      <div className="glass-card" style={{ padding: '0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+              <th style={{ padding: '0.75rem 1rem' }}>Roll</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Code</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 40 }).map((_, i) => {
+              const roll = i + 1;
+              const is23 = roll === 23;
+              return (
+                <tr key={roll} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '0.75rem 1rem' }}>{String(roll).padStart(2, '0')}</td>
+                  <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '1.1rem', color: codes[roll] ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                    {codes[roll] || '------'}
+                  </td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <button className="auth-btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }} onClick={() => handleRegen(roll)} disabled={busy}>
+                        🔄 Regen
+                      </button>
+                      <button className="auth-btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }} onClick={() => handleReset(roll)} disabled={busy || is23} title={is23 ? "Admin auto-bypasses" : ""}>
+                        🔓 Reset
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Monitor Roles Tab
+──────────────────────────────────────────────────────────────*/
+function MonitorRolesTab() {
+  const [monitors, setMonitors] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [newRoll, setNewRoll] = useState('');
+  
+  useEffect(() => { loadMonitors(); }, []);
+  
+  async function loadMonitors() {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'roleConfig'));
+      setMonitors(snap.exists() && snap.data().monitors ? snap.data().monitors : [1, 9, 35, 37]);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function handleAdd(e) {
+    e.preventDefault();
+    const roll = parseInt(newRoll, 10);
+    if (!roll || roll < 1 || roll > 40) return alert('Invalid roll number');
+    if (monitors.includes(roll)) return alert('Already a monitor');
+    
+    setBusy(true);
+    try {
+      const updated = [...monitors, roll].sort((a, b) => a - b);
+      await saveMonitorRolls(updated);
+      setMonitors(updated);
+      setNewRoll('');
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRemove(roll) {
+    if (!window.confirm(`Remove Roll ${roll} from Monitors?`)) return;
+    setBusy(true);
+    try {
+      const updated = monitors.filter(m => m !== roll);
+      await saveMonitorRolls(updated);
+      setMonitors(updated);
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px' }}>
+      <div className="glass-card" style={{ padding: '1.5rem' }}>
+        <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <UsersIcon size={18} /> Current Monitors
+        </h3>
+        
+        {monitors.length === 0 ? (
+          <p className="as-muted" style={{ marginBottom: '1rem' }}>No active monitors.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            {monitors.map(roll => (
+              <div key={roll} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                <span>Roll {String(roll).padStart(2, '0')}</span>
+                <button onClick={() => handleRemove(roll)} disabled={busy} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleAdd} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Add Monitor Roll</label>
+            <input 
+              type="number" 
+              value={newRoll} 
+              onChange={e => setNewRoll(e.target.value)} 
+              placeholder="e.g. 15" 
+              min={1} max={40} 
+              style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem' }} 
+            />
+          </div>
+          <button type="submit" className="auth-btn primary" disabled={busy || !newRoll}>
+            + Add
+          </button>
+        </form>
+        
+        <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          Note: Changes are applied instantly to all connected users.
+        </p>
+      </div>
     </div>
   );
 }
