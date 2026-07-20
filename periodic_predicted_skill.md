@@ -30,6 +30,10 @@ Using exact canonical names ensures the Topic Mastery Report Card correctly trac
 **IT:**
 `Methods and Types of Communication` | `Communication Process and Body Language` | `Feedback in Communication` | `Principles of Effective Communication` | `Barriers in Communication` | `Parts of Speech and Capitalisation` | `Punctuation` | `Sentence Construction and Types` | `Parts of a Sentence` | `Active and Passive Voice` | `Paragraph Writing` | `Styles in a Document` | `Inserting and Managing Images` | `Document Templates` | `Table of Contents (ToC)` | `Track Changes and Document Review`
 
+**Hindi:**
+`पदबंध (परिभाषा और भेद)` | `संज्ञा पदबंध` | `सर्वनाम पदबंध` | `विशेषण पदबंध` | `क्रिया पदबंध` | `क्रिया-विशेषण पदबंध` | `साखी — भावार्थ` | `साखी — काव्य-सौंदर्य` | `कबीर की भक्ति भावना` | `मीरा के पद — भावार्थ` | `मीरा के पद — काव्य-सौंदर्य` | `मीराबाई की भक्ति भावना` | `बड़े भाई साहब — विषयवस्तु और पात्र` | `बड़े भाई साहब — भाषा और शैली` | `डायरी का एक पन्ना — विषयवस्तु` | `डायरी का एक पन्ना — भाषा और शैली`
+
+For **English & SST**, put the name of the exact concept from which the question is drawn — by yourself (no canonical list defined yet).
 ## JSON Schema Example
 Generate exactly 20 objects in this format inside a root array:
 

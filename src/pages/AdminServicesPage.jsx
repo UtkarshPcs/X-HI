@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES, TEST_PHONE } from '../auth/roles';
 import { getUserRole } from '../auth/roles';
-import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone } from '../auth/authService';
+import { resetWhatsNew, resetTestAccount, setTestAccountRole, getUserByPhone, createCustomAccount, listCustomAccounts, updateCustomAccountPassword, deleteCustomAccount } from '../auth/authService';
 import { getAllUsers, getActivitySummary, purgeTestData, deleteUserDoc } from '../services/adminService';
 import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -51,6 +51,7 @@ const TABS = [
   { id: 'mathfixer',  label: 'Math Fixer',       Icon: Sparkles },
   { id: 'reportedQs', label: 'Reported Questions', Icon: Flag },
   { id: 'periodicPredicted', label: 'Predicted Analysis', Icon: Target },
+  { id: 'customAccounts',    label: 'Custom Accounts',    Icon: UserPlus },
 ];
 
 const ROLE_STYLE = {
@@ -1350,6 +1351,368 @@ function ReportedQuestionsTab() {
   );
 }
 
+
+// ── Custom Accounts Tab ────────────────────────────────────────
+function CustomAccountsTab() {
+  const [accounts, setAccounts] = useState(null);
+  const [form, setForm] = useState({ name: '', phone: '', rollNo: '', password: '' });
+  const [showPass, setShowPass] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [editingPhone, setEditingPhone] = useState(null);
+  const [newPass, setNewPass] = useState('');
+  const [newPassVisible, setNewPassVisible] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    try {
+      const list = await listCustomAccounts();
+      list.sort((a, b) => b.createdAt - a.createdAt);
+      setAccounts(list);
+    } catch (err) {
+      setAccounts([]);
+      console.error(err);
+    }
+  }
+
+  function formVal(field, val) {
+    setForm(f => ({ ...f, [field]: val }));
+  }
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    const rollNo = parseInt(form.rollNo, 10);
+    if (isNaN(rollNo) || rollNo < 0 || rollNo > 99) {
+      alert('Roll No must be a number between 0 and 99 (use 0 for outsider/no roll).');
+      return;
+    }
+    if (form.password.length < 4) {
+      alert('Password must be at least 4 characters.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await createCustomAccount({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        rollNo,
+        password: form.password,
+      });
+      setForm({ name: '', phone: '', rollNo: '', password: '' });
+      setShowForm(false);
+      await load();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete(phone) {
+    if (!window.confirm(`Delete account for ${phone}? This cannot be undone.`)) return;
+    setBusy(phone);
+    try {
+      await deleteCustomAccount(phone);
+      setAccounts(prev => prev.filter(a => a.phone !== phone));
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
+  async function handleChangePass(e, phone) {
+    e.preventDefault();
+    if (newPass.length < 4) { alert('Password must be at least 4 characters.'); return; }
+    setBusy(phone + '_pass');
+    try {
+      await updateCustomAccountPassword(phone, newPass);
+      setEditingPhone(null);
+      setNewPass('');
+      alert('Password updated.');
+    } catch (err) { alert(err.message); }
+    finally { setBusy(null); }
+  }
+
+  function copyText(text, key) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedPhone(key);
+      setTimeout(() => setCopiedPhone(k => k === key ? null : k), 2000);
+    });
+  }
+
+  const pillStyle = (color) => ({
+    display: 'inline-block',
+    padding: '0.15rem 0.55rem',
+    borderRadius: '20px',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    background: `${color}18`,
+    color,
+    border: `1px solid ${color}30`,
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div>
+          <h4 className="as-section-title" style={{ margin: 0 }}>
+            <UserPlus size={15} /> Custom Accounts
+          </h4>
+          <p className="as-muted" style={{ margin: '0.3rem 0 0' }}>
+            Create shareable login credentials for test users, parents, or outsiders. These accounts skip onboarding and are tracked separately.
+          </p>
+        </div>
+        <button
+          className={`auth-btn ${showForm ? 'secondary' : 'primary'}`}
+          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          onClick={() => setShowForm(s => !s)}
+        >
+          {showForm ? <><X size={14} /> Cancel</> : <><Plus size={14} /> New Account</>}
+        </button>
+      </div>
+
+      {/* ── Create Form ── */}
+      {showForm && (
+        <div className="as-card" style={{ border: '1px solid rgba(59,130,246,0.25)', background: 'rgba(59,130,246,0.04)' }}>
+          <h5 style={{ margin: '0 0 1rem', fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <UserPlus size={14} color="#3b82f6" /> Create New Custom Account
+          </h5>
+          <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Full Name *
+                </label>
+                <input
+                  className="as-input"
+                  placeholder="e.g. Test User 1"
+                  value={form.name}
+                  onChange={e => formVal('name', e.target.value)}
+                  required
+                  maxLength={50}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Phone No. (Login ID) *
+                </label>
+                <input
+                  className="as-input"
+                  placeholder="10-digit phone no."
+                  value={form.phone}
+                  onChange={e => formVal('phone', e.target.value)}
+                  required
+                  maxLength={20}
+                  inputMode="numeric"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Roll No. (2-digit, 0 = Outsider) *
+                </label>
+                <input
+                  className="as-input"
+                  placeholder="0 – 99"
+                  value={form.rollNo}
+                  onChange={e => formVal('rollNo', e.target.value)}
+                  required
+                  type="number"
+                  min={0}
+                  max={99}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Password *
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    className="as-input"
+                    placeholder="Min 4 characters"
+                    value={form.password}
+                    onChange={e => formVal('password', e.target.value)}
+                    type={showPass ? 'text' : 'password'}
+                    required
+                    style={{ paddingRight: '2.5rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(s => !s)}
+                    style={{ position: 'absolute', right: '0.6rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex', alignItems: 'center' }}
+                  >
+                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.25rem' }}>
+              <button type="submit" className="auth-btn primary" disabled={busy === true} style={{ padding: '0.55rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                {busy === true ? <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <UserPlus size={14} />}
+                {busy === true ? 'Creating…' : 'Create Account'}
+              </button>
+              <p className="as-muted" style={{ margin: 0, fontSize: '0.78rem' }}>
+                Roll 0 = outsider (no duplicate check). Phone is the unique login ID.
+              </p>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ── Accounts List ── */}
+      <div className="as-card">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h5 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            All Custom Accounts {accounts !== null && `(${accounts.length})`}
+          </h5>
+          <button
+            onClick={load}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem' }}
+          >
+            <RefreshCw size={13} /> Refresh
+          </button>
+        </div>
+
+        {accounts === null ? (
+          <p className="as-muted">Loading…</p>
+        ) : accounts.length === 0 ? (
+          <p className="as-muted">No custom accounts yet. Create one above.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {accounts.map(acc => (
+              <div key={acc.phone} style={{
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '1rem 1.1rem',
+                background: 'var(--bg-card)',
+                position: 'relative',
+              }}>
+                {/* Top row */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.97rem', fontWeight: 700, color: 'var(--text-primary)' }}>{acc.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={pillStyle('#a8a29e')}>Roll {acc.rollNo === 0 ? '— Outsider' : String(acc.rollNo).padStart(2, '0')}</span>
+                      <span style={pillStyle('#3b82f6')}>Custom</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Created {new Date(acc.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                    <button
+                      onClick={() => { setEditingPhone(editingPhone === acc.phone ? null : acc.phone); setNewPass(''); setNewPassVisible(false); }}
+                      title="Change Password"
+                      style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', borderRadius: '8px', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    >
+                      <KeyRound size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(acc.phone)}
+                      disabled={busy === acc.phone}
+                      title="Delete Account"
+                      style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', borderRadius: '8px', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Credentials copy row */}
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => copyText(acc.phone, `phone_${acc.phone}`)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      background: copiedPhone === `phone_${acc.phone}` ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${copiedPhone === `phone_${acc.phone}` ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
+                      borderRadius: '8px', padding: '0.35rem 0.75rem',
+                      fontSize: '0.8rem', fontWeight: 600,
+                      color: copiedPhone === `phone_${acc.phone}` ? '#10b981' : 'var(--text-secondary)',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                  >
+                    {copiedPhone === `phone_${acc.phone}` ? <Check size={13} /> : <Copy size={13} />}
+                    {copiedPhone === `phone_${acc.phone}` ? 'Copied!' : `Phone: ${acc.phone}`}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const msg = `📱 Login Credentials\nPhone: ${acc.phone}\nUse your assigned password to log in.`;
+                      copyText(msg, `share_${acc.phone}`);
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      background: copiedPhone === `share_${acc.phone}` ? 'rgba(16,185,129,0.12)' : 'rgba(59,130,246,0.06)',
+                      border: `1px solid ${copiedPhone === `share_${acc.phone}` ? 'rgba(16,185,129,0.3)' : 'rgba(59,130,246,0.2)'}`,
+                      borderRadius: '8px', padding: '0.35rem 0.75rem',
+                      fontSize: '0.8rem', fontWeight: 600,
+                      color: copiedPhone === `share_${acc.phone}` ? '#10b981' : '#3b82f6',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                  >
+                    {copiedPhone === `share_${acc.phone}` ? <Check size={13} /> : <Send size={13} />}
+                    {copiedPhone === `share_${acc.phone}` ? 'Copied!' : 'Copy Share Message'}
+                  </button>
+                </div>
+
+                {/* Change Password Panel */}
+                {editingPhone === acc.phone && (
+                  <form
+                    onSubmit={e => handleChangePass(e, acc.phone)}
+                    style={{
+                      marginTop: '0.9rem', paddingTop: '0.9rem',
+                      borderTop: '1px dashed var(--border)',
+                      display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap',
+                    }}
+                  >
+                    <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
+                      <input
+                        className="as-input"
+                        placeholder="New password (min 4 chars)"
+                        value={newPass}
+                        onChange={e => setNewPass(e.target.value)}
+                        type={newPassVisible ? 'text' : 'password'}
+                        required
+                        style={{ paddingRight: '2.5rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNewPassVisible(s => !s)}
+                        style={{ position: 'absolute', right: '0.6rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex', alignItems: 'center' }}
+                      >
+                        {newPassVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={busy === acc.phone + '_pass'}
+                      className="auth-btn primary"
+                      style={{ padding: '0.45rem 0.9rem', fontSize: '0.83rem', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <Save size={13} />
+                      {busy === acc.phone + '_pass' ? 'Saving…' : 'Save Password'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingPhone(null); setNewPass(''); }}
+                      className="auth-btn secondary"
+                      style={{ padding: '0.45rem 0.8rem', fontSize: '0.83rem', flexShrink: 0 }}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminServicesPage() {
   const { currentUser, triggerTour, loading } = useAuth();
   const navigate = useNavigate();
@@ -1406,6 +1769,7 @@ export default function AdminServicesPage() {
         { tab === 'mathfixer'  && <MathFixerTab /> }
         { tab === 'reportedQs' && <ReportedQuestionsTab /> }
         { tab === 'periodicPredicted' && <PeriodicPredictedAdminTab /> }
+        { tab === 'customAccounts'    && <CustomAccountsTab /> }
       </div>
     </div>
   );

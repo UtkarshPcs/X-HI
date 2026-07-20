@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, collection, setDoc, updateDoc, query, where, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, setDoc, updateDoc, query, where, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 async function sha256(text) {
@@ -231,4 +231,53 @@ export async function ensureBroadcastKey(phone) {
 // ── Feature Launch Popup "seen" flag ──────────────────────────
 export async function markFeaturePopupSeen(phone, id) {
   await updateDoc(doc(db, 'users', phone), { seenFeaturePopups: arrayUnion(id) });
+}
+
+// ── Admin-created Custom Accounts ─────────────────────────────
+// These are guest / test / outsider accounts created by the admin.
+// They are stored as regular user documents (phone = doc ID) with
+// an extra `isCustomAccount: true` flag so they can be listed separately.
+
+export async function createCustomAccount({ name, phone, rollNo, password }) {
+  const existing = await getUserByPhone(phone);
+  if (existing) throw new Error('This phone number is already registered.');
+
+  // Ensure roll number is not already taken (0 is always allowed to repeat — outsider)
+  if (rollNo !== 0) {
+    const allSnap = await getDocs(collection(db, 'users'));
+    const dup = allSnap.docs.find(d => {
+      const u = d.data();
+      return Number(u.rollNo) === Number(rollNo) && !u.mergedInto;
+    });
+    if (dup) throw new Error(`Roll no. ${rollNo} is already taken by another account.`);
+  }
+
+  const passwordHash = await sha256(password);
+
+  await setDoc(doc(db, 'users', phone), {
+    name,
+    phone,
+    rollNo,
+    passwordHash,
+    isCustomAccount: true,
+    isStarBatch: false,
+    hasUnlockedStarBatch: false,
+    onboardingCompleted: true,   // skip onboarding for custom accounts
+    createdAt: Date.now(),
+  });
+}
+
+export async function listCustomAccounts() {
+  const q = query(collection(db, 'users'), where('isCustomAccount', '==', true));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function updateCustomAccountPassword(phone, newPassword) {
+  const hash = await sha256(newPassword);
+  await updateDoc(doc(db, 'users', phone), { passwordHash: hash });
+}
+
+export async function deleteCustomAccount(phone) {
+  await deleteDoc(doc(db, 'users', phone));
 }
