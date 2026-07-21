@@ -9,7 +9,7 @@ import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus, UploadCloud } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -24,6 +24,7 @@ import { getTables, setTeacherRecordTables } from '../services/recordsService';
 import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/inAppNoticeService';
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
+import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
 import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
 
@@ -1797,6 +1798,9 @@ function PageCreationTab() {
   const [thumbnail, setThumbnail] = useState('');
   const [visibility, setVisibility] = useState('public');
   const [jsonCode, setJsonCode] = useState('');
+  
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => { loadPages(); }, []);
   
@@ -1812,6 +1816,43 @@ function PageCreationTab() {
       alert('JSON is valid!');
     } catch (e) {
       alert('Invalid JSON: ' + e.message);
+    }
+  }
+
+  async function handleImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      setThumbnail(url);
+    } catch (err) {
+      alert('Failed to upload image: ' + err.message);
+    }
+    setUploadingImage(false);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave() {
+    setIsDragging(false);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.name.endsWith('.json')) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        setJsonCode(evt.target.result);
+      };
+      reader.readAsText(file);
+    } else {
+      alert('Please drop a valid .json file');
     }
   }
 
@@ -1875,13 +1916,82 @@ function PageCreationTab() {
           <input className="as-input" placeholder="Page ID (e.g. my-page)" value={pageId} onChange={e=>setPageId(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} disabled={isEditing} required />
           <input className="as-input" placeholder="Page Title (OG)" value={title} onChange={e=>setTitle(e.target.value)} required />
           <input className="as-input" placeholder="Page Description (OG)" value={description} onChange={e=>setDescription(e.target.value)} required />
-          <input className="as-input" placeholder="Thumbnail URL (OG)" value={thumbnail} onChange={e=>setThumbnail(e.target.value)} />
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <input className="as-input" placeholder="Thumbnail URL (OG) or upload image ->" value={thumbnail} onChange={e=>setThumbnail(e.target.value)} style={{ flex: 1 }} />
+            <label className="auth-btn secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+              <UploadCloud size={16} />
+              {uploadingImage ? 'Uploading...' : 'Upload Image'}
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploadingImage} />
+            </label>
+          </div>
           <select className="as-input" value={visibility} onChange={e=>setVisibility(e.target.value)}>
             <option value="public">Public (No login required)</option>
             <option value="private">Private (Login required)</option>
             <option value="hidden">Hidden</option>
           </select>
-          <textarea className="as-input" placeholder="JSON Code (UI Spec)" value={jsonCode} onChange={e=>setJsonCode(e.target.value)} rows={10} required style={{ fontFamily: 'monospace' }} />
+
+          <div 
+            style={{ 
+              position: 'relative', 
+              border: `2px dashed ${isDragging ? '#3b82f6' : 'transparent'}`, 
+              borderRadius: '8px',
+              transition: 'border-color 0.2s',
+              marginTop: '0.5rem'
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div style={{
+              display: 'flex',
+              background: '#0d1117',
+              borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                padding: '1rem 0.5rem',
+                background: '#161b22',
+                color: '#6e7681',
+                textAlign: 'right',
+                userSelect: 'none',
+                fontFamily: 'monospace',
+                fontSize: '14px',
+                minWidth: '40px',
+                borderRight: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                {jsonCode.split('\n').map((_, i) => <div key={i}>{i + 1}</div>)}
+              </div>
+              <textarea 
+                className="as-input" 
+                placeholder="JSON Code (UI Spec) - Drag & Drop .json files here" 
+                value={jsonCode} 
+                onChange={e=>setJsonCode(e.target.value)} 
+                rows={15} 
+                required 
+                style={{ 
+                  flex: 1, 
+                  fontFamily: 'monospace', 
+                  fontSize: '14px',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '1rem',
+                  outline: 'none',
+                  resize: 'vertical',
+                  lineHeight: '1.5',
+                  color: '#c9d1d9'
+                }} 
+              />
+            </div>
+            {isDragging && (
+              <div style={{
+                position: 'absolute', inset: 0, background: 'rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', borderRadius: '8px', backdropFilter: 'blur(2px)'
+              }}>
+                <div style={{ background: '#3b82f6', color: '#fff', padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 'bold' }}>Drop JSON File</div>
+              </div>
+            )}
+          </div>
+
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button type="button" className="auth-btn secondary" onClick={validateJSON}>Validate JSON</button>
             <button type="submit" className="auth-btn" disabled={busy}>{busy ? 'Saving...' : 'Save Page'}</button>
