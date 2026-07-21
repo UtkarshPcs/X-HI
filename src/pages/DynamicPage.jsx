@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getPage } from '../services/dynamicPageService';
 import { useAuth } from '../auth/AuthContext';
 import JsonRenderer from '../components/dynamic/JsonRenderer';
-import { Helmet } from 'react-helmet'; // or we can just use document.title directly if Helmet isn't installed. Let's just use document.title
 
 export default function DynamicPage() {
   const { pageId } = useParams();
