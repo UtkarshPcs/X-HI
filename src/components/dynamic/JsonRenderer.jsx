@@ -9,32 +9,33 @@ const ComponentRegistry = {
     const Tag = `h${level}`;
     return <Tag {...props}>{children}</Tag>;
   },
-  Button: ({ children, onClickUrl, variant = 'primary', ...props }) => (
+  Button: ({ children, onClickUrl, variant = 'primary', className = '', ...props }) => (
     <button 
-      className={`auth-btn ${variant === 'secondary' ? 'secondary' : ''}`} 
+      className={`auth-btn ${variant === 'secondary' ? 'secondary' : ''} ${className}`} 
       onClick={() => onClickUrl && window.open(onClickUrl, '_blank')}
       {...props}
     >
       {children}
     </button>
   ),
-  Card: ({ children, ...props }) => (
-    <div className="glass-card p-6 rounded-2xl border border-white/10" {...props}>
+  Card: ({ children, className = '', ...props }) => (
+    <div className={`glass-card p-6 rounded-2xl border border-white/10 ${className}`} {...props}>
       {children}
     </div>
   ),
-  Image: ({ src, alt, ...props }) => (
+  Image: ({ src, alt, className = '', style, ...props }) => (
     <img 
       src={src} 
       alt={alt} 
-      style={{ maxWidth: '100%', borderRadius: '8px', objectFit: 'cover' }} 
+      className={className}
+      style={{ maxWidth: '100%', borderRadius: '8px', objectFit: 'cover', ...style }} 
       {...props} 
     />
   ),
   List: 'ul',
   ListItem: 'li',
   Span: 'span',
-  Divider: () => <hr className="border-white/10 my-4" />
+  Divider: ({ className = '', ...props }) => <hr className={`border-white/10 my-4 ${className}`} {...props} />
 };
 
 export default function JsonRenderer({ node }) {
