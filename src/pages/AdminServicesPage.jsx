@@ -1841,18 +1841,29 @@ function PageCreationTab() {
     setIsDragging(false);
   }
 
-  function handleDrop(e) {
+  async function handleDrop(e) {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.name.endsWith('.json')) {
+    if (!file) return;
+
+    if (file.name.endsWith('.json')) {
       const reader = new FileReader();
       reader.onload = (evt) => {
         setJsonCode(evt.target.result);
       };
       reader.readAsText(file);
+    } else if (file.type.startsWith('image/')) {
+      setUploadingImage(true);
+      try {
+        const url = await uploadImageToCloudinary(file);
+        setThumbnail(url);
+      } catch (err) {
+        alert('Failed to upload image: ' + err.message);
+      }
+      setUploadingImage(false);
     } else {
-      alert('Please drop a valid .json file');
+      alert('Please drop a valid .json or image file');
     }
   }
 
@@ -1964,7 +1975,7 @@ function PageCreationTab() {
               </div>
               <textarea 
                 className="as-input" 
-                placeholder="JSON Code (UI Spec) - Drag & Drop .json files here" 
+                placeholder="JSON Code (UI Spec) - Drag & Drop .json or image files here" 
                 value={jsonCode} 
                 onChange={e=>setJsonCode(e.target.value)} 
                 rows={15} 
@@ -1987,7 +1998,7 @@ function PageCreationTab() {
               <div style={{
                 position: 'absolute', inset: 0, background: 'rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', borderRadius: '8px', backdropFilter: 'blur(2px)'
               }}>
-                <div style={{ background: '#3b82f6', color: '#fff', padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 'bold' }}>Drop JSON File</div>
+                <div style={{ background: '#3b82f6', color: '#fff', padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 'bold' }}>Drop JSON or Image File</div>
               </div>
             )}
           </div>
