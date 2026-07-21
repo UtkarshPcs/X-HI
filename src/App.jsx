@@ -36,6 +36,7 @@ const RecordAdminPage = lazy(() => import('./pages/RecordAdminPage'));
 const RecordTeacherPage = lazy(() => import('./pages/RecordTeacherPage'));
 const StudyTogetherPage = lazy(() => import('./pages/StudyTogetherPage'));
 const StudyRoomPage = lazy(() => import('./pages/StudyRoomPage'));
+const DynamicPage = lazy(() => import('./pages/DynamicPage'));
 const StarBatchPage = lazy(() => import('./pages/StarBatchPage'));
 const StarBatchSyllabusPage = lazy(() => import('./pages/StarBatchSyllabusPage'));
 const StarBatchTestModulePage = lazy(() => import('./pages/StarBatchTestModulePage'));
@@ -151,6 +152,7 @@ function AppInner() {
               <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />
               <Route path="/periodic-predicted" element={<PeriodicPredictedAnalysisPage />} />
               <Route path="/periodic-predicted/test/:subject/:setNumber" element={<PeriodicPredictedTestPlayerPage />} />
+              <Route path="/p/:pageId" element={<DynamicPage />} />
             </Routes>
           </Suspense>
         </main>

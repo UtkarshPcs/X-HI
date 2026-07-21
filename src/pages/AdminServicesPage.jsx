@@ -9,7 +9,7 @@ import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -35,6 +35,7 @@ import { getPendingNotes, approveNote, rejectNote, deleteNote, getPublishedNotes
 import { earnSparks, SPARK_UPLOAD_REWARD } from '../services/sparksService';
 import { getAllClasswork } from '../services/classworkService';
 import { getHomework } from '../services/homeworkService';
+import { createPage, updatePage, getPage, getAllPages, deletePage } from '../services/dynamicPageService';
 
 const TABS = [
   { id: 'users',      label: 'User Directory',  Icon: Users },
@@ -56,6 +57,7 @@ const TABS = [
   { id: 'customAccounts',    label: 'Custom Accounts',    Icon: UserPlus },
   { id: 'accessCodes',       label: 'Access Codes',       Icon: ShieldCheck },
   { id: 'monitorRoles',      label: 'Monitor Roles',      Icon: UsersIcon },
+  { id: 'pages',             label: 'Page Creation',      Icon: FilePlus },
 ];
 
 const ROLE_STYLE = {
@@ -1776,6 +1778,138 @@ export default function AdminServicesPage() {
         { tab === 'customAccounts'    && <CustomAccountsTab /> }
         { tab === 'accessCodes'       && <AccessCodesTab /> }
         { tab === 'monitorRoles'      && <MonitorRolesTab /> }
+        { tab === 'pages'             && <PageCreationTab /> }
+      </div>
+    </div>
+  );
+}
+
+// ── Page Creation Tab ──────────────────────────────────────────
+function PageCreationTab() {
+  const [pages, setPages] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Form State
+  const [pageId, setPageId] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [thumbnail, setThumbnail] = useState('');
+  const [visibility, setVisibility] = useState('public');
+  const [jsonCode, setJsonCode] = useState('');
+
+  useEffect(() => { loadPages(); }, []);
+  
+  async function loadPages() {
+    setBusy(true);
+    try { setPages(await getAllPages()); } catch (err) {}
+    setBusy(false);
+  }
+
+  function validateJSON() {
+    try {
+      JSON.parse(jsonCode);
+      alert('JSON is valid!');
+    } catch (e) {
+      alert('Invalid JSON: ' + e.message);
+    }
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    try {
+      JSON.parse(jsonCode); // Ensure valid
+    } catch (err) {
+      return alert('Cannot save: Invalid JSON code');
+    }
+    
+    setBusy(true);
+    const data = { title, description, thumbnail, visibility, jsonCode };
+    try {
+      if (isEditing) {
+        await updatePage(pageId, data);
+      } else {
+        await createPage(pageId, data);
+      }
+      setIsEditing(false);
+      resetForm();
+      loadPages();
+    } catch (err) {
+      alert(err.message);
+    }
+    setBusy(false);
+  }
+
+  function resetForm() {
+    setPageId(''); setTitle(''); setDescription(''); setThumbnail(''); setVisibility('public'); setJsonCode('');
+    setIsEditing(false);
+  }
+
+  function handleEdit(p) {
+    setPageId(p.id); setTitle(p.title || ''); setDescription(p.description || ''); setThumbnail(p.thumbnail || '');
+    setVisibility(p.visibility || 'public'); 
+    setJsonCode(typeof p.jsonCode === 'string' ? p.jsonCode : JSON.stringify(p.jsonCode, null, 2));
+    setIsEditing(true);
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm('Delete this page?')) return;
+    try {
+      await deletePage(id);
+      loadPages();
+    } catch (err) { alert(err.message); }
+  }
+
+  async function handleToggleHide(p) {
+    try {
+      await updatePage(p.id, { visibility: p.visibility === 'hidden' ? 'public' : 'hidden' });
+      loadPages();
+    } catch (err) {}
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="as-card">
+        <h4 className="as-section-title"><FilePlus size={15} /> {isEditing ? 'Edit Page' : 'Create New Page'}</h4>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <input className="as-input" placeholder="Page ID (e.g. my-page)" value={pageId} onChange={e=>setPageId(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} disabled={isEditing} required />
+          <input className="as-input" placeholder="Page Title (OG)" value={title} onChange={e=>setTitle(e.target.value)} required />
+          <input className="as-input" placeholder="Page Description (OG)" value={description} onChange={e=>setDescription(e.target.value)} required />
+          <input className="as-input" placeholder="Thumbnail URL (OG)" value={thumbnail} onChange={e=>setThumbnail(e.target.value)} />
+          <select className="as-input" value={visibility} onChange={e=>setVisibility(e.target.value)}>
+            <option value="public">Public (No login required)</option>
+            <option value="private">Private (Login required)</option>
+            <option value="hidden">Hidden</option>
+          </select>
+          <textarea className="as-input" placeholder="JSON Code (UI Spec)" value={jsonCode} onChange={e=>setJsonCode(e.target.value)} rows={10} required style={{ fontFamily: 'monospace' }} />
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button type="button" className="auth-btn secondary" onClick={validateJSON}>Validate JSON</button>
+            <button type="submit" className="auth-btn" disabled={busy}>{busy ? 'Saving...' : 'Save Page'}</button>
+            {isEditing && <button type="button" className="auth-btn secondary" onClick={resetForm}>Cancel</button>}
+          </div>
+        </form>
+      </div>
+
+      <div className="as-card">
+        <h4 className="as-section-title">Created Pages</h4>
+        {pages.length === 0 ? <p className="as-muted">No custom pages created yet.</p> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {pages.map(p => (
+              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                <div>
+                  <strong>{p.title}</strong> <span style={{ opacity: 0.5 }}>/p/{p.id}</span>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '4px' }}>Visibility: {p.visibility}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="as-btn secondary" onClick={() => window.open(`/p/${p.id}`, '_blank')} title="View"><Eye size={14} /></button>
+                  <button className="as-btn secondary" onClick={() => handleEdit(p)} title="Edit"><Settings size={14} /></button>
+                  <button className="as-btn secondary" onClick={() => handleToggleHide(p)} title="Toggle Hidden">{p.visibility === 'hidden' ? <Eye size={14} /> : <EyeOff size={14} />}</button>
+                  <button className="as-btn" style={{ color: '#ef4444', borderColor: '#ef4444' }} onClick={() => handleDelete(p.id)} title="Delete"><Trash2 size={14} /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
