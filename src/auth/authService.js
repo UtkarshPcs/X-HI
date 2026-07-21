@@ -328,3 +328,9 @@ export function subscribeMonitorRolls(callback) {
 export async function saveMonitorRolls(rollsArray) {
   await setDoc(doc(db, 'settings', 'roleConfig'), { monitors: rollsArray });
 }
+
+export function subscribeUserDoc(phone, callback) {
+  return onSnapshot(doc(db, 'users', phone), (snap) => {
+    callback(snap.exists(), snap.data());
+  });
+}

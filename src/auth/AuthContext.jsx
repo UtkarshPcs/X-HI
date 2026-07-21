@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../firebase';
-import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword, subscribeMonitorRolls } from './authService';
+import { AlertTriangle } from 'lucide-react';
+import { getUserByPhone, loginUser, registerUser, setPassword, updatePassword, subscribeMonitorRolls, subscribeUserDoc } from './authService';
 import { getUserRole, ROLES, TEST_PHONE } from './roles';
 import { removeToken } from '../services/pushService';
-import { loginTeacher, getTeacher } from '../services/teacherService';
+import { loginTeacher, getTeacher, subscribeTeacherDoc } from '../services/teacherService';
 
 const AuthContext = createContext(null);
 
@@ -14,6 +15,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [monitorRolls, setMonitorRolls] = useState([1, 9, 35, 37]);
   const [forceTour, setForceTour] = useState(null); // { role } | null
+  const [accountDeleted, setAccountDeleted] = useState(false);
   const confirmationRef = useRef(null);
   const recaptchaRef = useRef(null);
 
@@ -26,9 +28,12 @@ export function AuthProvider({ children }) {
   // Helper — is this user always-verified (admin, custom account, teacher, test)?
   function isAutoVerified(user, monitors = monitorRolls) {
     const role = resolveRole(user, monitors);
+    const roll = Number(user.rollNo);
     return role === ROLES.ADMIN || role === ROLES.TEACHER
         || user.isCustomAccount === true
-        || user.phone === TEST_PHONE;
+        || user.phone === TEST_PHONE
+        || roll > 40
+        || roll === 0;
   }
 
   // 1. Live subscription to monitor rolls
@@ -201,6 +206,30 @@ export function AuthProvider({ children }) {
     if (user) localStorage.setItem('auth_user_cache', JSON.stringify(user));
   }
 
+  // Live listener for account deletion
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const handleSnapshot = (exists) => {
+      if (!exists) {
+        // Account was deleted by admin
+        logout();
+        setAccountDeleted(true);
+      }
+    };
+
+    let unsubscribe;
+    if (currentUser.role === ROLES.TEACHER) {
+      if (currentUser.id) unsubscribe = subscribeTeacherDoc(currentUser.id, handleSnapshot);
+    } else {
+      if (currentUser.phone) unsubscribe = subscribeUserDoc(currentUser.phone, handleSnapshot);
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [currentUser?.phone, currentUser?.id, currentUser?.role]);
+
   return (
     <AuthContext.Provider value={{
       currentUser: currentUser ? { ...currentUser, isAdmin: currentUser.role === 'ADMIN' } : null,
@@ -216,6 +245,21 @@ export function AuthProvider({ children }) {
     }}>
       {children}
       <div id="recaptcha-container" />
+      
+      {accountDeleted && (
+        <div className="auth-overlay" onClick={() => setAccountDeleted(false)}>
+          <div className="auth-modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
+            <AlertTriangle size={48} color="#ef4444" style={{ margin: '0 auto 1rem' }} />
+            <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>Account Deleted</h2>
+            <p className="auth-sub" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+              Your account has been deleted. Contact my phone no for more Details.
+            </p>
+            <button className="auth-btn primary" onClick={() => setAccountDeleted(false)}>
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 }

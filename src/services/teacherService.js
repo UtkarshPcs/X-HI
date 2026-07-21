@@ -1,5 +1,5 @@
 import {
-  collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
+  collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -51,4 +51,10 @@ export async function loginTeacher(id, password) {
   const hash = await sha256(password);
   if (hash !== teacher.passwordHash) return null;
   return teacher;
+}
+
+export function subscribeTeacherDoc(id, callback) {
+  return onSnapshot(doc(db, 'teachers', id), (snap) => {
+    callback(snap.exists(), snap.data());
+  });
 }

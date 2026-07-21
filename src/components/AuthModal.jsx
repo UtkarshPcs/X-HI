@@ -117,7 +117,7 @@ export default function AuthModal({ resetPhone, onResetConsumed }) {
     
     setBusy(true);
 
-    if (roll !== 23) {
+    if (roll !== 23 && roll > 0 && roll <= 40) {
       const snap = await getDoc(doc(db, 'settings', 'accessCodes'));
       const codes = snap.exists() ? snap.data() : {};
       if (codes[String(roll)] && accessCode.trim() !== String(codes[String(roll)])) {
