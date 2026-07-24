@@ -39,6 +39,7 @@ const StudyRoomPage = lazy(() => import('./pages/StudyRoomPage'));
 const DynamicPage = lazy(() => import('./pages/DynamicPage'));
 const StarBatchPage = lazy(() => import('./pages/StarBatchPage'));
 const StarBatchSyllabusPage = lazy(() => import('./pages/StarBatchSyllabusPage'));
+const StarBatchSyllabusTrackingPage = lazy(() => import('./pages/StarBatchSyllabusTrackingPage'));
 const StarBatchTestModulePage = lazy(() => import('./pages/StarBatchTestModulePage'));
 const StarBatchTestPlayerPage = lazy(() => import('./pages/StarBatchTestPlayerPage'));
 const HistoricalTestAnalysisPage = lazy(() => import('./pages/HistoricalTestAnalysisPage'));
@@ -81,7 +82,7 @@ function AppInner() {
   // Star Batch is an internal-only feature now (no separate external role/
   // login). Still suppress the normal app-wide popups while viewing the
   // Star Batch portal/syllabus pages, since those are a focused sub-area.
-  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-concepts');
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -144,6 +145,10 @@ function AppInner() {
               <Route path="/study-together" element={<StudyTogetherPage />} />
               <Route path="/study-together/:roomId" element={<StudyRoomPage />} />
               <Route path="/star-batch" element={<StarBatchPage />} />
+              <Route path="/star-tracking" element={<StarBatchSyllabusTrackingPage />} />
+              <Route path="/star-tracking/:sectionId" element={<StarBatchSyllabusTrackingPage />} />
+              <Route path="/star-tracking/:sectionId/:subjectId" element={<StarBatchSyllabusTrackingPage />} />
+              <Route path="/star-tracking/:sectionId/:subjectId/:chapterId" element={<StarBatchSyllabusTrackingPage />} />
               <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
               <Route path="/star-tests" element={<StarBatchTestModulePage />} />
               <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />

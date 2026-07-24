@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { unlockStarBatchWithCode } from '../services/starBatchService';
-import { Lock, Star, Sparkles, ChevronRight, ShieldAlert, Target, BookOpen } from 'lucide-react';
+import { Lock, Star, Sparkles, ChevronRight, ShieldAlert, Target, BookOpen, CheckCircle } from 'lucide-react';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 30_000;
@@ -257,6 +257,19 @@ export default function StarBatchPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div
+          className="as-card star-quick-link"
+          onClick={() => navigate('/star-tracking')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <CheckCircle size={20} color="#fbbf24" /> Syllabus Tracking
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>Track your syllabus completion from sections down to individual study tasks.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+        </div>
         <div
           className="as-card star-quick-link"
           onClick={() => navigate('/star-syllabus')}

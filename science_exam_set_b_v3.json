@@ -1,0 +1,2799 @@
+{
+  "type": "Container",
+  "props": {
+    "className": "max-w-7xl mx-auto p-4 md:p-8 animate-fade-in"
+  },
+  "children": [
+    {
+      "type": "Container",
+      "props": {
+        "className": "text-center mb-16"
+      },
+      "children": [
+        {
+          "type": "Heading",
+          "props": {
+            "level": 1,
+            "className": "text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+          },
+          "children": "Science Exam Solutions"
+        },
+        {
+          "type": "Text",
+          "props": {
+            "className": "text-white/70 max-w-2xl mx-auto uppercase tracking-widest text-sm font-semibold"
+          },
+          "children": "Class 10 \u2022 Periodic Test 1 \u2022 SET B"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "props": {
+        "className": "grid grid-cols-1 lg:grid-cols-2 gap-8"
+      },
+      "children": [
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "1) Normal blood pressure is"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) 120 /80 mm hg"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) 160 / 80 mm hg"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) 120 by 60 mm hg"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) 180 by 60 mm hg"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (a) 120 /80 mm hg"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "A normal resting blood pressure for a healthy adult is typically around 120 millimeters of mercury (mmHg) for systolic pressure (when the heart beats) and 80 mmHg for diastolic pressure (when the heart rests between beats)."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "2) Blood pressure is measured by"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) barometer"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) sphygmomanometer"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) photometer"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) Manometer"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (b) sphygmomanometer"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "A sphygmomanometer is the medical instrument specifically designed to measure blood pressure. A barometer measures atmospheric pressure, and a manometer measures fluid pressure."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "3) Fermentation of glucose by yeast yields"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) alcohol, carbon dioxide, 36 ATP"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) carbon dioxide, H2O, 36 ATP"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) alcohol, carbon dioxide, 2 ATP"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) lactic acid, carbon dioxide, 2 ATP"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (c) alcohol, carbon dioxide, 2 ATP"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "Yeast performs anaerobic respiration, also known as fermentation. In the absence of oxygen, yeast breaks down glucose into ethanol (an alcohol) and carbon dioxide, yielding a net total of 2 ATP (energy) molecules per glucose molecule."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "4) Process of breakdown of glucose into pyruvate occur in"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) mitochondria"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) chloroplast"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) nucleus"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) cytoplasm"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (d) cytoplasm"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "The first step of cellular respiration is glycolysis, where a glucose molecule is broken down into two molecules of pyruvate. This specific process occurs in the cytoplasm of the cell, regardless of whether the cell is undergoing aerobic or anaerobic respiration."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "5) The process by which blood is cleared of metabolic waste in case of kidney failure is"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) artificial kidney"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) dialysis"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) transplantation"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) filtration"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (b) dialysis"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "Hemodialysis is the medical procedure used to artificially filter metabolic wastes, excess water, and toxins from the blood when a patient's kidneys can no longer perform this function naturally."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "6) Which of the following event doesn't occur during photosynthesis"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) absorption of sunlight by chlorophyll"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) reduction of carbon dioxide to carbohydrate"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) oxidation of carbon to carbon dioxide"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) conversion of light energy into chemical energy"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (c) oxidation of carbon to carbon dioxide"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "During photosynthesis, plants take in carbon dioxide and reduce it to form carbohydrates (glucose). The oxidation of carbon to carbon dioxide is a process that occurs during cellular respiration, not photosynthesis."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "7) Which is the correct sequence of parts in human elementary canal"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) mouth- stomach -small intestine- oesophagus- large intestine"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) mouth -oesophagus -stomach- small intestine- large intestine"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) mouth- oesophagus- stomach- large intestine- small intestine"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) mouth -oesophagus -small intestine- stomach -large intestine"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (b) mouth -oesophagus -stomach- small intestine- large intestine"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "Food is ingested through the mouth, travels down the muscular tube called the oesophagus, enters the stomach for digestion, moves into the small intestine where the majority of digestion and nutrient absorption occurs, and finally passes into the large intestine where water is absorbed before elimination."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "8) A converging lens has focal length of 12 cm. Calculate at what distance should the object be placed from the lens so that it forms an image at 48 centimetre on the other side of the lens"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) 16 cm"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) 24 cm"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) 48 cm"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) 4 cm"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (a) 16 cm"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "We use the thin lens formula: 1/f = 1/v - 1/u. For a converging (convex) lens, f = +12 cm. Since the image is real, v = +48 cm. 1/12 = 1/48 - 1/u => 1/u = 1/48 - 4/48 = -3/48 = -1/16. So u = -16 cm. The physical distance is 16 cm."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "9) No deviation of light takes place from"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) principal access"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) focus"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) pole"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) optical centre"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (d) optical centre"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "By definition, any ray of light that passes directly through the optical centre of a thin lens emerges parallel to its incident direction and without any lateral deviation."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "10) Two thin lenses of power + 3.5 diopter and -2.5 diopter are placed in contact the focal length of the lens combination is"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) 100 cm"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) 25 cm"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) 200 cm"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) 50 cm"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (a) 100 cm"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "The total power P = P1 + P2 = +3.5 - 2.5 = +1.0 D. The focal length f = 1/P = 1/1.0 m = 1 m. Converted to centimeters, 1 meter is equal to 100 cm."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "11) The magnification for all the spherical mirrors is"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) u/v"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) -v/u"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) v/u"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) -v/u"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (b) -v/u"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "For any spherical mirror (concave or convex), linear magnification m is defined as the ratio of the height of the image to the height of the object, which mathematically equates to m = -v/u."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "12) The mirror used as dentist mirror is"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) convex mirror"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) concave lens"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) concave mirror"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) convex lens"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (c) concave mirror"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "Dentists use concave mirrors because when the mirror is held very close to a tooth, it creates a magnified, erect, and virtual image, allowing the dentist to see fine details clearly."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "13) No matter how far you stand from a mirror your image appears erect the mirror is likely to be"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) plane"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) concave"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) convex"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) either plane or convex"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (d) either plane or convex"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "Plane mirrors always form virtual, erect images of the same size. Convex mirrors always form virtual, erect images that are diminished in size. Because both always produce erect images regardless of distance, the mirror could be either type."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "14) When a light ray moves from denser to rarer medium it bends"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) towards the normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) at the normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) at center of curvature"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) away from the normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (d) away from the normal"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "When light travels from an optically denser medium into a rarer medium, its speed increases. This change in speed causes the light ray to refract and bend away from the normal line."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "15) What type of reaction occurs when copper is added to Dil. HCl"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) displacement reaction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) decomposition reaction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) double displacement reaction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) no reaction"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (d) no reaction"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "In the chemical reactivity series, copper is placed below hydrogen. Therefore, it is not reactive enough to displace hydrogen gas from dilute acids like hydrochloric acid."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "16) KCl(aq) + AgNO3(aq) -> AgCl(s) + KNO3(aq). The above reaction is an example of"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) Displacement reaction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) combination reaction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) double displacement reaction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) None of these"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (c) double displacement reaction"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "The positive and negative ions switch places to form a solid precipitate (AgCl). This mutual exchange of ions is the defining characteristic of a double displacement reaction."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "17) Which of the following is an endothermic process"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) dilution of sulphuric acid"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) sublimation of dry ice"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) condensation of water vapour"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) dissolution of sodium hydroxide in water"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (b) sublimation of dry ice"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "An endothermic process requires the absorption of heat from the surroundings. Sublimation of dry ice requires heat energy to break the intermolecular bonds."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "18) Electrolysis of water is a decomposition reaction the ratio of volume of hydrogen and oxygen gases liberated during electrolysis of water is"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) 1:1"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) 2:1"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) 4:1"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) 1:2"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (b) 2:1"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "The balanced chemical equation for its electrolysis is: 2H2O -> 2H2 + O2. This shows that two volumes of hydrogen gas are produced for every one volume of oxygen gas."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "19) Name of 2 metals which do not get corroded"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) gold and aluminium"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) gold and copper"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) gold and platinum"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) gold and iron"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (c) gold and platinum"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "Gold and platinum are highly unreactive noble metals. They sit at the very bottom of the reactivity series, meaning they do not readily react with oxygen, moisture, or other chemicals."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "props": {
+            "className": "flex flex-col h-full justify-between shadow-2xl bg-white/5 border-white/10 hover:border-white/20 transition-all duration-300"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "props": {},
+              "children": [
+                {
+                  "type": "Heading",
+                  "props": {
+                    "level": 3,
+                    "className": "text-2xl font-bold mb-6 text-white leading-tight"
+                  },
+                  "children": "20) The colour of precipitate formed when you mix solution of lead (II)nitrate and potassium iodide"
+                },
+                {
+                  "type": "List",
+                  "props": {
+                    "className": "mb-6 space-y-3 list-none"
+                  },
+                  "children": [
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(a) red"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(b) blue"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(c) white"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ListItem",
+                      "props": {
+                        "className": "text-white/80 flex items-start gap-3 text-base"
+                      },
+                      "children": [
+                        {
+                          "type": "Span",
+                          "props": {
+                            "className": "text-blue-400 font-bold mt-0.5"
+                          },
+                          "children": "\u2022"
+                        },
+                        {
+                          "type": "Span",
+                          "props": {},
+                          "children": "(d) yellow"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "props": {
+                "className": "mt-auto"
+              },
+              "children": [
+                {
+                  "type": "Divider",
+                  "props": {
+                    "className": "border-white/10 my-5"
+                  }
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-green-400 font-bold text-lg mb-3"
+                  },
+                  "children": "\u2713 (d) yellow"
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "className": "text-white/60 text-sm leading-relaxed"
+                  },
+                  "children": "When colorless solutions of lead(II) nitrate and potassium iodide are mixed, they undergo a double displacement reaction to form lead(II) iodide, which crashes out as a striking, bright yellow precipitate."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
