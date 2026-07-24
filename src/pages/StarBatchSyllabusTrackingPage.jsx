@@ -1,23 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { syllabusData } from '../data/syllabusData';
-import { getSyllabusProgress, toggleTaskCompletion } from '../services/starBatchTrackingService';
+import { getSyllabusProgress, toggleTaskCompletion, getTrackingConfig } from '../services/starBatchTrackingService';
 import { useAuth } from '../auth/AuthContext';
 import { Target, ChevronRight, ChevronLeft, CheckCircle, Circle, LayoutList } from 'lucide-react';
-
-export const SYLLABUS_CHECKLIST = [
-  { id: 'ncert-reading', label: 'NCERT Reading' },
-  { id: 'ncert-exercise', label: 'NCERT Exercise' },
-  { id: 'class-notes', label: 'Class Notes' },
-  { id: 'formula-revision', label: 'Formula / Important Points Revision' },
-  { id: 'pyq', label: 'PYQ Practice' },
-  { id: 'qb', label: 'Question Bank Practice' },
-  { id: 'advanced-q', label: 'Advanced Questions Practice' },
-  { id: 'sample-paper', label: 'Sample Paper Questions' },
-  { id: 'revision-1', label: 'Revision 1' },
-  { id: 'revision-2', label: 'Revision 2' },
-  { id: 'doubts', label: 'Doubts Cleared' },
-];
 
 export default function StarBatchSyllabusTrackingPage() {
   const { currentUser } = useAuth();
@@ -25,6 +11,7 @@ export default function StarBatchSyllabusTrackingPage() {
   const { sectionId, subjectId, chapterId } = useParams();
 
   const [completedTasks, setCompletedTasks] = useState({});
+  const [trackingConfig, setTrackingConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,8 +29,12 @@ export default function StarBatchSyllabusTrackingPage() {
   async function fetchProgress() {
     setLoading(true);
     try {
-      const data = await getSyllabusProgress(currentUser.phone);
+      const [data, config] = await Promise.all([
+        getSyllabusProgress(currentUser.phone),
+        getTrackingConfig()
+      ]);
       setCompletedTasks(data);
+      setTrackingConfig(config);
     } catch (err) {
       console.error(err);
     } finally {
@@ -52,14 +43,21 @@ export default function StarBatchSyllabusTrackingPage() {
   }
 
   // --- Progress Calculations ---
-  const totalTasksPerChapter = SYLLABUS_CHECKLIST.length;
+  const getTasksForSection = (secId) => {
+    if (!trackingConfig) return [];
+    const globalTasks = trackingConfig.globalChecklist || [];
+    const sectionTasks = trackingConfig.sectionChecklists?.[secId] || [];
+    return [...globalTasks, ...sectionTasks];
+  };
 
-  const calculateChapterProgress = (chapId) => {
+  const calculateChapterProgress = (chapId, secId) => {
     let count = 0;
-    SYLLABUS_CHECKLIST.forEach(task => {
+    const tasks = getTasksForSection(secId);
+    tasks.forEach(task => {
       if (completedTasks[`${chapId}-${task.id}`]) count++;
     });
-    return { completed: count, total: totalTasksPerChapter, percentage: count === 0 ? 0 : Math.round((count / totalTasksPerChapter) * 100) };
+    const total = tasks.length;
+    return { completed: count, total, percentage: total === 0 ? 0 : Math.round((count / total) * 100) };
   };
 
   const calculateSubjectProgress = (subId) => {
@@ -70,7 +68,7 @@ export default function StarBatchSyllabusTrackingPage() {
       const subject = section.subjects.find(s => s.subjectId === subId);
       if (subject) {
         subject.chapters.forEach(chap => {
-          const cp = calculateChapterProgress(chap.chapterId);
+          const cp = calculateChapterProgress(chap.chapterId, section.sectionId);
           completed += cp.completed;
           total += cp.total;
         });
@@ -143,7 +141,7 @@ export default function StarBatchSyllabusTrackingPage() {
     );
   };
 
-  if (loading) {
+  if (loading || !trackingConfig) {
     return (
       <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
         <div className="loader" />
@@ -159,7 +157,8 @@ export default function StarBatchSyllabusTrackingPage() {
 
     if (!chapter) return <div>Chapter not found.</div>;
 
-    const progress = calculateChapterProgress(chapterId);
+    const progress = calculateChapterProgress(chapterId, sectionId);
+    const tasks = getTasksForSection(sectionId);
 
     const toggleTask = async (taskId, currentStatus) => {
       // Optimistic update
@@ -200,7 +199,7 @@ export default function StarBatchSyllabusTrackingPage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {SYLLABUS_CHECKLIST.map(task => {
+          {tasks.map(task => {
             const isCompleted = !!completedTasks[`${chapterId}-${task.id}`];
             return (
               <div 
@@ -260,7 +259,7 @@ export default function StarBatchSyllabusTrackingPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {subject.chapters.map(chapter => {
-            const cp = calculateChapterProgress(chapter.chapterId);
+            const cp = calculateChapterProgress(chapter.chapterId, section.sectionId);
             return (
               <div 
                 key={chapter.chapterId}

@@ -45,3 +45,29 @@ export async function toggleTaskCompletion(userId, chapterId, taskId, isComplete
   await setDoc(docRef, { completedTasks });
   return completedTasks;
 }
+
+export const DEFAULT_GLOBAL_CHECKLIST = [
+  { id: 'ncert-reading', label: 'NCERT Reading' },
+  { id: 'ncert-exercise', label: 'NCERT Exercise' },
+  { id: 'class-notes', label: 'Class Notes' },
+  { id: 'formula-revision', label: 'Formula / Important Points Revision' },
+  { id: 'pyq', label: 'PYQ Practice' },
+  { id: 'qb', label: 'Question Bank Practice' },
+  { id: 'advanced-q', label: 'Advanced Questions Practice' },
+  { id: 'sample-paper', label: 'Sample Paper Questions' },
+  { id: 'revision-1', label: 'Revision 1' },
+  { id: 'revision-2', label: 'Revision 2' },
+  { id: 'doubts', label: 'Doubts Cleared' },
+];
+
+export async function getTrackingConfig() {
+  const snap = await getDoc(doc(db, 'settings', 'starBatchTrackingConfig'));
+  if (snap.exists()) {
+    return snap.data();
+  }
+  return { globalChecklist: DEFAULT_GLOBAL_CHECKLIST, sectionChecklists: {} };
+}
+
+export async function saveTrackingConfig(config) {
+  await setDoc(doc(db, 'settings', 'starBatchTrackingConfig'), config);
+}

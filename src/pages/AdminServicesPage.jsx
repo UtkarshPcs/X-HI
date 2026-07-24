@@ -24,6 +24,7 @@ import { getTables, setTeacherRecordTables } from '../services/recordsService';
 import { getInAppNotices, addInAppNotice, deleteInAppNotice } from '../services/inAppNoticeService';
 import UXCampaignAdmin from '../ux/admin/UXCampaignAdmin';
 import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInternalStudent } from '../services/starBatchService';
+import { getTrackingConfig, saveTrackingConfig } from '../services/starBatchTrackingService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
 import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
@@ -2345,6 +2346,7 @@ function TestDataTab() {
 ──────────────────────────────────────────────────────────────*/
 function StarBatchTab() {
   const [config, setConfig] = useState(null);
+  const [trackingConfig, setTrackingConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newCode, setNewCode] = useState('');
   const [rollInput, setRollInput] = useState('');
@@ -2444,12 +2446,13 @@ function StarBatchTab() {
       getAllTestAttempts(),
       getAllUsers(),
       getAllTests(),
-      getAllTests()
-    ]).then(([c, atts, usersList, _, allTests]) => {
+      getTrackingConfig()
+    ]).then(([c, atts, usersList, allTests, trkConfig]) => {
       setConfig(c);
       setNewCode(c.code);
       setAttempts(atts);
       setAllBankTests(allTests);
+      setTrackingConfig(trkConfig);
       
       const uMap = {};
       usersList.forEach(u => {
@@ -2710,6 +2713,86 @@ function StarBatchTab() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+      </div>
+
+      <div className="as-card">
+        <h4 className="as-section-title"><Target size={15} /> Syllabus Tracking Checklist</h4>
+        <p className="as-muted" style={{ marginBottom: '1rem' }}>Manage the tasks students must complete for each chapter. Adding tasks here dynamically updates the tracking portal.</p>
+        
+        {trackingConfig && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <h5 style={{ margin: '0 0 1rem 0', color: '#f1f5f9', fontSize: '1rem' }}>Global Tasks (Apply to all subjects)</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                {(trackingConfig.globalChecklist || []).map((t, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '0.5rem 0.75rem', borderRadius: '4px' }}>
+                    <span>{t.label} <span className="as-muted" style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>({t.id})</span></span>
+                    <button onClick={async () => {
+                      if (!window.confirm('Delete this task?')) return;
+                      const next = { ...trackingConfig, globalChecklist: trackingConfig.globalChecklist.filter(x => x.id !== t.id) };
+                      setTrackingConfig(next);
+                      await saveTrackingConfig(next);
+                    }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><X size={14} /></button>
+                  </div>
+                ))}
+              </div>
+              <button className="auth-btn secondary" onClick={async () => {
+                const label = window.prompt("Enter task label (e.g., 'NCERT Reading'):");
+                if (!label) return;
+                const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                const next = { ...trackingConfig, globalChecklist: [...(trackingConfig.globalChecklist || []), { id, label }] };
+                setTrackingConfig(next);
+                await saveTrackingConfig(next);
+              }} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}><Plus size={14} /> Add Global Task</button>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <h5 style={{ margin: '0 0 1rem 0', color: '#f1f5f9', fontSize: '1rem' }}>Section-Specific Tasks</h5>
+              {syllabusData.map(sec => {
+                const secTasks = trackingConfig.sectionChecklists?.[sec.sectionId] || [];
+                return (
+                  <div key={sec.sectionId} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontWeight: 600, color: '#fbbf24', marginBottom: '0.5rem' }}>{sec.sectionName} ({sec.sectionId})</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                      {secTasks.map((t, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '0.5rem 0.75rem', borderRadius: '4px' }}>
+                          <span>{t.label}</span>
+                          <button onClick={async () => {
+                            if (!window.confirm('Delete this task?')) return;
+                            const next = { 
+                              ...trackingConfig, 
+                              sectionChecklists: { 
+                                ...trackingConfig.sectionChecklists, 
+                                [sec.sectionId]: secTasks.filter(x => x.id !== t.id) 
+                              } 
+                            };
+                            setTrackingConfig(next);
+                            await saveTrackingConfig(next);
+                          }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><X size={14} /></button>
+                        </div>
+                      ))}
+                      {secTasks.length === 0 && <div className="as-muted" style={{ fontSize: '0.85rem' }}>No specific tasks.</div>}
+                    </div>
+                    <button className="auth-btn secondary" onClick={async () => {
+                      const label = window.prompt(`Enter task label for ${sec.sectionName}:`);
+                      if (!label) return;
+                      const id = sec.sectionId + '-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                      const next = { 
+                        ...trackingConfig, 
+                        sectionChecklists: { 
+                          ...trackingConfig.sectionChecklists, 
+                          [sec.sectionId]: [...secTasks, { id, label }] 
+                        } 
+                      };
+                      setTrackingConfig(next);
+                      await saveTrackingConfig(next);
+                    }} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}><Plus size={12} /> Add {sec.sectionName} Task</button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
