@@ -42,6 +42,6 @@ export async function toggleTaskCompletion(userId, chapterId, taskId, isComplete
     delete completedTasks[key];
   }
   
-  await setDoc(docRef, { completedTasks }, { merge: true });
+  await setDoc(docRef, { completedTasks });
   return completedTasks;
 }
