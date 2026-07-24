@@ -42,7 +42,7 @@ export default function StarBatchSyllabusTrackingPage() {
   async function fetchProgress() {
     setLoading(true);
     try {
-      const data = await getSyllabusProgress(currentUser.id);
+      const data = await getSyllabusProgress(currentUser.phone);
       setCompletedTasks(data);
     } catch (err) {
       console.error(err);
@@ -173,8 +173,10 @@ export default function StarBatchSyllabusTrackingPage() {
       });
 
       try {
-        const updated = await toggleTaskCompletion(currentUser.id, chapterId, taskId, newStatus);
-        setCompletedTasks(updated);
+        const updated = await toggleTaskCompletion(currentUser.phone, chapterId, taskId, newStatus);
+        if (updated) {
+          setCompletedTasks(updated);
+        }
       } catch (err) {
         console.error(err);
         // Revert optimistic on error could be implemented here
