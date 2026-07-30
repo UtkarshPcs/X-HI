@@ -44,10 +44,11 @@ If a question has multiple-choice options (e.g. (a), (b), (c), (d)) OR is an Ass
 }
 ```
 **Rules:**
-- `options`: Must be an array of exactly 4 strings.
+- `options`: Must be an array of exactly 4 strings. **Options fully support Markdown and LaTeX formulas (e.g. `"$\\sqrt{2}x$"`).**
 - `correctOptionIndex`: Integer (0-3) indicating the correct option. Determine this logically if the PDF doesn't have an answer key.
 - `difficulty`: `"Easy"`, `"Medium"`, `"Hard"`, or `"Super Difficult"`.
 - `type`: Must be `"objective"`.
+- Objective questions NEVER have `answerSteps` or `marks`.
 
 ---
 
@@ -91,6 +92,7 @@ If a question requires a written answer, proof, steps, or is a **Case-Based ques
 - `answerSteps`: Must be an array of objects (`stepText` and `marks`). The sum of `marks` in `answerSteps` must exactly equal the question's total `marks`. Write clear, step-by-step logic for the answer.
 - `type`: Must be `"subjective"`.
 - **Case-Based Questions**: Should be grouped under subjective questions (usually 4 or 5 marks).
+- Subjective questions NEVER have `options` or `correctOptionIndex`.
 
 ---
 
