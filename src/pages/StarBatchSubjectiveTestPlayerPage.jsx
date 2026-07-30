@@ -319,6 +319,14 @@ export default function StarBatchSubjectiveTestPlayerPage() {
         .modal-btn.cancel:hover { background: rgba(255,255,255,0.2); }
         .modal-btn.confirm { background: #3b82f6; color: #fff; }
         .modal-btn.confirm:hover { background: #2563eb; }
+        
+        @media (max-width: 600px) {
+          .eval-card { padding: 1rem; }
+          .paper-container { padding: 1rem; }
+          .tp-title { font-size: 1.1rem; white-space: normal; }
+          .eval-input { width: 70px !important; padding: 0.5rem !important; }
+          .paper-question { flex-direction: column; gap: 0.5rem; }
+        }
       `}</style>
       
       {confirmDialog && (
@@ -470,26 +478,64 @@ export default function StarBatchSubjectiveTestPlayerPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div>
-                <h4 style={{ margin: '0 0 0.25rem', color: '#fff' }}>Your Score</h4>
-                <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Enter the marks you obtained out of {activeQuestions[evalIndex].marks}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.2)', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem', color: '#fff' }}>Your Score</h4>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Out of {activeQuestions[evalIndex].marks} marks</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <input 
+                    type="number" 
+                    step="0.5" 
+                    min="0" 
+                    max={activeQuestions[evalIndex].marks}
+                    className="eval-input"
+                    value={evalMarks[evalIndex] !== undefined ? evalMarks[evalIndex] : ''}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setEvalMarks(prev => ({ ...prev, [evalIndex]: isNaN(val) ? undefined : val }));
+                    }}
+                    placeholder="0.0"
+                    style={{ width: '80px', padding: '0.6rem', fontSize: '1.1rem' }}
+                  />
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.1rem', fontWeight: 'bold' }}>/ {activeQuestions[evalIndex].marks}</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input 
-                  type="number" 
-                  step="0.5" 
-                  min="0" 
-                  max={activeQuestions[evalIndex].marks}
-                  className="eval-input"
-                  value={evalMarks[evalIndex] !== undefined ? evalMarks[evalIndex] : ''}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    setEvalMarks(prev => ({ ...prev, [evalIndex]: isNaN(val) ? undefined : val }));
-                  }}
-                  placeholder="0.0"
-                />
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.2rem', fontWeight: 'bold' }}>/ {activeQuestions[evalIndex].marks}</span>
+
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {(() => {
+                  const maxM = activeQuestions[evalIndex].marks;
+                  let options = [];
+                  if (maxM === 1) options = [0, 0.5, 1];
+                  else if (maxM === 2) options = [0, 1, 2];
+                  else if (maxM === 3) options = [1, 2, 3];
+                  else if (maxM === 4) options = [1, 2, 4];
+                  else if (maxM === 5) options = [2, 3, 5];
+                  else options = [0, Math.floor(maxM/2), maxM];
+                  
+                  return options.map(opt => (
+                    <button 
+                      key={opt}
+                      onClick={() => setEvalMarks(prev => ({ ...prev, [evalIndex]: opt }))}
+                      style={{ 
+                        flex: '1 1 calc(33.33% - 0.5rem)', 
+                        padding: '0.75rem', 
+                        background: evalMarks[evalIndex] === opt ? '#fbbf24' : 'rgba(255,255,255,0.05)', 
+                        color: evalMarks[evalIndex] === opt ? '#000' : '#fff', 
+                        border: '1px solid ' + (evalMarks[evalIndex] === opt ? '#fbbf24' : 'rgba(255,255,255,0.2)'),
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontSize: '1rem',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {opt} {opt === 1 ? 'Mark' : 'Marks'}
+                    </button>
+                  ));
+                })()}
               </div>
             </div>
           </div>
