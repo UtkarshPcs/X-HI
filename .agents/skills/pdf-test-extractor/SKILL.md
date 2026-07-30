@@ -96,21 +96,27 @@ If a question requires a written answer, proof, steps, or is a **Case-Based ques
 
 ---
 
-### Explicit Field Specifications:
+### Explicit Field Specifications (Applies to both files):
 1. **`sectionId`** *(Exact String)*: Must strictly be one of the top-level section IDs listed below (e.g., `"science"`, `"sst"`). No arbitrary strings.
 2. **`subjectId`** *(Exact String)*: Must strictly match the subject ID under the chosen section (e.g., `"science-0"`). No arbitrary strings.
 3. **`chapterId`** *(Exact String)*: Must strictly match the chapter ID under the chosen subject (e.g., `"science-0-c1"`). No arbitrary strings.
-4. **`title`** *(Free Text String)*: Format strictly as: `"[Subject Name] Ch [Chapter Number] - [Chapter Name]"` (e.g., `"Physics Ch 2 - Force and Laws of Motion"`). Do NOT use IDs like "science-0-c1" here.
-5. **`type`** *(Exact String)*: Must ALWAYS be exactly `"subjective"`.
-6. **`questions`** *(Array of Objects)*: Must contain a list of subjective questions.
-7. **`questions[i].text`** *(Free Text String)*: The question itself. You can type any arbitrary string here. Use Markdown for formatting. **CRITICAL:** Do NOT hardcode question numbers (e.g., "1.", "Q1.") at the start of the text. The system auto-numbers questions during rendering.
-8. **`questions[i].marks`** *(Integer)*: Must strictly be one of: `1, 2, 3, 4, 5`. Note: 5-mark questions are generally Case-Based or long descriptive questions.
-9. **`questions[i].difficulty`** *(Exact String)*: Must strictly be one of: `"Easy"`, `"Medium"`, `"Hard"`, `"Super Difficult"`.
-10. **`questions[i].topic`** *(Free Text String)*: The sub-topic of the chapter. You can type any arbitrary string here (e.g., `"Ohm's Law"`, `"Quadratic Formula"`).
-11. **`questions[i].answerSteps`** *(Array of Objects)*: Provide a clear, step-by-step marking scheme. The sum of `marks` inside `answerSteps` MUST exactly equal the total `marks` of the question.
-12. **`questions[i].answerSteps[j].stepText`** *(Free Text String)*: The exact step or logic required to earn the marks. You can type any arbitrary string here. Use Markdown.
-13. **`questions[i].answerSteps[j].marks`** *(Integer or Float)*: The marks awarded for this specific step (e.g., `1`, `0.5`, `1.5`).
-14. **`questions[i].diagram`** *(Object, Optional)*: Use this to generate procedural SVG diagrams. Do NOT invent templates. The following are the ONLY supported templates. Always use the specified IDs for highlighting or referencing in questions:
+4. **`title`** *(Free Text String)*: Format strictly as: `"[Subject Name] Ch [Chapter Number] - [Chapter Name] - [Objective/Subjective] Test"` (e.g., `"Physics Ch 2 - Force and Laws of Motion - Objective Test"`). 
+5. **`type`** *(Exact String)*: `"objective"` for the objective JSON, `"subjective"` for the subjective JSON.
+6. **`questions`** *(Array of Objects)*: Must contain a list of questions corresponding to the file type.
+7. **`questions[i].text`** *(Free Text String)*: The question itself. Use Markdown for formatting. **CRITICAL:** Do NOT hardcode question numbers (e.g., "1.", "Q1.") at the start of the text.
+8. **`questions[i].difficulty`** *(Exact String)*: Must strictly be one of: `"Easy"`, `"Medium"`, `"Hard"`, `"Super Difficult"`.
+9. **`questions[i].topic`** *(Free Text String)*: The sub-topic of the chapter. (e.g., `"Ohm's Law"`, `"Quadratic Formula"`).
+10. **`questions[i].diagram`** *(Object, Optional)*: Use this to generate procedural SVG diagrams for BOTH Objective and Subjective questions. Do NOT invent templates. You cannot extract raster images from a PDF, so use these supported SVG templates if a matching diagram is required. The following are the ONLY supported templates. Always use the specified IDs for highlighting or referencing in questions:
+
+*(The following fields apply ONLY to Subjective Questions)*:
+11. **`questions[i].marks`** *(Integer)*: Must strictly be one of: `1, 2, 3, 4, 5`. Note: 5-mark questions are generally Case-Based.
+12. **`questions[i].answerSteps`** *(Array of Objects)*: Provide a clear, step-by-step marking scheme. The sum of `marks` inside `answerSteps` MUST exactly equal the total `marks` of the question.
+13. **`questions[i].answerSteps[j].stepText`** *(Free Text String)*: The exact step or logic required to earn the marks. Use Markdown.
+14. **`questions[i].answerSteps[j].marks`** *(Integer or Float)*: The marks awarded for this specific step (e.g., `1`, `0.5`, `1.5`).
+
+*(The following fields apply ONLY to Objective Questions)*:
+15. **`questions[i].options`** *(Array of 4 Strings)*: Exactly 4 options. Fully supports Markdown and LaTeX.
+16. **`questions[i].correctOptionIndex`** *(Integer)*: 0-based index of the correct option (0, 1, 2, or 3).
 
 # Mathematics SVG Library Documentation
 
