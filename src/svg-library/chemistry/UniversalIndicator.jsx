@@ -44,7 +44,7 @@ const UniversalIndicator = ({ data }) => {
       {showLabels && (
         <g id="labels" fontSize="14" fill="#374151">
           {sections.map((sec, i) => (
-            <g key={\`label-\${sec.id}\`} opacity={getOpacity(sec.id)}>
+            <g key={`label-${sec.id}`} opacity={getOpacity(sec.id)}>
               <circle cx={420} cy={100 + i * 40} r="12" fill={sec.color} />
               <text x="445" y={105}>{sec.label} (pH {sec.ph})</text>
             </g>
