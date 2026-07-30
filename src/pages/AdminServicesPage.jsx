@@ -27,7 +27,7 @@ import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInterna
 import { getTrackingConfig, saveTrackingConfig } from '../services/starBatchTrackingService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadSubjectiveTestJSON } from '../services/starBatchSubjectiveTestService';
+import { uploadSubjectiveTestJSON, getAllSubjectiveTests } from '../services/starBatchSubjectiveTestService';
 import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
@@ -2358,6 +2358,7 @@ function StarBatchTab() {
   const [uploadType, setUploadType] = useState('objective');
   const [attempts, setAttempts] = useState([]);
   const [allBankTests, setAllBankTests] = useState([]);
+  const [allSubjectiveTests, setAllSubjectiveTests] = useState([]);
   const [usersMap, setUsersMap] = useState({});
   const [testsMap, setTestsMap] = useState({});
   
@@ -2424,6 +2425,32 @@ function StarBatchTab() {
             return q;
           })
         };
+      }
+      
+      let sampleQuestions = [];
+      if (Array.isArray(json)) {
+        if (json[0] && Array.isArray(json[0].questions)) {
+          sampleQuestions = json[0].questions;
+        } else if (json[0] && (json[0].question || json[0].text)) {
+          sampleQuestions = json;
+        }
+      } else if (json.questions) {
+        sampleQuestions = json.questions;
+      }
+
+      if (sampleQuestions.length > 0) {
+        const sample = sampleQuestions[0];
+        const isSubjectiveData = !!sample.answerSteps;
+        const isObjectiveData = !!sample.options;
+        
+        if (uploadType === 'subjective' && isObjectiveData && !isSubjectiveData) {
+          setBusy(false);
+          return alert("Format Mismatch: You are trying to upload an Objective JSON (contains options) but you selected Subjective upload!");
+        }
+        if (uploadType === 'objective' && isSubjectiveData && !isObjectiveData) {
+          setBusy(false);
+          return alert("Format Mismatch: You are trying to upload a Subjective JSON (contains answerSteps) but you selected Objective upload!");
+        }
       }
       
       let summary = [];
@@ -2495,13 +2522,15 @@ function StarBatchTab() {
       getAllTestAttempts(),
       getAllUsers(),
       getAllTests(),
-      getTrackingConfig()
-    ]).then(([c, atts, usersList, allTests, trkConfig]) => {
+      getTrackingConfig(),
+      getAllSubjectiveTests()
+    ]).then(([c, atts, usersList, allTests, trkConfig, subTests]) => {
       setConfig(c);
       setNewCode(c.code);
       setAttempts(atts);
       setAllBankTests(allTests);
       setTrackingConfig(trkConfig);
+      setAllSubjectiveTests(subTests || []);
       
       const uMap = {};
       usersList.forEach(u => {
@@ -2680,9 +2709,17 @@ function StarBatchTab() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {(() => {
             const questionCountsByChapter = {};
+            const subjectiveCountsByChapter = {};
+            
             allBankTests.forEach(test => {
               if (test.chapterId && test.questions) {
                 questionCountsByChapter[test.chapterId] = (questionCountsByChapter[test.chapterId] || 0) + test.questions.length;
+              }
+            });
+            
+            allSubjectiveTests.forEach(test => {
+              if (test.chapterId && test.questions) {
+                subjectiveCountsByChapter[test.chapterId] = (subjectiveCountsByChapter[test.chapterId] || 0) + test.questions.length;
               }
             });
             

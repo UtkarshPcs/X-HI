@@ -29,6 +29,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
 
   const [bookmarks, setBookmarks] = useState(new Set());
   const [reportedStatus, setReportedStatus] = useState({});
+  const [confirmDialog, setConfirmDialog] = useState(null);
   const [reporting, setReporting] = useState(false);
 
   // phases: 'INSTRUCTION', 'TEST', 'EVALUATION', 'RESULT'
@@ -172,18 +173,21 @@ export default function StarBatchSubjectiveTestPlayerPage() {
     if (!currentUser || reporting) return;
     const q = activeQuestions[evalIndex];
     if (reportedStatus[q.originalIndex]) return;
-    if (!window.confirm("Report this question for errors?")) return;
-    
-    setReporting(true);
-    try {
-      await reportTestQuestion(test.id, q.originalIndex, test.chapterId);
-      setReportedStatus(prev => ({ ...prev, [q.originalIndex]: true }));
-      alert("Question reported successfully. Our team will review it.");
-    } catch (err) {
-      alert("Failed to report: " + err.message);
-    } finally {
-      setReporting(false);
-    }
+    setConfirmDialog({
+      message: "Report this question for errors?",
+      onConfirm: async () => {
+        setReporting(true);
+        try {
+          await reportTestQuestion(test.id, q.originalIndex, test.chapterId);
+          setReportedStatus(prev => ({ ...prev, [q.originalIndex]: true }));
+          alert("Question reported successfully. Our team will review it.");
+        } catch (err) {
+          alert("Failed to report: " + err.message);
+        } finally {
+          setReporting(false);
+        }
+      }
+    });
   };
 
   const formatTime = (seconds) => {
@@ -197,8 +201,12 @@ export default function StarBatchSubjectiveTestPlayerPage() {
   };
 
   const handleFinishWriting = () => {
-    if (!window.confirm("Are you sure you have finished writing all answers in your copy?")) return;
-    setPhase('EVALUATION');
+    setConfirmDialog({
+      message: "Are you sure you have finished writing all answers in your copy?",
+      onConfirm: () => {
+        setPhase('EVALUATION');
+      }
+    });
   };
 
   const handleEvalNext = () => {
@@ -218,10 +226,12 @@ export default function StarBatchSubjectiveTestPlayerPage() {
   };
 
   async function handleSubmitEval() {
-    if (!window.confirm("Submit final evaluation?")) return;
-    setIsSubmitting(true);
-    
-    let totalObtained = 0;
+    setConfirmDialog({
+      message: "Submit final evaluation?",
+      onConfirm: async () => {
+        setIsSubmitting(true);
+        
+        let totalObtained = 0;
     let totalMax = 0;
     
     Object.entries(evalMarks).forEach(([idx, val]) => {
@@ -250,6 +260,8 @@ export default function StarBatchSubjectiveTestPlayerPage() {
     } finally {
       setIsSubmitting(false);
     }
+      }
+    });
   }
 
   if (loading) return (
@@ -296,7 +308,33 @@ export default function StarBatchSubjectiveTestPlayerPage() {
         .custom-md .katex-display { margin: 0.5rem 0; }
         .eval-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.75rem; border-radius: 8px; font-size: 1.2rem; width: 100px; text-align: center; font-weight: bold; outline: none; }
         .eval-input:focus { border-color: #fbbf24; }
+        .custom-md { white-space: pre-wrap; word-break: break-word; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .modal-content { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-title { font-size: 1.25rem; font-weight: bold; color: #fff; margin-bottom: 1rem; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+        .modal-btn { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: all 0.2s; }
+        .modal-btn.cancel { background: rgba(255,255,255,0.1); color: #fff; }
+        .modal-btn.cancel:hover { background: rgba(255,255,255,0.2); }
+        .modal-btn.confirm { background: #3b82f6; color: #fff; }
+        .modal-btn.confirm:hover { background: #2563eb; }
       `}</style>
+      
+      {confirmDialog && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-title">{confirmDialog.message}</div>
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setConfirmDialog(null)}>Cancel</button>
+              <button className="modal-btn confirm" onClick={() => {
+                confirmDialog.onConfirm();
+                setConfirmDialog(null);
+              }}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="tp-header" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>

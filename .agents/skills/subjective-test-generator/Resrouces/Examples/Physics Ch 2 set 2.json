@@ -1,0 +1,274 @@
+
+{
+  "sectionId": "science",
+  "subjectId": "science-0",
+  "chapterId": "science-0-c1",
+  "title": "Physics Ch 10 - Human Eye and Colourful World",
+  "type": "subjective",
+  "questions": [
+    {
+      "text": "**Assertion (A):** When ciliary muscles contract, the eye lens becomes thin.\n\n**Reason (R):** Ciliary muscles control the power of accommodation of the eye lens.\n\nChoose the correct option:\n(a) Both A and R are true and R is the correct explanation of A.\n(b) Both A and R are true but R is not the correct explanation of A.\n(c) A is true but R is false.\n(d) A is false but R is true.",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "Option (d) is correct. Assertion (A) is false because when ciliary muscles contract, the eye lens becomes thicker to decrease its focal length. Reason (R) is true as ciliary muscles do control the focal length and power of the eye lens.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Which of the following statements is NOT true for the scattering of light in the atmosphere?\n(a) The colour of the scattered light depends on the size of the scattering particles.\n(b) Red light is the least scattered in the atmosphere.\n(c) Scattering of light takes place because various colours of white light travel with different speeds in air.\n(d) Fine particles in the atmospheric air scatter the blue light more strongly than red.",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "Option (c) is not true. In air (or vacuum), all colours of white light travel with almost the exact same speed. Scattering depends on the wavelength of light and particle size, not on differing speeds in the air.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In bifocal lenses used for the correction of presbyopia, how are the concave and convex lenses structurally arranged?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "In a bifocal lens, the upper portion consists of a concave lens (for distant vision) and the lower portion consists of a convex lens (for near vision).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What physiological change occurs in the eye when you look at an object placed very close to your eyes?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Power of Accommodation",
+      "answerSteps": [
+        {
+          "stepText": "The ciliary muscles of the eye contract, which increases the curvature of the eye lens, making it thicker and decreasing its focal length.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What happens to the image distance in the human eye when we increase the distance of an object from the eye?",
+      "marks": 1,
+      "difficulty": "Hard",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The image distance remains unchanged (it is always the fixed distance between the eye lens and the retina). The ciliary muscles adjust the focal length of the eye lens to ensure the image always forms on the retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Trace the exact sequence of events which occur in the human eye when a bright light is suddenly focussed on it.",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "When bright light falls on the eye, the light-sensitive cells send signals to the brain, and the iris reacts immediately.",
+          "marks": 1
+        },
+        {
+          "stepText": "The muscular diaphragm of the iris expands, causing the pupil to contract and become smaller, thereby restricting the amount of light entering the eye to protect the retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A person needs a lens of power $-5.5 \\text{ D}$ for correcting his distant vision. Calculate the focal length of the lens required for correcting his distant vision.",
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "The power of the lens $P = -5.5 \\text{ D}$. The formula relating power and focal length is $f = \\frac{1}{P}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "$f = \\frac{1}{-5.5} = -0.1818 \\text{ m}$ (or roughly $-18.2 \\text{ cm}$).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "For correcting his near vision, a person requires a lens of power $+1.5 \\text{ D}$. Calculate the focal length of the lens required for this correction.",
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "The power of the lens $P = +1.5 \\text{ D}$. Using the formula $f = \\frac{1}{P}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "$f = \\frac{1}{+1.5} = +0.666 \\text{ m}$ (or roughly $+66.7 \\text{ cm}$).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Eye donation is a noble cause that can cure corneal blindness. Based on medical guidelines, state the time frame within which eyes must be removed after death, and list any two diseases that make a deceased person ineligible for eye donation.",
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The eyes must be removed within 4 to 6 hours after the death of the donor.",
+          "marks": 1
+        },
+        {
+          "stepText": "Persons infected with or who died from diseases like AIDS, Hepatitis B or C, rabies, cholera, or tetanus cannot donate their eyes.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "The near point of a hypermetropic eye is $1 \\text{ m}$. What is the power of the corrective lens required to correct this defect? Assume that the near point of a normal eye is $25 \\text{ cm}$.",
+      "marks": 3,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "For a hypermetropic eye, the lens must form a virtual image of an object placed at the normal near point ($u = -25 \\text{ cm}$) at the defective near point ($v = -1 \\text{ m} = -100 \\text{ cm}$).",
+          "marks": 1
+        },
+        {
+          "stepText": "Using the lens formula: $\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u} = \\frac{1}{-100} - \\left(\\frac{1}{-25}\\right) = \\frac{-1 + 4}{100} = \\frac{3}{100}$.\nThus, $f = +\\frac{100}{3} \\text{ cm} = +\\frac{1}{3} \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Power $P = \\frac{1}{f(\\text{in meters})} = \\frac{1}{(1/3)} = +3.0 \\text{ D}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A student very cautiously traces the path of a ray through a rectangular glass slab and then separately through a triangular glass prism. Compare the relationship between the angle of incidence ($\\angle i$) and the angle of emergence ($\\angle e$) in both the glass slab and the glass prism.",
+      "marks": 3,
+      "difficulty": "Medium",
+      "topic": "Refraction of Light",
+      "answerSteps": [
+        {
+          "stepText": "In a rectangular glass slab, the opposite refracting surfaces are parallel to each other.",
+          "marks": 1
+        },
+        {
+          "stepText": "Therefore, the extent of bending at the opposite and parallel faces is equal and opposite, making the emergent ray parallel to the incident ray. Thus, $\\angle i = \\angle e$.",
+          "marks": 1
+        },
+        {
+          "stepText": "In a triangular glass prism, the refracting surfaces are inclined at an angle to each other. The emergent ray bends at an angle to the direction of the incident ray (angle of deviation), so $\\angle i \\neq \\angle e$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Define the term 'power of accommodation'. Explain the specific modification in the curvature of the eye lens that enables us to see nearby objects clearly.",
+      "marks": 3,
+      "difficulty": "Medium",
+      "topic": "Power of Accommodation",
+      "answerSteps": [
+        {
+          "stepText": "The ability of the eye lens to adjust its focal length to clearly focus both near and distant objects on the retina is called the power of accommodation.",
+          "marks": 1
+        },
+        {
+          "stepText": "To see nearby objects clearly, the ciliary muscles contract.",
+          "marks": 1
+        },
+        {
+          "stepText": "This contraction increases the curvature of the eye lens, making it thicker and decreasing its focal length, which allows divergent rays from close objects to converge onto the retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Write the specific function of each of the following optical parts of the human eye:\n(i) Cornea\n(ii) Iris\n(iii) Crystalline lens\n(iv) Ciliary muscles",
+      "marks": 4,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "(i) Cornea: It is the transparent bulge on the front surface of the eye where most of the refraction for the light rays entering the eye occurs.",
+          "marks": 1
+        },
+        {
+          "stepText": "(ii) Iris: It is a dark muscular diaphragm behind the cornea that controls the size of the pupil, thus regulating light entry.",
+          "marks": 1
+        },
+        {
+          "stepText": "(iii) Crystalline lens: It provides the finer adjustments of focal length required to focus objects at different distances accurately on the retina.",
+          "marks": 1
+        },
+        {
+          "stepText": "(iv) Ciliary muscles: They hold the eye lens in position and change its curvature to alter its focal length for accommodation.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Case-Based Question:**\nThe students in a class took a thick sheet of cardboard and made a small hole in its centre. Sunlight was allowed to fall on this small hole to obtain a narrow beam of white light. A triangular glass prism was taken, and this white light was allowed to fall on one of its refracting faces. The prism was turned slowly until the light coming out of the opposite face appeared on a nearby screen. The students studied this beautiful band of light and concluded that it is a spectrum of white light.\n\n(a) What exactly happens to the white light when it passes through the prism, and what is the scientific reason behind it?\n(b) List two natural conditions necessary to observe a rainbow in the sky.\n(c) Name the three sequential optical phenomena involved in the formation of a rainbow by atmospheric water droplets.",
+      "marks": 5,
+      "difficulty": "Hard",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "(a) The white light undergoes dispersion, splitting into a band of its seven constituent colours.",
+          "marks": 1
+        },
+        {
+          "stepText": "This happens because different colours of light travel at different speeds inside the glass prism, causing them to bend through different angles of deviation.",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) Conditions to observe a rainbow: (i) The presence of water droplets in the atmosphere (e.g., after a rain shower). (ii) The Sun must be shining behind the observer.",
+          "marks": 1
+        },
+        {
+          "stepText": "(c) The three phenomena in sequential order are:",
+          "marks": 1
+        },
+        {
+          "stepText": "1. Refraction (with Dispersion)\n2. Total Internal Reflection\n3. Final Refraction (as light exits the droplet).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Case-Based Question:**\nA middle-aged person visits an eye specialist and complains that they are unable to read the newspaper comfortably. Upon testing, the doctor finds that the person's near point has receded to $100 \\text{ cm}$. To read the newspaper properly, they need to hold it at the normal reading distance of $25 \\text{ cm}$.\n\n(a) Name the specific defect of vision the person is suffering from.\n(b) Explain where the image of the text is physically being formed in their defective eye when reading a newspaper at $25 \\text{ cm}$.\n(c) State two physiological reasons why this defect arises.\n(d) Calculate the focal length and the power of the corrective lens required to correct this defect.",
+      "marks": 5,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(a) The person is suffering from Hypermetropia (far-sightedness) or Presbyopia, as their near point has receded away from $25 \\text{ cm}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) Because the converging power of the eye lens is insufficient for close objects, the light rays are focussed at a point behind the retina, resulting in a blurred image.",
+          "marks": 1
+        },
+        {
+          "stepText": "(c) Two causes: (i) The focal length of the eye lens is too long (decrease in curvature). (ii) The eyeball has become too small (shortening of the eyeball).",
+          "marks": 1
+        },
+        {
+          "stepText": "(d) The lens must take an object at $u = -25 \\text{ cm}$ and form a virtual image at $v = -100 \\text{ cm}$.\nUsing $\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u} = \\frac{1}{-100} - \\left(\\frac{1}{-25}\\right) = \\frac{-1 + 4}{100} = \\frac{3}{100}$.\nTherefore, $f = +\\frac{100}{3} \\text{ cm} = +0.33 \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Power $P = \\frac{1}{f (\\text{in m})} = \\frac{1}{(1/3)} = +3.0 \\text{ D}$. The corrective lens is convex with a power of $+3.0 \\text{ D}$.",
+          "marks": 1
+        }
+      ]
+    }
+  ]
+}

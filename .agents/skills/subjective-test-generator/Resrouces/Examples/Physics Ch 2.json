@@ -1,0 +1,1006 @@
+
+{
+  "sectionId": "science",
+  "subjectId": "science-0",
+  "chapterId": "science-0-c1",
+  "title": "Physics Ch 10 - Human Eye and Colourful World",
+  "type": "subjective",
+  "questions": [
+    {
+      "text": "How long does the image of an object remain in our eyes even after the removal of the object?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The image remains on the retina for about $\\frac{1}{16}^{\\text{th}}$ of a second, which is known as the persistence of vision.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In which defect of vision is the image of a distant object formed in front of the retina?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "This occurs in Myopia (or near-sightedness).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "When is a person said to have a cataract in his eye?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "A person is said to have a cataract when the crystalline lens of the eye becomes milky and cloudy at an old age.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What are the least distance and far distance of a normal eye?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The least distance of distinct vision is $25 \\text{ cm}$, and the far distance is infinity.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In which defect of vision is the image of a nearby object formed behind the retina?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "This occurs in Hypermetropia (or far-sightedness).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is meant by the dispersion of light?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "The splitting of white light into its seven constituent colours upon passing through a transparent medium (like a prism) is called dispersion of light.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "If a person can see distant objects clearly but cannot see nearby objects clearly, what type of corrective lens should he use to restore his vision?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "He should use a convex (converging) lens of suitable power.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "With which physical device can a human eye be compared?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The human eye functions similarly to a camera.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the shape of the human eyeball?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The human eyeball is approximately spherical in shape.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Where does most of the refraction of light entering our eyes take place?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "Most of the refraction occurs at the outer surface of the cornea.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the function of the crystalline lens in our eyes?",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "It provides the finer adjustments of focal length required to focus objects at different distances accurately on the retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Where is the iris located in the human eye?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The iris is located just behind the cornea.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the nature of the image formed on the retina in our eye?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The image formed is real and inverted.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Name the nerve which sends electrical signals from the retina to the brain.",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "The optic nerve.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "How does the pupil open completely in dim light?",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "In dim light, the muscles of the iris relax, which increases the size of the pupil allowing more light to enter.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Name the material which the eye-lens is made of.",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "It is made of a transparent, fibrous, jelly-like protein material.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the other name for myopia?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Near-sightedness.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the main problem faced by a person suffering from myopia?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "The person can see nearby objects clearly but cannot see distant objects distinctly.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the other name for hypermetropia?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Far-sightedness.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "How is the near point of a hypermetropic person affected?",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "The near point of the person recedes (moves farther away) from the normal near point of $25 \\text{ cm}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "How does the power of accommodation of the eye vary with ageing?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "The power of accommodation usually decreases with ageing, a condition known as presbyopia.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the primary use of Bi-focal lenses?",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "They are used by individuals suffering from both myopia and hypermetropia to correct both distant and near vision simultaneously.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is a glass prism?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Refraction of Light",
+      "answerSteps": [
+        {
+          "stepText": "A prism is a transparent refracting medium bound by two plane surfaces inclined to each other at a certain angle.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Define the angle of a prism.",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Refraction of Light",
+      "answerSteps": [
+        {
+          "stepText": "The angle formed between the two lateral refracting faces of a prism is called the angle of the prism.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is a spectrum of light?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "The band of the coloured components obtained from the splitting of a light beam is called its spectrum.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Which colour of light bends the least while passing through a glass prism?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "Red light bends the least.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Which colour of light bends the most while passing through a glass prism?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "Violet light bends the most.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "How many constituent colours are present in white sunlight?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "White sunlight consists of seven constituent colours (VIBGYOR).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Why does hot air have a lower density as compared to cool air?",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "Atmospheric Refraction",
+      "answerSteps": [
+        {
+          "stepText": "When air is heated, its molecules gain kinetic energy and move farther apart, causing it to expand and lower its density.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What optical phenomenon causes the twinkling of stars?",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Atmospheric Refraction",
+      "answerSteps": [
+        {
+          "stepText": "Atmospheric refraction of starlight causes stars to twinkle.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Why does the sun appear white at noon?",
+      "marks": 1,
+      "difficulty": "Medium",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "At noon, sunlight travels a shorter distance through the atmosphere, resulting in minimal scattering of light, so it appears white.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Assertion (A):** The colour of a clear sky appears blue.\n**Reason (R):** Light of blue colour has a longer wavelength as compared to the light of red colour.\n\nChoose the correct option:\n(A) Both A and R are true and R is the correct explanation of A.\n(B) Both A and R are true but R is NOT the correct explanation of A.\n(C) A is true but R is false.\n(D) A is false and R is true.",
+      "marks": 1,
+      "difficulty": "Hard",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "Option (C) is correct. Assertion is true (the sky is blue), but Reason is false because blue light has a **shorter** wavelength than red light.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Assertion (A):** A beam of white light gives a spectrum on passing through a glass prism.\n**Reason (R):** Speed of light outside the prism is different from the speed of light inside the prism.\n\nChoose the correct option:\n(A) Both A and R are true and R is the correct explanation of A.\n(B) Both A and R are true but R is NOT the correct explanation of A.\n(C) A is true but R is false.\n(D) A is false and R is true.",
+      "marks": 1,
+      "difficulty": "Hard",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "Option (B) is correct. Both statements are true. However, the reason white light forms a spectrum is due to different constituent colours travelling at *different speeds from each other* inside the prism, not just because the general speed changes from air to glass.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Assertion (A):** A hypermetropic person prefers to remove his spectacles while driving.\n**Reason (R):** When a hypermetropic person wearing spectacles looks at a distant object, the parallel rays from the distant object get converged in front of the retina, blurring the image.\n\nChoose the correct option:\n(A) Both A and R are true and R is the correct explanation of A.\n(B) Both A and R are true but R is NOT the correct explanation of A.\n(C) A is true but R is false.\n(D) A is false and R is true.",
+      "marks": 1,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Option (A) is correct. A hypermetropic person uses convex lenses for near vision. If looking at far objects (driving) through them, the lens converges the already parallel rays too early (in front of the retina), causing blur.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Fill in the blank: The dark muscular diaphragm that controls the amount of light entering the eye is called the ________.",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "Iris.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What focal length should reading spectacles have for a person whose least distance of distinct vision is $50 \\text{ cm}$?",
+      "marks": 2,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Given, object distance $u = -25 \\text{ cm}$ (normal near point), and image distance $v = -50 \\text{ cm}$.\nUsing lens formula: $\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u}$",
+          "marks": 1
+        },
+        {
+          "stepText": "$\\frac{1}{f} = \\frac{1}{-50} - \\left(\\frac{1}{-25}\\right) = \\frac{-1 + 2}{50} = \\frac{1}{50}$.\nThus, $f = +50 \\text{ cm}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Define the terms 'cornea' and 'optical nerve'.",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "Cornea: It is the front, thin, bulging, transparent membrane of the eye through which light enters and where most refraction occurs.",
+          "marks": 1
+        },
+        {
+          "stepText": "Optical nerve: It is the nerve that transmits electrical signals generated by light-sensitive cells of the retina to the brain.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A person uses spectacles of power $-0.5 \\text{ D}$ for distinct vision. How far is the far point of the person?",
+      "marks": 2,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Given, Power $P = -0.5 \\text{ D}$. The focal length $f = \\frac{1}{P} = \\frac{1}{-0.5} = -2 \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "For a myopic eye, the far point is equal to the magnitude of the focal length of the concave lens. Hence, the far point is $2 \\text{ m}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "The far-point of a myopic person is $100 \\text{ cm}$ in front of the eye. What is the nature and power of the lens required to correct the vision?",
+      "marks": 2,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Focal length required $f = -\\text{far point} = -100 \\text{ cm} = -1 \\text{ m}$. Thus, a concave (diverging) lens is required.",
+          "marks": 1
+        },
+        {
+          "stepText": "Power $P = \\frac{1}{f(\\text{in meters})} = \\frac{1}{-1} = -1 \\text{ D}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is astigmatism? How is it corrected?",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Astigmatism is a defect of vision where a person cannot simultaneously focus on horizontal and vertical lines clearly due to irregular curvature of the cornea.",
+          "marks": 1
+        },
+        {
+          "stepText": "It is corrected by using cylindrical lenses of appropriate focal length and axis.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "State two main advantages of having two eyes for vision instead of one.",
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "1. It provides a wider horizontal field of view (about $180^\\circ$ with two eyes compared to $150^\\circ$ with one).",
+          "marks": 1
+        },
+        {
+          "stepText": "2. It enhances depth perception and allows for stereopsis (3D vision) by combining slightly different images from each eye.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Why does the sky appear dark instead of blue to an astronaut?",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "At the high altitudes of space, there is a lack of atmosphere and scattering particles.",
+          "marks": 1
+        },
+        {
+          "stepText": "Because there are no molecules to scatter sunlight into the astronaut's eyes, the sky appears completely dark.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Why are stars considered point sources of light whereas planets are considered extended sources?",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Atmospheric Refraction",
+      "answerSteps": [
+        {
+          "stepText": "Stars are extremely far away from Earth, so they subtend a very small angle and act as point-sized sources of light.",
+          "marks": 1
+        },
+        {
+          "stepText": "Planets are much closer to Earth, subtend a larger angle, and thus behave as extended sources (a collection of many point sources).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Explain why we are unable to see our surroundings clearly when we enter a dark cinema hall from outside's bright sunlight.",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "In bright sunlight, the pupil contracts to reduce light entry and protect the retina.",
+          "marks": 1
+        },
+        {
+          "stepText": "Upon suddenly entering a dark hall, the small pupil does not let enough light in to see. It takes a few moments for the iris muscles to relax and dilate the pupil fully.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the primary difference between the behaviour of a glass slab and a glass prism towards a light ray?",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Refraction of Light",
+      "answerSteps": [
+        {
+          "stepText": "In a rectangular glass slab, the emergent ray is parallel to the incident ray but laterally displaced.",
+          "marks": 1
+        },
+        {
+          "stepText": "In a glass prism, due to its inclined refracting surfaces, the emergent ray bends at an angle relative to the incident ray (angle of deviation).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What happens when a narrow beam of (i) monochromatic light, and (ii) white light passes through a glass prism?",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Refraction of Light",
+      "answerSteps": [
+        {
+          "stepText": "(i) Monochromatic light undergoes only refraction (deviation/bending) but no dispersion since it has only one wavelength.",
+          "marks": 1
+        },
+        {
+          "stepText": "(ii) White light undergoes both refraction and dispersion, splitting into a spectrum of its seven constituent colours.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "State two main causes of Hypermetropia.",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "1. The focal length of the eye lens has become too long (reduced converging power).",
+          "marks": 1
+        },
+        {
+          "stepText": "2. The eyeball has become too small (shortening of the eyeball).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "State two main causes of Myopia.",
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "1. Excessive curvature of the eye lens (leading to a shorter focal length).",
+          "marks": 1
+        },
+        {
+          "stepText": "2. Elongation of the eyeball (distance between lens and retina increases).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is the Tyndall effect? State two instances of observing the Tyndall effect in daily life.",
+      "marks": 3,
+      "difficulty": "Medium",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "The phenomenon of scattering of light by colloidal particles, which makes the path of a light beam visible, is called the Tyndall effect.",
+          "marks": 1
+        },
+        {
+          "stepText": "Instance 1: A fine beam of sunlight entering a dark, smoke/dust-filled room through a small hole.",
+          "marks": 1
+        },
+        {
+          "stepText": "Instance 2: Sunlight passing through the canopy of a dense forest where tiny mist droplets scatter the light.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A person needs a lens of power $+3 \\text{ D}$ for correcting his near vision and $-3 \\text{ D}$ for correcting his distant vision.\n(i) What kind of defect is he suffering from? \n(ii) How are these lenses prepared in a single frame?",
+      "marks": 3,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(i) He is suffering from both Myopia (needs negative power) and Hypermetropia (needs positive power), a condition often resulting from Presbyopia.",
+          "marks": 1
+        },
+        {
+          "stepText": "(ii) These lenses are combined into a bi-focal lens.",
+          "marks": 1
+        },
+        {
+          "stepText": "The upper portion consists of a concave lens ($-3 \\text{ D}$) for distant vision, and the lower portion is a convex lens ($+3 \\text{ D}$) for reading/near vision.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Explain Isaac Newton's double-prism experiment with the help of a diagram description. What was his major conclusion?",
+      "marks": 3,
+      "difficulty": "Hard",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "Newton allowed a beam of white light to pass through a glass prism, splitting it into a spectrum of seven colours.",
+          "marks": 1
+        },
+        {
+          "stepText": "He then placed an identical second prism in an inverted position with respect to the first prism, making all dispersed colours pass through it.",
+          "marks": 1
+        },
+        {
+          "stepText": "The colours recombined to emerge as a single beam of white light, leading him to conclude that sunlight is made of seven constituent colours.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A student suffering from myopia is unable to see distinctly objects placed beyond $5 \\text{ m}$.\n(a) Identify the nature of the corrective lens required.\n(b) Calculate the power of the lens required as per the new Cartesian sign convention.",
+      "marks": 3,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(a) A concave (diverging) lens is required to correct myopia.",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) The far point is $5 \\text{ m}$. For the corrective concave lens, focal length $f = -\\text{far point} = -5 \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Power $P = \\frac{1}{f} = \\frac{1}{-5} = -0.2 \\text{ D}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Explain why the sky is blue but appears dark to astronauts in space.",
+      "marks": 3,
+      "difficulty": "Medium",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "The sky is blue because fine particles and air molecules in Earth's atmosphere strongly scatter shorter wavelengths (blue) of sunlight in all directions.",
+          "marks": 1
+        },
+        {
+          "stepText": "When this scattered blue light enters our eyes, the sky appears blue.",
+          "marks": 1
+        },
+        {
+          "stepText": "In space, there is no atmosphere and therefore no particles to scatter sunlight. With no scattered light reaching their eyes, the sky appears completely black to astronauts.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "What is Presbyopia? State its two causes and explain how it is corrected.",
+      "marks": 3,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "Presbyopia is an age-related vision defect where the power of accommodation of the eye decreases, making it difficult to focus on nearby objects clearly.",
+          "marks": 1
+        },
+        {
+          "stepText": "It is caused by the gradual weakening of the ciliary muscles and the diminishing flexibility of the crystalline lens.",
+          "marks": 1
+        },
+        {
+          "stepText": "It is typically corrected using convex lenses (reading glasses) or bi-focal lenses if the person also suffers from myopia.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Differentiate between myopia and hypermetropia on the basis of:\n(i) Vision problem experienced\n(ii) Focal length change of eye lens\n(iii) Image formation relative to retina",
+      "marks": 3,
+      "difficulty": "Hard",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(i) Myopia: Cannot see distant objects clearly. Hypermetropia: Cannot see nearby objects clearly.",
+          "marks": 1
+        },
+        {
+          "stepText": "(ii) Myopia: Focal length of the eye lens decreases. Hypermetropia: Focal length of the eye lens increases.",
+          "marks": 1
+        },
+        {
+          "stepText": "(iii) Myopia: Image of distant object forms in front of the retina. Hypermetropia: Image of near object forms behind the retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Explain the phenomena of advance sunrise and delayed sunset.",
+      "marks": 3,
+      "difficulty": "Hard",
+      "topic": "Atmospheric Refraction",
+      "answerSteps": [
+        {
+          "stepText": "Because of atmospheric refraction, the light coming from the Sun bends towards the normal as it enters Earth's increasingly dense atmosphere.",
+          "marks": 1
+        },
+        {
+          "stepText": "This bending causes the apparent position of the Sun to be slightly higher than its actual physical position.",
+          "marks": 1
+        },
+        {
+          "stepText": "As a result, the Sun becomes visible roughly 2 minutes before it physically crosses the horizon (advance sunrise) and stays visible for 2 minutes after it drops below (delayed sunset).",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Describe the main structure of the human eye detailing the functions of the cornea, iris, pupil, and crystalline lens.",
+      "marks": 4,
+      "difficulty": "Super Difficult",
+      "topic": "The Human Eye",
+      "answerSteps": [
+        {
+          "stepText": "Cornea: A transparent, outward-bulging membrane forming the front of the eye; it acts as a protective layer and provides most of the refraction for incoming light rays.",
+          "marks": 1
+        },
+        {
+          "stepText": "Iris: A dark, muscular diaphragm situated behind the cornea that controls the size of the pupil.",
+          "marks": 1
+        },
+        {
+          "stepText": "Pupil: The adjustable opening at the center of the iris that regulates and controls the amount of light entering the deeper parts of the eye.",
+          "marks": 1
+        },
+        {
+          "stepText": "Crystalline Lens: A flexible, fibrous jelly-like lens controlled by ciliary muscles; it provides the fine adjustment of focal length required to form a sharp, inverted, real image on the retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Explain the mechanism of atmospheric refraction and how it is responsible for the twinkling of stars.",
+      "marks": 4,
+      "difficulty": "Hard",
+      "topic": "Atmospheric Refraction",
+      "answerSteps": [
+        {
+          "stepText": "Earth's atmosphere has layers of air with varying optical densities (and refractive indices), generally becoming denser closer to the surface.",
+          "marks": 1
+        },
+        {
+          "stepText": "As starlight enters the atmosphere, it undergoes continuous refraction, bending towards the normal, which shifts the apparent position of the star slightly higher.",
+          "marks": 1
+        },
+        {
+          "stepText": "Because the physical conditions (temperature and density) of the atmosphere are constantly changing, the refractive index is not stationary.",
+          "marks": 1
+        },
+        {
+          "stepText": "This causes the path of the starlight to fluctuate, resulting in the apparent position of the point-sized star shifting and its brightness flickering, which we see as twinkling.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A magnifying glass (convex lens) of focal length $5 \\text{ cm}$ is being used by Debashree in the laboratory. Her least distance of distinct vision is $25 \\text{ cm}$.\n(i) What is the magnification obtained by using the glass? (Assume the image forms at her near point)\n(ii) She keeps a book at a distance of $10 \\text{ cm}$ from her eyes. Why is she unable to read it?",
+      "marks": 4,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(i) Given $f = +5 \\text{ cm}$, $v = -25 \\text{ cm}$. Using lens formula: $\\frac{1}{u} = \\frac{1}{v} - \\frac{1}{f} = \\frac{1}{-25} - \\frac{1}{5} = \\frac{-1 - 5}{25} = \\frac{-6}{25}$. So, $u = \\frac{-25}{6} \\text{ cm}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Magnification $m = \\frac{v}{u} = \\frac{-25}{-25/6} = 6$.",
+          "marks": 1
+        },
+        {
+          "stepText": "(ii) Her normal near point is $25 \\text{ cm}$. An object placed at $10 \\text{ cm}$ is far closer than her near point.",
+          "marks": 1
+        },
+        {
+          "stepText": "Her ciliary muscles cannot contract further to decrease the focal length of her eye lens enough to focus an object at $10 \\text{ cm}$ sharply on her retina.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "The near point of the eye of a person is $50 \\text{ cm}$. Find the nature and power of the corrective lens required by the person to enable him to clearly see objects placed at the normal near point of $25 \\text{ cm}$.",
+      "marks": 4,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "The person wants to see an object at $u = -25 \\text{ cm}$. The lens must form a virtual image at the person's defective near point, so $v = -50 \\text{ cm}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Using the lens formula: $\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u} = \\frac{1}{-50} - \\left(\\frac{1}{-25}\\right)$.",
+          "marks": 1
+        },
+        {
+          "stepText": "$\\frac{1}{f} = \\frac{-1}{50} + \\frac{2}{50} = \\frac{1}{50}$. Thus, $f = +50 \\text{ cm} = +0.5 \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Since focal length is positive, it is a convex (converging) lens. Power $P = \\frac{1}{+0.5} = +2.0 \\text{ D}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Case-Based Question:**\nPrachi uses a glass block and a prism to observe the path of a ray of white light as it passes through them. However, she was surprised by the outcome of the glass prism: she witnessed a beautiful pattern of various colours displayed on a screen. She also noted that the light bent upon emerging from the prism, unlike the glass block, where the light ray emerges laterally displaced without overall bending relative to the incident ray.\n\n(a) Name the phenomenon in which light splits into its constituent colours.\n(b) What is the fundamental scientific reason behind the splitting of the white light emerging from the glass prism?\n(c) Which colour of light bends the most and which bends the least while passing through the prism?\n(d) Name a natural atmospheric phenomenon caused by the same dispersion mechanism.",
+      "marks": 5,
+      "difficulty": "Hard",
+      "topic": "Dispersion of Light",
+      "answerSteps": [
+        {
+          "stepText": "(a) The phenomenon is called dispersion of light.",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) White light consists of different colours (wavelengths). Inside the glass medium of the prism, these different colours travel at different speeds.",
+          "marks": 1
+        },
+        {
+          "stepText": "Because they travel at different speeds, they bend through different angles of deviation with respect to the incident ray, causing them to separate.",
+          "marks": 1
+        },
+        {
+          "stepText": "(c) Violet light has the shortest wavelength and bends the most. Red light has the longest wavelength and bends the least.",
+          "marks": 1
+        },
+        {
+          "stepText": "(d) The formation of a rainbow in the sky after rain is a natural phenomenon caused by dispersion.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Case-Based Question:**\nDeepak and his friend Kapil are both suffering from eyesight issues. Deepak faces difficulty while reading the blackboard in his classroom from the last bench, while Kapil faces difficulty while reading books held in his hands. When they got their eyes checked, the doctor suggested spectacles of appropriate power. Kapil's spectacles have a power of $+2.0 \\text{ D}$. Although they tried to interchange glasses, they could not see clearly.\n\n(a) Write the exact name of the eye defect Kapil is suffering from.\n(b) State True or False: The image of the blackboard is formed in front of the retina when Deepak reads it without glasses.\n(c) Which specific type of lens is used by Kapil? Also, calculate its focal length in meters.\n(d) Write two possible physiological causes for the defect Deepak is suffering from.",
+      "marks": 5,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(a) Kapil struggles to read nearby books, meaning he is suffering from Hypermetropia (far-sightedness).",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) True. Deepak cannot read the distant blackboard, meaning he has Myopia. In myopia, the eye lens converges parallel rays from distant objects too strongly, forming the image in front of the retina.",
+          "marks": 1
+        },
+        {
+          "stepText": "(c) Kapil uses a convex lens because his spectacle power is positive ($+2.0 \\text{ D}$).",
+          "marks": 1
+        },
+        {
+          "stepText": "Focal length $f = \\frac{1}{P} = \\frac{1}{+2.0} = +0.5 \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "(d) Deepak's defect (Myopia) can be caused by either (i) excessive curvature of the eye lens, or (ii) elongation of the eyeball.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "**Case-Based Question:**\nWhen light from the sun enters the earth's atmosphere, it gets scattered by the dust particles and air molecules present in the atmosphere. The light having the least wavelength scatters more. The colour of the scattered light depends on the size of the scattering particles. Very fine particles scatter mainly blue light, while larger particles scatter light of longer wavelengths. Furthermore, the atmosphere has a non-uniform refractive index, causing light to undergo atmospheric refraction.\n\n(a) To an astronaut in a spaceship orbiting high above the atmosphere, what colour does the earth's sky appear and why?\n(b) Why do 'danger' signal lights use the colour red?\n(c) As altitude increases, what happens to the refractive index of the atmosphere?\n(d) How does scattering cause the sun to appear reddish early in the morning?",
+      "marks": 5,
+      "difficulty": "Hard",
+      "topic": "Scattering of Light",
+      "answerSteps": [
+        {
+          "stepText": "(a) To an astronaut, the sky appears black (dark) because there is no atmosphere in space to scatter the sunlight into their eyes.",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) Danger signals are red because red light has the longest wavelength in the visible spectrum.",
+          "marks": 1
+        },
+        {
+          "stepText": "Consequently, red is the least scattered by fog, smoke, or rain, allowing it to travel long distances without degrading.",
+          "marks": 1
+        },
+        {
+          "stepText": "(c) As altitude increases, the air becomes less dense, so the refractive index of the atmosphere decreases.",
+          "marks": 1
+        },
+        {
+          "stepText": "(d) At sunrise, sunlight travels through a thicker layer of the atmosphere. Shorter wavelengths (blue/violet) scatter away, leaving only the longer wavelengths (red/orange) to reach our eyes.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A person is unable to see objects distinctly when placed within $75 \\text{ cm}$ from his eyes.\n(a) Name the exact defect of vision the person is suffering from.\n(b) List its two possible physiological causes.\n(c) Calculate the power of the lens needed to correct this defect. Assume that the near point for the normal eye is $25 \\text{ cm}$.",
+      "marks": 5,
+      "difficulty": "Super Difficult",
+      "topic": "Defects of Vision",
+      "answerSteps": [
+        {
+          "stepText": "(a) Since the person cannot see nearby objects (within $75 \\text{ cm}$) distinctly, their near point has receded. The defect is Hypermetropia (far-sightedness).",
+          "marks": 1
+        },
+        {
+          "stepText": "(b) Two possible causes: (i) Decrease in the curvature of the eye lens (focal length becomes too long). (ii) Shortening of the eyeball.",
+          "marks": 1
+        },
+        {
+          "stepText": "(c) The corrective lens must take an object at $u = -25 \\text{ cm}$ and form a virtual image at the person's defective near point $v = -75 \\text{ cm}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Using the lens formula: $\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u} = \\frac{1}{-75} - \\left(\\frac{1}{-25}\\right) = \\frac{-1}{75} + \\frac{3}{75} = \\frac{2}{75}$.\nSo, $f = +\\frac{75}{2} \\text{ cm} = +0.375 \\text{ m}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Power $P = \\frac{1}{f} = \\frac{1}{0.375} = +2.67 \\text{ D}$. The corrective lens is convex with a power of $+2.67 \\text{ D}$.",
+          "marks": 1
+        }
+      ]
+    }
+  ]
+}

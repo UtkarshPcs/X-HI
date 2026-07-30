@@ -39,6 +39,7 @@ export default function StarBatchTestPlayerPage() {
   
   const [reportedStatus, setReportedStatus] = useState({});
   const [reporting, setReporting] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   useEffect(() => {
     if (test && !result) {
@@ -248,70 +249,73 @@ export default function StarBatchTestPlayerPage() {
   }
 
   async function handleSubmit() {
-    if (!window.confirm('Are you sure you want to submit?')) return;
-    
-    setIsSubmitting(true);
-    let score = 0;
-    const weakTopics = [];
-    const difficultyStats = { Easy: { correct: 0, total: 0 }, Medium: { correct: 0, total: 0 }, Hard: { correct: 0, total: 0 } };
-    const topicStats = {};
+    setConfirmDialog({
+      message: 'Are you sure you want to submit?',
+      onConfirm: async () => {
+        setIsSubmitting(true);
+        let score = 0;
+        const weakTopics = [];
+        const difficultyStats = { Easy: { correct: 0, total: 0 }, Medium: { correct: 0, total: 0 }, Hard: { correct: 0, total: 0 } };
+        const topicStats = {};
 
-    activeQuestions.forEach((q, index) => {
-      const isCorrect = answers[index] === q.correctOptionIndex;
-      if (isCorrect) score += 1;
-      else if (q.topic) weakTopics.push(q.topic);
-      
-      const diff = q.difficulty || 'Medium';
-      if (!difficultyStats[diff]) difficultyStats[diff] = { correct: 0, total: 0 };
-      difficultyStats[diff].total += 1;
-      if (isCorrect) difficultyStats[diff].correct += 1;
+        activeQuestions.forEach((q, index) => {
+          const isCorrect = answers[index] === q.correctOptionIndex;
+          if (isCorrect) score += 1;
+          else if (q.topic) weakTopics.push(q.topic);
+          
+          const diff = q.difficulty || 'Medium';
+          if (!difficultyStats[diff]) difficultyStats[diff] = { correct: 0, total: 0 };
+          difficultyStats[diff].total += 1;
+          if (isCorrect) difficultyStats[diff].correct += 1;
 
-      const top = q.topic || 'General';
-      if (!topicStats[top]) topicStats[top] = { correct: 0, total: 0 };
-      topicStats[top].total += 1;
-      if (isCorrect) topicStats[top].correct += 1;
-    });
-
-    const seenIndices = activeQuestions.map(q => q.originalIndex);
-
-    try {
-      let aiReview = [];
-      try {
-        const res = await fetch('/api/ai-test-review', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ score, total: activeQuestions.length, difficultyStats, topicStats, totalTime: quizTime, questionTimes })
+          const top = q.topic || 'General';
+          if (!topicStats[top]) topicStats[top] = { correct: 0, total: 0 };
+          topicStats[top].total += 1;
+          if (isCorrect) topicStats[top].correct += 1;
         });
-        if (res.ok) {
-          const data = await res.json();
-          aiReview = data.insights || [];
+
+        const seenIndices = activeQuestions.map(q => q.originalIndex);
+
+        try {
+          let aiReview = [];
+          try {
+            const res = await fetch('/api/ai-test-review', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ score, total: activeQuestions.length, difficultyStats, topicStats, totalTime: quizTime, questionTimes })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              aiReview = data.insights || [];
+            }
+          } catch (aiErr) {
+            console.error('AI Review Failed', aiErr);
+            aiReview = ['Great effort! Review your mistakes to improve.'];
+          }
+
+          await submitTestAttempt({
+            userId: currentUser.id || currentUser.phone,
+            testId: test.id,
+            chapterId: test.chapterId,
+            score,
+            total: activeQuestions.length,
+            responses: answers,
+            weakTopics: [...new Set(weakTopics)],
+            seenIndices,
+            aiReview,
+            totalTime: quizTime,
+            questionTimes
+          });
+
+          setResult({ score, total: activeQuestions.length, aiReview, difficultyStats, topicStats, totalTime: quizTime, questionTimes });
+          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+        } catch (e) {
+          alert('Failed to submit test. Please try again.');
+        } finally {
+          setIsSubmitting(false);
         }
-      } catch (aiErr) {
-        console.error('AI Review Failed', aiErr);
-        aiReview = ['Great effort! Review your mistakes to improve.'];
       }
-
-      await submitTestAttempt({
-        userId: currentUser.id || currentUser.phone,
-        testId: test.id,
-        chapterId: test.chapterId,
-        score,
-        total: activeQuestions.length,
-        responses: answers,
-        weakTopics: [...new Set(weakTopics)],
-        seenIndices,
-        aiReview,
-        totalTime: quizTime,
-        questionTimes
-      });
-
-      setResult({ score, total: activeQuestions.length, aiReview, difficultyStats, topicStats, totalTime: quizTime, questionTimes });
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    } catch (e) {
-      alert('Failed to submit test. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   }
 
   if (loading) return (
