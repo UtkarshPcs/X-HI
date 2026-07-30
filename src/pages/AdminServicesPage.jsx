@@ -27,7 +27,7 @@ import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInterna
 import { getTrackingConfig, saveTrackingConfig } from '../services/starBatchTrackingService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
-import { uploadSubjectiveTestJSON, getAllSubjectiveTests } from '../services/starBatchSubjectiveTestService';
+import { uploadSubjectiveTestJSON, getAllSubjectiveTests, getAllSubjectiveTestAttempts } from '../services/starBatchSubjectiveTestService';
 import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
@@ -2520,14 +2520,23 @@ function StarBatchTab() {
     Promise.all([
       getStarBatchConfig(),
       getAllTestAttempts(),
+      getAllSubjectiveTestAttempts(),
       getAllUsers(),
       getAllTests(),
       getTrackingConfig(),
       getAllSubjectiveTests()
-    ]).then(([c, atts, usersList, allTests, trkConfig, subTests]) => {
+    ]).then(([c, objAtts, subjAtts, usersList, allTests, trkConfig, subTests]) => {
       setConfig(c);
       setNewCode(c.code);
-      setAttempts(atts);
+      
+      const allAtts = [...objAtts.map(a => ({...a, type: 'objective'})), ...subjAtts.map(a => ({...a, type: 'subjective'}))];
+      allAtts.sort((a, b) => {
+        const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+        const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+        return timeB - timeA;
+      });
+      setAttempts(allAtts);
+      
       setAllBankTests(allTests);
       setTrackingConfig(trkConfig);
       setAllSubjectiveTests(subTests || []);
@@ -2750,6 +2759,7 @@ function StarBatchTab() {
                             {sub.chapters.map(ch => {
                               const testDoc = allBankTests.find(t => t.chapterId === ch.chapterId);
                               const qCount = testDoc?.questions?.length || 0;
+                              const subjCount = subjectiveCountsByChapter[ch.chapterId] || 0;
                               return (
                                 <div key={ch.chapterId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                   <span>{ch.chapterName}</span>
@@ -2764,9 +2774,14 @@ function StarBatchTab() {
                                         Sample Test
                                       </a>
                                     )}
-                                    <span style={{ fontWeight: 600, color: qCount > 0 ? '#10b981' : 'rgba(255,255,255,0.3)', background: qCount > 0 ? 'rgba(16, 185, 129, 0.1)' : 'transparent', padding: '0.1rem 0.5rem', borderRadius: 4 }}>
-                                      {qCount} {qCount === 1 ? 'question' : 'questions'}
-                                    </span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                                      <span style={{ fontWeight: 600, color: qCount > 0 ? '#10b981' : 'rgba(255,255,255,0.3)', background: qCount > 0 ? 'rgba(16, 185, 129, 0.1)' : 'transparent', padding: '0.1rem 0.5rem', borderRadius: 4, fontSize: '0.8rem' }}>
+                                        {qCount} Obj {qCount === 1 ? 'Q' : 'Qs'}
+                                      </span>
+                                      <span style={{ fontWeight: 600, color: subjCount > 0 ? '#f59e0b' : 'rgba(255,255,255,0.3)', background: subjCount > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent', padding: '0.1rem 0.5rem', borderRadius: 4, fontSize: '0.8rem' }}>
+                                        {subjCount} Subj {subjCount === 1 ? 'Q' : 'Qs'}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -2801,14 +2816,29 @@ function StarBatchTab() {
               </thead>
               <tbody>
                 {attempts.map(att => {
+                  const isSubj = att.type === 'subjective';
                   const student = usersMap[att.userId] || att.userId || 'Unknown';
-                  const testTitle = testsMap[att.testId] || att.chapterId || 'Unknown Test';
-                  const accuracy = att.total > 0 ? Math.round((att.score / att.total) * 100) : 0;
+                  
+                  let testTitle = 'Unknown Test';
+                  if (isSubj) {
+                    const found = allSubjectiveTests.find(t => t.id === att.testId);
+                    testTitle = found ? found.title : (att.chapterId || 'Unknown Test');
+                  } else {
+                    testTitle = testsMap[att.testId] || att.chapterId || 'Unknown Test';
+                  }
+
+                  const s = isSubj ? (att.marksObtained || 0) : (att.score || 0);
+                  const t = isSubj ? (att.totalMarks || 0) : (att.total || 0);
+                  const accuracy = t > 0 ? Math.round((s / t) * 100) : 0;
+                  
                   return (
                     <tr key={att.id}>
                       <td style={{ fontWeight: 500 }}>{student}</td>
-                      <td>{testTitle}</td>
-                      <td style={{ fontWeight: 600 }}>{att.score} / {att.total}</td>
+                      <td>
+                        {testTitle} 
+                        {isSubj && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', background: 'rgba(245,158,11,0.2)', color: '#f59e0b', borderRadius: '4px', fontWeight: 'bold' }}>SUBJ</span>}
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{s} / {t}</td>
                       <td>
                         <span style={{ color: accuracy >= 80 ? '#10b981' : accuracy >= 50 ? '#fbbf24' : '#ef4444', fontWeight: 600 }}>
                           {accuracy}%
