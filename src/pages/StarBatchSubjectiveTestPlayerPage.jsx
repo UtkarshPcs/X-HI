@@ -159,7 +159,11 @@ export default function StarBatchSubjectiveTestPlayerPage() {
         testTitle: test.title,
         chapterId: test.chapterId,
         questionIndex: q.originalIndex,
-        questionText: q.text
+        questionText: q.text,
+        type: 'subjective',
+        diagram: q.diagram || null,
+        answerSteps: q.answerSteps || null,
+        marks: q.marks || null
       });
       if (newSet.has(q.originalIndex)) newSet.delete(q.originalIndex);
       else newSet.add(q.originalIndex);

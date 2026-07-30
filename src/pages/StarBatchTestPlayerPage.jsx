@@ -211,7 +211,8 @@ export default function StarBatchTestPlayerPage() {
           correctOptionIndex: q.correctOptionIndex,
           topic: q.topic || '',
           difficulty: q.difficulty || 'Medium',
-          testTitle: test.title || ''
+          testTitle: test.title || '',
+          type: 'objective'
         });
         setIsBookmarked(true);
       }

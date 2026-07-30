@@ -893,46 +893,81 @@ export default function StarBatchTestModulePage() {
                 {selectedBookmark.diagram && <DiagramRenderer diagram={selectedBookmark.diagram} />}
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
-                {selectedBookmark.options?.map((opt, i) => (
-                  <div key={i} style={{ 
-                    padding: '1rem', 
-                    background: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.03)', 
-                    border: '1px solid', 
-                    borderColor: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.06)', 
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
-                    <div style={{ 
-                      width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
-                      background: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? '#10b981' : 'rgba(255,255,255,0.1)',
-                      color: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? '#fff' : 'rgba(255,255,255,0.5)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem'
-                    }}>
-                      {String.fromCharCode(65 + i)}
+              {selectedBookmark.type === 'subjective' ? (
+                <>
+                  {showCorrectOpt ? (
+                    <div style={{ background: 'rgba(16,185,129,0.05)', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.2)', padding: '1.5rem', marginBottom: '2rem' }}>
+                      <h4 style={{ margin: '0 0 1rem 0', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <CheckCircle size={18} /> Official Marking Scheme {selectedBookmark.marks ? `(${selectedBookmark.marks} Marks)` : ''}
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {(selectedBookmark.answerSteps || []).map((step, sIdx) => (
+                          <div key={sIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                            <div style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 800, flexShrink: 0, marginTop: '2px' }}>
+                              {step.marks}M
+                            </div>
+                            <div style={{ flex: 1, color: '#e2e8f0', fontSize: '0.95rem', lineHeight: 1.5 }} className="custom-md">
+                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {step.stepText || step.step || step.text}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '1rem', color: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? '#10b981' : '#e2e8f0' }}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
-                        {opt}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {!showCorrectOpt ? (
-                <button 
-                  onClick={() => setShowCorrectOpt(true)}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '1rem', color: '#fff', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-                >
-                  <CheckCircle size={18} /> Show Correct Option
-                </button>
+                  ) : (
+                    <button 
+                      onClick={() => setShowCorrectOpt(true)}
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '1rem', color: '#fff', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}
+                    >
+                      <CheckCircle size={18} /> Show Answer
+                    </button>
+                  )}
+                </>
               ) : (
-                <div style={{ padding: '1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '12px', color: '#10b981', textAlign: 'center', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                  <CheckCircle size={18} /> Correct option revealed
-                </div>
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
+                    {selectedBookmark.options?.map((opt, i) => (
+                      <div key={i} style={{ 
+                        padding: '1rem', 
+                        background: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.03)', 
+                        border: '1px solid', 
+                        borderColor: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.06)', 
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                      }}>
+                        <div style={{ 
+                          width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+                          background: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? '#10b981' : 'rgba(255,255,255,0.1)',
+                          color: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? '#fff' : 'rgba(255,255,255,0.5)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem'
+                        }}>
+                          {String.fromCharCode(65 + i)}
+                        </div>
+                        <div style={{ fontSize: '1rem', color: (showCorrectOpt && i === selectedBookmark.correctOptionIndex) ? '#10b981' : '#e2e8f0' }}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
+                            {opt}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+    
+                  {!showCorrectOpt ? (
+                    <button 
+                      onClick={() => setShowCorrectOpt(true)}
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '1rem', color: '#fff', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                      <CheckCircle size={18} /> Show Correct Option
+                    </button>
+                  ) : (
+                    <div style={{ padding: '1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '12px', color: '#10b981', textAlign: 'center', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                      <CheckCircle size={18} /> Correct option revealed
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
