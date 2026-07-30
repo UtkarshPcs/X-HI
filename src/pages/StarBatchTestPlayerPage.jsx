@@ -366,7 +366,32 @@ export default function StarBatchTestPlayerPage() {
         .tp-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .tp-nav-btn.primary { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: #fbbf24; }
         .tp-nav-btn.primary:hover:not(:disabled) { background: rgba(251,191,36,0.25); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1rem; }
+        .modal-content { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .modal-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+        .modal-btn { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: all 0.2s; }
+        .modal-btn.cancel { background: rgba(255,255,255,0.1); color: #fff; }
+        .modal-btn.cancel:hover { background: rgba(255,255,255,0.2); }
+        .modal-btn.confirm { background: #3b82f6; color: #fff; }
+        .modal-btn.confirm:hover { background: #2563eb; }
       `}</style>
+      
+      {confirmDialog && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-title">{confirmDialog.message}</div>
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setConfirmDialog(null)}>Cancel</button>
+              <button className="modal-btn confirm" onClick={() => {
+                confirmDialog.onConfirm();
+                setConfirmDialog(null);
+              }}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="tp-header" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
