@@ -98,7 +98,9 @@ service cloud.firestore {
     match /ctaBannerClicks/{id}   { allow read, write: if true; }
     match /test_data/{id}         { allow read, write: if true; }
     match /starBatchTests/{id}    { allow read, write: if true; }
+    match /starBatchSubjectiveTests/{id} { allow read, write: if true; }
     match /starBatchTestAttempts/{id} { allow read, write: if true; }
+    match /starBatchSubjectiveTestAttempts/{id} { allow read, write: if true; }
     match /starBatchMacroReports/{id} { allow read, write: if true; }
     match /users/{phone}/starBatchBookmarks/{bookmarkId} {                                                                              
           allow read, write: if true;                                                                                                       

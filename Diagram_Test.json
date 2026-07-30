@@ -1,0 +1,107 @@
+[
+  {
+    "chapterId": "maths-0-c12",
+    "subjectId": "maths-0",
+    "sectionId": "maths",
+    "title": "Diagram Test Paper",
+    "type": "subjective",
+    "questions": [
+      {
+        "text": "Identify the marked parts of the human eye.",
+        "diagram": { "template": "human_eye", "pointerCount": 4 },
+        "marks": 5, "difficulty": "Easy", "topic": "Human Eye",
+        "answerSteps": [{ "stepText": "1 is Cornea", "marks": 5 }]
+      },
+      {
+        "text": "Prove that triangle ABC is isosceles if AB = AC.",
+        "diagram": { "template": "triangle", "points": ["A", "B", "C"], "equalSides": ["AB=AC"] },
+        "marks": 2, "difficulty": "Medium", "topic": "Triangles",
+        "answerSteps": [{ "stepText": "Angles opposite equal sides are equal.", "marks": 2 }]
+      },
+      {
+        "text": "Find the area of the circle with center O and radius OA.",
+        "diagram": { "template": "circle", "labels": ["O", "A"], "showRadius": true },
+        "marks": 4, "difficulty": "Easy", "topic": "Circles",
+        "answerSteps": [{ "stepText": "Area = $\\pi r^2$", "marks": 4 }]
+      },
+      {
+        "text": "Analyze the electric circuit containing a battery, resistor, and closed switch.",
+        "diagram": { "template": "electric_circuit", "components": ["battery", "switch", "resistor"] },
+        "marks": 3, "difficulty": "Medium", "topic": "Electricity",
+        "answerSteps": [{ "stepText": "Circuit is closed so current flows.", "marks": 3 }]
+      },
+      {
+        "text": "What is the equivalent resistance of the given circuit?",
+        "diagram": { "template": "electric_circuit", "components": ["battery", "resistor"] },
+        "marks": 3, "difficulty": "Medium", "topic": "Electricity",
+        "answerSteps": [{ "stepText": "V = IR", "marks": 3 }]
+      },
+      {
+        "text": "Identify the shape shown below.",
+        "diagram": { "template": "circle", "labels": ["C", "R"], "showRadius": false },
+        "marks": 1, "difficulty": "Easy", "topic": "Geometry",
+        "answerSteps": [{ "stepText": "It is a circle.", "marks": 1 }]
+      },
+      {
+        "text": "Is the following circuit open or closed?",
+        "diagram": { "template": "electric_circuit", "components": ["battery", "switch"] },
+        "marks": 1, "difficulty": "Easy", "topic": "Electricity",
+        "answerSteps": [{ "stepText": "It contains a switch.", "marks": 1 }]
+      },
+      {
+        "text": "Observe the triangle and identify its vertices.",
+        "diagram": { "template": "triangle", "points": ["X", "Y", "Z"], "equalSides": [] },
+        "marks": 1, "difficulty": "Easy", "topic": "Triangles",
+        "answerSteps": [{ "stepText": "Vertices are X, Y, Z.", "marks": 1 }]
+      },
+      {
+        "text": "Identify the marked parts of the human eye (Variant B).",
+        "diagram": { "template": "human_eye", "pointerCount": 2 },
+        "marks": 5, "difficulty": "Medium", "topic": "Human Eye",
+        "answerSteps": [{ "stepText": "2 is Lens", "marks": 5 }]
+      },
+      {
+        "text": "Prove that triangle PQR is isosceles if PQ = PR.",
+        "diagram": { "template": "triangle", "points": ["P", "Q", "R"], "equalSides": ["PQ=PR"] },
+        "marks": 2, "difficulty": "Medium", "topic": "Triangles",
+        "answerSteps": [{ "stepText": "Angles opposite equal sides are equal.", "marks": 2 }]
+      },
+      {
+        "text": "Find the circumference of the circle with center O and radius OB.",
+        "diagram": { "template": "circle", "labels": ["O", "B"], "showRadius": true },
+        "marks": 4, "difficulty": "Medium", "topic": "Circles",
+        "answerSteps": [{ "stepText": "Circumference = $2 \\pi r$", "marks": 4 }]
+      },
+      {
+        "text": "Analyze this simple electric circuit.",
+        "diagram": { "template": "electric_circuit", "components": ["battery", "resistor"] },
+        "marks": 3, "difficulty": "Medium", "topic": "Electricity",
+        "answerSteps": [{ "stepText": "Only a resistor is present.", "marks": 3 }]
+      },
+      {
+        "text": "Calculate current across the resistor.",
+        "diagram": { "template": "electric_circuit", "components": ["battery", "switch", "resistor"] },
+        "marks": 3, "difficulty": "Hard", "topic": "Electricity",
+        "answerSteps": [{ "stepText": "I = V/R", "marks": 3 }]
+      },
+      {
+        "text": "Identify this geometric entity.",
+        "diagram": { "template": "circle", "labels": ["O"], "showRadius": false },
+        "marks": 1, "difficulty": "Easy", "topic": "Geometry",
+        "answerSteps": [{ "stepText": "It is a circle.", "marks": 1 }]
+      },
+      {
+        "text": "Identify the components in this circuit diagram.",
+        "diagram": { "template": "electric_circuit", "components": ["battery"] },
+        "marks": 1, "difficulty": "Easy", "topic": "Electricity",
+        "answerSteps": [{ "stepText": "A battery.", "marks": 1 }]
+      },
+      {
+        "text": "Name the vertices of this triangle.",
+        "diagram": { "template": "triangle", "points": ["L", "M", "N"], "equalSides": [] },
+        "marks": 1, "difficulty": "Easy", "topic": "Triangles",
+        "answerSteps": [{ "stepText": "L, M, N", "marks": 1 }]
+      }
+    ]
+  }
+]

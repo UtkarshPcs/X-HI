@@ -1,0 +1,81 @@
+{
+  "chapterId": "math-1-c1",
+  "subjectId": "math-1",
+  "sectionId": "math",
+  "title": "Real Numbers - Subjective Test",
+  "type": "subjective",
+  "questions": [
+    {
+      "text": "Prove that $\\sqrt{2}$ is irrational.",
+      "marks": 3,
+      "difficulty": "Medium",
+      "topic": "Irrational Numbers",
+      "answerSteps": [
+        {
+          "stepText": "Assume $\\sqrt{2}$ is rational, so $\\sqrt{2} = \\frac{a}{b}$ where $a$ and $b$ are coprime integers and $b \\neq 0$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Squaring both sides gives $2 = \\frac{a^2}{b^2}$, which means $a^2 = 2b^2$. This implies $a^2$ is even, so $a$ must also be even. Let $a = 2c$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Substitute $a = 2c$ into the equation to get $(2c)^2 = 2b^2 \\Rightarrow 4c^2 = 2b^2 \\Rightarrow b^2 = 2c^2$. This implies $b^2$ is even, so $b$ must be even. This contradicts our assumption that $a$ and $b$ are coprime. Hence, $\\sqrt{2}$ is irrational.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Find the HCF of 96 and 404 by the prime factorization method. Hence, find their LCM.",
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Fundamental Theorem of Arithmetic",
+      "answerSteps": [
+        {
+          "stepText": "Prime factorization: $96 = 2^5 \\times 3$ and $404 = 2^2 \\times 101$. Thus, HCF(96, 404) = $2^2 = 4$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Using the formula: $\\text{HCF} \\times \\text{LCM} = \\text{Product of numbers}$. LCM = $\\frac{96 \\times 404}{4} = 9696$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "State the Fundamental Theorem of Arithmetic.",
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Fundamental Theorem of Arithmetic",
+      "answerSteps": [
+        {
+          "stepText": "Every composite number can be expressed (factorized) as a product of primes, and this factorization is unique, apart from the order in which the prime factors occur.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Show that $3\\sqrt{2}$ is irrational.",
+      "marks": 4,
+      "difficulty": "Hard",
+      "topic": "Irrational Numbers",
+      "answerSteps": [
+        {
+          "stepText": "Assume to the contrary that $3\\sqrt{2}$ is rational.",
+          "marks": 1
+        },
+        {
+          "stepText": "Then $3\\sqrt{2} = \\frac{a}{b}$, where $a$ and $b$ are coprime integers ($b \\neq 0$).",
+          "marks": 1
+        },
+        {
+          "stepText": "Rearranging, we get $\\sqrt{2} = \\frac{a}{3b}$. Since $a, b,$ and $3$ are integers, $\\frac{a}{3b}$ is rational.",
+          "marks": 1
+        },
+        {
+          "stepText": "This implies $\\sqrt{2}$ is rational, which contradicts the fact that $\\sqrt{2}$ is irrational. Therefore, our assumption is wrong and $3\\sqrt{2}$ is irrational.",
+          "marks": 1
+        }
+      ]
+    }
+  ]
+}

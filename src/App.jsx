@@ -42,6 +42,7 @@ const StarBatchSyllabusPage = lazy(() => import('./pages/StarBatchSyllabusPage')
 const StarBatchSyllabusTrackingPage = lazy(() => import('./pages/StarBatchSyllabusTrackingPage'));
 const StarBatchTestModulePage = lazy(() => import('./pages/StarBatchTestModulePage'));
 const StarBatchTestPlayerPage = lazy(() => import('./pages/StarBatchTestPlayerPage'));
+const StarBatchSubjectiveTestPlayerPage = lazy(() => import('./pages/StarBatchSubjectiveTestPlayerPage'));
 const HistoricalTestAnalysisPage = lazy(() => import('./pages/HistoricalTestAnalysisPage'));
 const StarBatchConceptsHub = lazy(() => import('./pages/StarBatchConceptsHub'));
 const StarConceptChapterPage = lazy(() => import('./pages/StarConceptChapterPage'));
@@ -152,6 +153,7 @@ function AppInner() {
               <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
               <Route path="/star-tests" element={<StarBatchTestModulePage />} />
               <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />
+              <Route path="/star-subjective-tests/:testId" element={<StarBatchSubjectiveTestPlayerPage />} />
               <Route path="/star-tests/history/:attemptId" element={<HistoricalTestAnalysisPage />} />
               <Route path="/star-concepts" element={<StarBatchConceptsHub />} />
               <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />

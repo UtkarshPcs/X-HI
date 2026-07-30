@@ -27,6 +27,7 @@ import { getStarBatchConfig, setStarBatchCode, addInternalStudent, removeInterna
 import { getTrackingConfig, saveTrackingConfig } from '../services/starBatchTrackingService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
+import { uploadSubjectiveTestJSON } from '../services/starBatchSubjectiveTestService';
 import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
@@ -1734,9 +1735,10 @@ export default function AdminServicesPage() {
 
   return (
     <div className="as-page">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <ShieldAlert size={22} color="#ef4444" />
         <h1 className="page-title text-gradient" style={{ margin: 0 }}>Admin Services</h1>
+        
       </div>
 
       <div className="as-tabs">
@@ -2353,6 +2355,7 @@ function StarBatchTab() {
   const [busy, setBusy] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [pendingUpload, setPendingUpload] = useState(null);
+  const [uploadType, setUploadType] = useState('objective');
   const [attempts, setAttempts] = useState([]);
   const [allBankTests, setAllBankTests] = useState([]);
   const [usersMap, setUsersMap] = useState({});
@@ -2383,6 +2386,20 @@ function StarBatchTab() {
     }
   };
 
+  const getFriendlyTitle = (chapterId) => {
+    if (!chapterId) return 'Untitled Test';
+    for (const sec of syllabusData) {
+      for (const sub of sec.subjects) {
+        for (const chap of sub.chapters) {
+          if (chap.chapterId === chapterId) {
+            return `${sub.subjectName} - ${chap.chapterName} Subjective Test`;
+          }
+        }
+      }
+    }
+    return `${chapterId} Upload`;
+  };
+
   const handleFile = async (file) => {
     if (!file) return;
     if (file.type !== "application/json" && !file.name.endsWith(".json")) {
@@ -2391,20 +2408,48 @@ function StarBatchTab() {
     setBusy(true);
     try {
       const text = await file.text();
-      const json = JSON.parse(text);
+      let json = JSON.parse(text);
+      
+      // Auto-wrap if it's an array of questions rather than a test object/array of tests
+      if (Array.isArray(json) && json.length > 0 && (json[0].question || json[0].text || json[0].answerSteps || json[0].options)) {
+        json = {
+          chapterId: json[0].chapterId || 'Unknown',
+          subjectId: json[0].subjectId || 'Unknown',
+          sectionId: json[0].sectionId || 'Unknown',
+          title: getFriendlyTitle(json[0].chapterId),
+          questions: json.map(q => {
+            if (q.question && !q.text) {
+              q.text = q.question;
+            }
+            return q;
+          })
+        };
+      }
       
       let summary = [];
+      const computeMarks = (questions) => {
+        let b = {1:0, 2:0, 3:0, 4:0, 5:0};
+        if (Array.isArray(questions)) {
+          questions.forEach(q => {
+            if (q.marks) b[q.marks] = (b[q.marks] || 0) + 1;
+          });
+        }
+        return b;
+      };
+
       if (Array.isArray(json)) {
         summary = json.map(test => ({
           chapterId: test.chapterId || 'Unknown',
-          title: test.title || test.chapterId || 'Untitled',
-          count: Array.isArray(test.questions) ? test.questions.length : 0
+          title: test.title || getFriendlyTitle(test.chapterId),
+          count: Array.isArray(test.questions) ? test.questions.length : 0,
+          marksBreakdown: computeMarks(test.questions)
         }));
       } else {
         summary = [{
           chapterId: json.chapterId || 'Unknown',
           title: json.title || json.chapterId || 'Untitled',
-          count: Array.isArray(json.questions) ? json.questions.length : 0
+          count: Array.isArray(json.questions) ? json.questions.length : 0,
+          marksBreakdown: computeMarks(json.questions)
         }];
       }
       
@@ -2424,8 +2469,12 @@ function StarBatchTab() {
     if (!pendingUpload) return;
     setBusy(true);
     try {
-      await uploadTestJSON(pendingUpload.data);
-      alert("Test uploaded successfully!");
+      if (uploadType === 'subjective') {
+        await uploadSubjectiveTestJSON(pendingUpload.data);
+      } else {
+        await uploadTestJSON(pendingUpload.data);
+      }
+      alert(`${uploadType === 'subjective' ? 'Subjective Test' : 'Objective Test'} uploaded successfully!`);
       setPendingUpload(null);
       loadConfig();
     } catch (err) {
@@ -2463,7 +2512,7 @@ function StarBatchTab() {
       setUsersMap(uMap);
       
       const tMap = {};
-      testsList.forEach(t => tMap[t.id] = t.title);
+      allTests.forEach(t => tMap[t.id] = t.title);
       setTestsMap(tMap);
     }).catch(e => console.error(e)).finally(() => setLoading(false));
   }
@@ -2544,7 +2593,17 @@ function StarBatchTab() {
       </div>
 
       <div className="as-card">
-        <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter MCQ Test</h4>
+        <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter Test</h4>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', color: '#fff' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input type="radio" name="uploadType" value="objective" checked={uploadType === 'objective'} onChange={() => setUploadType('objective')} />
+            Objective (MCQ)
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input type="radio" name="uploadType" value="subjective" checked={uploadType === 'subjective'} onChange={() => setUploadType('subjective')} />
+            Subjective
+          </label>
+        </div>
         <p className="as-muted" style={{ marginBottom: '1rem' }}>Upload a valid JSON file containing chapterId, subjectId, sectionId, title, and a questions array.</p>
         
         {pendingUpload ? (
@@ -2553,7 +2612,18 @@ function StarBatchTab() {
             <p className="as-muted" style={{ margin: '0 0 1rem 0' }}>Total {pendingUpload.totalQuestions} questions will be added across {pendingUpload.summary.length} chapters.</p>
             <ul style={{ paddingLeft: '1.5rem', margin: '0 0 1.5rem 0', color: '#e2e8f0', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
               {pendingUpload.summary.map((item, idx) => (
-                <li key={idx}><strong>{item.title}</strong> ({item.chapterId}): <span style={{color: '#10b981', fontWeight: 600}}>+{item.count}</span> questions</li>
+                <li key={idx}>
+                  <strong>{item.title}</strong> ({item.chapterId}): <span style={{color: '#10b981', fontWeight: 600}}>+{item.count}</span> questions
+                  {uploadType === 'subjective' && item.marksBreakdown && (
+                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
+                      <span style={{ marginRight: '8px' }}>1M: <strong>{item.marksBreakdown[1] || 0}</strong></span>
+                      <span style={{ marginRight: '8px' }}>2M: <strong>{item.marksBreakdown[2] || 0}</strong></span>
+                      <span style={{ marginRight: '8px' }}>3M: <strong>{item.marksBreakdown[3] || 0}</strong></span>
+                      <span style={{ marginRight: '8px' }}>4M: <strong>{item.marksBreakdown[4] || 0}</strong></span>
+                      <span>5M: <strong>{item.marksBreakdown[5] || 0}</strong></span>
+                    </div>
+                  )}
+                </li>
               ))}
             </ul>
             <div style={{ display: 'flex', gap: '1rem' }}>

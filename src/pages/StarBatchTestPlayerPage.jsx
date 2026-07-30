@@ -3,10 +3,10 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { getTestById, submitTestAttempt, getUserTestAttemptsForTest, getTestAverageScore, reportTestQuestion } from '../services/starBatchTestService';
 import { addBookmark, removeBookmark, checkIsBookmarked } from '../services/starBatchBookmarkService';
-import { Loader2, ArrowLeft, CheckCircle, XCircle, Sparkles, Target, BarChart2, Zap, AlertCircle, BookOpen, Clock, Activity, Flag, Crosshair, ChevronDown, ChevronUp, Bookmark } from 'lucide-react';
-
+import { Loader2, ArrowLeft, CheckCircle, XCircle, Sparkles, Target, BarChart2, Zap, AlertCircle, BookOpen, Clock, Activity, Flag, Crosshair, ChevronDown, ChevronUp, Bookmark, List, ChevronRight, Home, X } from 'lucide-react';
 import TestAnalyticsDashboard from '../components/TestAnalyticsDashboard';
 import ReactMarkdown from 'react-markdown';
+import DiagramRenderer from '../components/DiagramRenderer';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -416,6 +416,7 @@ export default function StarBatchTestPlayerPage() {
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {activeQuestions[currentQuestionIndex].text}
               </ReactMarkdown>
+              {activeQuestions[currentQuestionIndex].diagram && <DiagramRenderer diagram={activeQuestions[currentQuestionIndex].diagram} />}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>

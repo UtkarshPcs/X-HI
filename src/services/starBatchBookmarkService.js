@@ -21,6 +21,17 @@ export async function removeBookmark(userId, bookmarkId) {
   await deleteDoc(ref);
 }
 
+export async function toggleBookmark(userId, bookmarkData) {
+  if (!userId) throw new Error("User ID is required");
+  const docId = `${bookmarkData.chapterId}_${bookmarkData.questionIndex}`;
+  const isBookmarked = await checkIsBookmarked(userId, docId);
+  if (isBookmarked) {
+    await removeBookmark(userId, docId);
+  } else {
+    await addBookmark(userId, bookmarkData);
+  }
+}
+
 export async function getUserBookmarks(userId) {
   if (!userId) return [];
   const q = query(collection(db, 'users', userId, 'starBatchBookmarks'), orderBy('createdAt', 'desc'));

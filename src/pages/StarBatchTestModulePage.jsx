@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getAllTests, getMacroReport, saveMacroReport, subscribeToUserHistory, reportTestQuestion } from '../services/starBatchTestService';
+import { getAllSubjectiveTests, subscribeToUserSubjectiveHistory } from '../services/starBatchSubjectiveTestService';
 import { getUserBookmarks } from '../services/starBatchBookmarkService';
 import { syllabusData } from '../data/syllabusData';
 import { Target, Play, TrendingUp, Search, Loader2, Star, CheckCircle, XCircle, ChevronDown, ChevronUp, BookOpen, Calendar, ArrowRight, ArrowLeft, BrainCircuit, Sparkles, AlertCircle, Clock, Flag, Bookmark, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import DiagramRenderer from '../components/DiagramRenderer';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -21,10 +23,11 @@ export default function StarBatchTestModulePage() {
   const [expandedChapter, setExpandedChapter] = useState(null);
   const [isAIReportExpanded, setIsAIReportExpanded] = useState(false);
   const [activeConfigTestId, setActiveConfigTestId] = useState(null);
-  const [testConfig, setTestConfig] = useState({ level: 2, count: 10 });
+  const [testConfig, setTestConfig] = useState({ mode: 'objective', level: 2, count: 10, marks: 20 });
   const [macroReport, setMacroReport] = useState(null);
   const [isGeneratingMacro, setIsGeneratingMacro] = useState(false);
   const [tests, setTests] = useState([]);
+  const [subjectiveTests, setSubjectiveTests] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,23 +52,44 @@ export default function StarBatchTestModulePage() {
     else if (!currentUser.isStarBatch || !currentUser.hasUnlockedStarBatch) navigate('/star-batch');
     else {
       let unsubscribe;
+      let unsubscribeSubj;
       async function fetchStaticData() {
         setLoading(true);
         setError(null);
         try {
           const userId = currentUser.id || currentUser.phone;
-          const [fetchedTests, fetchedMacro, fetchedBookmarks] = await Promise.all([
+          const [fetchedTests, fetchedSubjTests, fetchedMacro, fetchedBookmarks] = await Promise.all([
             getAllTests(),
+            getAllSubjectiveTests(),
             getMacroReport(userId),
             getUserBookmarks(userId)
           ]);
           setTests(fetchedTests);
+          setSubjectiveTests(fetchedSubjTests);
           setMacroReport(fetchedMacro);
           setBookmarks(fetchedBookmarks);
           
+          let objHist = [];
+          let subjHist = [];
+
+          const updateCombinedHistory = () => {
+             const merged = [...objHist, ...subjHist].sort((a,b) => {
+               const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+               const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+               return timeB - timeA;
+             });
+             setHistory(merged);
+             setLoading(false);
+          };
+
           unsubscribe = subscribeToUserHistory(userId, (newHistory) => {
-            setHistory(newHistory);
-            setLoading(false); // First snapshot turns off loading
+            objHist = newHistory.map(h => ({ ...h, isSubjective: false }));
+            updateCombinedHistory();
+          });
+          
+          unsubscribeSubj = subscribeToUserSubjectiveHistory(userId, (newHistory) => {
+            subjHist = newHistory.map(h => ({ ...h, isSubjective: true, score: h.marksObtained, total: h.totalMarks }));
+            updateCombinedHistory();
           });
         } catch (e) {
           console.error(e);
@@ -77,6 +101,7 @@ export default function StarBatchTestModulePage() {
 
       return () => {
         if (unsubscribe) unsubscribe();
+        if (unsubscribeSubj) unsubscribeSubj();
       };
     }
   }, [currentUser, navigate]);
@@ -87,13 +112,16 @@ export default function StarBatchTestModulePage() {
   );
 
   // Chart Data Preparation
-  const chartData = [...history].reverse().map((h, i) => ({
-    name: `Test ${i + 1}`,
-    score: (h.score / h.total) * 100, // percentage
-    rawScore: h.score,
-    total: h.total,
-    title: tests.find(t => t.id === h.testId)?.title || 'Test'
-  }));
+  const chartData = [...history].reverse().map((h, i) => {
+    const t = h.isSubjective ? subjectiveTests.find(st => st.id === h.testId) : tests.find(ot => ot.id === h.testId);
+    return {
+      name: `Test ${i + 1}`,
+      score: h.total > 0 ? (h.score / h.total) * 100 : 0, // percentage
+      rawScore: h.score,
+      total: h.total,
+      title: t?.title || 'Test'
+    };
+  });
 
   // Aggregate Weak Topics
   const allWeakTopics = history.flatMap(h => h.weakTopics || []);
@@ -341,101 +369,122 @@ export default function StarBatchTestModulePage() {
       </div>
 
       {activeTab === 'tests' && (
-        <>
-          <div className="tm-search">
-            <Search size={18} color="rgba(255,255,255,0.4)" />
-            <input 
-              type="text" 
-              placeholder="Search tests..." 
-              value={searchQuery} 
-              onChange={e => setSearchQuery(e.target.value)} 
-            />
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '2rem', maxWidth: '800px', margin: '0 auto', animation: 'fade-in 0.4s ease' }}>
+          <h3 style={{ margin: '0 0 1.5rem', color: '#fbbf24', fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Sparkles size={20} /> Test Generator
+          </h3>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>1. Select Section</div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {syllabusData.map(sec => (
+                <button key={sec.sectionId} onClick={() => { setSelectedSection(sec.sectionId); setSelectedSubject(null); setSelectedChapter(null); }} style={{ background: selectedSection === sec.sectionId ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.05)', border: selectedSection === sec.sectionId ? '1px solid rgba(251,191,36,0.4)' : '1px solid rgba(255,255,255,0.1)', color: selectedSection === sec.sectionId ? '#fbbf24' : '#fff', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }}>{sec.sectionName}</button>
+              ))}
+            </div>
           </div>
 
-          {filteredTests.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', padding: '3rem 0' }}>
-              No tests found.
-            </div>
-          ) : (
-            <div className="tm-grid">
-              {filteredTests.map(test => {
-                const isCompleted = history.some(h => h.testId === test.id);
-                
-                return (
-                  <div key={test.id} className="tm-card">
-                    <div>
-                      <h3 className="tm-card-title">{test.title}</h3>
-                      <div className="tm-card-meta">
-                        <span>{test.questions.length} Questions in Bank</span>
-                        <span>{isCompleted ? 'Attempted' : 'Not Attempted'}</span>
-                      </div>
-                      <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', margin: '0.75rem 0 0 0', lineHeight: 1.4 }}>
-                        Customize test difficulty and length for personalized practice.
-                      </p>
-                    </div>
-                    
-                    <div style={{ marginTop: 'auto' }}>
-                      {activeConfigTestId === test.id ? (
-                        <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '1rem', marginTop: '1rem' }}>
-                          <div style={{ marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#fff', marginBottom: '0.5rem', fontWeight: 600 }}>
-                              <span style={{ color: '#3b82f6', opacity: testConfig.level === 1 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 1})}>Easy</span>
-                              <span style={{ color: '#fbbf24', opacity: testConfig.level === 2 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 2})}>Medium</span>
-                              <span style={{ color: '#ef4444', opacity: testConfig.level === 3 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 3})}>Hard</span>
-                              <span style={{ color: '#991b1b', opacity: testConfig.level === 4 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 4})}>Difficult</span>
-                            </div>
-                            <input 
-                              type="range" 
-                              min="1" max="4" 
-                              value={testConfig.level}
-                              onChange={e => setTestConfig({...testConfig, level: parseInt(e.target.value)})}
-                              style={{ width: '100%', accentColor: testConfig.level === 1 ? '#3b82f6' : testConfig.level === 2 ? '#fbbf24' : testConfig.level === 3 ? '#ef4444' : '#991b1b' }}
-                            />
-                          </div>
-                          <div style={{ marginBottom: '1rem' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#fff', marginBottom: '0.5rem' }}>Total Questions:</div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              {[10, 15, 20].map(c => (
-                                <button
-                                  key={c}
-                                  onClick={() => setTestConfig({...testConfig, count: c})}
-                                  style={{ flex: 1, background: testConfig.count === c ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', cursor: 'pointer' }}
-                                >
-                                  {c}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          <button 
-                            className="tm-btn" 
-                            onClick={() => {
-                              const levelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.level - 1];
-                              navigate(`/star-tests/${test.id}?level=${levelName}&count=${testConfig.count}`);
-                            }}
-                          >
-                            <Play size={16} fill="currentColor" /> Start Test
-                          </button>
-                        </div>
-                      ) : (
-                        <button 
-                          className="tm-btn" 
-                          onClick={() => {
-                            setActiveConfigTestId(test.id);
-                            setTestConfig({ level: 2, count: 10 });
-                          }}
-                          style={{ marginTop: '1rem', ...(isCompleted ? { background: 'rgba(255,255,255,0.1)', color: '#fff' } : {}) }}
-                        >
-                          <Play size={16} fill={isCompleted ? 'none' : 'currentColor'} /> 
-                          Generate New Test
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+          {selectedSection && (
+            <div style={{ marginBottom: '1.5rem', animation: 'fade-in 0.3s' }}>
+              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>2. Select Subject</div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {syllabusData.find(s => s.sectionId === selectedSection)?.subjects.map(sub => (
+                  <button key={sub.subjectId} onClick={() => { setSelectedSubject(sub.subjectId); setSelectedChapter(null); }} style={{ background: selectedSubject === sub.subjectId ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)', border: selectedSubject === sub.subjectId ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.1)', color: selectedSubject === sub.subjectId ? '#60a5fa' : '#fff', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }}>{sub.subjectName}</button>
+                ))}
+              </div>
             </div>
           )}
-        </>
+
+          {selectedSubject && (
+            <div style={{ marginBottom: '1.5rem', animation: 'fade-in 0.3s' }}>
+              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>3. Select Chapter</div>
+              <select 
+                value={selectedChapter || ''} 
+                onChange={(e) => setSelectedChapter(e.target.value)}
+                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none', fontSize: '0.95rem' }}
+              >
+                <option value="">-- Choose Chapter --</option>
+                {syllabusData.find(s => s.sectionId === selectedSection)?.subjects.find(sub => sub.subjectId === selectedSubject)?.chapters.map(ch => {
+                  const hasObj = tests.some(t => t.chapterId === ch.chapterId);
+                  const hasSubj = subjectiveTests.some(t => t.chapterId === ch.chapterId);
+                  return (
+                    <option key={ch.chapterId} value={ch.chapterId}>
+                      {ch.chapterName} {(!hasObj && !hasSubj) ? '(No Test Bank)' : ''}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
+
+          {selectedChapter && (
+            <div style={{ animation: 'fade-in 0.3s', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>4. Test Type</div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    onClick={() => setTestConfig({...testConfig, mode: 'objective'})}
+                    style={{ flex: 1, background: testConfig.mode === 'objective' ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'objective' ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'objective' ? '#60a5fa' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Objective (MCQ)
+                  </button>
+                  <button 
+                    onClick={() => setTestConfig({...testConfig, mode: 'subjective'})}
+                    style={{ flex: 1, background: testConfig.mode === 'subjective' ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'subjective' ? '1px solid rgba(168,85,247,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'subjective' ? '#c084fc' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Subjective (Written)
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                  <span style={{ color: '#3b82f6', opacity: testConfig.level === 1 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 1})}>Easy</span>
+                  <span style={{ color: '#fbbf24', opacity: testConfig.level === 2 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 2})}>Medium</span>
+                  <span style={{ color: '#ef4444', opacity: testConfig.level === 3 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 3})}>Hard</span>
+                  <span style={{ color: '#991b1b', opacity: testConfig.level === 4 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 4})}>Difficult</span>
+                </div>
+                <input 
+                  type="range" min="1" max="4" value={testConfig.level}
+                  onChange={e => setTestConfig({...testConfig, level: parseInt(e.target.value)})}
+                  style={{ width: '100%', accentColor: testConfig.level === 1 ? '#3b82f6' : testConfig.level === 2 ? '#fbbf24' : testConfig.level === 3 ? '#ef4444' : '#991b1b' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>{testConfig.mode === 'objective' ? 'Total Questions' : 'Total Marks'}</div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {testConfig.mode === 'objective' ? (
+                    [10, 15, 20].map(c => (
+                      <button key={c} onClick={() => setTestConfig({...testConfig, count: c})} style={{ flex: 1, background: testConfig.count === c ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.6rem', fontSize: '0.95rem', cursor: 'pointer' }}>{c} Qs</button>
+                    ))
+                  ) : (
+                    [20, 40].map(m => (
+                      <button key={m} onClick={() => setTestConfig({...testConfig, marks: m})} style={{ flex: 1, background: testConfig.marks === m ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.6rem', fontSize: '0.95rem', cursor: 'pointer' }}>{m} Marks</button>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <button 
+                className="tm-btn" 
+                onClick={() => {
+                  const levelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.level - 1];
+                  if (testConfig.mode === 'objective') {
+                    const objTest = tests.find(t => t.chapterId === selectedChapter);
+                    if (!objTest) return alert('Sorry, Objective Test is not available right now for this chapter.');
+                    navigate(`/star-tests/${objTest.id}?level=${levelName}&count=${testConfig.count}`);
+                  } else {
+                    const subjTest = subjectiveTests.find(st => st.chapterId === selectedChapter);
+                    if (!subjTest) return alert('Sorry, Subjective Test is not Available right now for this chapter.');
+                    navigate(`/star-subjective-tests/${subjTest.id}?level=${levelName}&marks=${testConfig.marks}`);
+                  }
+                }}
+              >
+                <Play size={18} fill="currentColor" /> Generate Test
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {activeTab === 'report' && (
@@ -623,12 +672,16 @@ export default function StarBatchTestModulePage() {
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff' }}>{attempt.score} / {attempt.total}</span>
-                                    <button 
-                                      onClick={() => navigate(`/star-tests/history/${attempt.id}`)}
-                                      style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                    >
-                                      View Analysis <ArrowRight size={12} />
-                                    </button>
+                                    {attempt.isSubjective ? (
+                                      <span style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.2)', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem' }}>Subjective</span>
+                                    ) : (
+                                      <button 
+                                        onClick={() => navigate(`/star-tests/history/${attempt.id}`)}
+                                        style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                      >
+                                        View Analysis <ArrowRight size={12} />
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -837,6 +890,7 @@ export default function StarBatchTestModulePage() {
                 <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md">
                   {selectedBookmark.questionText}
                 </ReactMarkdown>
+                {selectedBookmark.diagram && <DiagramRenderer diagram={selectedBookmark.diagram} />}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
