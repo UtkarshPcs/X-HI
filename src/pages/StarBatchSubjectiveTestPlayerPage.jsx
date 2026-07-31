@@ -18,6 +18,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isMixed = searchParams.get('mixed') === 'true';
   
   const level = searchParams.get('level') || 'medium';
   const targetMarks = parseInt(searchParams.get('marks')) || 20;
@@ -291,6 +292,16 @@ export default function StarBatchSubjectiveTestPlayerPage() {
       };
       
       await submitSubjectiveTestAttempt(attemptData);
+      
+      if (isMixed) {
+        const objResultRaw = sessionStorage.getItem('mixedObjResult');
+        if (objResultRaw) {
+          const objResult = JSON.parse(objResultRaw);
+          attemptData.mixedObjResult = objResult;
+          sessionStorage.removeItem('mixedObjResult');
+        }
+      }
+      
       setResult(attemptData);
       setPhase('RESULT');
       window.scrollTo(0,0);

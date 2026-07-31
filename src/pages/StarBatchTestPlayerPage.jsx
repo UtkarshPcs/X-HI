@@ -16,6 +16,10 @@ export default function StarBatchTestPlayerPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isMixed = searchParams.get('mixed') === 'true';
+  const subjId = searchParams.get('subjId');
+  const subjLevel = searchParams.get('subjLevel');
+  const subjMarks = searchParams.get('subjMarks');
   
   const level = searchParams.get('level') || 'medium';
   const count = parseInt(searchParams.get('count')) || 10;
@@ -308,8 +312,14 @@ export default function StarBatchTestPlayerPage() {
             questionTimes
           });
 
-          setResult({ score, total: activeQuestions.length, aiReview, difficultyStats, topicStats, totalTime: quizTime, questionTimes });
-          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+          const resultData = { score, total: activeQuestions.length, aiReview, difficultyStats, topicStats, totalTime: quizTime, questionTimes };
+          if (isMixed && subjId) {
+            sessionStorage.setItem('mixedObjResult', JSON.stringify(resultData));
+            navigate(`/star-subjective-tests/${subjId}?level=${subjLevel}&marks=${subjMarks}&mixed=true`);
+          } else {
+            setResult(resultData);
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+          }
         } catch (e) {
           alert('Failed to submit test. Please try again.');
         } finally {

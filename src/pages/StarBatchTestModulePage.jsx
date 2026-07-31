@@ -23,7 +23,7 @@ export default function StarBatchTestModulePage() {
   const [expandedChapter, setExpandedChapter] = useState(null);
   const [isAIReportExpanded, setIsAIReportExpanded] = useState(false);
   const [activeConfigTestId, setActiveConfigTestId] = useState(null);
-  const [testConfig, setTestConfig] = useState({ mode: 'objective', level: 2, count: 10, marks: 20 });
+  const [testConfig, setTestConfig] = useState({ mode: 'objective', level: 2, count: 10, marks: 20, objLevel: 2, subjLevel: 2, objCount: 10, subjMarks: 20 });
   const [macroReport, setMacroReport] = useState(null);
   const [isGeneratingMacro, setIsGeneratingMacro] = useState(false);
   const [tests, setTests] = useState([]);
@@ -423,60 +423,122 @@ export default function StarBatchTestModulePage() {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button 
                     onClick={() => setTestConfig({...testConfig, mode: 'objective'})}
-                    style={{ flex: 1, background: testConfig.mode === 'objective' ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'objective' ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'objective' ? '#60a5fa' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ flex: 1, background: testConfig.mode === 'objective' ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'objective' ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'objective' ? '#60a5fa' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Objective (MCQ)
                   </button>
                   <button 
                     onClick={() => setTestConfig({...testConfig, mode: 'subjective'})}
-                    style={{ flex: 1, background: testConfig.mode === 'subjective' ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'subjective' ? '1px solid rgba(168,85,247,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'subjective' ? '#c084fc' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ flex: 1, background: testConfig.mode === 'subjective' ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'subjective' ? '1px solid rgba(168,85,247,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'subjective' ? '#c084fc' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Subjective (Written)
+                  </button>
+                  <button 
+                    onClick={() => setTestConfig({...testConfig, mode: 'mixed'})}
+                    style={{ flex: 1, background: testConfig.mode === 'mixed' ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.mode === 'mixed' ? '1px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.1)', color: testConfig.mode === 'mixed' ? '#fbbf24' : 'rgba(255,255,255,0.5)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Mixed Mode
                   </button>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem', fontWeight: 600 }}>
-                  <span style={{ color: '#3b82f6', opacity: testConfig.level === 1 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 1})}>Easy</span>
-                  <span style={{ color: '#fbbf24', opacity: testConfig.level === 2 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 2})}>Medium</span>
-                  <span style={{ color: '#ef4444', opacity: testConfig.level === 3 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 3})}>Hard</span>
-                  <span style={{ color: '#991b1b', opacity: testConfig.level === 4 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 4})}>Difficult</span>
-                </div>
-                <input 
-                  type="range" min="1" max="4" value={testConfig.level}
-                  onChange={e => setTestConfig({...testConfig, level: parseInt(e.target.value)})}
-                  style={{ width: '100%', accentColor: testConfig.level === 1 ? '#3b82f6' : testConfig.level === 2 ? '#fbbf24' : testConfig.level === 3 ? '#ef4444' : '#991b1b' }}
-                />
-              </div>
+              {testConfig.mode !== 'mixed' ? (
+                <>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                      <span style={{ color: '#3b82f6', opacity: testConfig.level === 1 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 1})}>Easy</span>
+                      <span style={{ color: '#fbbf24', opacity: testConfig.level === 2 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 2})}>Medium</span>
+                      <span style={{ color: '#ef4444', opacity: testConfig.level === 3 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 3})}>Hard</span>
+                      <span style={{ color: '#991b1b', opacity: testConfig.level === 4 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, level: 4})}>Difficult</span>
+                    </div>
+                    <input 
+                      type="range" min="1" max="4" value={testConfig.level}
+                      onChange={e => setTestConfig({...testConfig, level: parseInt(e.target.value)})}
+                      style={{ width: '100%', accentColor: testConfig.level === 1 ? '#3b82f6' : testConfig.level === 2 ? '#fbbf24' : testConfig.level === 3 ? '#ef4444' : '#991b1b' }}
+                    />
+                  </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>{testConfig.mode === 'objective' ? 'Total Questions' : 'Total Marks'}</div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {testConfig.mode === 'objective' ? (
-                    [10, 15, 20].map(c => (
-                      <button key={c} onClick={() => setTestConfig({...testConfig, count: c})} style={{ flex: 1, background: testConfig.count === c ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.6rem', fontSize: '0.95rem', cursor: 'pointer' }}>{c} Qs</button>
-                    ))
-                  ) : (
-                    [20, 40].map(m => (
-                      <button key={m} onClick={() => setTestConfig({...testConfig, marks: m})} style={{ flex: 1, background: testConfig.marks === m ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.6rem', fontSize: '0.95rem', cursor: 'pointer' }}>{m} Marks</button>
-                    ))
-                  )}
-                </div>
-              </div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>{testConfig.mode === 'objective' ? 'Total Questions' : 'Total Marks'}</div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {testConfig.mode === 'objective' ? (
+                        [10, 15, 20].map(c => (
+                          <button key={c} onClick={() => setTestConfig({...testConfig, count: c})} style={{ flex: 1, background: testConfig.count === c ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.6rem', fontSize: '0.95rem', cursor: 'pointer' }}>{c} Qs</button>
+                        ))
+                      ) : (
+                        [20, 40].map(m => (
+                          <button key={m} onClick={() => setTestConfig({...testConfig, marks: m})} style={{ flex: 1, background: testConfig.marks === m ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.6rem', fontSize: '0.95rem', cursor: 'pointer' }}>{m} Marks</button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '1.5rem', background: 'rgba(59,130,246,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.2)' }}>
+                    <h4 style={{ color: '#60a5fa', margin: '0 0 1rem', fontSize: '0.95rem' }}>Objective Phase Config</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                      <span style={{ color: '#3b82f6', opacity: testConfig.objLevel === 1 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, objLevel: 1})}>Easy</span>
+                      <span style={{ color: '#fbbf24', opacity: testConfig.objLevel === 2 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, objLevel: 2})}>Medium</span>
+                      <span style={{ color: '#ef4444', opacity: testConfig.objLevel === 3 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, objLevel: 3})}>Hard</span>
+                      <span style={{ color: '#991b1b', opacity: testConfig.objLevel === 4 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, objLevel: 4})}>Difficult</span>
+                    </div>
+                    <input 
+                      type="range" min="1" max="4" value={testConfig.objLevel}
+                      onChange={e => setTestConfig({...testConfig, objLevel: parseInt(e.target.value)})}
+                      style={{ width: '100%', accentColor: testConfig.objLevel === 1 ? '#3b82f6' : testConfig.objLevel === 2 ? '#fbbf24' : testConfig.objLevel === 3 ? '#ef4444' : '#991b1b', marginBottom: '1rem' }}
+                    />
+                    <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>Total Questions</div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {[10, 15, 20].map(c => (
+                        <button key={c} onClick={() => setTestConfig({...testConfig, objCount: c})} style={{ flex: 1, background: testConfig.objCount === c ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.objCount === c ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>{c} Qs</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '1.5rem', background: 'rgba(168,85,247,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(168,85,247,0.2)' }}>
+                    <h4 style={{ color: '#c084fc', margin: '0 0 1rem', fontSize: '0.95rem' }}>Subjective Phase Config</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                      <span style={{ color: '#3b82f6', opacity: testConfig.subjLevel === 1 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, subjLevel: 1})}>Easy</span>
+                      <span style={{ color: '#fbbf24', opacity: testConfig.subjLevel === 2 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, subjLevel: 2})}>Medium</span>
+                      <span style={{ color: '#ef4444', opacity: testConfig.subjLevel === 3 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, subjLevel: 3})}>Hard</span>
+                      <span style={{ color: '#991b1b', opacity: testConfig.subjLevel === 4 ? 1 : 0.5, cursor: 'pointer' }} onClick={() => setTestConfig({...testConfig, subjLevel: 4})}>Difficult</span>
+                    </div>
+                    <input 
+                      type="range" min="1" max="4" value={testConfig.subjLevel}
+                      onChange={e => setTestConfig({...testConfig, subjLevel: parseInt(e.target.value)})}
+                      style={{ width: '100%', accentColor: testConfig.subjLevel === 1 ? '#3b82f6' : testConfig.subjLevel === 2 ? '#fbbf24' : testConfig.subjLevel === 3 ? '#ef4444' : '#991b1b', marginBottom: '1rem' }}
+                    />
+                    <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>Total Marks</div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {[20, 40].map(m => (
+                        <button key={m} onClick={() => setTestConfig({...testConfig, subjMarks: m})} style={{ flex: 1, background: testConfig.subjMarks === m ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)', border: testConfig.subjMarks === m ? '1px solid rgba(168,85,247,0.4)' : '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>{m} Marks</button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <button 
                 className="tm-btn" 
                 onClick={() => {
-                  const levelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.level - 1];
                   if (testConfig.mode === 'objective') {
+                    const levelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.level - 1];
                     const objTest = tests.find(t => t.chapterId === selectedChapter);
                     if (!objTest) return alert('Sorry, Objective Test is not available right now for this chapter.');
                     navigate(`/star-tests/${objTest.id}?level=${levelName}&count=${testConfig.count}`);
-                  } else {
+                  } else if (testConfig.mode === 'subjective') {
+                    const levelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.level - 1];
                     const subjTest = subjectiveTests.find(st => st.chapterId === selectedChapter);
                     if (!subjTest) return alert('Sorry, Subjective Test is not Available right now for this chapter.');
                     navigate(`/star-subjective-tests/${subjTest.id}?level=${levelName}&marks=${testConfig.marks}`);
+                  } else if (testConfig.mode === 'mixed') {
+                    const objLevelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.objLevel - 1];
+                    const subjLevelName = ['easy', 'medium', 'hard', 'difficult'][testConfig.subjLevel - 1];
+                    const objTest = tests.find(t => t.chapterId === selectedChapter);
+                    const subjTest = subjectiveTests.find(st => st.chapterId === selectedChapter);
+                    if (!objTest || !subjTest) return alert('Sorry, Mixed Test requires both Objective and Subjective Tests to be available.');
+                    navigate(`/star-tests/${objTest.id}?level=${objLevelName}&count=${testConfig.objCount}&mixed=true&subjId=${subjTest.id}&subjLevel=${subjLevelName}&subjMarks=${testConfig.subjMarks}`);
                   }
                 }}
               >

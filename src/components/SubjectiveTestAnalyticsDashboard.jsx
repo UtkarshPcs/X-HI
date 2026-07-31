@@ -14,10 +14,17 @@ export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestio
     setExpandedMistakes(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  const { marksObtained, totalMarks, responses, aiReview, difficultyStats, topicStats, totalTime } = result;
+  const { marksObtained, totalMarks, responses, aiReview, difficultyStats, topicStats, totalTime, mixedObjResult } = result;
   
+  const isMixed = !!mixedObjResult;
+  const objRes = mixedObjResult || {};
+
+  const finalMarksObtained = marksObtained + (isMixed ? (objRes.score || 0) : 0);
+  const finalTotalMarks = totalMarks + (isMixed ? (objRes.total || 0) : 0);
+  const finalTotalTime = (totalTime || 0) + (isMixed ? (objRes.totalTime || 0) : 0);
+
   // Calculate accuracy based on total marks
-  const accuracy = totalMarks > 0 ? Math.round((marksObtained / totalMarks) * 100) : 0;
+  const accuracy = finalTotalMarks > 0 ? Math.round((finalMarksObtained / finalTotalMarks) * 100) : 0;
   
   let badge = "Needs Improvement";
   let badgeColor = "#ef4444";
@@ -51,18 +58,37 @@ export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestio
     topicStatsCalc[topic].m += (q.userMarks || 0);
   });
 
+  if (isMixed) {
+      if (objRes.difficultyStats) {
+          Object.entries(objRes.difficultyStats).forEach(([diff, stat]) => {
+              const d = diff || 'Medium';
+              if (!difficultyStatsCalc[d]) difficultyStatsCalc[d] = {m:0, t:0};
+              difficultyStatsCalc[d].t += stat.total;
+              difficultyStatsCalc[d].m += stat.correct;
+          });
+      }
+      if (objRes.topicStats) {
+          Object.entries(objRes.topicStats).forEach(([topic, stat]) => {
+              const t = topic || 'General';
+              if (!topicStatsCalc[t]) topicStatsCalc[t] = {m:0, t:0};
+              topicStatsCalc[t].t += stat.total;
+              topicStatsCalc[t].m += stat.correct;
+          });
+      }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animation: 'slideUp 0.5s ease', width: '100%' }}>
       {/* 1. Score Card */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', textAlign: 'center' }}>
           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>🏆 Score</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff' }}>{marksObtained}<span style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.3)' }}>/{totalMarks}</span></div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff' }}>{finalMarksObtained}<span style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.3)' }}>/{finalTotalMarks}</span></div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', textAlign: 'center' }}>
           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>⏱️ Time</div>
           <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff' }}>
-            {totalTime ? `${Math.floor(totalTime / 60)}m ${totalTime % 60}s` : '--'}
+            {finalTotalTime ? `${Math.floor(finalTotalTime / 60)}m ${finalTotalTime % 60}s` : '--'}
           </div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', textAlign: 'center' }}>
@@ -76,6 +102,49 @@ export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestio
           </div>
         </div>
       </div>
+
+      {isMixed && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+             <h3 style={{ margin: '0 0 1rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               Objective vs Subjective Marks
+             </h3>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+               <div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem', fontSize: '0.9rem' }}>
+                   <span style={{ color: 'rgba(255,255,255,0.8)' }}>Objective</span>
+                   <span style={{ fontWeight: 700, color: '#60a5fa' }}>{objRes.score || 0} / {objRes.total || 0} Marks</span>
+                 </div>
+                 {renderProgressBar(objRes.score || 0, objRes.total || 0, '#60a5fa')}
+               </div>
+               <div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem', fontSize: '0.9rem' }}>
+                   <span style={{ color: 'rgba(255,255,255,0.8)' }}>Subjective</span>
+                   <span style={{ fontWeight: 700, color: '#c084fc' }}>{marksObtained || 0} / {totalMarks || 0} Marks</span>
+                 </div>
+                 {renderProgressBar(marksObtained || 0, totalMarks || 0, '#c084fc')}
+               </div>
+             </div>
+          </div>
+          <div style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+             <h3 style={{ margin: '0 0 1rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               Objective vs Subjective Time
+             </h3>
+             <div style={{ display: 'flex', gap: '1rem', height: '80px', alignItems: 'flex-end', justifyContent: 'space-around', paddingTop: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                   <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#60a5fa' }}>{objRes.totalTime ? `${Math.floor(objRes.totalTime / 60)}m ${objRes.totalTime % 60}s` : '--'}</span>
+                   <div style={{ height: `${finalTotalTime > 0 ? (objRes.totalTime / finalTotalTime)*100 : 0}%`, minHeight: '10px', background: '#60a5fa', width: '30px', borderRadius: '4px 4px 0 0' }}></div>
+                   <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>Objective</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                   <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#c084fc' }}>{totalTime ? `${Math.floor(totalTime / 60)}m ${totalTime % 60}s` : '--'}</span>
+                   <div style={{ height: `${finalTotalTime > 0 ? (totalTime / finalTotalTime)*100 : 0}%`, minHeight: '10px', background: '#c084fc', width: '30px', borderRadius: '4px 4px 0 0' }}></div>
+                   <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>Subjective</span>
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
 
       {/* 2. Topic & Difficulty Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
