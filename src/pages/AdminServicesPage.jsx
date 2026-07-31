@@ -2356,6 +2356,8 @@ function StarBatchTab() {
   const [dragActive, setDragActive] = useState(false);
   const [pendingUpload, setPendingUpload] = useState(null);
   const [uploadType, setUploadType] = useState('objective');
+  const [showPasteModal, setShowPasteModal] = useState(false);
+  const [pastedJson, setPastedJson] = useState('');
   const [attempts, setAttempts] = useState([]);
   const [allBankTests, setAllBankTests] = useState([]);
   const [allSubjectiveTests, setAllSubjectiveTests] = useState([]);
@@ -2399,6 +2401,83 @@ function StarBatchTab() {
       }
     }
     return `${chapterId} Upload`;
+  };
+
+  const handlePastedJson = () => {
+    if (!pastedJson.trim()) return alert("Please paste some JSON code first.");
+    setBusy(true);
+    try {
+      let json = JSON.parse(pastedJson);
+      
+      if (Array.isArray(json) && json.length > 0 && (json[0].question || json[0].text || json[0].answerSteps || json[0].options)) {
+        json = {
+          chapterId: json[0].chapterId || 'Unknown',
+          subjectId: json[0].subjectId || 'Unknown',
+          sectionId: json[0].sectionId || 'Unknown',
+          title: getFriendlyTitle(json[0].chapterId),
+          questions: json.map(q => {
+            if (q.question && !q.text) q.text = q.question;
+            return q;
+          })
+        };
+      }
+      
+      let sampleQuestions = [];
+      if (Array.isArray(json)) {
+        if (json[0] && Array.isArray(json[0].questions)) {
+          sampleQuestions = json[0].questions;
+        } else if (json[0] && (json[0].question || json[0].text)) {
+          sampleQuestions = json;
+        }
+      } else if (json.questions) {
+        sampleQuestions = json.questions;
+      }
+
+      if (sampleQuestions.length > 0) {
+        const sample = sampleQuestions[0];
+        if (!!sample.answerSteps) setUploadType('subjective');
+        else setUploadType('objective');
+      }
+      
+      let summary = [];
+      const computeMarks = (questions) => {
+        let b = {1:0, 2:0, 3:0, 4:0, 5:0};
+        if (Array.isArray(questions)) {
+          questions.forEach(q => {
+            if (q.marks) b[q.marks] = (b[q.marks] || 0) + 1;
+          });
+        }
+        return b;
+      };
+
+      if (Array.isArray(json)) {
+        summary = json.map(test => ({
+          chapterId: test.chapterId || 'Unknown',
+          title: test.title || getFriendlyTitle(test.chapterId),
+          count: Array.isArray(test.questions) ? test.questions.length : 0,
+          marksBreakdown: computeMarks(test.questions)
+        }));
+      } else {
+        summary = [{
+          chapterId: json.chapterId || 'Unknown',
+          title: json.title || json.chapterId || 'Untitled',
+          count: Array.isArray(json.questions) ? json.questions.length : 0,
+          marksBreakdown: computeMarks(json.questions)
+        }];
+      }
+      
+      setPendingUpload({
+        data: json,
+        summary: summary,
+        totalQuestions: summary.reduce((acc, curr) => acc + curr.count, 0)
+      });
+      setShowPasteModal(false);
+      setPastedJson('');
+    } catch (err) {
+      alert("Failed to parse JSON: " + err.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const handleFile = async (file) => {
@@ -2642,7 +2721,10 @@ function StarBatchTab() {
             Subjective
           </label>
         </div>
-        <p className="as-muted" style={{ marginBottom: '1rem' }}>Upload a valid JSON file containing chapterId, subjectId, sectionId, title, and a questions array.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <p className="as-muted" style={{ margin: 0 }}>Upload a valid JSON file containing chapterId, subjectId, sectionId, title, and a questions array.</p>
+          <button className="auth-btn" onClick={() => setShowPasteModal(true)} disabled={busy} style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '0.5rem 1rem' }}>Paste JSON Instead</button>
+        </div>
         
         {pendingUpload ? (
           <div style={{ marginTop: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
@@ -2933,6 +3015,25 @@ function StarBatchTab() {
           </div>
         )}
       </div>
+      {/* Paste JSON Modal */}
+      {showPasteModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '1rem' }}>
+          <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '700px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <h3 style={{ color: '#fff', margin: 0 }}>Paste Test JSON</h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', margin: 0, fontSize: '0.9rem' }}>Paste your raw objective or subjective JSON code here. The system will auto-detect the type.</p>
+            <textarea 
+              value={pastedJson}
+              onChange={e => setPastedJson(e.target.value)}
+              placeholder="Paste JSON here..."
+              style={{ width: '100%', height: '300px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '1rem', color: '#fff', fontFamily: 'monospace', resize: 'vertical' }}
+            />
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <button className="auth-btn" onClick={() => { setShowPasteModal(false); setPastedJson(''); }} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}>Cancel</button>
+              <button className="auth-btn primary" onClick={handlePastedJson} disabled={busy}>Proceed</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
