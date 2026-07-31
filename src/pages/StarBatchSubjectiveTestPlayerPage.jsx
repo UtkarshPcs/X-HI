@@ -12,6 +12,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { formatMath } from '../utils/formatMath';
 
 export default function StarBatchSubjectiveTestPlayerPage() {
   const { testId } = useParams();
@@ -451,7 +452,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
                       <div style={{ flex: 1 }}>
                       <div className="custom-md">
                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                          {q.text}
+                          {formatMath(q.text)}
                         </ReactMarkdown>
                         {q.diagram && <DiagramRenderer diagram={q.diagram} />}
                       </div>
@@ -503,7 +504,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
           <div className="eval-card">
             <div style={{ fontSize: '1.1rem', color: '#f1f5f9', lineHeight: 1.6, marginBottom: '1.5rem' }} className="custom-md">
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {activeQuestions[evalIndex].text}
+                {formatMath(activeQuestions[evalIndex].text)}
               </ReactMarkdown>
               {activeQuestions[evalIndex].diagram && <DiagramRenderer diagram={activeQuestions[evalIndex].diagram} />}
             </div>
@@ -520,7 +521,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
                     </div>
                     <div style={{ flex: 1, color: '#e2e8f0', fontSize: '0.95rem', lineHeight: 1.5 }} className="custom-md">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                        {step.stepText || step.step || step.text}
+                        {formatMath(step.stepText || step.step || step.text)}
                       </ReactMarkdown>
                     </div>
                   </div>
@@ -566,7 +567,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
                   
                   return options.map(opt => (
                     <button 
-                      key={opt}
+                      key={formatMath(opt)}
                       onClick={() => setEvalMarks(prev => ({ ...prev, [evalIndex]: opt }))}
                       style={{ 
                         flex: '1 1 calc(33.33% - 0.5rem)', 
@@ -582,7 +583,7 @@ export default function StarBatchSubjectiveTestPlayerPage() {
                         whiteSpace: 'nowrap'
                       }}
                     >
-                      {opt} {opt === 1 ? 'Mark' : 'Marks'}
+                      {formatMath(opt)} {opt === 1 ? 'Mark' : 'Marks'}
                     </button>
                   ));
                 })()}

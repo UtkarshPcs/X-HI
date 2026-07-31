@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { formatMath } from '../utils/formatMath';
 
 export default function TestAnalyticsDashboard({ result, activeQuestions, answers, averageScore, test }) {
   const { currentUser } = useAuth();
@@ -425,7 +426,7 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                         </div>
                       </div>
                       <div style={{ color: '#fff', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '60vw' }}>
-                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{(q.text || '').split('\n')[0]}</ReactMarkdown>
+                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath((q.text || '').split('\n')[0])}</ReactMarkdown>
                       </div>
                     </div>
                     <div>{isExpanded ? <ChevronUp size={20} color="rgba(255,255,255,0.5)"/> : <ChevronDown size={20} color="rgba(255,255,255,0.5)"/>}</div>
@@ -435,7 +436,7 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                     <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: 1.5 }}>
                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md">
-                          {q.text}
+                          {formatMath(q.text)}
                         </ReactMarkdown>
                       </div>
                       
@@ -467,7 +468,7 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                                </div>
                                <div style={{ color: textColor, flex: 1, fontSize: '0.95rem' }}>
                                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
-                                   {opt}
+                                   {formatMath(opt)}
                                  </ReactMarkdown>
                                </div>
                                {icon && <div>{icon}</div>}

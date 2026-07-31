@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { formatMath } from '../utils/formatMath';
 export default function StarBatchTestPlayerPage() {
   const { testId } = useParams();
   const { currentUser } = useAuth();
@@ -454,7 +455,7 @@ export default function StarBatchTestPlayerPage() {
             </div>
             <div className="tp-q-text markdown-body custom-md" style={{ marginBottom: '1.25rem' }}>
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {activeQuestions[currentQuestionIndex].text}
+                {formatMath(activeQuestions[currentQuestionIndex].text)}
               </ReactMarkdown>
               {activeQuestions[currentQuestionIndex].diagram && <DiagramRenderer diagram={activeQuestions[currentQuestionIndex].diagram} />}
             </div>
@@ -474,7 +475,7 @@ export default function StarBatchTestPlayerPage() {
                     </div>
                     <span style={{ flex: 1, color: isSelected ? '#fff' : '#e2e8f0' }} className="markdown-body custom-md-opt">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                        {opt}
+                        {formatMath(opt)}
                       </ReactMarkdown>
                     </span>
                   </div>
