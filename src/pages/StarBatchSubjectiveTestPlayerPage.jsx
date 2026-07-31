@@ -102,19 +102,58 @@ export default function StarBatchSubjectiveTestPlayerPage() {
         'difficult': ['Super Difficult', 'Hard', 'Medium', 'Easy']
       }[level] || ['Medium', 'Easy', 'Hard', 'Super Difficult'];
 
-      let isBankExhausted = false;
-      for (let m = 1; m <= 5; m++) {
-        if (reqCounts[m] > 0 && qByMarks[m].length < reqCounts[m]) {
-          isBankExhausted = true;
-          break;
+      const desiredTotal = 20 * multiplier;
+      const findBestCombo = (buckets) => {
+        let best = null;
+        let minPen = Infinity;
+        const maxC1 = Math.min(buckets[1].length, desiredTotal);
+        for(let c1=0; c1<=maxC1; c1++) {
+          const maxC2 = Math.min(buckets[2].length, Math.floor((desiredTotal - c1*1)/2));
+          for(let c2=0; c2<=maxC2; c2++) {
+            const maxC3 = Math.min(buckets[3].length, Math.floor((desiredTotal - c1*1 - c2*2)/3));
+            for(let c3=0; c3<=maxC3; c3++) {
+              const maxC4 = Math.min(buckets[4].length, Math.floor((desiredTotal - c1*1 - c2*2 - c3*3)/4));
+              for(let c4=0; c4<=maxC4; c4++) {
+                const rem = desiredTotal - c1*1 - c2*2 - c3*3 - c4*4;
+                if (rem % 5 === 0) {
+                  let c5 = rem / 5;
+                  if (c5 <= buckets[5].length) {
+                    let sec = (c1>0?1:0) + (c2>0?1:0) + (c3>0?1:0) + (c4>0?1:0) + (c5>0?1:0);
+                    if (sec >= 3) {
+                      let pen = Math.abs(c1 - reqCounts[1]) + Math.abs(c2 - reqCounts[2]) + Math.abs(c3 - reqCounts[3]) + Math.abs(c4 - reqCounts[4]) + Math.abs(c5 - reqCounts[5]);
+                      if (pen < minPen) { minPen = pen; best = {1:c1, 2:c2, 3:c3, 4:c4, 5:c5}; }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
+        return { best, minPen };
+      };
+
+      let res = findBestCombo(qByMarks);
+      let isBankExhausted = false;
+      let finalBuckets = qByMarks;
+      
+      if (!res.best || res.minPen > 0) {
+          let resAll = findBestCombo(allQByMarks);
+          if (resAll.best && resAll.minPen < (res.best ? res.minPen : Infinity)) {
+              isBankExhausted = true;
+              finalBuckets = allQByMarks;
+              res = resAll;
+          }
       }
 
       if (isBankExhausted) {
-         alert("Question bank exhausted for your history! Restarting cycle from all available questions.");
+         alert("Question bank exhausted for perfect distribution! Restarting cycle from all available questions to form the best test.");
       }
 
-      const finalBuckets = isBankExhausted ? allQByMarks : qByMarks;
+      if (!res.best) {
+         throw new Error("Sorry, Test is not Available right now. (Question bank does not have enough questions to form a balanced test of at least 3 sections).");
+      }
+
+      reqCounts = res.best;
       const selectedQuestions = [];
 
       for (let m = 1; m <= 5; m++) {
@@ -132,10 +171,6 @@ export default function StarBatchSubjectiveTestPlayerPage() {
           const pB = diffPriority.indexOf(b.difficulty || 'Medium');
           return (pA === -1 ? 99 : pA) - (pB === -1 ? 99 : pB);
         });
-
-        if (bucket.length < req) {
-          throw new Error(`Sorry, Test is not Available right now. (Not enough ${m}-mark questions in bank)`);
-        }
 
         selectedQuestions.push(...bucket.slice(0, req));
       }
