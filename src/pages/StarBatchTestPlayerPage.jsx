@@ -315,6 +315,8 @@ export default function StarBatchTestPlayerPage() {
 
           const resultData = { score, total: activeQuestions.length, aiReview, difficultyStats, topicStats, totalTime: quizTime, questionTimes };
           if (isMixed && subjId) {
+            resultData.activeQuestions = activeQuestions;
+            resultData.responses = answers;
             sessionStorage.setItem('mixedObjResult', JSON.stringify(resultData));
             navigate(`/star-subjective-tests/${subjId}?level=${subjLevel}&marks=${subjMarks}&mixed=true`);
           } else {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, Sparkles, AlertCircle, BookOpen, Clock, Activity, Target } from 'lucide-react';
+import { CheckCircle, XCircle, Sparkles, AlertCircle, BookOpen, Clock, Activity, Target, ChevronUp, ChevronDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -10,9 +10,14 @@ import { formatMath } from '../utils/formatMath';
 export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestions, averageScore, test }) {
   const [expandedMistakes, setExpandedMistakes] = useState({});
   const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [expandedObjMistakes, setExpandedObjMistakes] = useState({});
+  const [showAllObjQuestions, setShowAllObjQuestions] = useState(false);
 
   const toggleMistake = (idx) => {
     setExpandedMistakes(prev => ({ ...prev, [idx]: !prev[idx] }));
+  };
+  const toggleObjMistake = (idx) => {
+    setExpandedObjMistakes(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
   const { marksObtained, totalMarks, responses, aiReview, difficultyStats, topicStats, totalTime, mixedObjResult } = result;
@@ -36,6 +41,13 @@ export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestio
   // Mistake Analysis (any question where user got less than full marks)
   const allQsWithScores = activeQuestions.map((q, idx) => ({ ...q, userMarks: responses[idx] || 0, idx }));
   const mistakes = allQsWithScores.filter(q => q.userMarks < q.marks);
+
+  const objQsWithScores = (isMixed && objRes.activeQuestions) ? objRes.activeQuestions.map((q, idx) => {
+    const userAns = objRes.responses ? objRes.responses[idx] : undefined;
+    const isCorrect = userAns === q.correctOptionIndex;
+    return { ...q, userAns, isCorrect, idx };
+  }) : [];
+  const objMistakes = objQsWithScores.filter(q => !q.isCorrect);
 
   const renderProgressBar = (correct, total, color) => (
     <div style={{ width: '100%', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', height: '8px', overflow: 'hidden', marginTop: '0.5rem' }}>
@@ -189,7 +201,124 @@ export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestio
         </div>
       </div>
 
-      {/* Question Review (Mistakes vs All) */}
+      {/* Objective Question Review */}
+      {isMixed && objQsWithScores.length > 0 && (
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h3 style={{ margin: 0, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={18} color="#60a5fa"/> Objective Review</h3>
+            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '0.2rem' }}>
+              <button 
+                onClick={() => setShowAllObjQuestions(false)} 
+                style={{ background: !showAllObjQuestions ? 'rgba(255,255,255,0.1)' : 'transparent', color: !showAllObjQuestions ? '#fff' : 'rgba(255,255,255,0.5)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                Mistakes ({objMistakes.length})
+              </button>
+              <button 
+                onClick={() => setShowAllObjQuestions(true)} 
+                style={{ background: showAllObjQuestions ? 'rgba(255,255,255,0.1)' : 'transparent', color: showAllObjQuestions ? '#fff' : 'rgba(255,255,255,0.5)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                All ({objQsWithScores.length})
+              </button>
+            </div>
+          </div>
+
+          {(!showAllObjQuestions && objMistakes.length === 0) ? (
+            <div style={{ textAlign: 'center', color: '#10b981', padding: '2rem', background: 'rgba(16,185,129,0.05)', borderRadius: '12px' }}>
+              <CheckCircle size={32} style={{ margin: '0 auto 1rem' }} />
+              <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>Perfect execution in the Objective section!</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {(showAllObjQuestions ? objQsWithScores : objMistakes).map((q, i) => {
+                const isExpanded = expandedObjMistakes[q.idx];
+                return (
+                  <div key={i} style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+                    <div 
+                      onClick={() => toggleObjMistake(q.idx)}
+                      style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontWeight: 700 }}>Q{q.idx + 1}</span>
+                          {q.isCorrect ? (
+                             <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 700 }}><CheckCircle size={12}/> Correct</span>
+                          ) : (
+                             <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 700 }}><XCircle size={12}/> Incorrect</span>
+                          )}
+                          <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.7rem', color: '#e2e8f0', marginLeft: '0.2rem' }}>{q.topic || 'General'}</span>
+                          <span style={{ background: q.difficulty === 'Easy' ? '#10b98120' : q.difficulty === 'Medium' ? '#fbbf2420' : '#ef444420', color: q.difficulty === 'Easy' ? '#10b981' : q.difficulty === 'Medium' ? '#fbbf24' : '#ef4444', padding: '2px 8px', borderRadius: '10px', fontSize: '0.7rem' }}>{q.difficulty || 'Medium'}</span>
+                          {objRes.questionTimes && objRes.questionTimes[q.idx] !== undefined && (
+                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.2rem', marginLeft: '0.5rem' }}><Clock size={12} /> {objRes.questionTimes[q.idx]}s</span>
+                          )}
+                        </div>
+                        <div style={{ color: '#fff', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}>
+                           <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath((q.text || '').split('\n')[0])}</ReactMarkdown>
+                        </div>
+                      </div>
+                      <div>{isExpanded ? <ChevronUp size={20} color="rgba(255,255,255,0.5)"/> : <ChevronDown size={20} color="rgba(255,255,255,0.5)"/>}</div>
+                    </div>
+                    
+                    {isExpanded && (
+                      <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: 1.5 }} className="custom-md">
+                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                            {formatMath(q.text)}
+                          </ReactMarkdown>
+                        </div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                          {(q.options || []).map((opt, oIdx) => {
+                            const isCorrect = oIdx === q.correctOptionIndex;
+                            const isSelected = oIdx === q.userAns;
+                            let bgColor = 'rgba(255,255,255,0.03)';
+                            let borderColor = 'rgba(255,255,255,0.08)';
+                            let textColor = '#e2e8f0';
+                            let icon = null;
+
+                            if (isCorrect) {
+                              bgColor = 'rgba(16,185,129,0.1)';
+                              borderColor = 'rgba(16,185,129,0.3)';
+                              textColor = '#10b981';
+                              icon = <CheckCircle size={16} color="#10b981" />;
+                            } else if (isSelected) {
+                              bgColor = 'rgba(239,68,68,0.1)';
+                              borderColor = 'rgba(239,68,68,0.3)';
+                              textColor = '#ef4444';
+                              icon = <XCircle size={16} color="#ef4444" />;
+                            }
+
+                            return (
+                              <div key={oIdx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: bgColor, border: `1px solid ${borderColor}`, padding: '0.75rem 1rem', borderRadius: '12px' }}>
+                                 <div style={{ color: textColor, fontWeight: 700, width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${borderColor}`, borderRadius: '50%' }}>
+                                   {String.fromCharCode(65 + oIdx)}
+                                 </div>
+                                 <div style={{ color: textColor, flex: 1, fontSize: '0.95rem' }}>
+                                   <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} className="custom-md-opt">
+                                     {formatMath(opt)}
+                                   </ReactMarkdown>
+                                 </div>
+                                 {icon && <div>{icon}</div>}
+                                 {isSelected && !isCorrect && <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 700, textTransform: 'uppercase' }}>Your Answer</span>}
+                              </div>
+                            );
+                          })}
+                          {q.userAns === undefined && (
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <AlertCircle size={14} /> You did not answer this question.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Subjective Question Review (Mistakes vs All) */}
       <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h3 style={{ margin: 0, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={18} color="#ef4444"/> Subjective Review</h3>
