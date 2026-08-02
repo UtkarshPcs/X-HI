@@ -39,6 +39,7 @@ import { earnSparks, SPARK_UPLOAD_REWARD } from '../services/sparksService';
 import { getAllClasswork } from '../services/classworkService';
 import { getHomework } from '../services/homeworkService';
 import { createPage, updatePage, getPage, getAllPages, deletePage } from '../services/dynamicPageService';
+import { createCustomTest, updateCustomTest, getCustomTests, getCustomTestAttempts } from '../services/customTestService';
 
 const TABS = [
   { id: 'users',      label: 'User Directory',  Icon: Users },
@@ -61,6 +62,7 @@ const TABS = [
   { id: 'accessCodes',       label: 'Access Codes',       Icon: ShieldCheck },
   { id: 'monitorRoles',      label: 'Monitor Roles',      Icon: UsersIcon },
   { id: 'pages',             label: 'Page Creation',      Icon: FilePlus },
+  { id: 'customTests',       label: 'Custom Tests',       Icon: Target },
 ];
 
 const ROLE_STYLE = {
@@ -1783,6 +1785,7 @@ export default function AdminServicesPage() {
         { tab === 'accessCodes'       && <AccessCodesTab /> }
         { tab === 'monitorRoles'      && <MonitorRolesTab /> }
         { tab === 'pages'             && <PageCreationTab /> }
+        { tab === 'customTests'       && <CustomTestsTab /> }
       </div>
     </div>
   );
@@ -3639,6 +3642,164 @@ function MonitorRolesTab() {
           Note: Changes are applied instantly to all connected users.
         </p>
       </div>
+    </div>
+  );
+}
+
+// ── Custom Tests Tab ──────────────────────────────────────────
+function CustomTestsTab() {
+  const [tests, setTests] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [jsonInput, setJsonInput] = useState('');
+  const [activeTest, setActiveTest] = useState(null);
+  const [attempts, setAttempts] = useState([]);
+
+  useEffect(() => {
+    loadTests();
+  }, []);
+
+  async function loadTests() {
+    setBusy(true);
+    try {
+      setTests(await getCustomTests());
+    } catch (e) {
+      alert("Error loading tests: " + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    try {
+      const data = JSON.parse(jsonInput);
+      await createCustomTest(data);
+      setJsonInput('');
+      loadTests();
+    } catch (err) {
+      alert("Invalid JSON: " + err.message);
+    }
+  }
+
+  async function handleUpdate(testId, updates) {
+    try {
+      await updateCustomTest(testId, updates);
+      loadTests();
+    } catch (err) {
+      alert("Update failed: " + err.message);
+    }
+  }
+
+  async function openTestStats(test) {
+    setActiveTest(test);
+    try {
+      setAttempts(await getCustomTestAttempts(test.id));
+    } catch (e) {
+      alert("Failed to load attempts: " + e.message);
+    }
+  }
+
+  function copyLink(id) {
+    const origin = window.location.origin;
+    navigator.clipboard.writeText(`${origin}/custom-tests/${id}`);
+    alert("Share link copied! Users will be prompted for their info if public.");
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="as-card">
+        <h4 className="as-section-title"><Target size={15} /> Create Custom Test</h4>
+        <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <textarea
+            className="as-input"
+            rows={10}
+            style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+            placeholder="Paste Custom Test JSON here..."
+            value={jsonInput}
+            onChange={e => setJsonInput(e.target.value)}
+            required
+          />
+          <button type="submit" className="auth-btn primary" disabled={busy} style={{ alignSelf: 'flex-start' }}>
+            {busy ? 'Creating...' : 'Create Test'}
+          </button>
+        </form>
+      </div>
+
+      <div className="as-card">
+        <h4 className="as-section-title"><Target size={15} /> Existing Custom Tests</h4>
+        {tests.length === 0 ? (
+          <p className="as-muted">No custom tests found.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {tests.map(t => (
+              <div key={t.id} style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', background: 'var(--bg-card)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <h5 style={{ margin: '0 0 0.2rem', fontSize: '1.05rem', color: 'var(--text-primary)' }}>{t.title}</h5>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t.description}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => openTestStats(t)} className="auth-btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
+                      <BarChart2 size={12} /> Stats
+                    </button>
+                    <button onClick={() => copyLink(t.id)} className="auth-btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>
+                      <Copy size={12} /> Link
+                    </button>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={t.isPrivate} onChange={e => handleUpdate(t.id, { isPrivate: e.target.checked })} />
+                    Private
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={t.allowMultipleAttempts} onChange={e => handleUpdate(t.id, { allowMultipleAttempts: e.target.checked })} />
+                    Multiple Attempts
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {activeTest && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '2rem', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button onClick={() => setActiveTest(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+            <h3 style={{ margin: '0 0 1rem', color: 'var(--text-primary)' }}>{activeTest.title} - Stats</h3>
+            <p className="as-muted" style={{ marginBottom: '1.5rem' }}>Total Attempts: {attempts.length}</p>
+            
+            {attempts.length > 0 ? (
+              <table className="as-table" style={{ width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {attempts.map(a => (
+                    <tr key={a.id}>
+                      <td>
+                        {a.userId ? <span style={{ color: '#3b82f6' }}>{a.userId}</span> : <span>{a.publicUser?.name} ({a.publicUser?.school})</span>}
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{a.score} / {a.total}</td>
+                      <td className="as-muted-cell">{new Date(a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt || Date.now())).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="as-muted">No one has taken this test yet.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

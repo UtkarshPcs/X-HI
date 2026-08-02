@@ -35,13 +35,14 @@ export default function handler(req) {
     const isNotes     = type === 'notes';
     const isNotice    = type === 'notice';
     const isHome      = type === 'home';
+    const isCustomTest = type === 'custom-test';
     const title = clampText(searchParams.get('title') || '10th HI Portal', 48);
     const rawLines = (searchParams.get('lines') || '').split('|').map((l) => l.trim()).filter(Boolean).slice(0, 5);
 
-    const accent     = isNotice ? '#ec4899' : isNotes ? '#f59e0b' : isClasswork ? '#FF6D00' : '#8b5cf6';
-    const accentSoft = isNotice ? 'rgba(236,72,153,0.18)' : isNotes ? 'rgba(245,158,11,0.18)' : isClasswork ? 'rgba(255,109,0,0.18)' : 'rgba(139,92,246,0.18)';
-    const label      = isHome ? 'PORTAL' : isNotice ? 'NOTICE' : isNotes ? 'NOTES' : isClasswork ? 'CLASSWORK' : 'HOMEWORK';
-    const emoji      = isHome ? '🎓' : isNotice ? '📢' : isNotes ? '📄' : isClasswork ? '📝' : '📋';
+    const accent     = isCustomTest ? '#10b981' : isNotice ? '#ec4899' : isNotes ? '#f59e0b' : isClasswork ? '#FF6D00' : '#8b5cf6';
+    const accentSoft = isCustomTest ? 'rgba(16,185,129,0.18)' : isNotice ? 'rgba(236,72,153,0.18)' : isNotes ? 'rgba(245,158,11,0.18)' : isClasswork ? 'rgba(255,109,0,0.18)' : 'rgba(139,92,246,0.18)';
+    const label      = isCustomTest ? 'CUSTOM TEST' : isHome ? 'PORTAL' : isNotice ? 'NOTICE' : isNotes ? 'NOTES' : isClasswork ? 'CLASSWORK' : 'HOMEWORK';
+    const emoji      = isCustomTest ? '🎯' : isHome ? '🎓' : isNotice ? '📢' : isNotes ? '📄' : isClasswork ? '📝' : '📋';
 
     const lineEls = rawLines.length
       ? rawLines.map((line) =>

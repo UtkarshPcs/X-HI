@@ -9,6 +9,10 @@
       "destination": "/api/maths-share"
     },
     {
+      "source": "/custom-test-share",
+      "destination": "/api/custom-test-share"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -48,6 +48,7 @@ const StarBatchConceptsHub = lazy(() => import('./pages/StarBatchConceptsHub'));
 const StarConceptChapterPage = lazy(() => import('./pages/StarConceptChapterPage'));
 const PeriodicPredictedAnalysisPage = lazy(() => import('./pages/PeriodicPredictedAnalysisPage'));
 const PeriodicPredictedTestPlayerPage = lazy(() => import('./pages/PeriodicPredictedTestPlayerPage'));
+const CustomTestPlayerPage = lazy(() => import('./pages/CustomTestPlayerPage'));
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -83,7 +84,7 @@ function AppInner() {
   // Star Batch is an internal-only feature now (no separate external role/
   // login). Still suppress the normal app-wide popups while viewing the
   // Star Batch portal/syllabus pages, since those are a focused sub-area.
-  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking');
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -159,6 +160,7 @@ function AppInner() {
               <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />
               <Route path="/periodic-predicted" element={<PeriodicPredictedAnalysisPage />} />
               <Route path="/periodic-predicted/test/:subject/:setNumber" element={<PeriodicPredictedTestPlayerPage />} />
+              <Route path="/custom-tests/:testId" element={<CustomTestPlayerPage />} />
               <Route path="/p/:pageId" element={<DynamicPage />} />
             </Routes>
           </Suspense>
