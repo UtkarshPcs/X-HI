@@ -454,31 +454,9 @@ export default function ProfilePage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 
-                {/* COL 1: Toggles */}
+                {/* COL 1: Drag & Drop */}
                 <div>
-                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>1. Toggle Features</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    {widgets.map((widget) => {
-                      const idx = widgets.findIndex(w => w.id === widget.id);
-                      return (
-                        <div key={`toggle-${widget.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.04)' }}>
-                          <span style={{ fontSize: '0.9rem', color: widget.enabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>{widget.label}</span>
-                          {widget.lockedToggle ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)' }}>
-                              <Lock size={14} /> <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Fixed</span>
-                            </div>
-                          ) : (
-                            <ToggleSwitch isOn={widget.enabled} onToggle={() => toggleWidget(idx)} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* COL 2: Drag & Drop */}
-                <div>
-                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>2. Arrange Layout</h3>
+                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>1. Arrange Layout</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <div style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Top (Fixed: Banners & AI)</span>
@@ -508,6 +486,28 @@ export default function ProfilePage() {
                         <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>{widget.label}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* COL 2: Toggles */}
+                <div>
+                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>2. Toggle Features</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {widgets.map((widget) => {
+                      const idx = widgets.findIndex(w => w.id === widget.id);
+                      return (
+                        <div key={`toggle-${widget.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                          <span style={{ fontSize: '0.9rem', color: widget.enabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>{widget.label}</span>
+                          {widget.lockedToggle ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)' }}>
+                              <Lock size={14} /> <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Fixed</span>
+                            </div>
+                          ) : (
+                            <ToggleSwitch isOn={widget.enabled} onToggle={() => toggleWidget(idx)} />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
