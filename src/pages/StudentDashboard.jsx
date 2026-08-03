@@ -464,7 +464,7 @@ export default function StudentDashboard() {
       );
       case 'monitor': return (
         (currentUser.role === ROLES.MONITOR || currentUser.role === ROLES.ADMIN) ? (
-          <div key="monitor" className="glass-card glow-hover" style={{ cursor: 'pointer', borderColor: 'rgba(59,130,246,0.3)' }} onClick={() => navigate('/records-monitor')}>
+          <div key="monitor" className="glass-card glow-hover" style={{ cursor: 'pointer', borderColor: 'rgba(59,130,246,0.3)' }} onClick={() => navigate('/admin')}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#3b82f6' }}><ClipboardCheck size={20} /> Monitor Tools</h2>
               <ArrowRight size={16} color="#3b82f6" />
@@ -475,7 +475,7 @@ export default function StudentDashboard() {
       );
       case 'admin': return (
         currentUser.role === ROLES.ADMIN ? (
-          <div key="admin" className="glass-card glow-hover" style={{ cursor: 'pointer', borderColor: 'rgba(239,68,68,0.3)' }} onClick={() => navigate('/admin')}>
+          <div key="admin" className="glass-card glow-hover" style={{ cursor: 'pointer', borderColor: 'rgba(239,68,68,0.3)' }} onClick={() => navigate('/admin-services')}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}><ShieldAlert size={20} /> Admin Tools</h2>
               <ArrowRight size={16} color="#ef4444" />
