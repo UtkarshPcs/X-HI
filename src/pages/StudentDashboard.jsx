@@ -231,6 +231,8 @@ export default function StudentDashboard() {
   }
 
   const DEFAULT_WIDGET_ORDER = [
+    { id: 'notices', enabled: true },
+    { id: 'homework', enabled: true },
     { id: 'classwork', enabled: true },
     { id: 'syllabus', enabled: true },
     { id: 'records', enabled: true },
@@ -243,11 +245,113 @@ export default function StudentDashboard() {
     { id: 'calendar', enabled: false },
     { id: 'monitor', enabled: false },
     { id: 'admin', enabled: false },
-    { id: 'maths', enabled: false }
+    { id: 'maths', enabled: false },
+    { id: 'attendance', enabled: true }
   ];
 
   const renderWidget = (id) => {
     switch (id) {
+      case 'notices': return <NoticeBar key="notices" />;
+      case 'homework': return (
+        <div key="homework" className="glass-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BookOpen size={20} color="var(--primary)" />
+              {isLatestToday ? "Today's Homework" : 'Latest Homework'}
+            </h2>
+            <button className="auth-link" onClick={() => navigate('/homework')} style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+              View all <ArrowRight size={13} />
+            </button>
+          </div>
+          {hwLoading ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
+          ) : !latestHw ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No homework entries yet.</p>
+          ) : (
+            <>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                {latestHw.date}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {(!latestHw.tasks || latestHw.tasks.length === 0) ? (
+                  <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.9rem' }}>No tasks recorded.</p>
+                ) : latestHw.tasks.map((task, idx) => {
+                  const key = `${latestHw.id}_${idx}`;
+                  const done = doneKeys.has(key);
+                  return (
+                    <button key={idx} onClick={() => toggleTask(key)} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                      <div style={{
+                        padding: '0.7rem 0.9rem',
+                        background: done ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)',
+                        borderRadius: 'var(--radius-sm)',
+                        borderLeft: `3px solid ${done ? '#10b981' : 'var(--primary)'}`,
+                        display: 'flex', gap: '0.65rem', alignItems: 'flex-start',
+                        transition: 'all 0.2s',
+                      }}>
+                        <div style={{
+                          flexShrink: 0, marginTop: 2,
+                          width: 18, height: 18, borderRadius: 5,
+                          border: `2px solid ${done ? '#10b981' : 'var(--border)'}`,
+                          background: done ? '#10b981' : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.2s',
+                        }}>
+                          {done && <Check size={11} color="#fff" strokeWidth={3} />}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.2rem', color: done ? 'var(--text-secondary)' : 'var(--text-primary)', textDecoration: done ? 'line-through' : 'none', margin: 0 }}>
+                            {task.subject}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      );
+      case 'attendance': return (
+        <div key="attendance" className="glass-card" data-tour="attendance-panel" ref={attendancePanelRef}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+            <h2 className="section-title" style={{ marginBottom: 0 }}>My Attendance</h2>
+            <span className={`dash-stat-value ${currentMonthPct >= 75 ? 'att-pct-good' : currentMonthPct >= 60 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.5rem' }}>
+              {currentMonthPct !== null ? `${currentMonthPct}%` : (attendanceLoaded ? `${displayPct}%` : '…')}
+            </span>
+          </div>
+          {attendanceLoaded && (
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '130px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.8rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <TrendingUp size={12} /> Projected (full year)
+                </p>
+                <p className={`dash-stat-value ${yearStats.projectedPct >= 75 ? 'att-pct-good' : yearStats.projectedPct >= 60 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.25rem', margin: 0 }}>
+                  {yearStats.projectedPct}%
+                </p>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{yearStats.totalYearDays} total working days</p>
+              </div>
+              <div style={{ flex: 1, minWidth: '130px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.8rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <CalendarCheck size={12} /> Can still miss (CBSE 75%)
+                </p>
+                <p className={`dash-stat-value ${yearStats.canMissMore > 10 ? 'att-pct-good' : yearStats.canMissMore > 0 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.25rem', margin: 0 }}>
+                  {yearStats.canMissMore > 0 ? yearStats.canMissMore : 0} days
+                </p>
+                <p style={{ fontSize: '0.72rem', color: yearStats.canMissMore < 0 ? '#ef4444' : 'var(--text-muted)', marginTop: '0.1rem' }}>
+                  {yearStats.canMissMore < 0 ? `⚠ exceeded by ${Math.abs(yearStats.canMissMore)} days` : `max ${yearStats.maxAllowed} absences allowed`}
+                </p>
+              </div>
+            </div>
+          )}
+          <AttendanceCalendar 
+            absentDays={absentDays} 
+            onToggle={handleToggle} 
+            closedDays={closedDays} 
+            onMonthStatsChange={(stats) => setCurrentMonthPct(stats.percentage)} 
+          />
+        </div>
+      );
       case 'syllabus': return (
         <div key="syllabus" className="glass-card glow-hover" data-tour="syllabus-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/syllabus')} title="View full syllabus progress">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
@@ -473,119 +577,13 @@ export default function StudentDashboard() {
       {/* Profile completion banner — hides permanently at 100% */}
       <ProfileCompletionBanner />
 
-      {/* Notices */}
+      {/* FIXED Banners */}
       <MarksBanner />
       <MergeBanner />
       <CampaignBanner campaignId="email-reminder-v1" />
-      <NoticeBar />
-
-      {/* FIXED: Today's / Latest homework card */}
-      <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BookOpen size={20} color="var(--primary)" />
-            {isLatestToday ? "Today's Homework" : 'Latest Homework'}
-          </h2>
-          <button className="auth-link" onClick={() => navigate('/homework')} style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
-            View all <ArrowRight size={13} />
-          </button>
-        </div>
-
-        {hwLoading ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
-        ) : !latestHw ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No homework entries yet.</p>
-        ) : (
-          <>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-              {latestHw.date}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {(!latestHw.tasks || latestHw.tasks.length === 0) ? (
-                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.9rem' }}>No tasks recorded.</p>
-              ) : latestHw.tasks.map((task, idx) => {
-                const key = `${latestHw.id}_${idx}`;
-                const done = doneKeys.has(key);
-                return (
-                  <button key={idx} onClick={() => toggleTask(key)} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-                    <div style={{
-                      padding: '0.7rem 0.9rem',
-                      background: done ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)',
-                      borderRadius: 'var(--radius-sm)',
-                      borderLeft: `3px solid ${done ? '#10b981' : 'var(--primary)'}`,
-                      display: 'flex', gap: '0.65rem', alignItems: 'flex-start',
-                      transition: 'all 0.2s',
-                    }}>
-                      <div style={{
-                        flexShrink: 0, marginTop: 2,
-                        width: 18, height: 18, borderRadius: 5,
-                        border: `2px solid ${done ? '#10b981' : 'var(--border)'}`,
-                        background: done ? '#10b981' : 'transparent',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        transition: 'all 0.2s',
-                      }}>
-                        {done && <Check size={11} color="#fff" strokeWidth={3} />}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.2rem', color: done ? 'var(--text-secondary)' : 'var(--text-primary)', textDecoration: done ? 'line-through' : 'none', margin: 0 }}>
-                          {task.subject}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
 
       {/* CUSTOMIZABLE WIDGETS */}
       {(currentUser.dashboardPreferences || DEFAULT_WIDGET_ORDER).map(w => w.enabled ? renderWidget(w.id) : null)}
-
-
-      {/* Attendance tracker */}
-      <div className="glass-card" data-tour="attendance-panel" ref={attendancePanelRef}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0 }}>My Attendance</h2>
-          <span className={`dash-stat-value ${currentMonthPct >= 75 ? 'att-pct-good' : currentMonthPct >= 60 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.5rem' }}>
-            {currentMonthPct !== null ? `${currentMonthPct}%` : (attendanceLoaded ? `${displayPct}%` : '…')}
-          </span>
-        </div>
-
-        {/* Full-year projection row */}
-        {attendanceLoaded && (
-          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '130px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.8rem' }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <TrendingUp size={12} /> Projected (full year)
-              </p>
-              <p className={`dash-stat-value ${yearStats.projectedPct >= 75 ? 'att-pct-good' : yearStats.projectedPct >= 60 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.25rem', margin: 0 }}>
-                {yearStats.projectedPct}%
-              </p>
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{yearStats.totalYearDays} total working days</p>
-            </div>
-            <div style={{ flex: 1, minWidth: '130px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 0.8rem' }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <CalendarCheck size={12} /> Can still miss (CBSE 75%)
-              </p>
-              <p className={`dash-stat-value ${yearStats.canMissMore > 10 ? 'att-pct-good' : yearStats.canMissMore > 0 ? 'att-pct-warn' : 'att-pct-bad'}`} style={{ fontSize: '1.25rem', margin: 0 }}>
-                {yearStats.canMissMore > 0 ? yearStats.canMissMore : 0} days
-              </p>
-              <p style={{ fontSize: '0.72rem', color: yearStats.canMissMore < 0 ? '#ef4444' : 'var(--text-muted)', marginTop: '0.1rem' }}>
-                {yearStats.canMissMore < 0 ? `⚠ exceeded by ${Math.abs(yearStats.canMissMore)} days` : `max ${yearStats.maxAllowed} absences allowed`}
-              </p>
-            </div>
-          </div>
-        )}
-
-        <AttendanceCalendar 
-          absentDays={absentDays} 
-          onToggle={handleToggle} 
-          closedDays={closedDays} 
-          onMonthStatsChange={(stats) => setCurrentMonthPct(stats.percentage)} 
-        />
-      </div>
 
       <FeatureLaunchPopup />
     </div>

@@ -41,6 +41,8 @@ export default function ProfilePage() {
 
   // Dashboard Customization State
   const DEFAULT_WIDGETS = [
+    { id: 'notices', label: 'Notices Board', enabled: true, lockedToggle: true },
+    { id: 'homework', label: 'Latest Homework', enabled: true },
     { id: 'classwork', label: 'Latest Classwork', enabled: true },
     { id: 'syllabus', label: 'Syllabus Progress', enabled: true },
     { id: 'records', label: 'My Records', enabled: true },
@@ -53,7 +55,8 @@ export default function ProfilePage() {
     { id: 'calendar', label: 'School Calendar', enabled: false },
     { id: 'monitor', label: 'Monitor Tools', enabled: false },
     { id: 'admin', label: 'Admin Tools', enabled: false },
-    { id: 'maths', label: 'Maths Dashboard', enabled: false }
+    { id: 'maths', label: 'Maths Dashboard', enabled: false },
+    { id: 'attendance', label: 'My Attendance', enabled: true, lockedToggle: true }
   ];
 
   const [widgets, setWidgets] = useState([]);
@@ -400,13 +403,9 @@ export default function ProfilePage() {
                 <LayoutDashboard size={22} color="var(--primary)" />
                 <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700 }}>Dashboard Layout</h2>
               </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.4 }}>
-                Personalize your dashboard. Turn on the features you need and arrange them in the perfect order.
-              </p>
-              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
                 <div style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Fixed Top (AI Insights)</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Fixed Top (AI, Stats, Banners)</span>
                   <Lock size={14} color="var(--text-muted)" />
                 </div>
                 
@@ -433,14 +432,15 @@ export default function ProfilePage() {
                         {widget.label}
                       </span>
                     </div>
-                    <ToggleSwitch isOn={widget.enabled} onToggle={() => toggleWidget(idx)} />
+                    {widget.lockedToggle ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)' }}>
+                        <Lock size={14} /> <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Fixed</span>
+                      </div>
+                    ) : (
+                      <ToggleSwitch isOn={widget.enabled} onToggle={() => toggleWidget(idx)} />
+                    )}
                   </div>
                 ))}
-
-                <div style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.2rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Fixed Bottom (Attendance)</span>
-                  <Lock size={14} color="var(--text-muted)" />
-                </div>
               </div>
 
               <button type="button" className="auth-btn primary" style={{ width: '100%', fontSize: '0.9rem', padding: '0.8rem' }} disabled={prefsBusy} onClick={handleSavePrefs}>
