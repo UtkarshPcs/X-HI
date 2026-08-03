@@ -425,13 +425,15 @@ export default function StudentDashboard() {
       case 'periodic': return (!periodicConfig.isHidden ? <PeriodicPredictedDashCard key="periodic" /> : null);
       case 'testdata': return <TestDataDashCard key="testdata" />;
       case 'starbatch': return (
-        <div key="starbatch" className="glass-card glow-hover" style={{ cursor: 'pointer', background: 'linear-gradient(145deg, rgba(234,179,8,0.05) 0%, rgba(202,138,4,0.1) 100%)', borderColor: 'rgba(234,179,8,0.3)' }} onClick={() => navigate('/star-batch')}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#eab308' }}><Star size={20} fill="#eab308" /> Star Batch Hub</h2>
-            <ArrowRight size={16} color="#eab308" />
+        currentUser.isStarBatch ? (
+          <div key="starbatch" className="glass-card glow-hover" style={{ cursor: 'pointer', background: 'linear-gradient(145deg, rgba(234,179,8,0.05) 0%, rgba(202,138,4,0.1) 100%)', borderColor: 'rgba(234,179,8,0.3)' }} onClick={() => navigate('/star-batch')}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#eab308' }}><Star size={20} fill="#eab308" /> Star Batch Hub</h2>
+              <ArrowRight size={16} color="#eab308" />
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Access advanced test modules, concept hubs, and deeper syllabus tracking.</p>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Access advanced test modules, concept hubs, and deeper syllabus tracking.</p>
-        </div>
+        ) : null
       );
       case 'studyrooms': return (
         <div key="studyrooms" className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/study-together')}>

@@ -1,7 +1,7 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical, LayoutDashboard, ArrowUp, ArrowDown, Eye, EyeOff, Lock, ChevronUp, ChevronDown, MoveVertical } from 'lucide-react';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical, LayoutDashboard, Plus, MinusCircle, Lock, MoveVertical, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { ROLES, TEST_PHONE } from '../auth/roles';
 import { saveEmail, setTestAccountRole, resetTestAccount, clearEmail, updateDashboardPreferences } from '../auth/authService';
 import { sendEmailLink } from '../firebase';
@@ -108,21 +108,33 @@ export default function ProfilePage() {
     setDragOverId(null);
   };
 
+  const availableWidgetsDefault = useMemo(() => {
+    if (!currentUser) return DEFAULT_WIDGETS;
+    return DEFAULT_WIDGETS.filter(w => {
+      if (w.id === 'admin' && currentUser.role !== ROLES.ADMIN) return false;
+      if (w.id === 'monitor' && currentUser.role !== ROLES.ADMIN && currentUser.role !== ROLES.MONITOR) return false;
+      if (w.id === 'starbatch' && !currentUser.isStarBatch) return false;
+      return true;
+    });
+  }, [currentUser]);
+
   useEffect(() => {
     if (currentUser && widgets.length === 0) {
       const savedPrefs = currentUser.dashboardPreferences;
       if (savedPrefs && Array.isArray(savedPrefs)) {
         const savedMap = new Map(savedPrefs.map(w => [w.id, w]));
-        const merged = savedPrefs.map(w => ({ ...w, label: DEFAULT_WIDGETS.find(d => d.id === w.id)?.label || w.label }));
-        DEFAULT_WIDGETS.forEach(dw => {
+        const merged = savedPrefs.map(w => ({ ...w, label: availableWidgetsDefault.find(d => d.id === w.id)?.label || w.label }));
+        availableWidgetsDefault.forEach(dw => {
           if (!savedMap.has(dw.id)) merged.push(dw);
         });
-        setWidgets(merged);
+        // Filter out widgets that are in savedPrefs but are no longer available to this user role
+        const finalWidgets = merged.filter(w => availableWidgetsDefault.some(d => d.id === w.id));
+        setWidgets(finalWidgets);
       } else {
-        setWidgets([...DEFAULT_WIDGETS]);
+        setWidgets([...availableWidgetsDefault]);
       }
     }
-  }, [currentUser]);
+  }, [currentUser, availableWidgetsDefault]);
 
   const moveWidget = (index, dir) => {
     const newWidgets = [...widgets];
@@ -446,24 +458,24 @@ export default function ProfilePage() {
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
                 <LayoutDashboard size={22} color="var(--primary)" />
-                <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700 }}>Dashboard Layout</h2>
+                <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700 }}>Dashboard Customizer</h2>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.4 }}>
-                Toggle features on the left, and drag to reorder your active layout on the right.
+                Personalize your dashboard layout. Drag to reorder, or add/remove features below.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                
-                {/* COL 1: Drag & Drop */}
-                <div>
-                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>1. Arrange Layout</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    <div style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Top (Fixed: Banners & AI)</span>
-                      <Lock size={14} color="var(--text-muted)" />
-                    </div>
-                    
-                    {widgets.filter(w => w.enabled).map((widget) => (
+              {/* INCLUDED WIDGETS */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>Included (Drag to reorder)</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <div style={{ padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Fixed Top (AI Insights & Banners)</span>
+                    <Lock size={14} color="var(--text-muted)" />
+                  </div>
+                  
+                  {widgets.filter(w => w.enabled).map((widget) => {
+                    const idx = widgets.findIndex(w => w.id === widget.id);
+                    return (
                       <div 
                         key={`drag-${widget.id}`}
                         draggable
@@ -473,44 +485,51 @@ export default function ProfilePage() {
                         onDrop={(e) => handleDrop(e, widget.id)}
                         onDragEnd={handleDragEnd}
                         style={{ 
-                          display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.8rem',
-                          background: dragOverId === widget.id ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                          border: dragOverId === widget.id ? '1px dashed var(--primary)' : '1px solid rgba(255,255,255,0.1)',
+                          display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem 1rem',
+                          background: dragOverId === widget.id ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)',
+                          border: dragOverId === widget.id ? '1px dashed var(--primary)' : '1px solid rgba(255,255,255,0.06)',
                           borderRadius: 'var(--radius-md)', cursor: 'grab',
                           opacity: draggedId === widget.id ? 0.4 : 1,
                           transition: 'all 0.2s ease',
-                          boxShadow: dragOverId === widget.id ? '0 0 10px rgba(139, 92, 246, 0.2)' : 'none'
+                          boxShadow: dragOverId === widget.id ? '0 0 10px rgba(139, 92, 246, 0.2)' : '0 2px 4px rgba(0,0,0,0.1)'
                         }}
                       >
-                        <MoveVertical size={16} color="var(--text-muted)" />
-                        <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>{widget.label}</span>
+                        {widget.lockedToggle ? (
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <Lock size={16} color="var(--text-muted)" />
+                          </div>
+                        ) : (
+                          <button onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                            <MinusCircle size={20} />
+                          </button>
+                        )}
+                        <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-primary)', flex: 1 }}>{widget.label}</span>
+                        <MoveVertical size={18} color="rgba(255,255,255,0.2)" />
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* COL 2: Toggles */}
-                <div>
-                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>2. Toggle Features</h3>
+              {/* MORE CONTROLS WIDGETS */}
+              {widgets.filter(w => !w.enabled).length > 0 && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>More Controls</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    {widgets.map((widget) => {
+                    {widgets.filter(w => !w.enabled).map((widget) => {
                       const idx = widgets.findIndex(w => w.id === widget.id);
                       return (
-                        <div key={`toggle-${widget.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.04)' }}>
-                          <span style={{ fontSize: '0.9rem', color: widget.enabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>{widget.label}</span>
-                          {widget.lockedToggle ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)' }}>
-                              <Lock size={14} /> <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Fixed</span>
-                            </div>
-                          ) : (
-                            <ToggleSwitch isOn={widget.enabled} onToggle={() => toggleWidget(idx)} />
-                          )}
+                        <div key={`toggle-${widget.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.01)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                          <button onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                            <Plus size={20} />
+                          </button>
+                          <span style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', flex: 1 }}>{widget.label}</span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
-              </div>
+              )}
 
               <button type="button" className="auth-btn primary" style={{ width: '100%', fontSize: '0.9rem', padding: '0.8rem' }} disabled={prefsBusy} onClick={handleSavePrefs}>
                 {prefsBusy ? 'Saving...' : 'Save Layout Preferences'}
