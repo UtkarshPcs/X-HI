@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked, ClipboardList, Mail, BookCopy, FileText } from 'lucide-react';
+import { CalendarCheck, BookOpen, TrendingUp, LogIn, ClipboardCheck, ArrowRight, Check, BookMarked, ClipboardList, Mail, BookCopy, FileText, Star, Users, GraduationCap, ShieldAlert, LineChart, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
@@ -230,6 +230,167 @@ export default function StudentDashboard() {
     attendancePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  const DEFAULT_WIDGET_ORDER = [
+    { id: 'classwork', enabled: true },
+    { id: 'syllabus', enabled: true },
+    { id: 'records', enabled: true },
+    { id: 'notes', enabled: true },
+    { id: 'testdata', enabled: false },
+    { id: 'periodic', enabled: false },
+    { id: 'starbatch', enabled: false },
+    { id: 'studyrooms', enabled: false },
+    { id: 'testscores', enabled: false },
+    { id: 'calendar', enabled: false },
+    { id: 'monitor', enabled: false },
+    { id: 'admin', enabled: false },
+    { id: 'maths', enabled: false }
+  ];
+
+  const renderWidget = (id) => {
+    switch (id) {
+      case 'syllabus': return (
+        <div key="syllabus" className="glass-card glow-hover" data-tour="syllabus-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/syllabus')} title="View full syllabus progress">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BookMarked size={20} color="var(--primary)" /> Syllabus Progress
+            </h2>
+            <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>View syllabus <ArrowRight size={13} /></span>
+          </div>
+          {syllabusStats === null ? <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p> : (
+            <SyllabusProgressBar completed={syllabusStats.completedPct} checked={syllabusStats.checkedPct} sublabel={`${syllabusStats.completed}/${syllabusStats.total} topics`} showLegend />
+          )}
+        </div>
+      );
+      case 'records': return (
+        <div key="records" className="glass-card glow-hover dash-records-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/records')} title="View your class records">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0 }}>
+              <ClipboardList size={20} color="var(--primary)" /> <span>My Records</span>
+            </h2>
+            <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>View records <ArrowRight size={13} /></span>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Check your personal class records — attendance drives, fee status, submissions and more.</p>
+        </div>
+      );
+      case 'classwork': return (
+        <div key="classwork" className="glass-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ClipboardList size={20} color="#FF6D00" /> Latest Classwork
+            </h2>
+            <button className="auth-link" onClick={() => navigate('/homework?tab=classwork')} style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>View all <ArrowRight size={13} /></button>
+          </div>
+          {cwLoading ? <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p> : !latestClasswork ? <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No classwork recorded yet.</p> : (
+            <>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>{latestClasswork.weekday}, {new Date(latestClasswork.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {(!latestClasswork.periods || latestClasswork.periods.length === 0) ? <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.9rem' }}>No periods recorded.</p> : latestClasswork.periods.map((p, idx) => (
+                  <div key={idx} style={{ padding: '0.7rem 0.9rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid #FF6D00' }}>
+                    <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: 0, marginBottom: '0.15rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#FF6D00' }}>{p.period}</span> {p.subject}</p>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>{p.note}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      );
+      case 'notes': return (
+        <div key="notes" className="glass-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BookCopy size={20} color="var(--primary)" /> Notes Exchange
+            </h2>
+            <button className="auth-link" onClick={() => navigate('/notes')} style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>View all <ArrowRight size={13} /></button>
+          </div>
+          {recentNotes === null ? <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p> : recentNotes.length === 0 ? <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No notes uploaded yet. Be the first!</p> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {recentNotes.map(note => (
+                <div key={note.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--primary)', gap: '0.5rem' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 600, fontSize: '0.875rem', margin: 0, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{note.title}</p>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>{note.subjectName} · {note.chapterName}</p>
+                  </div>
+                  <FileText size={15} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+      case 'periodic': return (!periodicConfig.isHidden ? <PeriodicPredictedDashCard key="periodic" /> : null);
+      case 'testdata': return <TestDataDashCard key="testdata" />;
+      case 'starbatch': return (
+        <div key="starbatch" className="glass-card glow-hover" style={{ cursor: 'pointer', background: 'linear-gradient(145deg, rgba(234,179,8,0.05) 0%, rgba(202,138,4,0.1) 100%)', borderColor: 'rgba(234,179,8,0.3)' }} onClick={() => navigate('/star-batch')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#eab308' }}><Star size={20} fill="#eab308" /> Star Batch Hub</h2>
+            <ArrowRight size={16} color="#eab308" />
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Access advanced test modules, concept hubs, and deeper syllabus tracking.</p>
+        </div>
+      );
+      case 'studyrooms': return (
+        <div key="studyrooms" className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/study-together')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Users size={20} color="var(--primary)" /> Study Together</h2>
+            <ArrowRight size={16} color="var(--primary)" />
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Join virtual study rooms and collaborate with classmates.</p>
+        </div>
+      );
+      case 'testscores': return (
+        <div key="testscores" className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/test-scores')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><GraduationCap size={20} color="var(--primary)" /> Test Scores</h2>
+            <ArrowRight size={16} color="var(--primary)" />
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>View your individual test results and performance history.</p>
+        </div>
+      );
+      case 'calendar': return (
+        <div key="calendar" className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/calendar')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={20} color="var(--primary)" /> School Calendar</h2>
+            <ArrowRight size={16} color="var(--primary)" />
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Check upcoming holidays and school events.</p>
+        </div>
+      );
+      case 'monitor': return (
+        (currentUser.role === ROLES.MONITOR || currentUser.role === ROLES.ADMIN) ? (
+          <div key="monitor" className="glass-card glow-hover" style={{ cursor: 'pointer', borderColor: 'rgba(59,130,246,0.3)' }} onClick={() => navigate('/records-monitor')}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#3b82f6' }}><ClipboardCheck size={20} /> Monitor Tools</h2>
+              <ArrowRight size={16} color="#3b82f6" />
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Quick access to mark attendance and manage class records.</p>
+          </div>
+        ) : null
+      );
+      case 'admin': return (
+        currentUser.role === ROLES.ADMIN ? (
+          <div key="admin" className="glass-card glow-hover" style={{ cursor: 'pointer', borderColor: 'rgba(239,68,68,0.3)' }} onClick={() => navigate('/admin')}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}><ShieldAlert size={20} /> Admin Tools</h2>
+              <ArrowRight size={16} color="#ef4444" />
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Manage the platform, users, and global settings.</p>
+          </div>
+        ) : null
+      );
+      case 'maths': return (
+        <div key="maths" className="glass-card glow-hover" style={{ cursor: 'pointer' }} onClick={() => navigate('/maths')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><LineChart size={20} color="var(--primary)" /> Maths Dashboard</h2>
+            <ArrowRight size={16} color="var(--primary)" />
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>Access dedicated maths assignments and analytics.</p>
+        </div>
+      );
+      default: return null;
+    }
+  };
+
   if (!currentUser) {
     return <WelcomeLanding onLogin={openModal} />;
   }
@@ -316,73 +477,16 @@ export default function StudentDashboard() {
       <MarksBanner />
       <MergeBanner />
       <CampaignBanner campaignId="email-reminder-v1" />
-      {!periodicConfig.isHidden && <PeriodicPredictedDashCard />}
-      <TestDataDashCard />
       <NoticeBar />
 
-      {/* Syllabus progress summary */}
-      <div
-        className="glass-card glow-hover"
-        data-tour="syllabus-card"
-        style={{ cursor: 'pointer' }}
-        onClick={() => navigate('/syllabus')}
-        title="View full syllabus progress"
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BookMarked size={20} color="var(--primary)" />
-            Syllabus Progress
-          </h2>
-          <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
-            View syllabus <ArrowRight size={13} />
-          </span>
-        </div>
-        {syllabusStats === null ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
-        ) : (
-          <SyllabusProgressBar
-            completed={syllabusStats.completedPct}
-            checked={syllabusStats.checkedPct}
-            sublabel={`${syllabusStats.completed}/${syllabusStats.total} topics`}
-            showLegend
-          />
-        )}
-      </div>
-
-      {/* My Records — quick access nav card */}
-      <div
-        className="glass-card glow-hover dash-records-card"
-        style={{ cursor: 'pointer' }}
-        onClick={() => navigate('/records')}
-        title="View your class records"
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0 }}>
-            <ClipboardList size={20} color="var(--primary)" />
-            <span>My Records</span>
-            <span className="dash-new-badge">NEW</span>
-          </h2>
-          <span className="auth-link" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
-            View records <ArrowRight size={13} />
-          </span>
-        </div>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.6rem 0 0' }}>
-          Check your personal class records — attendance drives, fee status, submissions and more.
-        </p>
-      </div>
-
-      {/* Today's / Latest homework card */}
+      {/* FIXED: Today's / Latest homework card */}
       <div className="glass-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <BookOpen size={20} color="var(--primary)" />
             {isLatestToday ? "Today's Homework" : 'Latest Homework'}
           </h2>
-          <button
-            className="auth-link"
-            onClick={() => navigate('/homework')}
-            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}
-          >
+          <button className="auth-link" onClick={() => navigate('/homework')} style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
             View all <ArrowRight size={13} />
           </button>
         </div>
@@ -436,87 +540,9 @@ export default function StudentDashboard() {
         )}
       </div>
 
-      {/* Latest classwork card */}
-      <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ClipboardList size={20} color="#FF6D00" />
-            Latest Classwork
-          </h2>
-          <button
-            className="auth-link"
-            onClick={() => navigate('/homework?tab=classwork')}
-            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}
-          >
-            View all <ArrowRight size={13} />
-          </button>
-        </div>
+      {/* CUSTOMIZABLE WIDGETS */}
+      {(currentUser.dashboardPreferences || DEFAULT_WIDGET_ORDER).map(w => w.enabled ? renderWidget(w.id) : null)}
 
-        {cwLoading ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
-        ) : !latestClasswork ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No classwork recorded yet.</p>
-        ) : (
-          <>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-              {latestClasswork.weekday}, {new Date(latestClasswork.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {(!latestClasswork.periods || latestClasswork.periods.length === 0) ? (
-                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.9rem' }}>No periods recorded.</p>
-              ) : latestClasswork.periods.map((p, idx) => (
-                <div key={idx} style={{
-                  padding: '0.7rem 0.9rem',
-                  background: 'rgba(255,255,255,0.02)',
-                  borderRadius: 'var(--radius-sm)',
-                  borderLeft: '3px solid #FF6D00',
-                }}>
-                  <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: 0, marginBottom: '0.15rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#FF6D00' }}>{p.period}</span> {p.subject}
-                  </p>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
-                    {p.note}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Notes teaser */}
-      <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.85rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BookCopy size={20} color="var(--primary)" /> Notes Exchange
-          </h2>
-          <button className="auth-link" onClick={() => navigate('/notes')}
-            style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
-            View all <ArrowRight size={13} />
-          </button>
-        </div>
-        {recentNotes === null ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading…</p>
-        ) : recentNotes.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No notes uploaded yet. Be the first!</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {recentNotes.map(note => (
-              <div key={note.id} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)',
-                borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--primary)', gap: '0.5rem',
-              }}>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontWeight: 600, fontSize: '0.875rem', margin: 0, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{note.title}</p>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>{note.subjectName} · {note.chapterName}</p>
-                </div>
-                <FileText size={15} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Attendance tracker */}
       <div className="glass-card" data-tour="attendance-panel" ref={attendancePanelRef}>

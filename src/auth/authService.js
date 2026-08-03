@@ -143,6 +143,12 @@ export async function setHomeworkDone(phone, doneKeys) {
   return cleaned;
 }
 
+// ── Dashboard Preferences ──────────────────────────────────────
+
+export async function updateDashboardPreferences(phone, preferences) {
+  await updateDoc(userRef(phone), { dashboardPreferences: preferences });
+}
+
 
 // ── Syllabus "checked" topics (per-student) ────────────────────
 // Keys are globally-unique topic IDs (e.g. "science-0-c0-t3"). A student

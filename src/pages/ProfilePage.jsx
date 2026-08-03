@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical } from 'lucide-react';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical, LayoutDashboard, ArrowUp, ArrowDown, Eye, EyeOff, Lock } from 'lucide-react';
 import { ROLES, TEST_PHONE } from '../auth/roles';
-import { saveEmail, setTestAccountRole, resetTestAccount, clearEmail } from '../auth/authService';
+import { saveEmail, setTestAccountRole, resetTestAccount, clearEmail, updateDashboardPreferences } from '../auth/authService';
 import { sendEmailLink } from '../firebase';
 import { useToast } from '../ux/hooks/useToast';
 import packageJson from '../../package.json';
@@ -22,6 +22,73 @@ export default function ProfilePage() {
   const [emailBusy, setEmailBusy] = useState(false);
   const [emailMsg, setEmailMsg] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
+
+  // Dashboard Customization State
+  const DEFAULT_WIDGETS = [
+    { id: 'classwork', label: 'Latest Classwork', enabled: true },
+    { id: 'syllabus', label: 'Syllabus Progress', enabled: true },
+    { id: 'records', label: 'My Records', enabled: true },
+    { id: 'notes', label: 'Notes Exchange', enabled: true },
+    { id: 'testdata', label: 'Test Data', enabled: false },
+    { id: 'periodic', label: 'Periodic Predicted', enabled: false },
+    { id: 'starbatch', label: 'Star Batch Portal', enabled: false },
+    { id: 'studyrooms', label: 'Study Together', enabled: false },
+    { id: 'testscores', label: 'Test Scores', enabled: false },
+    { id: 'calendar', label: 'School Calendar', enabled: false },
+    { id: 'monitor', label: 'Monitor Tools', enabled: false },
+    { id: 'admin', label: 'Admin Tools', enabled: false },
+    { id: 'maths', label: 'Maths Dashboard', enabled: false }
+  ];
+
+  const [widgets, setWidgets] = useState([]);
+  const [prefsBusy, setPrefsBusy] = useState(false);
+  const [prefsMsg, setPrefsMsg] = useState('');
+
+  useEffect(() => {
+    if (currentUser && widgets.length === 0) {
+      const savedPrefs = currentUser.dashboardPreferences;
+      if (savedPrefs && Array.isArray(savedPrefs)) {
+        const savedMap = new Map(savedPrefs.map(w => [w.id, w]));
+        const merged = savedPrefs.map(w => ({ ...w, label: DEFAULT_WIDGETS.find(d => d.id === w.id)?.label || w.label }));
+        DEFAULT_WIDGETS.forEach(dw => {
+          if (!savedMap.has(dw.id)) merged.push(dw);
+        });
+        setWidgets(merged);
+      } else {
+        setWidgets([...DEFAULT_WIDGETS]);
+      }
+    }
+  }, [currentUser]);
+
+  const moveWidget = (index, dir) => {
+    const newWidgets = [...widgets];
+    if (dir === 'up' && index > 0) {
+      [newWidgets[index], newWidgets[index - 1]] = [newWidgets[index - 1], newWidgets[index]];
+    } else if (dir === 'down' && index < newWidgets.length - 1) {
+      [newWidgets[index], newWidgets[index + 1]] = [newWidgets[index + 1], newWidgets[index]];
+    }
+    setWidgets(newWidgets);
+  };
+
+  const toggleWidget = (index) => {
+    const newWidgets = [...widgets];
+    newWidgets[index].enabled = !newWidgets[index].enabled;
+    setWidgets(newWidgets);
+  };
+
+  const handleSavePrefs = async () => {
+    setPrefsBusy(true); setPrefsMsg('');
+    try {
+      await updateDashboardPreferences(currentUser.phone, widgets);
+      await refreshUser(currentUser.phone);
+      toast.success('Dashboard preferences saved!');
+      setPrefsMsg('✓ Saved successfully');
+    } catch (err) {
+      setPrefsMsg('Error: ' + err.message);
+    } finally {
+      setPrefsBusy(false);
+    }
+  };
 
   // Show success toast when returning from verification link
   useEffect(() => {
@@ -301,6 +368,62 @@ export default function ProfilePage() {
                 🔄 Reset Test Account
               </button>
               {testMsg && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textAlign: 'center' }}>{testMsg}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* ── Dashboard Customization ── */}
+        {!isTeacher && widgets.length > 0 && (
+          <div className="profile-email-section">
+            <div className="profile-email-card">
+              <div className="profile-email-header">
+                <LayoutDashboard size={15} />
+                <span>Customize Dashboard</span>
+              </div>
+              <p className="profile-email-hint" style={{ marginBottom: '1rem' }}>
+                Reorder or hide cards on your dashboard. Fixed items (like Attendance and Today's HW) cannot be removed.
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Fixed Top Elements (AI, Alerts)</span>
+                  <Lock size={14} color="var(--text-muted)" />
+                </div>
+                
+                {widgets.map((widget, idx) => (
+                  <div key={widget.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.5rem 0.8rem', background: 'rgba(255,255,255,0.02)',
+                    borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                    opacity: widget.enabled ? 1 : 0.6
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <button type="button" onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: widget.enabled ? 'var(--primary)' : 'var(--text-muted)' }}>
+                        {widget.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
+                      <span style={{ fontSize: '0.85rem', fontWeight: widget.enabled ? 500 : 400 }}>{widget.label}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                      <button type="button" onClick={() => moveWidget(idx, 'up')} disabled={idx === 0} style={{ background: 'none', border: 'none', padding: '0.2rem', cursor: idx === 0 ? 'default' : 'pointer', color: idx === 0 ? 'transparent' : 'var(--text-secondary)' }}>
+                        <ArrowUp size={16} />
+                      </button>
+                      <button type="button" onClick={() => moveWidget(idx, 'down')} disabled={idx === widgets.length - 1} style={{ background: 'none', border: 'none', padding: '0.2rem', cursor: idx === widgets.length - 1 ? 'default' : 'pointer', color: idx === widgets.length - 1 ? 'transparent' : 'var(--text-secondary)' }}>
+                        <ArrowDown size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <div style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Fixed Bottom Elements (Attendance Panel)</span>
+                  <Lock size={14} color="var(--text-muted)" />
+                </div>
+              </div>
+
+              <button type="button" className="auth-btn primary" style={{ width: '100%', fontSize: '0.85rem' }} disabled={prefsBusy} onClick={handleSavePrefs}>
+                {prefsBusy ? 'Saving...' : 'Save Layout'}
+              </button>
+              {prefsMsg && <p style={{ fontSize: '0.82rem', color: prefsMsg.includes('Error') ? '#f87171' : '#10b981', marginTop: '0.5rem', textAlign: 'center' }}>{prefsMsg}</p>}
             </div>
           </div>
         )}
