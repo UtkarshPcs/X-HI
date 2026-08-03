@@ -467,14 +467,22 @@ export default function ProfilePage() {
               {/* INCLUDED WIDGETS */}
               <div style={{ marginBottom: '2rem' }}>
                 <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>Included (Drag to reorder)</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <div style={{ padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Fixed Top (AI Insights & Banners)</span>
-                    <Lock size={14} color="var(--text-muted)" />
+                <div style={{ 
+                  display: 'flex', flexDirection: 'column', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  border: '1px solid rgba(255,255,255,0.06)', 
+                  borderRadius: 'var(--radius-md)', 
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ padding: '0.8rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(255,255,255,0.01)' }}>
+                    <div style={{ width: '24px' }}></div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, flex: 1, paddingLeft: '0.8rem' }}>Fixed Top (AI Insights & Banners)</span>
+                    <Lock size={16} color="var(--text-muted)" />
                   </div>
                   
-                  {widgets.filter(w => w.enabled).map((widget) => {
+                  {widgets.filter(w => w.enabled).map((widget, i, arr) => {
                     const idx = widgets.findIndex(w => w.id === widget.id);
+                    const isLast = i === arr.length - 1;
                     return (
                       <div 
                         key={`drag-${widget.id}`}
@@ -485,24 +493,23 @@ export default function ProfilePage() {
                         onDrop={(e) => handleDrop(e, widget.id)}
                         onDragEnd={handleDragEnd}
                         style={{ 
-                          display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem 1rem',
-                          background: dragOverId === widget.id ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)',
-                          border: dragOverId === widget.id ? '1px dashed var(--primary)' : '1px solid rgba(255,255,255,0.06)',
-                          borderRadius: 'var(--radius-md)', cursor: 'grab',
+                          display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.7rem 1rem',
+                          background: dragOverId === widget.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                          borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.04)',
+                          cursor: 'grab',
                           opacity: draggedId === widget.id ? 0.4 : 1,
-                          transition: 'all 0.2s ease',
-                          boxShadow: dragOverId === widget.id ? '0 0 10px rgba(139, 92, 246, 0.2)' : '0 2px 4px rgba(0,0,0,0.1)'
+                          transition: 'background 0.2s ease',
                         }}
                       >
-                        {widget.lockedToggle ? (
-                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                          {widget.lockedToggle ? (
                             <Lock size={16} color="var(--text-muted)" />
-                          </div>
-                        ) : (
-                          <button onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
-                            <MinusCircle size={20} />
-                          </button>
-                        )}
+                          ) : (
+                            <button onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                              <MinusCircle size={20} />
+                            </button>
+                          )}
+                        </div>
                         <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-primary)', flex: 1 }}>{widget.label}</span>
                         <MoveVertical size={18} color="rgba(255,255,255,0.2)" />
                       </div>
@@ -513,16 +520,28 @@ export default function ProfilePage() {
 
               {/* MORE CONTROLS WIDGETS */}
               {widgets.filter(w => !w.enabled).length > 0 && (
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '2rem' }}>
                   <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em', fontWeight: 600 }}>More Controls</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    {widgets.filter(w => !w.enabled).map((widget) => {
+                  <div style={{ 
+                    display: 'flex', flexDirection: 'column',
+                    background: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid rgba(255,255,255,0.06)', 
+                    borderRadius: 'var(--radius-md)', 
+                    overflow: 'hidden'
+                  }}>
+                    {widgets.filter(w => !w.enabled).map((widget, i, arr) => {
                       const idx = widgets.findIndex(w => w.id === widget.id);
+                      const isLast = i === arr.length - 1;
                       return (
-                        <div key={`toggle-${widget.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.01)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.03)' }}>
-                          <button onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-                            <Plus size={20} />
-                          </button>
+                        <div key={`toggle-${widget.id}`} style={{ 
+                          display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.7rem 1rem',
+                          borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.04)'
+                        }}>
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <button onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                              <Plus size={20} />
+                            </button>
+                          </div>
                           <span style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', flex: 1 }}>{widget.label}</span>
                         </div>
                       );
