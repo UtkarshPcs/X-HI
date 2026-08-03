@@ -281,7 +281,7 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', width: '100%', maxWidth: '1100px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '1.5rem', width: '100%', maxWidth: '1100px', boxSizing: 'border-box' }}>
         
         {/* LEFT COLUMN: Profile Info & Email */}
         <div className="profile-card" style={{ maxWidth: '100%', margin: 0, height: 'fit-content' }}>

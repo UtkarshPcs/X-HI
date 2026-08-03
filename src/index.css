@@ -1140,7 +1140,9 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 6rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-classinfo-wrap {
