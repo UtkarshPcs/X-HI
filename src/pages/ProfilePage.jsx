@@ -1,12 +1,28 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical, LayoutDashboard, ArrowUp, ArrowDown, Eye, EyeOff, Lock } from 'lucide-react';
+import { Camera, ShieldAlert, ShieldCheck, User as UserIcon, Users, Mail, CheckCircle, Clock, FlaskConical, LayoutDashboard, ArrowUp, ArrowDown, Eye, EyeOff, Lock, ChevronUp, ChevronDown, MoveVertical } from 'lucide-react';
 import { ROLES, TEST_PHONE } from '../auth/roles';
 import { saveEmail, setTestAccountRole, resetTestAccount, clearEmail, updateDashboardPreferences } from '../auth/authService';
 import { sendEmailLink } from '../firebase';
 import { useToast } from '../ux/hooks/useToast';
 import packageJson from '../../package.json';
+
+const ToggleSwitch = ({ isOn, onToggle }) => (
+  <div onClick={onToggle} style={{
+    width: '38px', height: '22px', borderRadius: '20px',
+    background: isOn ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
+    position: 'relative', cursor: 'pointer', transition: 'background 0.3s',
+    flexShrink: 0
+  }}>
+    <div style={{
+      width: '18px', height: '18px', borderRadius: '50%',
+      background: '#fff', position: 'absolute', top: '2px',
+      left: isOn ? '18px' : '2px', transition: 'left 0.3s',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+    }} />
+  </div>
+);
 
 export default function ProfilePage() {
   const { currentUser, loading, logout, refreshUser } = useAuth();
@@ -205,234 +221,243 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
-      <div className="profile-card">
-        <div className="profile-avatar-wrap" onClick={() => fileRef.current.click()} title="Change photo">
-          {photo
-            ? <img src={photo} alt="profile" className="profile-photo" />
-            : <div className="profile-initials">{getInitials(currentUser.name)}</div>
-          }
-          <div className="profile-camera-overlay"><Camera size={18} /></div>
-          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
-        </div>
-
-        <h2 className="profile-name">{currentUser.name}</h2>
-        <p className="profile-roll">
-          {isTeacher
-            ? `${currentUser.subject} · ${currentUser.period}`
-            : currentUser.rollNo === 0 ? 'Outsider Account' : `Class 10th HI · Roll No. ${currentUser.rollNo}`}
-        </p>
-
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
-          {currentUser.role === ROLES.ADMIN && <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }}><ShieldAlert size={14} style={{ marginRight: 4 }} /> ADMIN</span>}
-          {currentUser.role === ROLES.MONITOR && <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}><ShieldCheck size={14} style={{ marginRight: 4 }} /> MONITOR</span>}
-          {currentUser.role === ROLES.STUDENT && <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}><UserIcon size={14} style={{ marginRight: 4 }} /> STUDENT</span>}
-          {currentUser.role === ROLES.OUTSIDER && <span className="badge" style={{ background: 'rgba(168, 162, 158, 0.1)', color: '#a8a29e', border: '1px solid rgba(168, 162, 158, 0.3)' }}><Users size={14} style={{ marginRight: 4 }} /> OUTSIDER</span>}
-          {isTeacher && <span className="badge teacher-chip">TEACHER</span>}
-        </div>
-
-        <div className="profile-info-grid">
-          <div className="profile-info-item">
-            <span className="profile-info-label">{isTeacher ? 'Teacher ID' : 'Login ID (Phone)'}</span>
-            <span className="profile-info-value">{maskedPhone}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', width: '100%', maxWidth: '950px' }}>
+        
+        {/* LEFT COLUMN: Profile Info & Email */}
+        <div className="profile-card" style={{ maxWidth: '100%', margin: 0, height: 'fit-content' }}>
+          <div className="profile-avatar-wrap" onClick={() => fileRef.current.click()} title="Change photo">
+            {photo
+              ? <img src={photo} alt="profile" className="profile-photo" />
+              : <div className="profile-initials">{getInitials(currentUser.name)}</div>
+            }
+            <div className="profile-camera-overlay"><Camera size={18} /></div>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
           </div>
-          {isTeacher ? (
-            <div className="profile-info-item">
-              <span className="profile-info-label">Period</span>
-              <span className="profile-info-value">{currentUser.period}</span>
-            </div>
-          ) : (
-            <div className="profile-info-item">
-              <span className="profile-info-label">{currentUser.rollNo === 0 ? 'Account Type' : 'Roll Number'}</span>
-              <span className="profile-info-value">{currentUser.rollNo === 0 ? 'Outsider' : currentUser.rollNo}</span>
-            </div>
-          )}
-          {!isTeacher && (
-            <div className="profile-info-item">
-              <span className="profile-info-label">Registered</span>
-              <span className="profile-info-value">{currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('en-IN') : '—'}</span>
-            </div>
-          )}
-        </div>
 
-        <p className="profile-photo-hint">Tap the photo to change it. Stored on this device only.</p>
+          <h2 className="profile-name">{currentUser.name}</h2>
+          <p className="profile-roll">
+            {isTeacher
+              ? `${currentUser.subject} · ${currentUser.period}`
+              : currentUser.rollNo === 0 ? 'Outsider Account' : `Class 10th HI · Roll No. ${currentUser.rollNo}`}
+          </p>
 
-        {/* ── Email Section — students only ── */}
-        {!isTeacher && (
-        <div className="profile-email-section">
-          <div className="profile-email-card">
-            <div className="profile-email-header">
-              <Mail size={15} />
-              <span>Recovery Email</span>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+            {currentUser.role === ROLES.ADMIN && <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }}><ShieldAlert size={14} style={{ marginRight: 4 }} /> ADMIN</span>}
+            {currentUser.role === ROLES.MONITOR && <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}><ShieldCheck size={14} style={{ marginRight: 4 }} /> MONITOR</span>}
+            {currentUser.role === ROLES.STUDENT && <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}><UserIcon size={14} style={{ marginRight: 4 }} /> STUDENT</span>}
+            {currentUser.role === ROLES.OUTSIDER && <span className="badge" style={{ background: 'rgba(168, 162, 158, 0.1)', color: '#a8a29e', border: '1px solid rgba(168, 162, 158, 0.3)' }}><Users size={14} style={{ marginRight: 4 }} /> OUTSIDER</span>}
+            {isTeacher && <span className="badge teacher-chip">TEACHER</span>}
+          </div>
+
+          <div className="profile-info-grid">
+            <div className="profile-info-item">
+              <span className="profile-info-label">{isTeacher ? 'Teacher ID' : 'Login ID (Phone)'}</span>
+              <span className="profile-info-value">{maskedPhone}</span>
             </div>
-
-            {currentUser.email && currentUser.emailVerified ? (
-              <div className="profile-email-row">
-                <span className="profile-email-addr">
-                  {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
-                </span>
-                <span className="profile-email-badge verified">
-                  <CheckCircle size={12} /> Verified
-                </span>
+            {isTeacher ? (
+              <div className="profile-info-item">
+                <span className="profile-info-label">Period</span>
+                <span className="profile-info-value">{currentUser.period}</span>
               </div>
-            ) : currentUser.email && !currentUser.emailVerified ? (
-              <>
+            ) : (
+              <div className="profile-info-item">
+                <span className="profile-info-label">{currentUser.rollNo === 0 ? 'Account Type' : 'Roll Number'}</span>
+                <span className="profile-info-value">{currentUser.rollNo === 0 ? 'Outsider' : currentUser.rollNo}</span>
+              </div>
+            )}
+            {!isTeacher && (
+              <div className="profile-info-item">
+                <span className="profile-info-label">Registered</span>
+                <span className="profile-info-value">{currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('en-IN') : '—'}</span>
+              </div>
+            )}
+          </div>
+
+          <p className="profile-photo-hint">Tap the photo to change it. Stored on this device only.</p>
+
+          {/* ── Email Section — students only ── */}
+          {!isTeacher && (
+          <div className="profile-email-section" style={{ marginTop: '1rem' }}>
+            <div className="profile-email-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="profile-email-header">
+                <Mail size={15} />
+                <span>Recovery Email</span>
+              </div>
+
+              {currentUser.email && currentUser.emailVerified ? (
                 <div className="profile-email-row">
                   <span className="profile-email-addr">
                     {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
                   </span>
-                  <span className="profile-email-badge pending">
-                    <Clock size={12} /> Pending
+                  <span className="profile-email-badge verified">
+                    <CheckCircle size={12} /> Verified
                   </span>
                 </div>
-                <p className="profile-email-hint">
-                  Check your inbox (and <strong>spam folder</strong>) for the verification link.
-                </p>
-                <button type="button" className="profile-email-resend"
-                  onClick={handleResendVerification} disabled={emailBusy}>
-                  {emailBusy ? 'Sending…' : 'Resend verification link'}
-                </button>
-                <button type="button" className="profile-email-resend"
-                  onClick={handleChangeEmail} disabled={emailBusy}
-                  style={{ marginTop: '0.4rem', color: 'var(--text-muted)', borderColor: 'rgba(113,113,122,0.35)' }}>
-                  ✏️ Wrong email? Change it
-                </button>
-                {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
-              </>
-            ) : showEmailForm ? (
-              <form onSubmit={handleAddEmail} className="profile-email-form">
-                <input
-                  type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)}
-                  placeholder="your@email.com" required autoFocus
-                  className="profile-email-input"
-                />
-                <p className="profile-email-hint">
-                  A verification link will be sent to this email. Check your <strong>spam folder</strong> if you don't see it.
-                </p>
-                <div className="profile-email-actions">
-                  <button className="auth-btn primary" type="submit" disabled={emailBusy}
-                    style={{ flex: 1, fontSize: '0.875rem' }}>
-                    {emailBusy ? 'Sending…' : 'Send verification link'}
+              ) : currentUser.email && !currentUser.emailVerified ? (
+                <>
+                  <div className="profile-email-row">
+                    <span className="profile-email-addr">
+                      {currentUser.email.replace(/(.{2}).*(@.*)/, '$1…$2')}
+                    </span>
+                    <span className="profile-email-badge pending">
+                      <Clock size={12} /> Pending
+                    </span>
+                  </div>
+                  <p className="profile-email-hint">
+                    Check your inbox (and <strong>spam folder</strong>) for the verification link.
+                  </p>
+                  <button type="button" className="profile-email-resend"
+                    onClick={handleResendVerification} disabled={emailBusy}>
+                    {emailBusy ? 'Sending…' : 'Resend verification link'}
                   </button>
-                  <button type="button" className="auth-btn secondary"
-                    onClick={() => { setShowEmailForm(false); setEmailMsg(''); }}
-                    style={{ fontSize: '0.875rem' }}>
-                    Cancel
+                  <button type="button" className="profile-email-resend"
+                    onClick={handleChangeEmail} disabled={emailBusy}
+                    style={{ marginTop: '0.4rem', color: 'var(--text-muted)', borderColor: 'rgba(113,113,122,0.35)' }}>
+                    ✏️ Wrong email? Change it
                   </button>
-                </div>
-                {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
-              </form>
-            ) : (
-              <>
-                <p className="profile-email-hint" style={{ marginBottom: '0.6rem' }}>
-                  Used to reset your password if you forget it.
-                </p>
-                <button type="button" className="profile-email-resend"
-                  onClick={() => setShowEmailForm(true)}>
-                  + Add email address
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-        )}
-
-        {/* ── Test Account Role Switcher ── */}
-        {isTestAccount && (
-          <div className="profile-email-section">
-            <div className="profile-email-card">
-              <div className="profile-email-header">
-                <FlaskConical size={15} />
-                <span>Test Account — Switch Role</span>
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                {[ROLES.STUDENT, ROLES.MONITOR, ROLES.TEACHER, ROLES.ADMIN].map(role => (
-                  <button
-                    key={role}
-                    type="button"
-                    className={`auth-btn ${currentUser.role === role ? 'primary' : 'secondary'}`}
-                    style={{ flex: 1, minWidth: '80px', fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
-                    disabled={testRoleBusy || currentUser.role === role}
-                    onClick={() => handleSwitchRole(role)}
-                  >
-                    {role}
+                  {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
+                </>
+              ) : showEmailForm ? (
+                <form onSubmit={handleAddEmail} className="profile-email-form">
+                  <input
+                    type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)}
+                    placeholder="your@email.com" required autoFocus
+                    className="profile-email-input"
+                  />
+                  <p className="profile-email-hint">
+                    A verification link will be sent to this email. Check your <strong>spam folder</strong> if you don't see it.
+                  </p>
+                  <div className="profile-email-actions">
+                    <button className="auth-btn primary" type="submit" disabled={emailBusy}
+                      style={{ flex: 1, fontSize: '0.875rem' }}>
+                      {emailBusy ? 'Sending…' : 'Send verification link'}
+                    </button>
+                    <button type="button" className="auth-btn secondary"
+                      onClick={() => { setShowEmailForm(false); setEmailMsg(''); }}
+                      style={{ fontSize: '0.875rem' }}>
+                      Cancel
+                    </button>
+                  </div>
+                  {emailMsg && <p className="profile-email-msg">{emailMsg}</p>}
+                </form>
+              ) : (
+                <>
+                  <p className="profile-email-hint" style={{ marginBottom: '0.6rem' }}>
+                    Used to reset your password if you forget it.
+                  </p>
+                  <button type="button" className="profile-email-resend"
+                    onClick={() => setShowEmailForm(true)}>
+                    + Add email address
                   </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="auth-btn secondary"
-                style={{ width: '100%', marginTop: '0.75rem', fontSize: '0.82rem', color: '#f87171', borderColor: 'rgba(248,113,113,0.3)' }}
-                disabled={testRoleBusy}
-                onClick={handleResetAccount}
-              >
-                🔄 Reset Test Account
-              </button>
-              {testMsg && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textAlign: 'center' }}>{testMsg}</p>}
+                </>
+              )}
             </div>
           </div>
-        )}
+          )}
 
-        {/* ── Dashboard Customization ── */}
-        {!isTeacher && widgets.length > 0 && (
-          <div className="profile-email-section">
-            <div className="profile-email-card">
-              <div className="profile-email-header">
-                <LayoutDashboard size={15} />
-                <span>Customize Dashboard</span>
+          {/* ── Test Account Role Switcher ── */}
+          {isTestAccount && (
+            <div className="profile-email-section">
+              <div className="profile-email-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="profile-email-header">
+                  <FlaskConical size={15} />
+                  <span>Test Account — Switch Role</span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                  {[ROLES.STUDENT, ROLES.MONITOR, ROLES.TEACHER, ROLES.ADMIN].map(role => (
+                    <button
+                      key={role}
+                      type="button"
+                      className={`auth-btn ${currentUser.role === role ? 'primary' : 'secondary'}`}
+                      style={{ flex: 1, minWidth: '80px', fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                      disabled={testRoleBusy || currentUser.role === role}
+                      onClick={() => handleSwitchRole(role)}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="auth-btn secondary"
+                  style={{ width: '100%', marginTop: '0.75rem', fontSize: '0.82rem', color: '#f87171', borderColor: 'rgba(248,113,113,0.3)' }}
+                  disabled={testRoleBusy}
+                  onClick={handleResetAccount}
+                >
+                  🔄 Reset Test Account
+                </button>
+                {testMsg && <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textAlign: 'center' }}>{testMsg}</p>}
               </div>
-              <p className="profile-email-hint" style={{ marginBottom: '1rem' }}>
-                Reorder or hide cards on your dashboard. Fixed items (like Attendance and Today's HW) cannot be removed.
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: Dashboard Customization */}
+        {!isTeacher && widgets.length > 0 && (
+          <div className="profile-card" style={{ maxWidth: '100%', margin: 0, height: 'fit-content' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+                <LayoutDashboard size={22} color="var(--primary)" />
+                <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 700 }}>Dashboard Layout</h2>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.4 }}>
+                Personalize your dashboard. Turn on the features you need and arrange them in the perfect order.
               </p>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Fixed Top Elements (AI, Alerts)</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                <div style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Fixed Top (AI Insights)</span>
                   <Lock size={14} color="var(--text-muted)" />
                 </div>
                 
                 {widgets.map((widget, idx) => (
                   <div key={widget.id} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0.5rem 0.8rem', background: 'rgba(255,255,255,0.02)',
-                    borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-                    opacity: widget.enabled ? 1 : 0.6
+                    padding: '0.7rem 0.8rem', 
+                    background: widget.enabled ? 'rgba(255,255,255,0.05)' : 'transparent',
+                    borderRadius: 'var(--radius-md)', 
+                    border: `1px solid ${widget.enabled ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)'}`,
+                    transition: 'all 0.2s ease',
+                    boxShadow: widget.enabled ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <button type="button" onClick={() => toggleWidget(idx)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: widget.enabled ? 'var(--primary)' : 'var(--text-muted)' }}>
-                        {widget.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
-                      </button>
-                      <span style={{ fontSize: '0.85rem', fontWeight: widget.enabled ? 500 : 400 }}>{widget.label}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                        <button type="button" onClick={() => moveWidget(idx, 'up')} disabled={idx === 0} style={{ background: 'none', border: 'none', padding: 0, cursor: idx === 0 ? 'default' : 'pointer', color: idx === 0 ? 'transparent' : 'var(--text-muted)', display: 'flex' }}>
+                          <ChevronUp size={16} />
+                        </button>
+                        <button type="button" onClick={() => moveWidget(idx, 'down')} disabled={idx === widgets.length - 1} style={{ background: 'none', border: 'none', padding: 0, cursor: idx === widgets.length - 1 ? 'default' : 'pointer', color: idx === widgets.length - 1 ? 'transparent' : 'var(--text-muted)', display: 'flex' }}>
+                          <ChevronDown size={16} />
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.95rem', fontWeight: widget.enabled ? 600 : 400, color: widget.enabled ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 0.2s' }}>
+                        {widget.label}
+                      </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <button type="button" onClick={() => moveWidget(idx, 'up')} disabled={idx === 0} style={{ background: 'none', border: 'none', padding: '0.2rem', cursor: idx === 0 ? 'default' : 'pointer', color: idx === 0 ? 'transparent' : 'var(--text-secondary)' }}>
-                        <ArrowUp size={16} />
-                      </button>
-                      <button type="button" onClick={() => moveWidget(idx, 'down')} disabled={idx === widgets.length - 1} style={{ background: 'none', border: 'none', padding: '0.2rem', cursor: idx === widgets.length - 1 ? 'default' : 'pointer', color: idx === widgets.length - 1 ? 'transparent' : 'var(--text-secondary)' }}>
-                        <ArrowDown size={16} />
-                      </button>
-                    </div>
+                    <ToggleSwitch isOn={widget.enabled} onToggle={() => toggleWidget(idx)} />
                   </div>
                 ))}
 
-                <div style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Fixed Bottom Elements (Attendance Panel)</span>
+                <div style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.2rem' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Fixed Bottom (Attendance)</span>
                   <Lock size={14} color="var(--text-muted)" />
                 </div>
               </div>
 
-              <button type="button" className="auth-btn primary" style={{ width: '100%', fontSize: '0.85rem' }} disabled={prefsBusy} onClick={handleSavePrefs}>
-                {prefsBusy ? 'Saving...' : 'Save Layout'}
+              <button type="button" className="auth-btn primary" style={{ width: '100%', fontSize: '0.9rem', padding: '0.8rem' }} disabled={prefsBusy} onClick={handleSavePrefs}>
+                {prefsBusy ? 'Saving...' : 'Save Layout Preferences'}
               </button>
-              {prefsMsg && <p style={{ fontSize: '0.82rem', color: prefsMsg.includes('Error') ? '#f87171' : '#10b981', marginTop: '0.5rem', textAlign: 'center' }}>{prefsMsg}</p>}
+              {prefsMsg && <p style={{ fontSize: '0.85rem', color: prefsMsg.includes('Error') ? '#f87171' : '#10b981', marginTop: '0.75rem', textAlign: 'center', fontWeight: 500 }}>{prefsMsg}</p>}
             </div>
           </div>
         )}
+      </div>
 
-        <button className="auth-btn secondary profile-logout" style={{ marginTop: '2rem' }} onClick={() => { logout(); navigate('/'); }}>
-          Logout
+      <div style={{ width: '100%', maxWidth: '400px', margin: '2.5rem auto 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <button className="auth-btn secondary profile-logout" style={{ width: '100%', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444', margin: 0 }} onClick={() => { logout(); navigate('/'); }}>
+          Sign Out
         </button>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '1.5rem' }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '1.5rem', fontWeight: 500 }}>
           App Version: v{packageJson.version}
         </p>
       </div>
