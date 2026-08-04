@@ -114,7 +114,10 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
 
   const endQuiz = useCallback(async () => {
     if (!roomId || !isActingAdmin) return;
-    await updateQuizState(roomId, { 'quizState.status': 'finished' });
+    await updateQuizState(roomId, { 
+      'quizState.status': 'finished',
+      mode: 'video' 
+    });
   }, [roomId, isActingAdmin]);
 
   const updateMyScore = useCallback(async (correctCount, wrongCount, score, totalTime) => {
