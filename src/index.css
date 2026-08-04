@@ -638,6 +638,19 @@ a {
 }
 
 /* Responsive */
+/* Study Room Fullscreen Overrides */
+body.study-room-active .app-container {
+  height: 100vh;
+  overflow: hidden;
+}
+body.study-room-active .main-content {
+  padding: 0 !important;
+}
+body.study-room-active .app-footer,
+body.study-room-active .nav-links {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .nav-links {
     position: fixed;

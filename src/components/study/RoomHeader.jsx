@@ -201,6 +201,7 @@ const RoomHeader = memo(function RoomHeader({
 const styles = {
   root: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '0.75rem',
@@ -213,7 +214,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.75rem',
-    flex: 1,
+    flex: '1 1 200px',
     minWidth: 0,
   },
   backBtn: {

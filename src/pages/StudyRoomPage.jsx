@@ -197,6 +197,11 @@ export default function StudyRoomPage() {
   const { room, loading, error, isOwner, changeVideo, toggleLock, kickMember, closeRoom } =
     useStudyRoom(roomId, currentUser?.phone);
 
+  useEffect(() => {
+    document.body.classList.add('study-room-active');
+    return () => document.body.classList.remove('study-room-active');
+  }, []);
+
   const handleKicked = useCallback(() => setWasKicked(true), []);
   const { members, memberCount } =
     useRoomPresence(currentUser ? roomId : null, currentUser, handleKicked);
