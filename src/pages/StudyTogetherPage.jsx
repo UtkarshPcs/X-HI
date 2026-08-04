@@ -28,8 +28,9 @@ function formatAge(ts) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function RoomCard({ room, onJoin }) {
+function RoomCard({ room, onJoin, isAdmin }) {
   const hasPassword = Boolean(room.password);
+  const isButtonDisabled = room.isLocked && !isAdmin;
   return (
     <div style={cardStyles.root} className="animate-fade-in">
       {/* Header row */}
@@ -66,9 +67,9 @@ function RoomCard({ room, onJoin }) {
         className="auth-btn primary"
         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginTop: '0.5rem' }}
         onClick={() => onJoin(room)}
-        disabled={room.isLocked}
+        disabled={isButtonDisabled}
       >
-        {room.isLocked ? 'Locked' : <><LogIn size={15} /> Join Room</>}
+        {isButtonDisabled ? 'Locked' : <><LogIn size={15} /> Join Room</>}
       </button>
     </div>
   );
@@ -288,10 +289,9 @@ export default function StudyTogetherPage() {
     return unsub;
   }, []);
 
-  // Navigate to a room, handling password if required
   const handleJoinRoom = useCallback((room) => {
     if (!currentUser) { openModal(); return; }
-    if (room.password) {
+    if (room.password && currentUser.activeRole !== 'ADMIN') {
       setPendingRoom(room);
       setPasswordRoom(room);
     } else {
@@ -439,7 +439,7 @@ export default function StudyTogetherPage() {
         ) : (
           <div style={styles.grid}>
             {filtered.map(room => (
-              <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} />
+              <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} isAdmin={currentUser?.activeRole === 'ADMIN'} />
             ))}
           </div>
         )}

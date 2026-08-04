@@ -216,6 +216,7 @@ export async function updateRoomVideo(roomId, newUrl) {
     videoId,
     mode: 'video',
     updatedAt: Date.now(),
+    'quizState.status': 'finished',
   });
 }
 
@@ -367,7 +368,11 @@ export function joinPresence(roomId, user, sessionId) {
 
   return () => {
     clearInterval(intervalId);
-    deleteDoc(ref).catch(() => {});
+    getDoc(ref).then(snap => {
+      if (snap.exists() && snap.data().sessionId === (sessionId || null)) {
+        deleteDoc(ref).catch(() => {});
+      }
+    }).catch(() => {});
   };
 }
 

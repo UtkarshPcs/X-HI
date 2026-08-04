@@ -92,7 +92,7 @@ service cloud.firestore {
     match /activityLogs/{id}      { allow read, write: if true; }
     match /fcmTokens/{id}         { allow read, write: if true; }
     match /in_app_notices/{id}    { allow read, write: if true; }
-    match /studyRooms/{id}        { allow read, write: if true; }
+    match /studyRooms/{document=**} { allow read, write: if true; }
     match /notifications/{id}     { allow read, write: if true; }
     match /student_notifications/{id} { allow read, write: if true; }
     match /ctaBannerClicks/{id}   { allow read, write: if true; }

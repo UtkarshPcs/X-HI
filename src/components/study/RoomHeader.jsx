@@ -51,6 +51,12 @@ const RoomHeader = memo(function RoomHeader({
       setUrlError('Please enter a valid YouTube URL.');
       return;
     }
+
+    if (room.mode === 'quiz') {
+      const confirmEnd = window.confirm("Changing the video will end the ongoing quiz. Are you sure you want to continue?");
+      if (!confirmEnd) return;
+    }
+
     setUrlError('');
     onChangeVideo(newUrl);
     setNewUrl('');
@@ -255,6 +261,7 @@ const styles = {
   right: {
     display: 'flex',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: '0.25rem',
   },
   iconBtn: {

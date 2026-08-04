@@ -24,6 +24,7 @@ export default function LiveQuizPlayer({
 
   // On reveal, calculate scores if not calculated yet
   const [scoreCalculatedForQ, setScoreCalculatedForQ] = useState(-1);
+  const [showLeaderboard, setShowLeaderboard] = useState(true);
 
   useEffect(() => {
     if (status === 'revealing' && currentQuestionIndex !== scoreCalculatedForQ) {
@@ -54,6 +55,40 @@ export default function LiveQuizPlayer({
         <div style={styles.timer(timeRemaining)}>
           <Clock size={18} /> 00:{timeRemaining < 10 ? `0${timeRemaining}` : timeRemaining}
         </div>
+      </div>
+
+      {/* Live Leaderboard Toggle */}
+      <div style={{ marginBottom: '1.5rem', background: 'var(--surface)', borderRadius: '0.75rem', border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div 
+          style={{ padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: 'var(--surface-hover)' }}
+          onClick={() => setShowLeaderboard(!showLeaderboard)}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+            <Trophy size={16} color="#fbbf24" /> Live Scores
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            {showLeaderboard ? 'Hide' : 'Show'}
+          </div>
+        </div>
+        {showLeaderboard && (
+          <div style={{ padding: '0.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto' }}>
+            {scores.length === 0 ? (
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '0.5rem 0' }}>No scores yet</div>
+            ) : (
+              [...scores].sort((a, b) => b.score - a.score).map((s, i) => (
+                <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', padding: '0.25rem 0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ color: 'var(--text-muted)', width: '24px', fontWeight: 500 }}>#{i + 1}</span>
+                    <span style={{ color: 'var(--text-primary)' }}>{s.name} {s.id === currentUser.phone && <span style={{opacity: 0.5}}>(You)</span>}</span>
+                  </div>
+                  <div style={{ fontWeight: 'bold', color: s.score > 0 ? '#10b981' : (s.score < 0 ? '#ef4444' : 'var(--text-primary)') }}>
+                    {s.score} pts
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {status === 'reading' ? (

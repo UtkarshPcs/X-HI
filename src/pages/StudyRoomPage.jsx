@@ -172,11 +172,11 @@ function RoomEndedOverlay({ reason, onLeave }) {
       }} className="spring-up">
         <AlertTriangle size={32} color="#f59e0b" />
         <h2 style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)', margin: 0 }}>
-          {reason === 'kicked' ? 'You were removed' : 'Room ended'}
+          {reason === 'kicked' ? 'Session active elsewhere' : 'Room ended'}
         </h2>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
           {reason === 'kicked'
-            ? 'The host removed you from this room.'
+            ? 'You have joined this room from another device or tab.'
             : 'The host has ended this study session.'}
         </p>
         <button className="auth-btn primary" onClick={onLeave} style={{ width: '100%' }}>
@@ -213,6 +213,14 @@ export default function StudyRoomPage() {
   const [showQuizSetup, setShowQuizSetup] = useState(false);
 
   // Track unread messages on mobile when chat tab isn't active
+  const handleStartQuizClick = useCallback(() => {
+    if (room?.mode === 'quiz') {
+      const confirmNew = window.confirm("A quiz is already running. Are you sure you want to abandon it and start a new one?");
+      if (!confirmNew) return;
+    }
+    setShowQuizSetup(true);
+  }, [room?.mode]);
+
   useEffect(() => {
     if (mobileTab !== 'chat' && messages.length > prevMsgCount[0]) {
       setUnreadCount(c => c + (messages.length - prevMsgCount[0]));
@@ -337,7 +345,7 @@ export default function StudyRoomPage() {
         onToggleLock={toggleLock}
         onEndRoom={handleEndRoom}
         onBack={handleLeave}
-        onStartQuiz={isOwner ? () => setShowQuizSetup(true) : undefined}
+        onStartQuiz={isOwner ? handleStartQuizClick : undefined}
       />
 
       {/* ── Desktop layout ─────────────────────────────────────────────── */}
@@ -388,7 +396,7 @@ export default function StudyRoomPage() {
       {/* ── Mobile layout ──────────────────────────────────────────────── */}
       <div style={pageStyles.mobileLayout} className="study-mobile-layout">
         {/* Main Content always on top */}
-        <div style={{ ...pageStyles.mobileVideo, flex: room.mode === 'quiz' ? 1 : 'none', overflowY: 'auto' }}>
+        <div style={{ ...pageStyles.mobileVideo, flex: room.mode === 'quiz' ? '0 0 60%' : 'none', overflowY: 'auto' }}>
           {renderMainContent()}
         </div>
 

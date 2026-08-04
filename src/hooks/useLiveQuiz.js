@@ -30,22 +30,23 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
   const [timeRemaining, setTimeRemaining] = useState(0);
 
   // Listen for answers
+  const hasQuiz = Boolean(quizState);
   useEffect(() => {
-    if (!roomId || !quizState) return;
+    if (!roomId || !hasQuiz) return;
     const unsub = subscribeToQuizAnswers(roomId, (data) => {
       setAnswers(data);
     });
     return unsub;
-  }, [roomId, quizState]);
+  }, [roomId, hasQuiz]);
 
   // Listen for scores
   useEffect(() => {
-    if (!roomId || !quizState) return;
+    if (!roomId || !hasQuiz) return;
     const unsub = subscribeToQuizScores(roomId, (data) => {
       setScores(data);
     });
     return unsub;
-  }, [roomId, quizState]);
+  }, [roomId, hasQuiz]);
 
   // Timer logic
   useEffect(() => {
