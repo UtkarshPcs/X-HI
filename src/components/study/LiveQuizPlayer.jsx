@@ -24,7 +24,7 @@ export default function LiveQuizPlayer({
 
   // On reveal, calculate scores if not calculated yet
   const [scoreCalculatedForQ, setScoreCalculatedForQ] = useState(-1);
-  const [showLeaderboard, setShowLeaderboard] = useState(true);
+  const [showLeaderboard, setShowLeaderboard] = useState(window.innerWidth > 768);
 
   useEffect(() => {
     if (status === 'revealing' && currentQuestionIndex !== scoreCalculatedForQ) {

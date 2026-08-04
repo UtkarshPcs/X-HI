@@ -197,9 +197,9 @@ export default function StudyRoomPage() {
   const { room, loading, error, isOwner, changeVideo, toggleLock, kickMember, closeRoom } =
     useStudyRoom(roomId, currentUser?.phone);
 
-  // Only join presence and load chat if user is logged in
+  const handleKicked = useCallback(() => setWasKicked(true), []);
   const { members, memberCount } =
-    useRoomPresence(currentUser ? roomId : null, currentUser, () => setWasKicked(true));
+    useRoomPresence(currentUser ? roomId : null, currentUser, handleKicked);
 
   const { messages, sending, send } =
     useRoomChat(currentUser ? roomId : null, currentUser);

@@ -291,7 +291,8 @@ export default function StudyTogetherPage() {
 
   const handleJoinRoom = useCallback((room) => {
     if (!currentUser) { openModal(); return; }
-    if (room.password && currentUser.activeRole !== 'ADMIN') {
+    const isAdmin = currentUser.role === 'ADMIN' || currentUser.activeRole === 'ADMIN';
+    if (room.password && !isAdmin) {
       setPendingRoom(room);
       setPasswordRoom(room);
     } else {
@@ -439,7 +440,7 @@ export default function StudyTogetherPage() {
         ) : (
           <div style={styles.grid}>
             {filtered.map(room => (
-              <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} isAdmin={currentUser?.activeRole === 'ADMIN'} />
+              <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} isAdmin={currentUser?.role === 'ADMIN' || currentUser?.activeRole === 'ADMIN'} />
             ))}
           </div>
         )}
