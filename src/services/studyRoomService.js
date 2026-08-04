@@ -163,11 +163,13 @@ export async function getRoomByCode(code) {
 export async function getActiveRooms() {
   const q = query(
     collection(db, ROOMS_COL),
-    where('isActive', '==', true),
-    orderBy('createdAt', 'desc'),
+    where('isActive', '==', true)
   );
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const rooms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  
+  // Sort descending by createdAt
+  return rooms.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 }
 
 /**
@@ -178,11 +180,12 @@ export async function getActiveRooms() {
 export function subscribeToActiveRooms(callback) {
   const q = query(
     collection(db, ROOMS_COL),
-    where('isActive', '==', true),
-    orderBy('createdAt', 'desc'),
+    where('isActive', '==', true)
   );
   return onSnapshot(q, snap => {
-    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const rooms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    rooms.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    callback(rooms);
   });
 }
 
