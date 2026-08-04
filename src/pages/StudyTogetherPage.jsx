@@ -353,13 +353,24 @@ export default function StudyTogetherPage() {
           </h1>
           <p style={styles.pageSubtitle}>Join a live session or start one around any YouTube lecture.</p>
         </div>
-        <button
-          className="auth-btn primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}
-          onClick={() => setShowCreate(true)}
-        >
-          <Plus size={16} /> New Room
-        </button>
+        {rooms.length >= 3 ? (
+          <button
+            className="auth-btn secondary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0, opacity: 0.6, cursor: 'not-allowed' }}
+            disabled
+            title="Server at capacity (Max 3 active rooms)"
+          >
+            <Plus size={16} /> Server Full
+          </button>
+        ) : (
+          <button
+            className="auth-btn primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}
+            onClick={() => setShowCreate(true)}
+          >
+            <Plus size={16} /> New Room
+          </button>
+        )}
       </div>
 
       {/* Join by code */}
@@ -405,13 +416,24 @@ export default function StudyTogetherPage() {
               {searchQuery ? 'Try a different search or clear the filter.' : 'Be the first — create a study room!'}
             </p>
             {!searchQuery && (
-              <button
-                className="auth-btn primary"
-                onClick={() => setShowCreate(true)}
-                style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-              >
-                <Plus size={15} /> Create a Room
-              </button>
+              rooms.length >= 3 ? (
+                <button
+                  className="auth-btn secondary"
+                  disabled
+                  style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.6, cursor: 'not-allowed' }}
+                  title="Server at capacity (Max 3 active rooms)"
+                >
+                  <Plus size={15} /> Server Full
+                </button>
+              ) : (
+                <button
+                  className="auth-btn primary"
+                  onClick={() => setShowCreate(true)}
+                  style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <Plus size={15} /> Create a Room
+                </button>
+              )
             )}
           </div>
         ) : (

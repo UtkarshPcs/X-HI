@@ -19,6 +19,10 @@ import YouTubePlayer from '../components/study/YouTubePlayer';
 import RoomChat from '../components/study/RoomChat';
 import MembersList from '../components/study/MembersList';
 import RoomHeader from '../components/study/RoomHeader';
+import { useLiveQuiz } from '../hooks/useLiveQuiz';
+import LiveQuizPlayer from '../components/study/LiveQuizPlayer';
+import QuizSetupModal from '../components/study/QuizSetupModal';
+import { startQuiz } from '../services/studyRoomService';
 
 // ── Mobile tab bar ───────────────────────────────────────────────────────────
 function MobileTabBar({ activeTab, onTabChange, memberCount, unread }) {
@@ -195,15 +199,18 @@ export default function StudyRoomPage() {
 
   // Only join presence and load chat if user is logged in
   const { members, memberCount } =
-    useRoomPresence(currentUser ? roomId : null, currentUser);
+    useRoomPresence(currentUser ? roomId : null, currentUser, () => setWasKicked(true));
 
   const { messages, sending, send } =
     useRoomChat(currentUser ? roomId : null, currentUser);
+
+  const quizProps = useLiveQuiz(roomId, room, currentUser, members);
 
   // Mobile UI state
   const [mobileTab,   setMobileTab]   = useState('chat');
   const [unreadCount, setUnreadCount] = useState(0);
   const prevMsgCount                  = useState(0);
+  const [showQuizSetup, setShowQuizSetup] = useState(false);
 
   // Track unread messages on mobile when chat tab isn't active
   useEffect(() => {
@@ -243,6 +250,11 @@ export default function StudyRoomPage() {
     navigate('/study-together');
   }, [closeRoom, navigate]);
 
+  const handleStartQuiz = async (quizData) => {
+    await startQuiz(roomId, quizData);
+    setShowQuizSetup(false);
+  };
+
   // ── Login gate ─────────────────────────────────────────────────────────────
   if (!currentUser) {
     return (
@@ -279,8 +291,23 @@ export default function StudyRoomPage() {
     );
   }
 
-  // ── Kick / room ended overlay ──────────────────────────────────────────────
   const showEnded = wasKicked || (!room.isActive);
+
+  const renderMainContent = () => {
+    if (room.mode === 'quiz') {
+      return <LiveQuizPlayer {...quizProps} currentUser={currentUser} />;
+    }
+    if (room.mode === 'video' || room.videoId) {
+      return <YouTubePlayer videoId={room.videoId} title={room.name} />;
+    }
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+        <MessageSquare size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+        <h3>Chat Room Active</h3>
+        <p>No video or quiz is currently playing.</p>
+      </div>
+    );
+  };
 
   return (
     <div style={pageStyles.root} className="animate-fade-in study-room-page">
@@ -289,6 +316,15 @@ export default function StudyRoomPage() {
         <RoomEndedOverlay
           reason={wasKicked ? 'kicked' : 'ended'}
           onLeave={handleLeave}
+        />
+      )}
+
+      {showQuizSetup && isOwner && (
+        <QuizSetupModal 
+          onClose={() => setShowQuizSetup(false)} 
+          onStart={handleStartQuiz} 
+          onlineMembers={members}
+          currentCoHost={room.coHostPhone}
         />
       )}
 
@@ -301,14 +337,15 @@ export default function StudyRoomPage() {
         onToggleLock={toggleLock}
         onEndRoom={handleEndRoom}
         onBack={handleLeave}
+        onStartQuiz={isOwner ? () => setShowQuizSetup(true) : undefined}
       />
 
       {/* ── Desktop layout ─────────────────────────────────────────────── */}
       <div style={pageStyles.desktopLayout} className="study-desktop-layout">
 
-        {/* Video column */}
+        {/* Video / Quiz column */}
         <div style={pageStyles.videoCol}>
-          <YouTubePlayer videoId={room.videoId} title={room.name} />
+          {renderMainContent()}
         </div>
 
         {/* Sidebar column */}
@@ -350,9 +387,9 @@ export default function StudyRoomPage() {
 
       {/* ── Mobile layout ──────────────────────────────────────────────── */}
       <div style={pageStyles.mobileLayout} className="study-mobile-layout">
-        {/* Video always on top */}
-        <div style={pageStyles.mobileVideo}>
-          <YouTubePlayer videoId={room.videoId} title={room.name} />
+        {/* Main Content always on top */}
+        <div style={{ ...pageStyles.mobileVideo, flex: room.mode === 'quiz' ? 1 : 'none', overflowY: 'auto' }}>
+          {renderMainContent()}
         </div>
 
         {/* Tab bar */}

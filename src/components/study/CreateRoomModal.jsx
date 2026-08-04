@@ -25,8 +25,7 @@ export default function CreateRoomModal({ onClose, onCreate }) {
     const errs = {};
     if (!name.trim())              errs.name = 'Room name is required.';
     if (name.trim().length > 60)   errs.name = 'Name must be 60 characters or less.';
-    if (!youtubeUrl.trim())        errs.youtubeUrl = 'YouTube URL is required.';
-    else if (!isValidYouTubeUrl(youtubeUrl)) errs.youtubeUrl = 'Please enter a valid YouTube video or live URL.';
+    if (youtubeUrl.trim() && !isValidYouTubeUrl(youtubeUrl)) errs.youtubeUrl = 'Please enter a valid YouTube video or live URL.';
     return errs;
   }
 
@@ -90,7 +89,7 @@ export default function CreateRoomModal({ onClose, onCreate }) {
           <div style={styles.field}>
             <label style={styles.label} htmlFor="room-url">
               <Play size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-              YouTube URL
+              YouTube URL <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
             </label>
             <input
               id="room-url"

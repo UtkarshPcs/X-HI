@@ -93,15 +93,27 @@ function generateRoomCode() {
  * @returns {Promise<{ roomId: string, roomCode: string }>}
  */
 export async function createRoom({ name, youtubeUrl, password, ownerPhone, ownerName }) {
-  const videoId = extractYouTubeId(youtubeUrl);
-  if (!videoId) throw new Error('Invalid YouTube URL.');
+  const activeRooms = await getActiveRooms();
+  if (activeRooms.length >= 3) {
+    throw new Error('Maximum of 3 active study rooms allowed at a time.');
+  }
+
+  let videoId = null;
+  let mode = 'chat';
+  if (youtubeUrl && youtubeUrl.trim()) {
+    videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) throw new Error('Invalid YouTube URL.');
+    mode = 'video';
+  }
 
   const roomCode = generateRoomCode();
 
   const docRef = await addDoc(collection(db, ROOMS_COL), {
     name: name.trim(),
-    youtubeUrl: youtubeUrl.trim(),
+    youtubeUrl: youtubeUrl ? youtubeUrl.trim() : null,
     videoId,
+    mode,
+    coHostPhone: null,
     password: password?.trim() || null,
     ownerPhone,
     ownerName,
@@ -199,6 +211,47 @@ export async function updateRoomVideo(roomId, newUrl) {
   await updateDoc(doc(db, ROOMS_COL, roomId), {
     youtubeUrl: newUrl.trim(),
     videoId,
+    mode: 'video',
+    updatedAt: Date.now(),
+  });
+}
+
+/**
+ * Assigns a co-host for the room.
+ * @param {string} roomId 
+ * @param {string} coHostPhone 
+ */
+export async function assignCoHost(roomId, coHostPhone) {
+  await updateDoc(doc(db, ROOMS_COL, roomId), { coHostPhone, updatedAt: Date.now() });
+}
+
+/**
+ * Starts a quiz, setting the room mode to 'quiz' and initializing quiz state.
+ * @param {string} roomId 
+ * @param {object} quizState 
+ */
+export async function startQuiz(roomId, quizState) {
+  const roomRef = doc(db, ROOMS_COL, roomId);
+  // We initialize the quizState in a subcollection or on the document itself.
+  // Using document fields is easier for listening to top-level room changes,
+  // but a dedicated subcollection or a map on the room document is fine.
+  // Let's store it as a map `quizState` on the room document.
+  await updateDoc(roomRef, {
+    mode: 'quiz',
+    quizState,
+    updatedAt: Date.now(),
+  });
+}
+
+/**
+ * Updates the current quiz state (e.g. progressing to next question)
+ */
+export async function updateQuizState(roomId, newStatePartial) {
+  // To avoid race conditions, we can use dot notation for nested fields,
+  // or just pass the whole new state map if we compute it client side.
+  // We'll pass an object with dot-notation keys, e.g. { "quizState.currentQuestionIndex": 1 }
+  await updateDoc(doc(db, ROOMS_COL, roomId), {
+    ...newStatePartial,
     updatedAt: Date.now(),
   });
 }
@@ -231,6 +284,54 @@ export async function removeMember(roomId, memberPhone) {
   await deleteDoc(doc(db, ROOMS_COL, roomId, PRESENCE_COL, memberPhone));
 }
 
+/**
+ * Answers a quiz question. Handles transactions for 'fastest' mode.
+ */
+import { runTransaction } from 'firebase/firestore';
+
+export async function answerQuizQuestion(roomId, qIndex, userId, optionIndex, mode) {
+  if (mode === 'fastest') {
+    const qRef = doc(db, ROOMS_COL, roomId, 'quizAnswers', `q_${qIndex}`);
+    await runTransaction(db, async (t) => {
+      const qDoc = await t.get(qRef);
+      if (!qDoc.exists()) {
+        t.set(qRef, { winnerId: userId, optionIndex, timestamp: serverTimestamp() });
+      } else {
+        throw new Error('Someone else answered first!');
+      }
+    });
+  } else {
+    // mode === 'all'
+    const userAnsRef = doc(db, ROOMS_COL, roomId, 'quizAnswers', `q_${qIndex}_${userId}`);
+    await setDoc(userAnsRef, { userId, optionIndex, timestamp: serverTimestamp() }, { merge: true });
+  }
+}
+
+/**
+ * Subscribes to the answers for a specific question (used for revealing).
+ */
+export function subscribeToQuizAnswers(roomId, callback) {
+  const q = collection(db, ROOMS_COL, roomId, 'quizAnswers');
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+}
+
+/**
+ * Subscribes to quiz scores.
+ */
+export function subscribeToQuizScores(roomId, callback) {
+  const q = collection(db, ROOMS_COL, roomId, 'quizScores');
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+}
+
+export async function submitQuizScore(roomId, userId, scoreData) {
+  const ref = doc(db, ROOMS_COL, roomId, 'quizScores', userId);
+  await setDoc(ref, scoreData, { merge: true });
+}
+
 // ── Presence ────────────────────────────────────────────────────────────────
 
 const HEARTBEAT_INTERVAL_MS = 15_000; // 15 seconds
@@ -246,13 +347,14 @@ const PRESENCE_STALE_MS     = 35_000; // consider offline after 35 s
  * @param {{ phone: string, name: string }} user
  * @returns {function} cleanup
  */
-export function joinPresence(roomId, user) {
+export function joinPresence(roomId, user, sessionId) {
   const ref = doc(db, ROOMS_COL, roomId, PRESENCE_COL, user.phone);
 
   const heartbeat = () =>
     setDoc(ref, {
       phone: user.phone,
       name: user.name,
+      sessionId: sessionId || null,
       joinedAt: Date.now(),
       lastSeen: Date.now(),
     }, { merge: true }).catch(() => {});

@@ -7,7 +7,7 @@
 import { memo, useState } from 'react';
 import {
   Users, Copy, Check, Lock, Unlock,
-  Video, StopCircle, ArrowLeft, ExternalLink,
+  Video, StopCircle, ArrowLeft, ExternalLink, Play
 } from 'lucide-react';
 import { isValidYouTubeUrl } from '../../services/studyRoomService';
 
@@ -20,11 +20,12 @@ import { isValidYouTubeUrl } from '../../services/studyRoomService';
  *   onToggleLock: () => void,
  *   onEndRoom: () => void,
  *   onBack: () => void,
+ *   onStartQuiz: () => void,
  * }} props
  */
 const RoomHeader = memo(function RoomHeader({
   room, memberCount, isOwner,
-  onChangeVideo, onToggleLock, onEndRoom, onBack,
+  onChangeVideo, onToggleLock, onEndRoom, onBack, onStartQuiz
 }) {
   const [copied, setCopied]           = useState(false);
   const [showVideoForm, setShowVideoForm] = useState(false);
@@ -112,6 +113,18 @@ const RoomHeader = memo(function RoomHeader({
             aria-label="Change video"
           >
             <Video size={16} />
+          </button>
+        )}
+
+        {/* Owner: Start Quiz */}
+        {isOwner && onStartQuiz && (
+          <button
+            style={{ ...styles.iconBtn, color: '#8b5cf6' }}
+            onClick={onStartQuiz}
+            title="Start Live Quiz"
+            aria-label="Start Live Quiz"
+          >
+            <Play size={16} />
           </button>
         )}
 
