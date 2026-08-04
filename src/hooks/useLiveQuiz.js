@@ -69,7 +69,7 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
           const delay = isActingAdmin ? 0 : 1000 + Math.random() * 2000;
           setTimeout(() => {
             // Check if state is STILL active (someone else might have successfully transitioned it)
-            if (room.quizState?.status === 'active') {
+            if (room?.quizState?.status === 'active') {
               updateQuizState(roomId, { 'quizState.status': 'revealing' }).catch(() => {});
             }
           }, delay);
@@ -78,7 +78,7 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
     }, 250);
 
     return () => clearInterval(interval);
-  }, [quizState, isActingAdmin, isDecentralizedFallback, roomId, room.quizState?.status]);
+  }, [quizState, isActingAdmin, isDecentralizedFallback, roomId, room?.quizState?.status]);
 
   const submitAnswer = useCallback(async (qIndex, optionIndex) => {
     if (!roomId || !currentUser) return;
