@@ -130,48 +130,46 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
             <span style={styles.hint}>Co-hosts will take over if you disconnect.</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            {/* 2a. Select Subject */}
-            <div style={{ ...styles.field, flex: 1 }}>
-              <label style={styles.label}>
-                <BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                Subject
-              </label>
-              <select 
-                style={styles.select} 
-                value={selectedSubject} 
-                onChange={e => setSelectedSubject(e.target.value)}
-                required
-              >
-                <option value="">-- Select Subject --</option>
-                {subjects.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
+          {/* 2a. Select Subject */}
+          <div style={styles.field}>
+            <label style={styles.label}>
+              <BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+              Subject
+            </label>
+            <select 
+              style={styles.select} 
+              value={selectedSubject} 
+              onChange={e => setSelectedSubject(e.target.value)}
+              required
+            >
+              <option value="">-- Select Subject --</option>
+              {subjects.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
 
-            {/* 2b. Select Chapter */}
-            <div style={{ ...styles.field, flex: 1 }}>
-              <label style={styles.label}>
-                <Hash size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                Chapter
-              </label>
-              <select 
-                style={styles.select} 
-                value={selectedTestId} 
-                onChange={e => {
-                  setSelectedTestId(e.target.value);
-                  setErrorMsg('');
-                }}
-                required
-                disabled={!selectedSubject}
-              >
-                <option value="">-- Select Chapter --</option>
-                {filteredTests.map(t => (
-                  <option key={t.id} value={t.id}>{t.title}</option>
-                ))}
-              </select>
-            </div>
+          {/* 2b. Select Chapter */}
+          <div style={styles.field}>
+            <label style={styles.label}>
+              <Hash size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+              Chapter
+            </label>
+            <select 
+              style={styles.select} 
+              value={selectedTestId} 
+              onChange={e => {
+                setSelectedTestId(e.target.value);
+                setErrorMsg('');
+              }}
+              required
+              disabled={!selectedSubject}
+            >
+              <option value="">-- Select Chapter --</option>
+              {filteredTests.map(t => (
+                <option key={t.id} value={t.id}>{t.title}</option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', gap: '1rem' }}>
