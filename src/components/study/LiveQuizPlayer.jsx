@@ -177,7 +177,7 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
                       ...lbStyles.barFill,
                       width: `${Math.max(barWidth, 0)}%`,
                       background: s.score > 0
-                        ? `linear-gradient(90deg, ${i < 3 ? rankColor : '#8b5cf6'}, ${i < 3 ? rankColor + '88' : '#8b5cf688'})`
+                        ? `linear-gradient(90deg, ${i < 3 ? rankColor : '#14b8a6'}, ${i < 3 ? rankColor + '88' : '#14b8a688'})`
                         : s.score < 0 ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)',
                     }} />
                   </div>
@@ -262,8 +262,8 @@ const lbStyles = {
     borderLeft: '3px solid transparent',
   },
   entryMe: {
-    background: 'rgba(139,92,246,0.08)',
-    border: '1px solid rgba(139,92,246,0.2)',
+    background: 'rgba(20,184,166,0.08)',
+    border: '1px solid rgba(20,184,166,0.2)',
   },
   rank: {
     width: 28,
@@ -298,8 +298,8 @@ const lbStyles = {
   youBadge: {
     fontSize: '0.55rem',
     fontWeight: 700,
-    color: '#8b5cf6',
-    background: 'rgba(139,92,246,0.15)',
+    color: '#14b8a6',
+    background: 'rgba(20,184,166,0.15)',
     padding: '0.05rem 0.3rem',
     borderRadius: '4px',
     letterSpacing: '0.05em',
@@ -661,7 +661,7 @@ function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) 
 const styles = {
   container: {
     height: '100%', display: 'flex', flexDirection: 'column', 
-    background: '#0f172a', padding: '1.5rem', borderRadius: '12px', overflowY: 'auto'
+    background: '#042f2e', padding: '1.5rem', borderRadius: '12px', overflowY: 'auto'
   },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' },
   qIndex: { fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted)' },
@@ -761,8 +761,8 @@ const styles = {
   },
   selected: { background: 'rgba(251,191,36,0.1)', borderColor: 'rgba(251,191,36,0.4)' },
   circle_selected: { borderColor: '#fbbf24', color: '#fbbf24' },
-  locked_mine: { background: 'rgba(59,130,246,0.1)', borderColor: '#3b82f6' },
-  circle_locked_mine: { borderColor: '#3b82f6', color: '#3b82f6' },
+  locked_mine: { background: 'rgba(20,184,166,0.1)', borderColor: '#14b8a6' },
+  circle_locked_mine: { borderColor: '#14b8a6', color: '#14b8a6' },
   locked_other: { opacity: 0.5 },
   correct: { background: 'rgba(16,185,129,0.1)', borderColor: '#10b981' },
   circle_correct: { borderColor: '#10b981', color: '#10b981', background: '#10b981' },
@@ -841,7 +841,7 @@ const styles = {
     textTransform: 'uppercase'
   },
   statValueRank: { fontSize: '1.1rem', fontWeight: 700, color: '#fbbf24' },
-  statValueScore: { fontSize: '1.1rem', fontWeight: 700, color: '#8b5cf6' },
+  statValueScore: { fontSize: '1.1rem', fontWeight: 700, color: '#14b8a6' },
   statValueCorrect: { fontSize: '1.1rem', fontWeight: 700, color: '#10b981' },
   statValueAcc: { fontSize: '1.1rem', fontWeight: 700, color: '#3b82f6' },
   statValueTime: { fontSize: '1.1rem', fontWeight: 700, color: '#fff' },
