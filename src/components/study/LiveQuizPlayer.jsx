@@ -822,16 +822,18 @@ const styles = {
     textAlign: 'center'
   },
   myStatsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(5, 1fr)',
-    gap: '0.5rem',
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '1rem',
     textAlign: 'center'
   },
   statBox: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '0.2rem'
+    gap: '0.2rem',
+    minWidth: '60px'
   },
   statLabel: {
     fontSize: '0.65rem',
