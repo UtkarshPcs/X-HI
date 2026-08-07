@@ -164,7 +164,7 @@ const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUser
           onChange={e => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={disabled ? 'Chat disabled' : 'Type a message…'}
-          disabled={disabled || sending}
+          disabled={disabled}
           rows={1}
           maxLength={500}
           aria-label="Chat message input"
