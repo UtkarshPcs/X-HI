@@ -112,6 +112,7 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
       chapterId: selectedChapter,
       chapterTitle: testTitle,
       subject: selectedSubject,
+      difficulty: targetDifficultyStr,
       questions: selectedQuestions,
       quizMode,
       timePerQuestion,

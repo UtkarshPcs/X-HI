@@ -6,7 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../../utils/formatMath';
-import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw } from 'lucide-react';
+import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw, Star } from 'lucide-react';
 
 // ── Medal / rank helpers ─────────────────────────────────────────────────────
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
@@ -474,10 +474,24 @@ export default function LiveQuizPlayer({
                   </div>
                 </div>
                 <div style={styles.metaItem}>
+                  <Star size={16} color="var(--primary)" />
+                  <div style={styles.metaText}>
+                    <span style={styles.metaLabel}>Difficulty</span>
+                    <span style={styles.metaValue}>{quizState.difficulty || 'Medium'}</span>
+                  </div>
+                </div>
+                <div style={styles.metaItem}>
                   <ListOrdered size={16} color="var(--primary)" />
                   <div style={styles.metaText}>
                     <span style={styles.metaLabel}>Questions</span>
                     <span style={styles.metaValue}>{questions.length}</span>
+                  </div>
+                </div>
+                <div style={styles.metaItem}>
+                  <Clock size={16} color="var(--primary)" />
+                  <div style={styles.metaText}>
+                    <span style={styles.metaLabel}>Time Limit</span>
+                    <span style={styles.metaValue}>{quizState.timePerQuestion}s / Q</span>
                   </div>
                 </div>
               </div>
