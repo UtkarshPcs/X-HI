@@ -374,14 +374,16 @@ export default function LiveQuizPlayer({
 
   // Optimistic local selection — shows instantly before Firestore confirms
   const [optimisticOption, setOptimisticOption] = useState(null);
-  const [optimisticForQ, setOptimisticForQ] = useState(-1);
+  const [optimisticForQ, setOptimisticForQ] = useState(null);
 
-  // Reset optimistic state when question changes
+  // Reset optimistic state when question or quiz changes
   useEffect(() => {
-    if (currentQuestionIndex !== optimisticForQ) {
+    const qKey = `${quizState.quizId}_${currentQuestionIndex}`;
+    if (qKey !== optimisticForQ) {
       setOptimisticOption(null);
+      setOptimisticForQ(qKey);
     }
-  }, [currentQuestionIndex, optimisticForQ]);
+  }, [currentQuestionIndex, quizState.quizId, optimisticForQ]);
 
   // Merge: use server-confirmed answer if available, otherwise use optimistic
   let effectiveSelectedOption = null;

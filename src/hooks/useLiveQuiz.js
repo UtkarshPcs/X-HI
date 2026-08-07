@@ -35,6 +35,7 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
   const quizId = quizState?.quizId;
   useEffect(() => {
     if (!roomId || !hasQuiz || !quizId) return;
+    setAnswers([]); // clear stale answers from previous quiz
     const unsub = subscribeToQuizAnswers(roomId, quizId, (data) => {
       setAnswers(data);
     });
@@ -44,6 +45,7 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
   // Listen for scores
   useEffect(() => {
     if (!roomId || !hasQuiz || !quizId) return;
+    setScores([]); // clear stale scores from previous quiz
     const unsub = subscribeToQuizScores(roomId, quizId, (data) => {
       setScores(data);
     });
