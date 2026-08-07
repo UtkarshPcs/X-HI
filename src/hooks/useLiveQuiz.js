@@ -136,6 +136,38 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
     });
   }, [roomId, isActingAdmin]);
 
+  const replaceCurrentQuestion = useCallback(async () => {
+    if (!roomId || !isActingAdmin || !quizState || !quizState.testId) return;
+    try {
+      const { getTestById } = await import('../services/starBatchTestService');
+      const test = await getTestById(quizState.testId);
+      if (!test || !test.questions) return;
+      
+      const allQs = test.questions.filter(q => !q.isDeleted);
+      const usedIds = quizState.questions.map(q => q.id);
+      const availableQs = allQs.filter(q => !usedIds.includes(q.id));
+      
+      if (availableQs.length === 0) {
+        alert("No remaining questions available in this chapter to replace with.");
+        return;
+      }
+      
+      const randomQ = availableQs[Math.floor(Math.random() * availableQs.length)];
+      
+      const newQuestions = [...quizState.questions];
+      newQuestions[quizState.currentQuestionIndex] = randomQ;
+      
+      await updateQuizState(roomId, {
+        'quizState.questions': newQuestions,
+        'quizState.status': 'reading',
+        'quizState.questionStartedAt': null
+      });
+      
+    } catch (e) {
+      console.error(e);
+    }
+  }, [roomId, isActingAdmin, quizState]);
+
   const updateMyScore = useCallback(async (correctCount, wrongCount, score, totalTime) => {
     if (!roomId || !currentUser || !quizState?.quizId) return;
     await submitQuizScore(roomId, quizState.quizId, currentUser.phone, {
@@ -157,6 +189,7 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
     nextQuestion,
     startTimer,
     endQuiz,
+    replaceCurrentQuestion,
     updateMyScore
   };
 }

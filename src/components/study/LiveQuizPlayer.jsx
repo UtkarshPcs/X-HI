@@ -6,7 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../../utils/formatMath';
-import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered } from 'lucide-react';
+import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw } from 'lucide-react';
 
 // ── Medal / rank helpers ─────────────────────────────────────────────────────
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
@@ -352,7 +352,7 @@ const lbStyles = {
 // ── Main Quiz Player ─────────────────────────────────────────────────────────
 export default function LiveQuizPlayer({
   quizState, isActingAdmin, timeRemaining, answers, scores,
-  submitAnswer, nextQuestion, startTimer, endQuiz, updateMyScore, currentUser
+  submitAnswer, nextQuestion, startTimer, endQuiz, updateMyScore, replaceCurrentQuestion, currentUser
 }) {
   const { status, currentQuestionIndex, questions, quizMode } = quizState;
   const currentQuestion = questions[currentQuestionIndex];
@@ -561,6 +561,28 @@ export default function LiveQuizPlayer({
               );
             })}
           </div>
+
+          {/* Admin Replace Question Button */}
+          {isActingAdmin && status === 'active' && (
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+              <button 
+                className="auth-btn secondary" 
+                onClick={() => {
+                  if (window.confirm("Replace this question with a new one?")) {
+                    replaceCurrentQuestion();
+                  }
+                }} 
+                style={{ 
+                  background: 'rgba(239,68,68,0.08)', color: '#EF4444', 
+                  border: '1px solid rgba(239,68,68,0.2)', padding: '0.6rem 1.2rem', 
+                  fontSize: '0.85rem', display: 'flex', alignItems: 'center', borderRadius: '8px' 
+                }}
+              >
+                <RefreshCw size={14} style={{ marginRight: '8px' }} />
+                Replace Question
+              </button>
+            </div>
+          )}
 
           {/* Reveal phase: show leaderboard + next button */}
           {status === 'revealing' && (
