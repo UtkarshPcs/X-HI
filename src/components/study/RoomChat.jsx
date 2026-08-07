@@ -76,6 +76,7 @@ const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUser
   const [text, setText]         = useState('');
   const bottomRef               = useRef(null);
   const chatBodyRef             = useRef(null);
+  const inputRef                = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
   // Auto-scroll when messages arrive, but only if user hasn't scrolled up
@@ -99,7 +100,10 @@ const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUser
     setText('');
     // Force-scroll after sending own message
     setAutoScroll(true);
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      inputRef.current?.focus();
+    }, 50);
   }, [text, sending, disabled, onSend]);
 
   function handleKeyDown(e) {
@@ -154,6 +158,7 @@ const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUser
       {/* Input bar */}
       <div style={styles.inputRow}>
         <textarea
+          ref={inputRef}
           style={styles.input}
           value={text}
           onChange={e => setText(e.target.value)}
