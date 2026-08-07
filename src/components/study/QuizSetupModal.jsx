@@ -80,7 +80,7 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
        return;
     }
 
-    let allQuestions = matchingTests.flatMap(t => t.questions || []).filter(q => !q.isDeleted);
+    let allQuestions = (matchingTests[0].questions || []).map((q, idx) => ({ ...q, originalIndex: idx })).filter(q => !q.isDeleted);
     
     if (allQuestions.length === 0) {
       setErrorMsg('No valid questions available in this chapter.');
@@ -95,7 +95,7 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
     let diffQuestions = allQuestions.filter(q => (q.difficulty || 'Medium') === targetDifficultyStr);
     
     // EXCLUDE previously asked questions
-    let freshQuestions = diffQuestions.filter(q => !askedQuestionIds.includes(q.id));
+    let freshQuestions = diffQuestions.filter(q => !askedQuestionIds.includes(q.originalIndex));
 
     // If we don't have enough fresh questions of this difficulty, fall back to reusing asked ones
     if (freshQuestions.length < totalQuestions) {
@@ -104,7 +104,7 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
 
     // If STILL not enough, ignore difficulty and grab everything
     if (freshQuestions.length < totalQuestions) {
-      freshQuestions = [...allQuestions].filter(q => !askedQuestionIds.includes(q.id));
+      freshQuestions = [...allQuestions].filter(q => !askedQuestionIds.includes(q.originalIndex));
       if (freshQuestions.length < totalQuestions) {
          freshQuestions = [...allQuestions];
       }

@@ -143,9 +143,9 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
       const test = await getTestById(quizState.testId);
       if (!test || !test.questions) return;
       
-      const allQs = test.questions.filter(q => !q.isDeleted);
-      const usedIds = quizState.questions.map(q => q.id);
-      const availableQs = allQs.filter(q => !usedIds.includes(q.id));
+      const allQs = (test.questions || []).map((q, idx) => ({...q, originalIndex: idx})).filter(q => !q.isDeleted);
+      const usedIndices = quizState.questions.map(q => q.originalIndex).filter(idx => idx !== undefined);
+      const availableQs = allQs.filter(q => !usedIndices.includes(q.originalIndex));
       
       if (availableQs.length === 0) {
         alert("No remaining questions available in this chapter to replace with.");

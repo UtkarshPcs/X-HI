@@ -246,7 +246,7 @@ export async function removeCoHost(roomId, phone) {
  */
 export async function startQuiz(roomId, quizState) {
   const roomRef = doc(db, ROOMS_COL, roomId);
-  const qIds = quizState.questions ? quizState.questions.map(q => q.id) : [];
+  const qIds = quizState.questions ? quizState.questions.map(q => q.originalIndex) : [];
   
   const updates = {
     mode: 'quiz',

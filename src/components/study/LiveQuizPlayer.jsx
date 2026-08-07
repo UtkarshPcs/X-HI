@@ -6,7 +6,8 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../../utils/formatMath';
-import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw, Star } from 'lucide-react';
+import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw, Star, Bookmark } from 'lucide-react';
+import { addBookmark, removeBookmark, checkIsBookmarked } from '../../services/starBatchBookmarkService';
 
 // ── Medal / rank helpers ─────────────────────────────────────────────────────
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
@@ -376,6 +377,49 @@ export default function LiveQuizPlayer({
   const [optimisticOption, setOptimisticOption] = useState(null);
   const [optimisticForQ, setOptimisticForQ] = useState(null);
 
+  // Bookmark state
+  const [bookmarking, setBookmarking] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (!currentQuestion || !currentUser || !quizState.testId) return;
+    const docId = `${quizState.chapterId}_${currentQuestion.originalIndex}`;
+    checkIsBookmarked(currentUser.id || currentUser.phone, docId)
+      .then(setIsBookmarked)
+      .catch(console.error);
+  }, [currentQuestion, currentUser, quizState.testId, quizState.chapterId]);
+
+  async function handleToggleBookmark() {
+    if (!currentQuestion || !currentUser || bookmarking) return;
+    setBookmarking(true);
+    const userId = currentUser.id || currentUser.phone;
+    const docId = `${quizState.chapterId}_${currentQuestion.originalIndex}`;
+    
+    try {
+      if (isBookmarked) {
+        await removeBookmark(userId, docId);
+        setIsBookmarked(false);
+      } else {
+        await addBookmark(userId, {
+          chapterId: quizState.chapterId,
+          testId: quizState.testId,
+          questionIndex: currentQuestion.originalIndex,
+          questionText: currentQuestion.text,
+          options: currentQuestion.options,
+          correctOptionIndex: currentQuestion.correctOptionIndex,
+          topic: currentQuestion.topic || '',
+          difficulty: currentQuestion.difficulty || 'Medium',
+          testTitle: quizState.chapterTitle || '',
+          type: 'objective'
+        });
+        setIsBookmarked(true);
+      }
+    } catch(e) {
+      console.error(e);
+    }
+    setBookmarking(false);
+  }
+
   // Reset optimistic state when question or quiz changes
   useEffect(() => {
     const qKey = `${quizState.quizId}_${currentQuestionIndex}`;
@@ -513,12 +557,29 @@ export default function LiveQuizPlayer({
         </div>
       ) : (
         <div style={styles.qCard}>
-          {/* Question text */}
-          <div className="markdown-body custom-md" style={{ marginBottom: '1.5rem', color: '#fff', fontSize: '1.1rem' }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-              {formatMath(currentQuestion.text)}
-            </ReactMarkdown>
-            {currentQuestion.diagram && <DiagramRenderer diagram={currentQuestion.diagram} />}
+          {/* Question Header & Bookmark */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <div className="markdown-body custom-md" style={{ flex: 1, color: '#fff', fontSize: '1.1rem' }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                {formatMath(currentQuestion.text)}
+              </ReactMarkdown>
+              {currentQuestion.diagram && <DiagramRenderer diagram={currentQuestion.diagram} />}
+            </div>
+            
+            <button 
+              onClick={handleToggleBookmark} 
+              disabled={bookmarking}
+              style={{ 
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', 
+                color: isBookmarked ? '#F5C542' : 'rgba(255,255,255,0.5)', 
+                cursor: bookmarking ? 'default' : 'pointer', 
+                padding: '0.4rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                transition: 'all 0.2s', marginLeft: '1rem', flexShrink: 0
+              }}
+              title={isBookmarked ? "Remove Bookmark" : "Bookmark Question"}
+            >
+              <Bookmark size={18} fill={isBookmarked ? '#F5C542' : 'none'} />
+            </button>
           </div>
 
           {/* Options */}
