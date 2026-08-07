@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, Play, Users, Clock, Hash, Shield, BookOpen, AlertCircle } from 'lucide-react';
+import { X, Play, Users, Clock, Hash, Shield, BookOpen, AlertCircle, Layers, Star } from 'lucide-react';
 import { getAllTests } from '../../services/starBatchTestService';
+import { syllabusData } from '../../data/syllabusData';
 
 export default function QuizSetupModal({ onClose, onStart, onlineMembers, currentCoHosts }) {
   const [tests, setTests] = useState([]);
@@ -8,8 +9,11 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
   const [errorMsg, setErrorMsg] = useState('');
   
   // Selections
+  const [selectedSection, setSelectedSection] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedTestId, setSelectedTestId] = useState('');
+  const [selectedChapter, setSelectedChapter] = useState('');
+  
+  const [quizDifficulty, setQuizDifficulty] = useState('medium');
   const [totalQuestions, setTotalQuestions] = useState(5);
   const [timePerQuestion, setTimePerQuestion] = useState(30);
   const [quizMode, setQuizMode] = useState('all'); // 'all' or 'fastest'
@@ -22,58 +26,91 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
     });
   }, []);
 
-  // Extract unique subjects
-  const subjects = useMemo(() => {
-    const subs = new Set(tests.map(t => t.sectionId || t.subjectId));
-    return Array.from(subs).filter(Boolean).sort();
+  // Extract available sets based on tests to prevent empty selections
+  const { availableSections, availableSubjects, availableChapters } = useMemo(() => {
+    const sections = new Set();
+    const subjects = new Set();
+    const chapters = new Set();
+
+    tests.forEach(t => {
+      if (t.sectionId) sections.add(t.sectionId);
+      if (t.subjectId) subjects.add(t.subjectId);
+      if (t.chapterId || t.id) chapters.add(t.chapterId || t.id);
+    });
+
+    return { availableSections: sections, availableSubjects: subjects, availableChapters: chapters };
   }, [tests]);
 
-  // Filter tests by selected subject
-  const filteredTests = useMemo(() => {
-    if (!selectedSubject) return [];
-    return tests.filter(t => (t.sectionId || t.subjectId) === selectedSubject);
-  }, [tests, selectedSubject]);
+  // Derived options from syllabusData based on availability
+  const sectionOptions = useMemo(() => {
+    return syllabusData.filter(sec => availableSections.has(sec.sectionId));
+  }, [availableSections]);
 
-  // Reset chapter selection if subject changes
-  useEffect(() => {
-    setSelectedTestId('');
-  }, [selectedSubject]);
+  const subjectOptions = useMemo(() => {
+    if (!selectedSection) return [];
+    const sec = syllabusData.find(s => s.sectionId === selectedSection);
+    if (!sec) return [];
+    return sec.subjects.filter(sub => availableSubjects.has(sub.subjectId));
+  }, [selectedSection, availableSubjects]);
+
+  const chapterOptions = useMemo(() => {
+    if (!selectedSubject) return [];
+    const sec = syllabusData.find(s => s.sectionId === selectedSection);
+    const sub = sec?.subjects.find(s => s.subjectId === selectedSubject);
+    if (!sub) return [];
+    return sub.chapters.filter(ch => availableChapters.has(ch.chapterId));
+  }, [selectedSection, selectedSubject, availableChapters]);
+
+  // Reset cascade
+  useEffect(() => { setSelectedSubject(''); setSelectedChapter(''); }, [selectedSection]);
+  useEffect(() => { setSelectedChapter(''); }, [selectedSubject]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!selectedSubject) {
-      setErrorMsg('Please select a subject first.');
-      return;
-    }
-    if (!selectedTestId) {
-      setErrorMsg('Please select a chapter/test.');
+    if (!selectedChapter) {
+      setErrorMsg('Please select a chapter.');
       return;
     }
     
-    const test = tests.find(t => t.id === selectedTestId);
-    if (!test) return;
-
-    // Randomly select questions up to totalQuestions
-    let availableQuestions = test.questions.filter(q => !q.isDeleted);
-    // Shuffle
-    for (let i = availableQuestions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [availableQuestions[i], availableQuestions[j]] = [availableQuestions[j], availableQuestions[i]];
+    const matchingTests = tests.filter(t => (t.chapterId || t.id) === selectedChapter);
+    if (matchingTests.length === 0) {
+       setErrorMsg('No tests found for this chapter.');
+       return;
     }
-    const selectedQuestions = availableQuestions.slice(0, totalQuestions);
 
-    if (selectedQuestions.length === 0) {
-      setErrorMsg('No questions available in this chapter. Please select a different one.');
+    let allQuestions = matchingTests.flatMap(t => t.questions || []).filter(q => !q.isDeleted);
+    
+    if (allQuestions.length === 0) {
+      setErrorMsg('No valid questions available in this chapter.');
       return;
     }
 
+    let targetDifficultyStr = 'Medium';
+    if (quizDifficulty === 'easy') targetDifficultyStr = 'Easy';
+    if (quizDifficulty === 'hard') targetDifficultyStr = 'Hard';
+    if (quizDifficulty === 'difficult') targetDifficultyStr = 'Super Hard';
+
+    let diffQuestions = allQuestions.filter(q => (q.difficulty || 'Medium') === targetDifficultyStr);
+    
+    if (diffQuestions.length < totalQuestions) {
+      diffQuestions = [...allQuestions];
+    }
+
+    for (let i = diffQuestions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [diffQuestions[i], diffQuestions[j]] = [diffQuestions[j], diffQuestions[i]];
+    }
+
+    const selectedQuestions = diffQuestions.slice(0, totalQuestions);
+    const testTitle = chapterOptions.find(c => c.chapterId === selectedChapter)?.chapterName || 'Custom Quiz';
+
     onStart({
       quizId: Date.now().toString(),
-      testId: test.id,
-      chapterId: test.chapterId,
-      chapterTitle: test.title,
+      testId: matchingTests[0].id,
+      chapterId: selectedChapter,
+      chapterTitle: testTitle,
       subject: selectedSubject,
       questions: selectedQuestions,
       quizMode,
@@ -102,7 +139,6 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
 
         <form onSubmit={handleSubmit} style={styles.form}>
           
-          {/* 1. Assign Co-Hosts */}
           <div style={styles.field}>
             <label style={styles.label}>
               <Shield size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
@@ -115,85 +151,74 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
                     type="checkbox"
                     checked={selectedCoHosts.includes(m.phone)}
                     onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedCoHosts([...selectedCoHosts, m.phone]);
-                      } else {
-                        setSelectedCoHosts(selectedCoHosts.filter(p => p !== m.phone));
-                      }
+                      if (e.target.checked) setSelectedCoHosts([...selectedCoHosts, m.phone]);
+                      else setSelectedCoHosts(selectedCoHosts.filter(p => p !== m.phone));
                     }}
                   />
                   {m.name}
                 </label>
               ))}
-              {onlineMembers.length === 0 && (
-                <span style={styles.hint}>No other members online.</span>
-              )}
+              {onlineMembers.length === 0 && <span style={styles.hint}>No other members online.</span>}
             </div>
-            <span style={styles.hint}>Co-hosts will take over if you disconnect.</span>
           </div>
 
-          {/* 2a. Select Subject */}
           <div style={styles.field}>
             <label style={styles.label}>
-              <BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-              Subject
+              <Layers size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+              Section
             </label>
-            <select 
-              style={styles.select} 
-              value={selectedSubject} 
-              onChange={e => setSelectedSubject(e.target.value)}
-              required
-            >
-              <option value="">-- Select Subject --</option>
-              {subjects.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
+            <select style={styles.select} value={selectedSection} onChange={e => setSelectedSection(e.target.value)} required>
+              <option value="">-- Select Section --</option>
+              {sectionOptions.map(s => <option key={s.sectionId} value={s.sectionId}>{s.sectionName}</option>)}
             </select>
           </div>
 
-          {/* 2b. Select Chapter */}
-          <div style={styles.field}>
-            <label style={styles.label}>
-              <Hash size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-              Chapter
-            </label>
-            <select 
-              style={styles.select} 
-              value={selectedTestId} 
-              onChange={e => {
-                setSelectedTestId(e.target.value);
-                setErrorMsg('');
-              }}
-              required
-              disabled={!selectedSubject}
-            >
-              <option value="">-- Select Chapter --</option>
-              {filteredTests.map(t => (
-                <option key={t.id} value={t.id}>{t.title}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            {/* 3. Total Questions */}
-            <div style={{ ...styles.field, flex: 1 }}>
-              <label style={styles.label}>Total Questions</label>
-              <input 
-                type="number" 
-                style={styles.input} 
-                min="1" max="50" 
-                value={totalQuestions} 
-                onChange={e => setTotalQuestions(Number(e.target.value))} 
-              />
-            </div>
-
-            {/* 4. Time Per Question */}
-            <div style={{ ...styles.field, flex: 1 }}>
+          {selectedSection && (
+            <div style={styles.field}>
               <label style={styles.label}>
-                <Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                Time Limit
+                <BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                Subject
               </label>
+              <select style={styles.select} value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} required>
+                <option value="">-- Select Subject --</option>
+                {subjectOptions.map(s => <option key={s.subjectId} value={s.subjectId}>{s.subjectName}</option>)}
+              </select>
+            </div>
+          )}
+
+          {selectedSubject && (
+            <div style={styles.field}>
+              <label style={styles.label}>
+                <Hash size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                Chapter
+              </label>
+              <select style={styles.select} value={selectedChapter} onChange={e => { setSelectedChapter(e.target.value); setErrorMsg(''); }} required>
+                <option value="">-- Select Chapter --</option>
+                {chapterOptions.map(c => <option key={c.chapterId} value={c.chapterId}>{c.chapterName}</option>)}
+              </select>
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+            <div style={styles.field}>
+              <label style={styles.label}><Star size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Difficulty</label>
+              <select style={styles.select} value={quizDifficulty} onChange={e => setQuizDifficulty(e.target.value)}>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="difficult">Super Hard</option>
+              </select>
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label}>Total Qs</label>
+              <input type="number" style={styles.input} min="1" max="50" value={totalQuestions} onChange={e => setTotalQuestions(Number(e.target.value))} />
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label}><Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Time Limit</label>
               <select style={styles.select} value={timePerQuestion} onChange={e => setTimePerQuestion(Number(e.target.value))}>
+                <option value={15}>15 Seconds</option>
                 <option value={30}>30 Seconds</option>
                 <option value={60}>60 Seconds</option>
                 <option value={90}>90 Seconds</option>
@@ -202,34 +227,17 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
             </div>
           </div>
 
-          {/* 5. Mode */}
           <div style={styles.field}>
             <label style={styles.label}>
               <Users size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
               Quiz Mode
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => setQuizMode('all')}
-                style={{
-                  ...styles.modeBtn,
-                  ...(quizMode === 'all' ? styles.modeBtnActive : {})
-                }}
-              >
-                All Players
-                <span style={styles.modeDesc}>Everyone can answer.</span>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => setQuizMode('all')} style={{ ...styles.modeBtn, ...(quizMode === 'all' ? styles.modeBtnActive : {}) }}>
+                All Players <span style={styles.modeDesc}>Everyone can answer.</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setQuizMode('fastest')}
-                style={{
-                  ...styles.modeBtn,
-                  ...(quizMode === 'fastest' ? styles.modeBtnActive : {})
-                }}
-              >
-                Fastest Finger First
-                <span style={styles.modeDesc}>Only the first to answer locks it.</span>
+              <button type="button" onClick={() => setQuizMode('fastest')} style={{ ...styles.modeBtn, ...(quizMode === 'fastest' ? styles.modeBtnActive : {}) }}>
+                Fastest Finger First <span style={styles.modeDesc}>Only first answer locks.</span>
               </button>
             </div>
           </div>
@@ -260,10 +268,12 @@ const styles = {
     background: 'var(--surface)', border: '1px solid var(--border)',
     borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 520,
     boxShadow: '0 24px 60px rgba(0,0,0,0.5)', overflow: 'hidden',
+    display: 'flex', flexDirection: 'column', maxHeight: '90vh'
   },
   header: {
     display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
     padding: '1.25rem 1.5rem 1rem', borderBottom: '1px solid var(--border)',
+    flexShrink: 0
   },
   headerIcon: {
     flexShrink: 0, width: 40, height: 40, borderRadius: 'var(--radius-sm)',
@@ -282,7 +292,8 @@ const styles = {
     cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem',
   },
   form: {
-    padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
+    padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem',
+    overflowY: 'auto', flex: 1
   },
   field: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
   label: { fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' },
@@ -290,16 +301,17 @@ const styles = {
     background: 'var(--surface-hover)', border: '1px solid var(--border)',
     borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)',
     padding: '0.55rem 0.85rem', fontSize: '0.9rem', fontFamily: 'inherit', outline: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer', minWidth: 0
   },
   input: {
     background: 'var(--surface-hover)', border: '1px solid var(--border)',
     borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)',
     padding: '0.55rem 0.85rem', fontSize: '0.9rem', fontFamily: 'inherit', outline: 'none',
+    minWidth: 0
   },
   hint: { fontSize: '0.75rem', color: 'var(--text-muted)' },
   modeBtn: {
-    flex: 1, background: 'var(--surface-hover)', border: '1px solid var(--border)',
+    flex: 1, minWidth: '160px', background: 'var(--surface-hover)', border: '1px solid var(--border)',
     borderRadius: 'var(--radius-sm)', padding: '0.75rem', color: 'var(--text-primary)',
     cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem',
     textAlign: 'center', transition: 'all 0.2s'
@@ -309,34 +321,19 @@ const styles = {
   },
   modeDesc: { fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 },
   checkboxGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.4rem',
-    background: 'var(--surface-hover)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '0.55rem 0.85rem',
-    maxHeight: '120px',
-    overflowY: 'auto'
+    display: 'flex', flexDirection: 'column', gap: '0.4rem',
+    background: 'var(--surface-hover)', border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.85rem',
+    maxHeight: '120px', overflowY: 'auto'
   },
   checkboxLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '0.85rem',
-    color: 'var(--text-primary)',
-    cursor: 'pointer'
+    display: 'flex', alignItems: 'center', gap: '0.5rem',
+    fontSize: '0.85rem', color: 'var(--text-primary)', cursor: 'pointer'
   },
   errorBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    background: 'rgba(239, 68, 68, 0.1)',
-    border: '1px solid rgba(239, 68, 68, 0.2)',
-    color: '#ef4444',
-    padding: '0.75rem',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: '0.85rem',
-    fontWeight: 500
+    display: 'flex', alignItems: 'center', gap: '0.5rem',
+    background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
+    color: '#ef4444', padding: '0.75rem', borderRadius: 'var(--radius-sm)',
+    fontSize: '0.85rem', fontWeight: 500
   }
 };
