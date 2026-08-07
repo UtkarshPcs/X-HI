@@ -43,6 +43,8 @@ const StarBatchSyllabusTrackingPage = lazy(() => import('./pages/StarBatchSyllab
 const StarBatchTestModulePage = lazy(() => import('./pages/StarBatchTestModulePage'));
 const StarBatchTestPlayerPage = lazy(() => import('./pages/StarBatchTestPlayerPage'));
 const StarBatchSubjectiveTestPlayerPage = lazy(() => import('./pages/StarBatchSubjectiveTestPlayerPage'));
+const StarBatchMixedTestModulePage = lazy(() => import('./pages/StarBatchMixedTestModulePage'));
+const StarBatchMixedSubjectiveTestPlayerPage = lazy(() => import('./pages/StarBatchMixedSubjectiveTestPlayerPage'));
 const HistoricalTestAnalysisPage = lazy(() => import('./pages/HistoricalTestAnalysisPage'));
 const StarBatchConceptsHub = lazy(() => import('./pages/StarBatchConceptsHub'));
 const StarConceptChapterPage = lazy(() => import('./pages/StarConceptChapterPage'));
@@ -84,7 +86,7 @@ function AppInner() {
   // Star Batch is an internal-only feature now (no separate external role/
   // login). Still suppress the normal app-wide popups while viewing the
   // Star Batch portal/syllabus pages, since those are a focused sub-area.
-  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests');
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-mixed-tests') || pathname.startsWith('/star-mixed-subjective-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -155,6 +157,8 @@ function AppInner() {
               <Route path="/star-tests" element={<StarBatchTestModulePage />} />
               <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />
               <Route path="/star-subjective-tests/:testId" element={<StarBatchSubjectiveTestPlayerPage />} />
+              <Route path="/star-mixed-tests" element={<StarBatchMixedTestModulePage />} />
+              <Route path="/star-mixed-subjective-tests" element={<StarBatchMixedSubjectiveTestPlayerPage />} />
               <Route path="/star-tests/history/:attemptId" element={<HistoricalTestAnalysisPage />} />
               <Route path="/star-concepts" element={<StarBatchConceptsHub />} />
               <Route path="/star-concepts/:chapterId" element={<StarConceptChapterPage />} />

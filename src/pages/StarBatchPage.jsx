@@ -300,6 +300,20 @@ export default function StarBatchPage() {
 
         <div
           className="as-card star-quick-link"
+          onClick={() => navigate('/star-mixed-tests')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <Sparkles size={20} color="#fbbf24" /> Mixed Subjective Tests
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>Generate 40/80 mark subjective tests by selecting multiple chapters at once.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+        </div>
+
+        <div
+          className="as-card star-quick-link"
           onClick={() => navigate('/star-concepts')}
           style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
         >
