@@ -3,14 +3,21 @@
  * Main collaborative study room interface.
  *
  * Desktop layout:  [Video (left, ~65%)] [Chat + Members sidebar (right, ~35%)]
- * Mobile layout:   [Video] [Members collapsible] [Chat]
+ * Mobile layouts:
+ *   - YouTube mode:  Split view — video on top, collapsible chat+members below
+ *   - Quiz mode:     Full-screen tab switching — Quiz view OR Chat/Members view
+ *   - Chat-only:     Full chat with members tab
  *
  * Route: /study-together/:roomId
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Users, MessageSquare, ChevronDown, ChevronUp, AlertTriangle, RefreshCw } from 'lucide-react';
+import {
+  Users, MessageSquare, ChevronDown, ChevronUp,
+  AlertTriangle, RefreshCw, Minimize2, Maximize2,
+  Monitor, Play, Lock,
+} from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { useStudyRoom } from '../hooks/useStudyRoom';
 import { useRoomChat } from '../hooks/useRoomChat';
@@ -24,40 +31,108 @@ import LiveQuizPlayer from '../components/study/LiveQuizPlayer';
 import QuizSetupModal from '../components/study/QuizSetupModal';
 import { startQuiz } from '../services/studyRoomService';
 
-// ── Mobile tab bar ───────────────────────────────────────────────────────────
-function MobileTabBar({ activeTab, onTabChange, memberCount, unread }) {
+// ── Mobile: Chat / Members sub-tab bar (used inside the chat panel) ─────────
+function MobileChatMembersTabs({ activeTab, onTabChange, memberCount, unread }) {
   return (
-    <div style={mobileTabStyles.root} role="tablist">
+    <div style={mobileSubTabStyles.root} role="tablist">
       <button
         role="tab"
         aria-selected={activeTab === 'chat'}
-        style={{ ...mobileTabStyles.tab, ...(activeTab === 'chat' ? mobileTabStyles.activeTab : {}) }}
+        style={{ ...mobileSubTabStyles.tab, ...(activeTab === 'chat' ? mobileSubTabStyles.activeTab : {}) }}
         onClick={() => onTabChange('chat')}
       >
-        <MessageSquare size={16} />
+        <MessageSquare size={14} />
         Chat
         {unread > 0 && activeTab !== 'chat' && (
-          <span style={mobileTabStyles.badge}>{unread > 9 ? '9+' : unread}</span>
+          <span style={mobileSubTabStyles.badge}>{unread > 9 ? '9+' : unread}</span>
         )}
       </button>
       <button
         role="tab"
         aria-selected={activeTab === 'members'}
-        style={{ ...mobileTabStyles.tab, ...(activeTab === 'members' ? mobileTabStyles.activeTab : {}) }}
+        style={{ ...mobileSubTabStyles.tab, ...(activeTab === 'members' ? mobileSubTabStyles.activeTab : {}) }}
         onClick={() => onTabChange('members')}
       >
-        <Users size={16} />
+        <Users size={14} />
         Members ({memberCount})
       </button>
     </div>
   );
 }
 
-const mobileTabStyles = {
+const mobileSubTabStyles = {
   root: {
     display: 'flex',
-    borderBottom: '1px solid var(--border)',
     background: 'var(--surface)',
+    borderBottom: '1px solid var(--border)',
+    flexShrink: 0,
+  },
+  tab: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.35rem',
+    padding: '0.5rem',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: 'var(--text-muted)',
+    fontSize: '0.8rem',
+    fontWeight: 500,
+    fontFamily: 'inherit',
+    transition: 'color 0.15s',
+  },
+  activeTab: {
+    color: 'var(--primary)',
+    borderBottom: '2px solid var(--primary)',
+  },
+  badge: {
+    background: 'var(--primary)',
+    color: '#fff',
+    fontSize: '0.6rem',
+    fontWeight: 700,
+    borderRadius: 999,
+    padding: '0 0.3rem',
+    lineHeight: '1.4',
+  },
+};
+
+// ── Mobile: Quiz mode top-level tab bar (Quiz vs Chat) ──────────────────────
+function MobileQuizTabBar({ activeView, onViewChange, unread }) {
+  return (
+    <div style={quizTabStyles.root} role="tablist">
+      <button
+        role="tab"
+        aria-selected={activeView === 'quiz'}
+        style={{ ...quizTabStyles.tab, ...(activeView === 'quiz' ? quizTabStyles.activeTab : {}) }}
+        onClick={() => onViewChange('quiz')}
+      >
+        <Monitor size={16} />
+        Quiz
+      </button>
+      <button
+        role="tab"
+        aria-selected={activeView === 'chat'}
+        style={{ ...quizTabStyles.tab, ...(activeView === 'chat' ? quizTabStyles.activeTab : {}) }}
+        onClick={() => onViewChange('chat')}
+      >
+        <MessageSquare size={16} />
+        Chat
+        {unread > 0 && activeView !== 'chat' && (
+          <span style={quizTabStyles.badge}>{unread > 9 ? '9+' : unread}</span>
+        )}
+      </button>
+    </div>
+  );
+}
+
+const quizTabStyles = {
+  root: {
+    display: 'flex',
+    background: 'var(--surface)',
+    borderBottom: '1px solid var(--border)',
+    flexShrink: 0,
   },
   tab: {
     flex: 1,
@@ -65,20 +140,20 @@ const mobileTabStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.4rem',
-    padding: '0.65rem',
+    padding: '0.7rem',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     color: 'var(--text-muted)',
-    fontSize: '0.85rem',
-    fontWeight: 500,
+    fontSize: '0.88rem',
+    fontWeight: 600,
     fontFamily: 'inherit',
-    position: 'relative',
-    transition: 'color 0.15s',
+    transition: 'color 0.15s, background 0.15s',
   },
   activeTab: {
     color: 'var(--primary)',
-    borderBottom: '2px solid var(--primary)',
+    background: 'rgba(139,92,246,0.06)',
+    borderBottom: '2.5px solid var(--primary)',
   },
   badge: {
     background: 'var(--primary)',
@@ -194,7 +269,7 @@ export default function StudyRoomPage() {
   const { currentUser, openModal }    = useAuth();
 
   // Core state from hooks
-  const { room, loading, error, isOwner, changeVideo, toggleLock, kickMember, closeRoom } =
+  const { room, loading, error, isOwner, isPrivileged, changeVideo, toggleLock, kickMember, closeRoom, promoteCoHost, demoteCoHost } =
     useStudyRoom(roomId, currentUser?.phone);
 
   useEffect(() => {
@@ -212,30 +287,36 @@ export default function StudyRoomPage() {
   const quizProps = useLiveQuiz(roomId, room, currentUser, members);
 
   // Mobile UI state
-  const [mobileTab,   setMobileTab]   = useState('chat');
+  const [mobileChatTab, setMobileChatTab] = useState('chat');   // 'chat' | 'members' (sub-tab inside chat panel)
+  const [mobileQuizView, setMobileQuizView] = useState('quiz'); // 'quiz' | 'chat' (top-level for quiz mode)
+  const [chatCollapsed, setChatCollapsed] = useState(false);    // YouTube mode: collapse chat panel
   const [unreadCount, setUnreadCount] = useState(0);
   const prevMsgCount                  = useState(0);
   const [showQuizSetup, setShowQuizSetup] = useState(false);
 
   // Track unread messages on mobile when chat tab isn't active
   const handleStartQuizClick = useCallback(() => {
-    if (room?.mode === 'quiz') {
-      const confirmNew = window.confirm("A quiz is already running. Are you sure you want to abandon it and start a new one?");
-      if (!confirmNew) return;
-    }
     setShowQuizSetup(true);
-  }, [room?.mode]);
+  }, []);
+
+  // Unread tracking — counts new messages when the user isn't looking at chat
+  const isChatVisible = room?.mode === 'quiz' ? mobileQuizView === 'chat' : mobileChatTab === 'chat';
 
   useEffect(() => {
-    if (mobileTab !== 'chat' && messages.length > prevMsgCount[0]) {
+    if (!isChatVisible && messages.length > prevMsgCount[0]) {
       setUnreadCount(c => c + (messages.length - prevMsgCount[0]));
     }
     prevMsgCount[0] = messages.length;
-  }, [messages.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [messages.length, isChatVisible]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleTabChange(tab) {
-    setMobileTab(tab);
+  function handleChatTabChange(tab) {
+    setMobileChatTab(tab);
     if (tab === 'chat') setUnreadCount(0);
+  }
+
+  function handleQuizViewChange(view) {
+    setMobileQuizView(view);
+    if (view === 'chat') setUnreadCount(0);
   }
 
   // Detect if current user was kicked (their presence doc deleted by owner)
@@ -306,21 +387,149 @@ export default function StudyRoomPage() {
 
   const showEnded = wasKicked || (!room.isActive);
 
-  const renderMainContent = () => {
-    if (room.mode === 'quiz') {
-      return <LiveQuizPlayer {...quizProps} currentUser={currentUser} />;
-    }
-    if (room.mode === 'video' || room.videoId) {
-      return <YouTubePlayer videoId={room.videoId} title={room.name} />;
-    }
+  const isAdmin = currentUser.role === 'ADMIN' || currentUser.activeRole === 'ADMIN';
+  const isRoomOwner = room.ownerPhone === currentUser.phone;
+  const isRoomCoHost = (room.coHostPhones || []).includes(currentUser.phone);
+  const isLockedOut = room.isLocked && !isRoomOwner && !isRoomCoHost && !isAdmin;
+
+  if (isLockedOut) {
     return (
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-        <MessageSquare size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-        <h3>Chat Room Active</h3>
-        <p>No video or quiz is currently playing.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1rem', padding: '2rem', textAlign: 'center' }}>
+        <Lock size={32} color="#f59e0b" />
+        <h2 style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>Room is Locked</h2>
+        <p style={{ color: 'var(--text-muted)' }}>The host has locked this room. New members cannot join right now.</p>
+        <button className="auth-btn primary" onClick={() => navigate('/study-together')}>Back to Study Together</button>
       </div>
     );
-  };
+  }
+  const isQuizMode = room.mode === 'quiz';
+  const isVideoMode = room.mode === 'video' || room.videoId;
+
+  // ── Shared chat + members panel (reused across mobile layouts) ─────────────
+  const renderChatMembersPanel = () => (
+    <>
+      <MobileChatMembersTabs
+        activeTab={mobileChatTab}
+        onTabChange={handleChatTabChange}
+        memberCount={memberCount}
+        unread={unreadCount}
+      />
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {mobileChatTab === 'members' ? (
+          <div style={{ padding: '0.75rem', overflowY: 'auto', flex: 1 }}>
+            <MembersList
+              members={members}
+              ownerPhone={room.ownerPhone}
+              currentUserPhone={currentUser.phone}
+              isOwner={isOwner}
+              isPrivileged={isPrivileged}
+              coHostPhones={room.coHostPhones || []}
+              onKick={kickMember}
+              onPromote={promoteCoHost}
+              onDemote={demoteCoHost}
+            />
+          </div>
+        ) : (
+          <RoomChat
+            messages={messages}
+            sending={sending}
+            onSend={send}
+            currentUserPhone={currentUser.phone}
+            disabled={!currentUser}
+          />
+        )}
+      </div>
+    </>
+  );
+
+  // ── Mobile: YouTube split-view layout ──────────────────────────────────────
+  const renderMobileVideoLayout = () => (
+    <>
+      {/* Video section — expands when chat is collapsed */}
+      <div style={{
+        flex: chatCollapsed ? 1 : '0 0 auto',
+        overflowY: 'auto',
+        padding: '0.5rem',
+        background: 'var(--background)',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'flex 0.3s ease',
+      }}>
+        <YouTubePlayer videoId={room.videoId} title={room.name} />
+      </div>
+
+      {/* Drag handle / collapse toggle */}
+      <button
+        onClick={() => setChatCollapsed(c => !c)}
+        style={mobileSplitStyles.handle}
+        aria-label={chatCollapsed ? 'Expand chat' : 'Minimize chat'}
+      >
+        <div style={mobileSplitStyles.handleBar} />
+        <span style={mobileSplitStyles.handleLabel}>
+          {chatCollapsed ? <><Maximize2 size={13} /> Show Chat</> : <><Minimize2 size={13} /> Hide Chat</>}
+        </span>
+        <div style={mobileSplitStyles.handleBar} />
+      </button>
+
+      {/* Chat panel — collapses to zero height */}
+      <div style={{
+        flex: chatCollapsed ? '0 0 0px' : 1,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'flex 0.3s ease',
+        borderTop: chatCollapsed ? 'none' : '1px solid var(--border)',
+      }}>
+        {!chatCollapsed && renderChatMembersPanel()}
+      </div>
+    </>
+  );
+
+  // ── Mobile: Quiz tab-switch layout ─────────────────────────────────────────
+  const renderMobileQuizLayout = () => (
+    <>
+      {/* Top-level tab bar: Quiz vs Chat */}
+      <MobileQuizTabBar
+        activeView={mobileQuizView}
+        onViewChange={handleQuizViewChange}
+        unread={unreadCount}
+      />
+
+      {/* Full-screen panel for the active tab */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {mobileQuizView === 'quiz' ? (
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+            <LiveQuizPlayer {...quizProps} currentUser={currentUser} />
+          </div>
+        ) : (
+          renderChatMembersPanel()
+        )}
+      </div>
+    </>
+  );
+
+  // ── Mobile: Chat-only layout (no video or quiz active) ─────────────────────
+  const renderMobileChatOnlyLayout = () => (
+    <>
+      {/* Empty state hint */}
+      <div style={{
+        padding: '1.5rem 1rem',
+        textAlign: 'center',
+        color: 'var(--text-muted)',
+        background: 'var(--surface)',
+        borderBottom: '1px solid var(--border)',
+        flexShrink: 0,
+      }}>
+        <MessageSquare size={28} style={{ opacity: 0.25, marginBottom: '0.35rem' }} />
+        <p style={{ margin: 0, fontSize: '0.85rem' }}>No video or quiz is playing right now.</p>
+      </div>
+
+      {/* Chat + members fills the rest */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {renderChatMembersPanel()}
+      </div>
+    </>
+  );
 
   return (
     <div style={pageStyles.root} className="animate-fade-in study-room-page">
@@ -332,12 +541,12 @@ export default function StudyRoomPage() {
         />
       )}
 
-      {showQuizSetup && isOwner && (
+      {showQuizSetup && isPrivileged && (
         <QuizSetupModal 
           onClose={() => setShowQuizSetup(false)} 
           onStart={handleStartQuiz} 
           onlineMembers={members}
-          currentCoHost={room.coHostPhone}
+          currentCoHosts={room.coHostPhones || []}
         />
       )}
 
@@ -346,19 +555,31 @@ export default function StudyRoomPage() {
         room={room}
         memberCount={memberCount}
         isOwner={isOwner}
+        isPrivileged={isPrivileged}
         onChangeVideo={changeVideo}
         onToggleLock={toggleLock}
         onEndRoom={handleEndRoom}
         onBack={handleLeave}
-        onStartQuiz={isOwner ? handleStartQuizClick : undefined}
+        onStartQuiz={isPrivileged ? handleStartQuizClick : undefined}
       />
 
-      {/* ── Desktop layout ─────────────────────────────────────────────── */}
+      {/* ── Desktop layout (unchanged) ─────────────────────────────────── */}
       <div style={pageStyles.desktopLayout} className="study-desktop-layout">
 
         {/* Video / Quiz column */}
         <div style={pageStyles.videoCol}>
-          {renderMainContent()}
+          {isQuizMode
+            ? <LiveQuizPlayer {...quizProps} currentUser={currentUser} />
+            : isVideoMode
+              ? <YouTubePlayer videoId={room.videoId} title={room.name} />
+              : (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                  <MessageSquare size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                  <h3>Chat Room Active</h3>
+                  <p>No video or quiz is currently playing.</p>
+                </div>
+              )
+          }
         </div>
 
         {/* Sidebar column */}
@@ -375,7 +596,11 @@ export default function StudyRoomPage() {
               ownerPhone={room.ownerPhone}
               currentUserPhone={currentUser.phone}
               isOwner={isOwner}
+              isPrivileged={isPrivileged}
+              coHostPhones={room.coHostPhones || []}
               onKick={kickMember}
+              onPromote={promoteCoHost}
+              onDemote={demoteCoHost}
             />
           </SidebarSection>
 
@@ -400,46 +625,52 @@ export default function StudyRoomPage() {
 
       {/* ── Mobile layout ──────────────────────────────────────────────── */}
       <div style={pageStyles.mobileLayout} className="study-mobile-layout">
-        {/* Main Content always on top */}
-        <div style={{ ...pageStyles.mobileVideo, flex: room.mode === 'quiz' ? '0 0 60%' : 'none', overflowY: 'auto' }}>
-          {renderMainContent()}
-        </div>
-
-        {/* Tab bar */}
-        <MobileTabBar
-          activeTab={mobileTab}
-          onTabChange={handleTabChange}
-          memberCount={memberCount}
-          unread={unreadCount}
-        />
-
-        {/* Tab content */}
-        <div style={pageStyles.mobileContent}>
-          {mobileTab === 'members' && (
-            <div style={{ padding: '0.75rem' }}>
-              <MembersList
-                members={members}
-                ownerPhone={room.ownerPhone}
-                currentUserPhone={currentUser.phone}
-                isOwner={isOwner}
-                onKick={kickMember}
-              />
-            </div>
-          )}
-          {mobileTab === 'chat' && (
-            <RoomChat
-              messages={messages}
-              sending={sending}
-              onSend={send}
-              currentUserPhone={currentUser.phone}
-              disabled={!currentUser}
-            />
-          )}
-        </div>
+        {isQuizMode
+          ? renderMobileQuizLayout()
+          : isVideoMode
+            ? renderMobileVideoLayout()
+            : renderMobileChatOnlyLayout()
+        }
       </div>
     </div>
   );
 }
+
+// ── Split-view handle styles (YouTube mobile) ───────────────────────────────
+const mobileSplitStyles = {
+  handle: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    padding: '0.45rem 0.75rem',
+    background: 'var(--surface)',
+    border: 'none',
+    borderTop: '1px solid var(--border)',
+    borderBottom: '1px solid var(--border)',
+    cursor: 'pointer',
+    flexShrink: 0,
+    fontFamily: 'inherit',
+    color: 'var(--text-muted)',
+    transition: 'background 0.15s',
+  },
+  handleBar: {
+    flex: 1,
+    height: 1,
+    background: 'var(--border)',
+  },
+  handleLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.3rem',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+    color: 'var(--text-secondary)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+  },
+};
 
 // ── Responsive styles via inline media-query simulation ─────────────────────
 // .study-desktop-layout is shown by default; CSS hides it and shows .study-mobile-layout
@@ -486,16 +717,5 @@ const pageStyles = {
     flexDirection: 'column',
     flex: 1,
     overflow: 'hidden',
-  },
-  mobileVideo: {
-    padding: '0.75rem',
-    background: 'var(--background)',
-    borderBottom: '1px solid var(--border)',
-  },
-  mobileContent: {
-    flex: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
   },
 };

@@ -5,7 +5,7 @@
  */
 
 import { memo, useCallback } from 'react';
-import { UserX, Crown } from 'lucide-react';
+import { UserX, Crown, Shield } from 'lucide-react';
 
 function getInitials(name) {
   if (!name) return '?';
@@ -30,10 +30,14 @@ function avatarColour(phone) {
  *   ownerPhone: string,
  *   currentUserPhone: string,
  *   isOwner: boolean,
+ *   isPrivileged: boolean,
+ *   coHostPhones: string[],
  *   onKick: (phone: string) => void,
+ *   onPromote: (phone: string) => void,
+ *   onDemote: (phone: string) => void,
  * }} props
  */
-const MembersList = memo(function MembersList({ members, ownerPhone, currentUserPhone, isOwner, onKick }) {
+const MembersList = memo(function MembersList({ members, ownerPhone, currentUserPhone, isOwner, isPrivileged, coHostPhones = [], onKick, onPromote, onDemote }) {
   const handleKick = useCallback((phone) => {
     if (window.confirm('Remove this member from the room?')) {
       onKick(phone);
@@ -53,6 +57,7 @@ const MembersList = memo(function MembersList({ members, ownerPhone, currentUser
       {members.map((m) => {
         const isThisOwner = m.phone === ownerPhone;
         const isMe        = m.phone === currentUserPhone;
+        const isCoHost    = coHostPhones.includes(m.phone);
 
         return (
           <li key={m.phone} style={styles.item}>
@@ -79,22 +84,52 @@ const MembersList = memo(function MembersList({ members, ownerPhone, currentUser
                   Host
                 </span>
               )}
+              {isCoHost && !isThisOwner && (
+                <span style={styles.coHostBadge}>
+                  <Shield size={10} style={{ marginRight: 3 }} />
+                  Co-Host
+                </span>
+              )}
             </span>
 
             {/* Online dot */}
             <span style={styles.onlineDot} title="Online" aria-label="online" />
+            
+            {/* Action buttons wrapper */}
+            <div style={styles.actionsWrap}>
+              {/* Promote/Demote button (owner only) */}
+              {isOwner && !isMe && !isThisOwner && (
+                isCoHost ? (
+                  <button
+                    style={styles.textBtn}
+                    onClick={() => onDemote && onDemote(m.phone)}
+                    title={`Remove Co-Host status from ${m.name}`}
+                  >
+                    Remove Co-Host
+                  </button>
+                ) : (
+                  <button
+                    style={styles.textBtn}
+                    onClick={() => onPromote && onPromote(m.phone)}
+                    title={`Make ${m.name} a Co-Host`}
+                  >
+                    Make Co-Host
+                  </button>
+                )
+              )}
 
-            {/* Remove button (owner only, can't kick self or other owner) */}
-            {isOwner && !isMe && !isThisOwner && (
-              <button
-                style={styles.kickBtn}
-                onClick={() => handleKick(m.phone)}
-                title={`Remove ${m.name}`}
-                aria-label={`Remove ${m.name}`}
-              >
-                <UserX size={14} />
-              </button>
-            )}
+              {/* Remove button (privileged only, can't kick self or owner) */}
+              {isPrivileged && !isMe && !isThisOwner && (
+                <button
+                  style={styles.kickBtn}
+                  onClick={() => handleKick(m.phone)}
+                  title={`Remove ${m.name}`}
+                  aria-label={`Remove ${m.name}`}
+                >
+                  <UserX size={14} />
+                </button>
+              )}
+            </div>
           </li>
         );
       })}
@@ -164,6 +199,13 @@ const styles = {
     color: '#f59e0b',
     fontWeight: 600,
   },
+  coHostBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '0.65rem',
+    color: '#8b5cf6', // purple
+    fontWeight: 600,
+  },
   onlineDot: {
     flexShrink: 0,
     width: 7,
@@ -183,6 +225,21 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     transition: 'color 0.15s',
+  },
+  actionsWrap: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+  },
+  textBtn: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: 'var(--primary)',
+    fontSize: '0.7rem',
+    padding: '0.2rem 0.4rem',
+    borderRadius: 'var(--radius-sm)',
+    transition: 'background 0.15s',
   },
   empty: {
     display: 'flex',

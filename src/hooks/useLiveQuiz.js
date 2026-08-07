@@ -6,24 +6,25 @@ import { updateQuizState, answerQuizQuestion, submitQuizScore, subscribeToQuizAn
  * Handles quiz state synchronization, decentralized auto-timer, and scoring.
  * 
  * @param {string} roomId 
- * @param {object} room - The room document (contains room.quizState, room.coHostPhone, room.ownerPhone)
+ * @param {object} room - The room document (contains room.quizState, room.coHostPhones, room.ownerPhone)
  * @param {object} currentUser - Current user { phone, name }
  * @param {Array} onlineMembers - Active members from useRoomPresence
  */
 export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
   const quizState = room?.quizState || null;
   const isOwner = currentUser?.phone === room?.ownerPhone;
-  const isCoHost = currentUser?.phone === room?.coHostPhone;
+  const coHostPhones = room?.coHostPhones || [];
+  const isCoHost = coHostPhones.includes(currentUser?.phone);
 
   // Fault tolerance: Check if actual Admin and Co-Host are online
   const isAdminOnline = onlineMembers.some(m => m.phone === room?.ownerPhone);
-  const isCoHostOnline = onlineMembers.some(m => m.phone === room?.coHostPhone);
+  const isAnyCoHostOnline = onlineMembers.some(m => coHostPhones.includes(m.phone));
 
   // You are acting Admin if you are the Owner, OR if you are Co-Host and Admin is offline
   const isActingAdmin = isOwner || (isCoHost && !isAdminOnline);
   
   // Auto-timer decentralized check: If both are offline, any active client can advance
-  const isDecentralizedFallback = !isAdminOnline && !isCoHostOnline;
+  const isDecentralizedFallback = !isAdminOnline && !isAnyCoHostOnline;
 
   const [answers, setAnswers] = useState([]);
   const [scores, setScores] = useState([]);
@@ -31,22 +32,23 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
 
   // Listen for answers
   const hasQuiz = Boolean(quizState);
+  const quizId = quizState?.quizId;
   useEffect(() => {
-    if (!roomId || !hasQuiz) return;
-    const unsub = subscribeToQuizAnswers(roomId, (data) => {
+    if (!roomId || !hasQuiz || !quizId) return;
+    const unsub = subscribeToQuizAnswers(roomId, quizId, (data) => {
       setAnswers(data);
     });
     return unsub;
-  }, [roomId, hasQuiz]);
+  }, [roomId, hasQuiz, quizId]);
 
   // Listen for scores
   useEffect(() => {
-    if (!roomId || !hasQuiz) return;
-    const unsub = subscribeToQuizScores(roomId, (data) => {
+    if (!roomId || !hasQuiz || !quizId) return;
+    const unsub = subscribeToQuizScores(roomId, quizId, (data) => {
       setScores(data);
     });
     return unsub;
-  }, [roomId, hasQuiz]);
+  }, [roomId, hasQuiz, quizId]);
 
   // Timer logic
   useEffect(() => {
@@ -81,14 +83,26 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
     return () => clearInterval(interval);
   }, [quizState, isActingAdmin, isDecentralizedFallback, roomId, room?.quizState?.status]);
 
+  // Fastest Finger First: auto-advance when someone clicks
+  useEffect(() => {
+    if (quizState?.status === 'active' && quizState?.quizMode === 'fastest') {
+      const currentAnswers = answers.filter(a => a.id === `q_${quizState.currentQuestionIndex}`);
+      if (currentAnswers.length > 0) {
+        if (isActingAdmin || isDecentralizedFallback) {
+          updateQuizState(roomId, { 'quizState.status': 'revealing' }).catch(() => {});
+        }
+      }
+    }
+  }, [answers, quizState?.status, quizState?.quizMode, quizState?.currentQuestionIndex, isActingAdmin, isDecentralizedFallback, roomId]);
+
   const submitAnswer = useCallback(async (qIndex, optionIndex) => {
-    if (!roomId || !currentUser) return;
+    if (!roomId || !currentUser || !quizState?.quizId) return;
     try {
-      await answerQuizQuestion(roomId, qIndex, currentUser.phone, optionIndex, quizState.quizMode);
+      await answerQuizQuestion(roomId, quizState.quizId, qIndex, currentUser.phone, optionIndex, quizState.quizMode);
     } catch (e) {
       console.log('Answer rejected:', e.message);
     }
-  }, [roomId, currentUser, quizState?.quizMode]);
+  }, [roomId, currentUser, quizState?.quizId, quizState?.quizMode]);
 
   const nextQuestion = useCallback(async () => {
     if (!roomId || !isActingAdmin || !quizState) return;
@@ -121,15 +135,15 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
   }, [roomId, isActingAdmin]);
 
   const updateMyScore = useCallback(async (correctCount, wrongCount, score, totalTime) => {
-    if (!roomId || !currentUser) return;
-    await submitQuizScore(roomId, currentUser.phone, {
+    if (!roomId || !currentUser || !quizState?.quizId) return;
+    await submitQuizScore(roomId, quizState.quizId, currentUser.phone, {
       name: currentUser.name,
       correctCount,
       wrongCount,
       score,
       totalTime
     });
-  }, [roomId, currentUser]);
+  }, [roomId, currentUser, quizState?.quizId]);
 
   return {
     quizState,

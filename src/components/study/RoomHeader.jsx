@@ -16,6 +16,7 @@ import { isValidYouTubeUrl } from '../../services/studyRoomService';
  *   room: object,
  *   memberCount: number,
  *   isOwner: boolean,
+ *   isPrivileged: boolean,
  *   onChangeVideo: (url: string) => void,
  *   onToggleLock: () => void,
  *   onEndRoom: () => void,
@@ -24,7 +25,7 @@ import { isValidYouTubeUrl } from '../../services/studyRoomService';
  * }} props
  */
 const RoomHeader = memo(function RoomHeader({
-  room, memberCount, isOwner,
+  room, memberCount, isOwner, isPrivileged,
   onChangeVideo, onToggleLock, onEndRoom, onBack, onStartQuiz
 }) {
   const [copied, setCopied]           = useState(false);
@@ -110,8 +111,8 @@ const RoomHeader = memo(function RoomHeader({
           <ExternalLink size={16} />
         </a>
 
-        {/* Owner: change video */}
-        {isOwner && (
+        {/* Privileged: change video */}
+        {isPrivileged && (
           <button
             style={{ ...styles.iconBtn, color: showVideoForm ? 'var(--primary)' : undefined }}
             onClick={() => setShowVideoForm(v => !v)}
@@ -122,8 +123,8 @@ const RoomHeader = memo(function RoomHeader({
           </button>
         )}
 
-        {/* Owner: Start Quiz */}
-        {isOwner && onStartQuiz && (
+        {/* Privileged: Start Quiz */}
+        {isPrivileged && onStartQuiz && (
           <button
             style={{ ...styles.iconBtn, color: '#8b5cf6' }}
             onClick={onStartQuiz}
@@ -134,8 +135,8 @@ const RoomHeader = memo(function RoomHeader({
           </button>
         )}
 
-        {/* Owner: lock/unlock */}
-        {isOwner && (
+        {/* Privileged: lock/unlock */}
+        {isPrivileged && (
           <button
             style={{
               ...styles.iconBtn,
@@ -167,7 +168,7 @@ const RoomHeader = memo(function RoomHeader({
       </div>
 
       {/* Change video form (inline dropdown) */}
-      {showVideoForm && isOwner && (
+      {showVideoForm && isPrivileged && (
         <form style={styles.videoForm} onSubmit={submitVideoChange}>
           <input
             style={styles.videoInput}

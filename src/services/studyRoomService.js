@@ -18,6 +18,7 @@ import {
   updateDoc, deleteDoc, onSnapshot,
   query, orderBy, limit, where,
   serverTimestamp, setDoc,
+  arrayUnion, arrayRemove,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -113,7 +114,7 @@ export async function createRoom({ name, youtubeUrl, password, ownerPhone, owner
     youtubeUrl: youtubeUrl ? youtubeUrl.trim() : null,
     videoId,
     mode,
-    coHostPhone: null,
+    coHostPhones: [],
     password: password?.trim() || null,
     ownerPhone,
     ownerName,
@@ -221,12 +222,21 @@ export async function updateRoomVideo(roomId, newUrl) {
 }
 
 /**
- * Assigns a co-host for the room.
+ * Adds a co-host to the room.
  * @param {string} roomId 
- * @param {string} coHostPhone 
+ * @param {string} phone 
  */
-export async function assignCoHost(roomId, coHostPhone) {
-  await updateDoc(doc(db, ROOMS_COL, roomId), { coHostPhone, updatedAt: Date.now() });
+export async function addCoHost(roomId, phone) {
+  await updateDoc(doc(db, ROOMS_COL, roomId), { coHostPhones: arrayUnion(phone), updatedAt: Date.now() });
+}
+
+/**
+ * Removes a co-host from the room.
+ * @param {string} roomId 
+ * @param {string} phone 
+ */
+export async function removeCoHost(roomId, phone) {
+  await updateDoc(doc(db, ROOMS_COL, roomId), { coHostPhones: arrayRemove(phone), updatedAt: Date.now() });
 }
 
 /**
@@ -293,9 +303,9 @@ export async function removeMember(roomId, memberPhone) {
  */
 import { runTransaction } from 'firebase/firestore';
 
-export async function answerQuizQuestion(roomId, qIndex, userId, optionIndex, mode) {
+export async function answerQuizQuestion(roomId, quizId, qIndex, userId, optionIndex, mode) {
   if (mode === 'fastest') {
-    const qRef = doc(db, ROOMS_COL, roomId, 'quizAnswers', `q_${qIndex}`);
+    const qRef = doc(db, ROOMS_COL, roomId, `quizAnswers_${quizId}`, `q_${qIndex}`);
     await runTransaction(db, async (t) => {
       const qDoc = await t.get(qRef);
       if (!qDoc.exists()) {
@@ -306,7 +316,7 @@ export async function answerQuizQuestion(roomId, qIndex, userId, optionIndex, mo
     });
   } else {
     // mode === 'all'
-    const userAnsRef = doc(db, ROOMS_COL, roomId, 'quizAnswers', `q_${qIndex}_${userId}`);
+    const userAnsRef = doc(db, ROOMS_COL, roomId, `quizAnswers_${quizId}`, `q_${qIndex}_${userId}`);
     await setDoc(userAnsRef, { userId, optionIndex, timestamp: serverTimestamp() }, { merge: true });
   }
 }
@@ -314,8 +324,8 @@ export async function answerQuizQuestion(roomId, qIndex, userId, optionIndex, mo
 /**
  * Subscribes to the answers for a specific question (used for revealing).
  */
-export function subscribeToQuizAnswers(roomId, callback) {
-  const q = collection(db, ROOMS_COL, roomId, 'quizAnswers');
+export function subscribeToQuizAnswers(roomId, quizId, callback) {
+  const q = collection(db, ROOMS_COL, roomId, `quizAnswers_${quizId}`);
   return onSnapshot(q, snap => {
     callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   });
@@ -324,15 +334,15 @@ export function subscribeToQuizAnswers(roomId, callback) {
 /**
  * Subscribes to quiz scores.
  */
-export function subscribeToQuizScores(roomId, callback) {
-  const q = collection(db, ROOMS_COL, roomId, 'quizScores');
+export function subscribeToQuizScores(roomId, quizId, callback) {
+  const q = collection(db, ROOMS_COL, roomId, `quizScores_${quizId}`);
   return onSnapshot(q, snap => {
     callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   });
 }
 
-export async function submitQuizScore(roomId, userId, scoreData) {
-  const ref = doc(db, ROOMS_COL, roomId, 'quizScores', userId);
+export async function submitQuizScore(roomId, quizId, userId, scoreData) {
+  const ref = doc(db, ROOMS_COL, roomId, `quizScores_${quizId}`, userId);
   await setDoc(ref, scoreData, { merge: true });
 }
 

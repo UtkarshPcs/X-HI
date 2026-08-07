@@ -11,6 +11,8 @@ import {
   setRoomLocked,
   endRoom,
   removeMember,
+  addCoHost,
+  removeCoHost,
 } from '../services/studyRoomService';
 
 /**
@@ -53,6 +55,8 @@ export function useStudyRoom(roomId, ownerPhone) {
   }, [roomId]);
 
   const isOwner = Boolean(room && ownerPhone && room.ownerPhone === ownerPhone);
+  const isCoHost = Boolean(room && ownerPhone && (room.coHostPhones || []).includes(ownerPhone));
+  const isPrivileged = isOwner || isCoHost;
 
   const changeVideo = useCallback(async (url) => {
     if (!isOwner || !roomId) return;
@@ -60,19 +64,33 @@ export function useStudyRoom(roomId, ownerPhone) {
   }, [isOwner, roomId]);
 
   const toggleLock = useCallback(async () => {
-    if (!isOwner || !roomId || !room) return;
+    if (!isPrivileged || !roomId || !room) return;
     await setRoomLocked(roomId, !room.isLocked);
-  }, [isOwner, roomId, room]);
+  }, [isPrivileged, roomId, room]);
 
   const kickMember = useCallback(async (memberPhone) => {
-    if (!isOwner || !roomId) return;
+    if (!isPrivileged || !roomId) return;
     await removeMember(roomId, memberPhone);
-  }, [isOwner, roomId]);
+  }, [isPrivileged, roomId]);
 
   const closeRoom = useCallback(async () => {
     if (!isOwner || !roomId) return;
     await endRoom(roomId);
   }, [isOwner, roomId]);
 
-  return { room, loading, error, isOwner, changeVideo, toggleLock, kickMember, closeRoom };
+  const promoteCoHost = useCallback(async (phone) => {
+    if (!isOwner || !roomId) return;
+    await addCoHost(roomId, phone);
+  }, [isOwner, roomId]);
+
+  const demoteCoHost = useCallback(async (phone) => {
+    if (!isOwner || !roomId) return;
+    await removeCoHost(roomId, phone);
+  }, [isOwner, roomId]);
+
+  return { 
+    room, loading, error, isOwner, isCoHost, isPrivileged, 
+    changeVideo, toggleLock, kickMember, closeRoom,
+    promoteCoHost, demoteCoHost 
+  };
 }

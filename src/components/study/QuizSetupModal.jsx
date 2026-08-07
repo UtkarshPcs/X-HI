@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
-import { X, Play, Users, Clock, Hash, Shield } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { X, Play, Users, Clock, Hash, Shield, BookOpen, AlertCircle } from 'lucide-react';
 import { getAllTests } from '../../services/starBatchTestService';
 
-export default function QuizSetupModal({ onClose, onStart, onlineMembers, currentCoHost }) {
+export default function QuizSetupModal({ onClose, onStart, onlineMembers, currentCoHosts }) {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   
   // Selections
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedTestId, setSelectedTestId] = useState('');
   const [totalQuestions, setTotalQuestions] = useState(5);
   const [timePerQuestion, setTimePerQuestion] = useState(30);
   const [quizMode, setQuizMode] = useState('all'); // 'all' or 'fastest'
-  const [selectedCoHost, setSelectedCoHost] = useState(currentCoHost || '');
+  const [selectedCoHosts, setSelectedCoHosts] = useState(currentCoHosts || []);
 
   useEffect(() => {
     getAllTests().then(data => {
@@ -20,10 +22,35 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
     });
   }, []);
 
+  // Extract unique subjects
+  const subjects = useMemo(() => {
+    const subs = new Set(tests.map(t => t.sectionId || t.subjectId));
+    return Array.from(subs).filter(Boolean).sort();
+  }, [tests]);
+
+  // Filter tests by selected subject
+  const filteredTests = useMemo(() => {
+    if (!selectedSubject) return [];
+    return tests.filter(t => (t.sectionId || t.subjectId) === selectedSubject);
+  }, [tests, selectedSubject]);
+
+  // Reset chapter selection if subject changes
+  useEffect(() => {
+    setSelectedTestId('');
+  }, [selectedSubject]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!selectedTestId) return alert('Please select a chapter/test.');
-    if (!selectedCoHost) return alert('You must assign a Co-Host before starting the quiz.');
+    setErrorMsg('');
+
+    if (!selectedSubject) {
+      setErrorMsg('Please select a subject first.');
+      return;
+    }
+    if (!selectedTestId) {
+      setErrorMsg('Please select a chapter/test.');
+      return;
+    }
     
     const test = tests.find(t => t.id === selectedTestId);
     if (!test) return;
@@ -38,10 +65,12 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
     const selectedQuestions = availableQuestions.slice(0, totalQuestions);
 
     if (selectedQuestions.length === 0) {
-      return alert('No questions available in this chapter.');
+      setErrorMsg('No questions available in this chapter. Please select a different one.');
+      return;
     }
 
     onStart({
+      quizId: Date.now().toString(),
       testId: test.id,
       chapterId: test.chapterId,
       questions: selectedQuestions,
@@ -50,7 +79,7 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
       currentQuestionIndex: 0,
       status: 'reading',
       questionStartedAt: null,
-      coHostPhone: selectedCoHost
+      coHostPhones: selectedCoHosts
     });
   };
 
@@ -71,43 +100,78 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
 
         <form onSubmit={handleSubmit} style={styles.form}>
           
-          {/* 1. Assign Co-Host */}
+          {/* 1. Assign Co-Hosts */}
           <div style={styles.field}>
             <label style={styles.label}>
               <Shield size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-              Assign Co-Host <span style={{ color: '#ef4444' }}>*</span>
+              Assign Co-Hosts
             </label>
-            <select 
-              style={styles.select} 
-              value={selectedCoHost} 
-              onChange={e => setSelectedCoHost(e.target.value)}
-              required
-            >
-              <option value="">-- Select a Co-Host --</option>
+            <div style={styles.checkboxGroup}>
               {onlineMembers.map(m => (
-                <option key={m.phone} value={m.phone}>{m.name}</option>
+                <label key={m.phone} style={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={selectedCoHosts.includes(m.phone)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedCoHosts([...selectedCoHosts, m.phone]);
+                      } else {
+                        setSelectedCoHosts(selectedCoHosts.filter(p => p !== m.phone));
+                      }
+                    }}
+                  />
+                  {m.name}
+                </label>
               ))}
-            </select>
-            <span style={styles.hint}>Co-host will take over if you disconnect.</span>
+              {onlineMembers.length === 0 && (
+                <span style={styles.hint}>No other members online.</span>
+              )}
+            </div>
+            <span style={styles.hint}>Co-hosts will take over if you disconnect.</span>
           </div>
 
-          {/* 2. Select Test/Chapter */}
-          <div style={styles.field}>
-            <label style={styles.label}>
-              <Hash size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-              Select Chapter
-            </label>
-            <select 
-              style={styles.select} 
-              value={selectedTestId} 
-              onChange={e => setSelectedTestId(e.target.value)}
-              required
-            >
-              <option value="">-- Select Chapter --</option>
-              {tests.map(t => (
-                <option key={t.id} value={t.id}>{t.title} ({t.sectionId})</option>
-              ))}
-            </select>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            {/* 2a. Select Subject */}
+            <div style={{ ...styles.field, flex: 1 }}>
+              <label style={styles.label}>
+                <BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                Subject
+              </label>
+              <select 
+                style={styles.select} 
+                value={selectedSubject} 
+                onChange={e => setSelectedSubject(e.target.value)}
+                required
+              >
+                <option value="">-- Select Subject --</option>
+                {subjects.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2b. Select Chapter */}
+            <div style={{ ...styles.field, flex: 1 }}>
+              <label style={styles.label}>
+                <Hash size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                Chapter
+              </label>
+              <select 
+                style={styles.select} 
+                value={selectedTestId} 
+                onChange={e => {
+                  setSelectedTestId(e.target.value);
+                  setErrorMsg('');
+                }}
+                required
+                disabled={!selectedSubject}
+              >
+                <option value="">-- Select Chapter --</option>
+                {filteredTests.map(t => (
+                  <option key={t.id} value={t.id}>{t.title}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '1rem' }}>
@@ -170,6 +234,13 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
             </div>
           </div>
 
+          {errorMsg && (
+            <div style={styles.errorBox} className="animate-fade-in">
+              <AlertCircle size={16} />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           <button type="submit" className="auth-btn primary" style={{ padding: '0.8rem', marginTop: '0.5rem' }} disabled={loading}>
             {loading ? 'Loading tests...' : 'Start Live Quiz'}
           </button>
@@ -187,7 +258,7 @@ const styles = {
   },
   modal: {
     background: 'var(--surface)', border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 480,
+    borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 520,
     boxShadow: '0 24px 60px rgba(0,0,0,0.5)', overflow: 'hidden',
   },
   header: {
@@ -211,7 +282,7 @@ const styles = {
     cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem',
   },
   form: {
-    padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem',
+    padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
   },
   field: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
   label: { fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' },
@@ -219,6 +290,7 @@ const styles = {
     background: 'var(--surface-hover)', border: '1px solid var(--border)',
     borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)',
     padding: '0.55rem 0.85rem', fontSize: '0.9rem', fontFamily: 'inherit', outline: 'none',
+    cursor: 'pointer'
   },
   input: {
     background: 'var(--surface-hover)', border: '1px solid var(--border)',
@@ -235,5 +307,36 @@ const styles = {
   modeBtnActive: {
     background: 'rgba(251,191,36,0.1)', borderColor: '#fbbf24', color: '#fbbf24'
   },
-  modeDesc: { fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }
+  modeDesc: { fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 },
+  checkboxGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.4rem',
+    background: 'var(--surface-hover)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '0.55rem 0.85rem',
+    maxHeight: '120px',
+    overflowY: 'auto'
+  },
+  checkboxLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem',
+    color: 'var(--text-primary)',
+    cursor: 'pointer'
+  },
+  errorBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    background: 'rgba(239, 68, 68, 0.1)',
+    border: '1px solid rgba(239, 68, 68, 0.2)',
+    color: '#ef4444',
+    padding: '0.75rem',
+    borderRadius: 'var(--radius-sm)',
+    fontSize: '0.85rem',
+    fontWeight: 500
+  }
 };
