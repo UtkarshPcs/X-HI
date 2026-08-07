@@ -10,11 +10,11 @@ import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, Tre
 
 // ── Medal / rank helpers ─────────────────────────────────────────────────────
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
-const RANK_COLORS = ['#fbbf24', '#94a3b8', '#cd7f32'];
-const RANK_GLOWS  = [
-  'rgba(251,191,36,0.15)',
-  'rgba(148,163,184,0.1)',
-  'rgba(205,127,50,0.1)',
+const RANK_COLORS = ['#F5C542', '#cbd5e1', '#b45309'];
+const RANK_GLOWS = [
+  'rgba(245,197,66,0.2)',
+  'rgba(203,213,225,0.1)',
+  'rgba(180,83,9,0.1)'
 ];
 
 function getInitials(name) {
@@ -177,7 +177,7 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
                       ...lbStyles.barFill,
                       width: `${Math.max(barWidth, 0)}%`,
                       background: s.score > 0
-                        ? `linear-gradient(90deg, ${i < 3 ? rankColor : '#14b8a6'}, ${i < 3 ? rankColor + '88' : '#14b8a688'})`
+                        ? `linear-gradient(90deg, ${i < 3 ? rankColor : '#7C5CFF'}, ${i < 3 ? rankColor + '88' : '#7C5CFF88'})`
                         : s.score < 0 ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)',
                     }} />
                   </div>
@@ -187,19 +187,19 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
               {/* Stats */}
               <div style={lbStyles.statsCol}>
                 <div style={lbStyles.scoreValue}>
-                  {s.score > 0 && <TrendingUp size={12} color="#10b981" />}
-                  {s.score < 0 && <TrendingDown size={12} color="#ef4444" />}
+                  {s.score > 0 && <TrendingUp size={12} color="#22C55E" />}
+                  {s.score < 0 && <TrendingDown size={12} color="#EF4444" />}
                   {s.score === 0 && <Minus size={12} color="rgba(255,255,255,0.3)" />}
                   <span style={{
                     fontWeight: 800, fontSize: '0.95rem',
-                    color: s.score > 0 ? '#10b981' : s.score < 0 ? '#ef4444' : 'rgba(255,255,255,0.5)',
+                    color: s.score > 0 ? '#22C55E' : s.score < 0 ? '#EF4444' : 'rgba(255,255,255,0.5)',
                   }}>
                     {s.score}
                   </span>
                 </div>
                 <div style={lbStyles.statsMini}>
-                  <span style={{ color: '#10b981' }}>{s.correctCount || 0}✓</span>
-                  <span style={{ color: '#ef4444' }}>{s.wrongCount || 0}✗</span>
+                  <span style={{ color: '#22C55E' }}>{s.correctCount || 0}✓</span>
+                  <span style={{ color: '#EF4444' }}>{s.wrongCount || 0}✗</span>
                 </div>
               </div>
             </div>
@@ -212,7 +212,7 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
 
 const lbStyles = {
   root: {
-    background: 'rgba(255,255,255,0.02)',
+    background: '#151B2E',
     border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '14px',
     padding: '0.75rem',
@@ -262,8 +262,8 @@ const lbStyles = {
     borderLeft: '3px solid transparent',
   },
   entryMe: {
-    background: 'rgba(20,184,166,0.08)',
-    border: '1px solid rgba(20,184,166,0.2)',
+    background: 'rgba(124,92,255,0.08)',
+    border: '1px solid rgba(124,92,255,0.2)',
   },
   rank: {
     width: 28,
@@ -298,8 +298,8 @@ const lbStyles = {
   youBadge: {
     fontSize: '0.55rem',
     fontWeight: 700,
-    color: '#14b8a6',
-    background: 'rgba(20,184,166,0.15)',
+    color: '#7C5CFF',
+    background: 'rgba(124,92,255,0.15)',
     padding: '0.05rem 0.3rem',
     borderRadius: '4px',
     letterSpacing: '0.05em',
@@ -661,14 +661,14 @@ function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) 
 const styles = {
   container: {
     height: '100%', display: 'flex', flexDirection: 'column', 
-    background: '#042f2e', padding: '1.5rem', borderRadius: '12px', overflowY: 'auto'
+    background: '#0B1220', padding: '1.5rem', borderRadius: '12px', overflowY: 'auto'
   },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' },
   qIndex: { fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted)' },
   timer: (rem) => ({
     display: 'flex', alignItems: 'center', gap: '0.4rem', 
     background: rem <= 5 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.1)',
-    color: rem <= 5 ? '#ef4444' : '#fff',
+    color: rem <= 5 ? '#EF4444' : '#fff',
     padding: '0.4rem 0.8rem', borderRadius: '20px', fontWeight: 700,
     animation: rem <= 5 ? 'pulse 1s infinite' : 'none'
   }),
@@ -690,8 +690,8 @@ const styles = {
   },
   readyIcon: {
     width: 56, height: 56, borderRadius: '50%',
-    background: 'rgba(251,191,36,0.1)',
-    border: '1px solid rgba(251,191,36,0.25)',
+    background: 'rgba(245,197,66,0.1)',
+    border: '1px solid rgba(245,197,66,0.25)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     marginBottom: '0.25rem',
   },
@@ -711,7 +711,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.75rem',
-    background: 'rgba(255,255,255,0.05)',
+    background: '#151B2E',
     border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: 'var(--radius-lg)',
     padding: '1rem',
@@ -752,28 +752,28 @@ const styles = {
   optionsList: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
   option: {
     display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
-    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', 
+    background: '#151B2E', border: '1px solid rgba(255,255,255,0.06)', 
     borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s'
   },
   optCircle: {
     width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)'
   },
-  selected: { background: 'rgba(251,191,36,0.1)', borderColor: 'rgba(251,191,36,0.4)' },
-  circle_selected: { borderColor: '#fbbf24', color: '#fbbf24' },
-  locked_mine: { background: 'rgba(20,184,166,0.1)', borderColor: '#14b8a6' },
-  circle_locked_mine: { borderColor: '#14b8a6', color: '#14b8a6' },
+  selected: { background: 'rgba(245,197,66,0.1)', borderColor: 'rgba(245,197,66,0.4)' },
+  circle_selected: { borderColor: '#F5C542', color: '#F5C542' },
+  locked_mine: { background: 'rgba(124,92,255,0.1)', borderColor: '#7C5CFF' },
+  circle_locked_mine: { borderColor: '#7C5CFF', color: '#7C5CFF' },
   locked_other: { opacity: 0.5 },
-  correct: { background: 'rgba(16,185,129,0.1)', borderColor: '#10b981' },
-  circle_correct: { borderColor: '#10b981', color: '#10b981', background: '#10b981' },
-  wrong: { background: 'rgba(239,68,68,0.1)', borderColor: '#ef4444' },
-  circle_wrong: { borderColor: '#ef4444', color: '#ef4444', background: '#ef4444' },
+  correct: { background: 'rgba(34,197,94,0.1)', borderColor: '#22C55E' },
+  circle_correct: { borderColor: '#22C55E', color: '#22C55E', background: '#22C55E' },
+  wrong: { background: 'rgba(239,68,68,0.1)', borderColor: '#EF4444' },
+  circle_wrong: { borderColor: '#EF4444', color: '#EF4444', background: '#EF4444' },
   badge: { fontSize: '0.7rem', background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px' },
 
   // Report card
   reportCard: {
     maxWidth: 500, margin: 'auto', width: '100%',
-    background: 'rgba(255,255,255,0.02)',
+    background: '#151B2E',
     padding: '2rem', borderRadius: '16px',
     border: '1px solid rgba(255,255,255,0.1)',
     display: 'flex', flexDirection: 'column', gap: '1.25rem',
@@ -783,8 +783,8 @@ const styles = {
   },
   trophyGlow: {
     width: 64, height: 64, borderRadius: '50%',
-    background: 'rgba(251,191,36,0.1)',
-    border: '1px solid rgba(251,191,36,0.25)',
+    background: 'rgba(245,197,66,0.1)',
+    border: '1px solid rgba(245,197,66,0.25)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   reportTitle: {
@@ -793,8 +793,8 @@ const styles = {
   },
   winnerBox: {
     textAlign: 'center',
-    background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))',
-    border: '1px solid rgba(251,191,36,0.2)',
+    background: 'linear-gradient(135deg, rgba(245,197,66,0.08), rgba(245,197,66,0.02))',
+    border: '1px solid rgba(245,197,66,0.2)',
     padding: '1.25rem', borderRadius: '14px',
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem',
   },
@@ -802,12 +802,12 @@ const styles = {
     fontSize: '2rem', lineHeight: 1, marginBottom: '0.25rem',
   },
   winnerName: {
-    margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#fbbf24',
+    margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#F5C542',
   },
   
   // My Stats Card
   myStatsCard: {
-    background: 'rgba(255,255,255,0.03)',
+    background: '#151B2E',
     border: '1px solid rgba(255,255,255,0.06)',
     borderRadius: '12px',
     padding: '1rem',
@@ -840,10 +840,10 @@ const styles = {
     color: 'rgba(255,255,255,0.4)',
     textTransform: 'uppercase'
   },
-  statValueRank: { fontSize: '1.1rem', fontWeight: 700, color: '#fbbf24' },
-  statValueScore: { fontSize: '1.1rem', fontWeight: 700, color: '#14b8a6' },
-  statValueCorrect: { fontSize: '1.1rem', fontWeight: 700, color: '#10b981' },
-  statValueAcc: { fontSize: '1.1rem', fontWeight: 700, color: '#3b82f6' },
+  statValueRank: { fontSize: '1.1rem', fontWeight: 700, color: '#F5C542' },
+  statValueScore: { fontSize: '1.1rem', fontWeight: 700, color: '#7C5CFF' },
+  statValueCorrect: { fontSize: '1.1rem', fontWeight: 700, color: '#22C55E' },
+  statValueAcc: { fontSize: '1.1rem', fontWeight: 700, color: '#7C5CFF' },
   statValueTime: { fontSize: '1.1rem', fontWeight: 700, color: '#fff' },
 };
 
