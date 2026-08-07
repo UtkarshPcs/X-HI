@@ -281,6 +281,20 @@ export async function setRoomLocked(roomId, locked) {
 }
 
 /**
+ * Clears the active video or quiz, returning the room to chat-only mode.
+ * @param {string} roomId
+ */
+export async function clearRoomScreen(roomId) {
+  await updateDoc(doc(db, ROOMS_COL, roomId), {
+    mode: 'chat',
+    youtubeUrl: null,
+    videoId: null,
+    updatedAt: Date.now(),
+    'quizState.status': 'finished'
+  });
+}
+
+/**
  * Ends the room — sets isActive=false, persists the record for history.
  * @param {string} roomId
  */

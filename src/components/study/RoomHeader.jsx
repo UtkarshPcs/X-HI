@@ -7,7 +7,7 @@
 import { memo, useState } from 'react';
 import {
   Users, Copy, Check, Lock, Unlock,
-  Video, StopCircle, ArrowLeft, ExternalLink, Play
+  Video, StopCircle, ArrowLeft, ExternalLink, Play, MonitorOff
 } from 'lucide-react';
 import { isValidYouTubeUrl } from '../../services/studyRoomService';
 
@@ -22,11 +22,12 @@ import { isValidYouTubeUrl } from '../../services/studyRoomService';
  *   onEndRoom: () => void,
  *   onBack: () => void,
  *   onStartQuiz: () => void,
+ *   onClearScreen: () => void,
  * }} props
  */
 const RoomHeader = memo(function RoomHeader({
   room, memberCount, isOwner, isPrivileged,
-  onChangeVideo, onToggleLock, onEndRoom, onBack, onStartQuiz
+  onChangeVideo, onToggleLock, onEndRoom, onBack, onStartQuiz, onClearScreen
 }) {
   const [copied, setCopied]           = useState(false);
   const [showVideoForm, setShowVideoForm] = useState(false);
@@ -132,6 +133,22 @@ const RoomHeader = memo(function RoomHeader({
             aria-label="Start Live Quiz"
           >
             <Play size={16} />
+          </button>
+        )}
+
+        {/* Privileged: Clear Screen (Stop Sharing) */}
+        {isPrivileged && onClearScreen && room.mode !== 'chat' && (
+          <button
+            style={{ ...styles.iconBtn, color: '#ef4444' }}
+            onClick={() => {
+              if (window.confirm('Clear the screen for everyone? This will end the current video or quiz.')) {
+                onClearScreen();
+              }
+            }}
+            title="Clear Screen (End Quiz/Video)"
+            aria-label="Clear Screen"
+          >
+            <MonitorOff size={16} />
           </button>
         )}
 

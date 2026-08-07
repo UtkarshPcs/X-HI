@@ -13,6 +13,7 @@ import {
   removeMember,
   addCoHost,
   removeCoHost,
+  clearRoomScreen,
 } from '../services/studyRoomService';
 
 /**
@@ -27,6 +28,7 @@ import {
  *   toggleLock: () => Promise<void>,
  *   kickMember: (phone: string) => Promise<void>,
  *   closeRoom: () => Promise<void>,
+ *   clearScreen: () => Promise<void>,
  * }}
  */
 export function useStudyRoom(roomId, ownerPhone) {
@@ -88,9 +90,14 @@ export function useStudyRoom(roomId, ownerPhone) {
     await removeCoHost(roomId, phone);
   }, [isOwner, roomId]);
 
+  const clearScreen = useCallback(async () => {
+    if (!isPrivileged || !roomId) return;
+    await clearRoomScreen(roomId);
+  }, [isPrivileged, roomId]);
+
   return { 
     room, loading, error, isOwner, isCoHost, isPrivileged, 
     changeVideo, toggleLock, kickMember, closeRoom,
-    promoteCoHost, demoteCoHost 
+    promoteCoHost, demoteCoHost, clearScreen
   };
 }

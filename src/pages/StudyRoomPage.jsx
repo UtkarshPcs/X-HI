@@ -269,7 +269,7 @@ export default function StudyRoomPage() {
   const { currentUser, openModal }    = useAuth();
 
   // Core state from hooks
-  const { room, loading, error, isOwner, isPrivileged, changeVideo, toggleLock, kickMember, closeRoom, promoteCoHost, demoteCoHost } =
+  const { room, loading, error, isOwner, isPrivileged, changeVideo, toggleLock, kickMember, closeRoom, promoteCoHost, demoteCoHost, clearScreen } =
     useStudyRoom(roomId, currentUser?.phone);
 
   useEffect(() => {
@@ -561,6 +561,7 @@ export default function StudyRoomPage() {
         onEndRoom={handleEndRoom}
         onBack={handleLeave}
         onStartQuiz={isPrivileged ? handleStartQuizClick : undefined}
+        onClearScreen={isPrivileged ? clearScreen : undefined}
       />
 
       {/* ── Desktop layout (unchanged) ─────────────────────────────────── */}
