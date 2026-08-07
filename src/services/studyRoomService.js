@@ -246,15 +246,19 @@ export async function removeCoHost(roomId, phone) {
  */
 export async function startQuiz(roomId, quizState) {
   const roomRef = doc(db, ROOMS_COL, roomId);
-  // We initialize the quizState in a subcollection or on the document itself.
-  // Using document fields is easier for listening to top-level room changes,
-  // but a dedicated subcollection or a map on the room document is fine.
-  // Let's store it as a map `quizState` on the room document.
-  await updateDoc(roomRef, {
+  const qIds = quizState.questions ? quizState.questions.map(q => q.id) : [];
+  
+  const updates = {
     mode: 'quiz',
     quizState,
     updatedAt: Date.now(),
-  });
+  };
+
+  if (qIds.length > 0) {
+    updates.askedQuestionIds = arrayUnion(...qIds);
+  }
+
+  await updateDoc(roomRef, updates);
 }
 
 /**

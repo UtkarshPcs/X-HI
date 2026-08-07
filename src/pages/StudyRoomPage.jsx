@@ -554,6 +554,7 @@ export default function StudyRoomPage() {
           onStart={handleStartQuiz} 
           onlineMembers={members}
           currentCoHosts={room.coHostPhones || []}
+          askedQuestionIds={room.askedQuestionIds || []}
         />
       )}
 

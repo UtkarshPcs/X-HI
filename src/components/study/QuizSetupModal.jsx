@@ -3,7 +3,7 @@ import { X, Play, Users, Clock, Hash, Shield, BookOpen, AlertCircle, Layers, Sta
 import { getAllTests } from '../../services/starBatchTestService';
 import { syllabusData } from '../../data/syllabusData';
 
-export default function QuizSetupModal({ onClose, onStart, onlineMembers, currentCoHosts }) {
+export default function QuizSetupModal({ onClose, onStart, onlineMembers, currentCoHosts, askedQuestionIds = [] }) {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -94,16 +94,28 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
 
     let diffQuestions = allQuestions.filter(q => (q.difficulty || 'Medium') === targetDifficultyStr);
     
-    if (diffQuestions.length < totalQuestions) {
-      diffQuestions = [...allQuestions];
+    // EXCLUDE previously asked questions
+    let freshQuestions = diffQuestions.filter(q => !askedQuestionIds.includes(q.id));
+
+    // If we don't have enough fresh questions of this difficulty, fall back to reusing asked ones
+    if (freshQuestions.length < totalQuestions) {
+       freshQuestions = diffQuestions;
     }
 
-    for (let i = diffQuestions.length - 1; i > 0; i--) {
+    // If STILL not enough, ignore difficulty and grab everything
+    if (freshQuestions.length < totalQuestions) {
+      freshQuestions = [...allQuestions].filter(q => !askedQuestionIds.includes(q.id));
+      if (freshQuestions.length < totalQuestions) {
+         freshQuestions = [...allQuestions];
+      }
+    }
+
+    for (let i = freshQuestions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [diffQuestions[i], diffQuestions[j]] = [diffQuestions[j], diffQuestions[i]];
+      [freshQuestions[i], freshQuestions[j]] = [freshQuestions[j], freshQuestions[i]];
     }
 
-    const selectedQuestions = diffQuestions.slice(0, totalQuestions);
+    const selectedQuestions = freshQuestions.slice(0, totalQuestions);
     const testTitle = chapterOptions.find(c => c.chapterId === selectedChapter)?.chapterName || 'Custom Quiz';
 
     onStart({
