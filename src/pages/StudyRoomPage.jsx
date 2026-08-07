@@ -11,7 +11,7 @@
  * Route: /study-together/:roomId
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Users, MessageSquare, ChevronDown, ChevronUp,
@@ -291,7 +291,7 @@ export default function StudyRoomPage() {
   const [mobileQuizView, setMobileQuizView] = useState('quiz'); // 'quiz' | 'chat' (top-level for quiz mode)
   const [chatCollapsed, setChatCollapsed] = useState(false);    // YouTube mode: collapse chat panel
   const [unreadCount, setUnreadCount] = useState(0);
-  const prevMsgCount                  = useState(0);
+  const prevMsgCount = useRef(messages.length);
   const [showQuizSetup, setShowQuizSetup] = useState(false);
 
   // Track unread messages on mobile when chat tab isn't active
@@ -300,14 +300,21 @@ export default function StudyRoomPage() {
   }, []);
 
   // Unread tracking — counts new messages when the user isn't looking at chat
-  const isChatVisible = room?.mode === 'quiz' ? mobileQuizView === 'chat' : mobileChatTab === 'chat';
+  // Note: in video mode, chat is visible if not collapsed.
+  const isChatVisible = room?.mode === 'quiz' 
+    ? mobileQuizView === 'chat' 
+    : (room?.mode === 'video' || room?.videoId ? !chatCollapsed && mobileChatTab === 'chat' : mobileChatTab === 'chat');
 
   useEffect(() => {
-    if (!isChatVisible && messages.length > prevMsgCount[0]) {
-      setUnreadCount(c => c + (messages.length - prevMsgCount[0]));
+    // Only increment if we had previously loaded messages to avoid spiking on initial load
+    if (messages.length > prevMsgCount.current && prevMsgCount.current > 0) {
+      if (!isChatVisible) {
+        setUnreadCount(c => c + (messages.length - prevMsgCount.current));
+      }
     }
-    prevMsgCount[0] = messages.length;
-  }, [messages.length, isChatVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+    // If it's initial load (prev was 0), we just sync it without marking as unread
+    prevMsgCount.current = messages.length;
+  }, [messages.length, isChatVisible]);
 
   function handleChatTabChange(tab) {
     setMobileChatTab(tab);
