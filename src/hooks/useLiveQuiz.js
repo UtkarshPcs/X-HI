@@ -67,11 +67,14 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
 
       // --- Decentralized Auto-Timer Fallback ---
       if (remaining === 0) {
-        // If we are acting admin, or if it's fallback mode
-        if (isActingAdmin || isDecentralizedFallback) {
+        const isTheActiveAdmin = quizState.activeAdminPhone === currentUser?.phone;
+        const isActiveAdminOnline = onlineMembers?.some(m => m.phone === quizState.activeAdminPhone);
+        
+        // If we are the exact person who started this timer, transition immediately.
+        // If they are offline, fallback users can transition it after a random delay.
+        if (isTheActiveAdmin || (!isActiveAdminOnline && isDecentralizedFallback)) {
           // Add a grace period to avoid simultaneous immediate writes
-          // Acting admin transitions immediately. Fallback users wait a random delay (1-3s).
-          const delay = isActingAdmin ? 0 : 1000 + Math.random() * 2000;
+          const delay = isTheActiveAdmin ? 0 : 2000 + Math.random() * 3000;
           setTimeout(() => {
             // Check if state is STILL active (someone else might have successfully transitioned it)
             if (room?.quizState?.status === 'active') {
@@ -121,12 +124,13 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
   }, [roomId, isActingAdmin, quizState]);
 
   const startTimer = useCallback(async () => {
-    if (!roomId || !isActingAdmin) return;
+    if (!roomId || !isActingAdmin || !currentUser) return;
     await updateQuizState(roomId, {
       'quizState.status': 'active',
-      'quizState.questionStartedAt': Date.now()
+      'quizState.questionStartedAt': Date.now(),
+      'quizState.activeAdminPhone': currentUser.phone
     });
-  }, [roomId, isActingAdmin]);
+  }, [roomId, isActingAdmin, currentUser]);
 
   const endQuiz = useCallback(async () => {
     if (!roomId || !isActingAdmin) return;
@@ -168,14 +172,15 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
     }
   }, [roomId, isActingAdmin, quizState]);
 
-  const updateMyScore = useCallback(async (correctCount, wrongCount, score, totalTime) => {
+  const updateMyScore = useCallback(async (correctCount, wrongCount, score, totalTime, scoredIndices) => {
     if (!roomId || !currentUser || !quizState?.quizId) return;
     await submitQuizScore(roomId, quizState.quizId, currentUser.phone, {
       name: currentUser.name,
       correctCount,
       wrongCount,
       score,
-      totalTime
+      totalTime,
+      scoredIndices: scoredIndices || []
     });
   }, [roomId, currentUser, quizState?.quizId]);
 

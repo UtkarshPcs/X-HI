@@ -448,13 +448,18 @@ export default function LiveQuizPlayer({
     if (status === 'revealing' && currentQuestionIndex !== scoreCalculatedForQ) {
       if (effectiveSelectedOption !== null) {
         const isCorrect = effectiveSelectedOption === currentQuestion.correctOptionIndex;
-        const myData = scores.find(s => s.id === currentUser.phone) || { score: 0, correctCount: 0, wrongCount: 0, totalTime: 0 };
-        updateMyScore(
-          isCorrect ? myData.correctCount + 1 : myData.correctCount,
-          !isCorrect ? myData.wrongCount + 1 : myData.wrongCount,
-          isCorrect ? myData.score + 2 : myData.score - 1,
-          myData.totalTime + (quizState.timePerQuestion - timeRemaining)
-        );
+        const myData = scores.find(s => s.id === currentUser.phone) || { score: 0, correctCount: 0, wrongCount: 0, totalTime: 0, scoredIndices: [] };
+        
+        if (!myData.scoredIndices?.includes(currentQuestionIndex)) {
+          const newScoredIndices = [...(myData.scoredIndices || []), currentQuestionIndex];
+          updateMyScore(
+            isCorrect ? myData.correctCount + 1 : myData.correctCount,
+            !isCorrect ? myData.wrongCount + 1 : myData.wrongCount,
+            isCorrect ? myData.score + 2 : myData.score - 1,
+            myData.totalTime + (quizState.timePerQuestion - timeRemaining),
+            newScoredIndices
+          );
+        }
       }
       setScoreCalculatedForQ(currentQuestionIndex);
     }
