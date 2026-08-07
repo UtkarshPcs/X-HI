@@ -137,7 +137,7 @@ const RoomHeader = memo(function RoomHeader({
         )}
 
         {/* Privileged: Clear Screen (Stop Sharing) */}
-        {isPrivileged && onClearScreen && room.mode !== 'chat' && (
+        {isPrivileged && onClearScreen && (room?.mode === 'quiz' || room?.mode === 'video' || !!room?.videoId) && (
           <button
             style={{ ...styles.iconBtn, color: '#ef4444' }}
             onClick={() => {
