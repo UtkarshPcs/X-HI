@@ -582,13 +582,21 @@ function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) 
   const sorted = [...scores].sort((a, b) => b.score - a.score);
   const winner = sorted[0];
 
+  const myIndex = sorted.findIndex(s => s.id === currentUserPhone);
+  const myData = myIndex >= 0 ? sorted[myIndex] : null;
+  const myRank = myIndex >= 0 ? myIndex + 1 : '-';
+  
+  const totalAnswered = myData ? ((myData.correctCount || 0) + (myData.wrongCount || 0)) : 0;
+  const avgTime = (myData && totalAnswered > 0 && myData.totalTime) ? (myData.totalTime / totalAnswered).toFixed(1) + 's' : '-';
+  const accuracy = (myData && totalAnswered > 0) ? Math.round((myData.correctCount / totalAnswered) * 100) + '%' : '-';
+
   return (
     <div style={styles.container}>
       <div style={styles.reportCard}>
         {/* Trophy + confetti vibes */}
         <div style={styles.reportHeader}>
           <div style={styles.trophyGlow}>
-            <Trophy size={36} color="#fbbf24" />
+            <Trophy size={36} color="#fbbf24" strokeWidth={1.5} />
           </div>
           <h2 style={styles.reportTitle}>Quiz Complete!</h2>
         </div>
@@ -605,11 +613,40 @@ function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) 
           <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>No scores recorded.</p>
         )}
 
+        {/* YOUR STATS CARD */}
+        {myData && (
+          <div style={styles.myStatsCard}>
+            <div style={styles.myStatsHeader}>Your Stats</div>
+            <div style={styles.myStatsGrid}>
+              <div style={styles.statBox}>
+                <div style={styles.statValueRank}>#{myRank}</div>
+                <div style={styles.statLabel}>Rank</div>
+              </div>
+              <div style={styles.statBox}>
+                <div style={styles.statValueScore}>{myData.score}</div>
+                <div style={styles.statLabel}>Score</div>
+              </div>
+              <div style={styles.statBox}>
+                <div style={styles.statValueCorrect}>{myData.correctCount || 0}</div>
+                <div style={styles.statLabel}>Correct</div>
+              </div>
+              <div style={styles.statBox}>
+                <div style={styles.statValueAcc}>{accuracy}</div>
+                <div style={styles.statLabel}>Accuracy</div>
+              </div>
+              <div style={styles.statBox}>
+                <div style={styles.statValueTime}>{avgTime}</div>
+                <div style={styles.statLabel}>Avg Time</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Full leaderboard */}
         <LeaderboardPanel scores={scores} currentUserPhone={currentUserPhone} />
 
         {isActingAdmin && (
-          <button className="auth-btn secondary" onClick={onEndQuiz} style={{ marginTop: '1.5rem', width: '100%' }}>
+          <button className="auth-btn secondary" onClick={onEndQuiz} style={{ marginTop: '0.5rem', width: '100%', padding: '1rem', background: '#27272a', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600 }}>
             End Quiz & Return to Chat
           </button>
         )}
@@ -765,5 +802,44 @@ const styles = {
   winnerName: {
     margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#fbbf24',
   },
+  
+  // My Stats Card
+  myStatsCard: {
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    borderRadius: '12px',
+    padding: '1rem',
+  },
+  myStatsHeader: {
+    fontSize: '0.75rem',
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.5)',
+    fontWeight: 700,
+    letterSpacing: '0.05em',
+    marginBottom: '0.75rem',
+    textAlign: 'center'
+  },
+  myStatsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    gap: '0.5rem',
+    textAlign: 'center'
+  },
+  statBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.2rem'
+  },
+  statLabel: {
+    fontSize: '0.65rem',
+    color: 'rgba(255,255,255,0.4)',
+    textTransform: 'uppercase'
+  },
+  statValueRank: { fontSize: '1.1rem', fontWeight: 700, color: '#fbbf24' },
+  statValueScore: { fontSize: '1.1rem', fontWeight: 700, color: '#8b5cf6' },
+  statValueCorrect: { fontSize: '1.1rem', fontWeight: 700, color: '#10b981' },
+  statValueAcc: { fontSize: '1.1rem', fontWeight: 700, color: '#3b82f6' },
+  statValueTime: { fontSize: '1.1rem', fontWeight: 700, color: '#fff' },
 };
 
