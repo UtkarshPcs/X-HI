@@ -61,9 +61,9 @@ export function useStudyRoom(roomId, ownerPhone) {
   const isPrivileged = isOwner || isCoHost;
 
   const changeVideo = useCallback(async (url) => {
-    if (!isOwner || !roomId) return;
+    if (!isPrivileged || !roomId) return;
     await updateRoomVideo(roomId, url);
-  }, [isOwner, roomId]);
+  }, [isPrivileged, roomId]);
 
   const toggleLock = useCallback(async () => {
     if (!isPrivileged || !roomId || !room) return;
