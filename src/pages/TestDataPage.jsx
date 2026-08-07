@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../ux/hooks/useToast';
@@ -122,7 +122,7 @@ export default function TestDataPage() {
         else setData(d);
       })
       .catch(() => {
-        if (active) toast.error('Unable to load test data.');
+        if (active) toast.warning('Unable to load test data.');
         navigate('/');
       })
       .finally(() => { if (active) setFetching(false); });
@@ -142,7 +142,7 @@ export default function TestDataPage() {
   if (!data) return null;
 
   const sections = data.sections || [];
-  const totalFM  = useMemo(() => sections.reduce((s, sec) => s + (sec.totalMarks || 0), 0), [sections]);
+  const totalFM  = sections.reduce((s, sec) => s + (sec.totalMarks || 0), 0);
   const from = fmtShort(data.dateFrom);
   const to   = fmtShort(data.dateTo);
   const fromFull = fmtDate(data.dateFrom);
