@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { useToast } from '../ux/hooks/useToast';
 import { getTestData } from '../services/testDataService';
 import {
   Beaker, CalendarDays, Clock, CheckCircle2, AlertCircle,
-  BookOpen, ChevronRight, ArrowLeft, Layers
+  BookOpen, ChevronRight, ArrowLeft, Layers, Copy
 } from 'lucide-react';
 
 /* ── Helpers ─────────────────────────────────────────────────── */
@@ -104,6 +105,7 @@ function SectionCard({ section }) {
 export default function TestDataPage() {
   const { currentUser, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [data, setData] = useState(null);
   const [fetching, setFetching] = useState(true);
 
@@ -119,7 +121,10 @@ export default function TestDataPage() {
         if (!d || !d.visible) navigate('/');
         else setData(d);
       })
-      .catch(() => navigate('/'))
+      .catch(() => {
+        if (active) toast.error('Unable to load test data.');
+        navigate('/');
+      })
       .finally(() => { if (active) setFetching(false); });
     return () => { active = false; };
   }, [navigate]);
@@ -137,20 +142,50 @@ export default function TestDataPage() {
   if (!data) return null;
 
   const sections = data.sections || [];
-  const totalFM  = sections.reduce((s, sec) => s + (sec.totalMarks || 0), 0);
+  const totalFM  = useMemo(() => sections.reduce((s, sec) => s + (sec.totalMarks || 0), 0), [sections]);
   const from = fmtShort(data.dateFrom);
   const to   = fmtShort(data.dateTo);
   const fromFull = fmtDate(data.dateFrom);
   const toFull   = fmtDate(data.dateTo);
   const dateRange = from && to ? `${from} – ${to}` : from || null;
 
+  const handleCopySyllabus = () => {
+    let md = `# ${data.testName}\n\n`;
+    sections.forEach(sec => {
+      md += `## ${sec.name}\n\n`;
+      if (!sec.subsections || sec.subsections.length === 0) {
+        md += `Syllabus to be announced\n\n`;
+        return;
+      }
+      sec.subsections.forEach(sub => {
+        if (sub.name) md += `### ${sub.name}\n\n`;
+        if (!sub.chapters || sub.chapters.length === 0) {
+          md += `- TBA\n\n`;
+        } else {
+          sub.chapters.forEach(ch => {
+            md += `- ${ch}\n`;
+          });
+          md += `\n`;
+        }
+      });
+    });
+    navigator.clipboard.writeText(md.trim()).then(() => alert('Syllabus copied as Markdown!'));
+  };
+
   return (
     <div className="td-page animate-fade-in fade-in-up">
 
-      {/* Back button */}
-      <button className="td-back-btn" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} /> Back
-      </button>
+      {/* Top Actions */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button className="td-back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} /> Back
+        </button>
+        {currentUser?.isAdmin && (
+          <button className="td-back-btn" onClick={handleCopySyllabus}>
+            <Copy size={16} /> Copy Syllabus
+          </button>
+        )}
+      </div>
 
       {/* Hero */}
       <div className="td-hero glass-card">
