@@ -73,6 +73,8 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
       quizId: Date.now().toString(),
       testId: test.id,
       chapterId: test.chapterId,
+      chapterTitle: test.title,
+      subject: selectedSubject,
       questions: selectedQuestions,
       quizMode,
       timePerQuestion,

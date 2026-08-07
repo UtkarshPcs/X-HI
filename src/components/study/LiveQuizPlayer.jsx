@@ -6,7 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../../utils/formatMath';
-import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown } from 'lucide-react';
+import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered } from 'lucide-react';
 
 // ── Medal / rank helpers ─────────────────────────────────────────────────────
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
@@ -443,8 +443,44 @@ export default function LiveQuizPlayer({
             <div style={styles.readyIcon}>
               <Zap size={28} color="#fbbf24" />
             </div>
-            <h2 style={styles.readyTitle}>Get Ready!</h2>
+            <h2 style={styles.readyTitle}>
+              {currentQuestionIndex === 0 ? "Quiz Starting!" : "Get Ready!"}
+            </h2>
             <p style={styles.readySub}>Read the question carefully. Timer will start soon.</p>
+
+            {currentQuestionIndex === 0 && (
+              <div style={styles.metaCard}>
+                <div style={styles.metaItem}>
+                  <BookOpen size={16} color="var(--primary)" />
+                  <div style={styles.metaText}>
+                    <span style={styles.metaLabel}>Subject</span>
+                    <span style={styles.metaValue}>{quizState.subject || 'N/A'}</span>
+                  </div>
+                </div>
+                <div style={styles.metaItem}>
+                  <Hash size={16} color="var(--primary)" />
+                  <div style={styles.metaText}>
+                    <span style={styles.metaLabel}>Chapter</span>
+                    <span style={styles.metaValue} title={quizState.chapterTitle || 'N/A'}>{quizState.chapterTitle || 'N/A'}</span>
+                  </div>
+                </div>
+                <div style={styles.metaItem}>
+                  <Users size={16} color="var(--primary)" />
+                  <div style={styles.metaText}>
+                    <span style={styles.metaLabel}>Mode</span>
+                    <span style={styles.metaValue}>{quizState.quizMode === 'fastest' ? 'Fastest Finger First' : 'All Players'}</span>
+                  </div>
+                </div>
+                <div style={styles.metaItem}>
+                  <ListOrdered size={16} color="var(--primary)" />
+                  <div style={styles.metaText}>
+                    <span style={styles.metaLabel}>Questions</span>
+                    <span style={styles.metaValue}>{questions.length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {isActingAdmin && (
               <button className="auth-btn primary" onClick={startTimer} style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Zap size={16} /> Start Timer
@@ -631,6 +667,45 @@ const styles = {
     color: 'rgba(255,255,255,0.5)',
     margin: 0,
     maxWidth: 300,
+  },
+  metaCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '1rem',
+    marginTop: '0.75rem',
+    width: '100%',
+    maxWidth: 320,
+    textAlign: 'left'
+  },
+  metaItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+  metaText: {
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    flex: 1
+  },
+  metaLabel: {
+    fontSize: '0.7rem',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '0.1rem'
+  },
+  metaValue: {
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    color: '#fff',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   },
 
   // Question card
