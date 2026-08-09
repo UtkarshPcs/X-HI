@@ -20,6 +20,15 @@ const LOADING_MESSAGES = [
   "Synthesizing your answer..."
 ];
 
+const preprocessLaTeX = (content) => {
+  if (!content) return '';
+  return content
+    .replace(/\\\[/g, '$$$$')
+    .replace(/\\\]/g, '$$$$')
+    .replace(/\\\(/g, '$')
+    .replace(/\\\)/g, '$');
+};
+
 function LoadingIndicator() {
   const [msgIdx, setMsgIdx] = React.useState(0);
 
@@ -275,7 +284,7 @@ export default function AiChatPage() {
                         remarkPlugins={[remarkGfm, remarkMath]}
                         rehypePlugins={[rehypeRaw, rehypeKatex]}
                       >
-                        {currentChat.aiResponse}
+                        {preprocessLaTeX(currentChat.aiResponse)}
                       </ReactMarkdown>
                     </div>
                     {currentChat.id !== 'temp' && (
