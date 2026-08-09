@@ -21,6 +21,11 @@
   position: relative;
 }
 
+/* Elevate wrapper z-index on mobile when sidebar is open to cover the sticky navbar */
+.ai-chat-wrapper.mobile-menu-open {
+  z-index: 2000;
+}
+
 /* Ambient glow orbs (behind everything) */
 .ai-chat-wrapper::before,
 .ai-chat-wrapper::after {

@@ -190,7 +190,7 @@ export default function AiChatPage() {
   };
 
   return (
-    <div className="ai-chat-wrapper">
+    <div className={`ai-chat-wrapper ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
       <div className="ai-chat-container">
         {/* Mobile Overlay */}
         {isMobileMenuOpen && (
