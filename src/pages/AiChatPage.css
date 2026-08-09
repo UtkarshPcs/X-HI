@@ -4,9 +4,8 @@
 
 /* ── 1. The Main Wrapper ── */
 .ai-chat-wrapper {
-  /* Controlled viewport-relative height */
-  height: calc(100vh - 240px);
-  min-height: 500px;
+  /* Fill the available space via flex */
+  flex: 1;
   width: 100%;
   
   /* Flex column so the inner container can fill it using flex: 1 */
@@ -14,9 +13,10 @@
   flex-direction: column;
   
   background: var(--background);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  /* Edge-to-edge styling */
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   overflow: clip;
   position: relative;
 }
@@ -329,8 +329,7 @@
    ══════════════════════════ */
 @media (max-width: 768px) {
   .ai-chat-wrapper {
-    height: calc(100vh - 180px); /* Adjust for mobile viewport */
-    border-radius: 1rem;
+    /* Rely on flex: 1 from desktop */
   }
 
   .ai-chat-container {
@@ -376,3 +375,17 @@
   .ai-input { padding: 0.85rem 1.25rem; font-size: 0.95rem; }
   .ai-send-btn { width: 48px; height: 48px; }
 }
+
+/* Edge-to-edge overrides for parent containers */
+body.ai-chat-active .main-content {
+  padding: 0 !important;
+  max-width: none !important;
+  display: flex;
+  flex-direction: column;
+}
+
+body.ai-chat-active .app-footer,
+body.ai-chat-active .nav-links {
+  display: none !important;
+}
+

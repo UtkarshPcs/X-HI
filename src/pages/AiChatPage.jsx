@@ -99,6 +99,13 @@ export default function AiChatPage() {
     scrollToBottom();
   }, [currentChat, isLoading]);
 
+  useEffect(() => {
+    document.body.classList.add('ai-chat-active');
+    return () => {
+      document.body.classList.remove('ai-chat-active');
+    };
+  }, []);
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
