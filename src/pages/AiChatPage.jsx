@@ -183,6 +183,14 @@ export default function AiChatPage() {
   return (
     <div className="ai-chat-wrapper">
       <div className="ai-chat-container">
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div 
+            className="ai-mobile-overlay" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+        )}
+        
         {/* Sidebar */}
         <div className={`ai-glass-panel ai-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           <div className="ai-sidebar-tabs" style={{ display: 'flex', alignItems: 'center' }}>
