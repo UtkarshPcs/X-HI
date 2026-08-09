@@ -9,7 +9,7 @@ import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus, UploadCloud } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus, UploadCloud, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -40,6 +40,7 @@ import { getAllClasswork } from '../services/classworkService';
 import { getHomework } from '../services/homeworkService';
 import { createPage, updatePage, getPage, getAllPages, deletePage } from '../services/dynamicPageService';
 import { createCustomTest, updateCustomTest, getCustomTests, getCustomTestAttempts } from '../services/customTestService';
+import { getAllowedChapters, addAllowedChapter, removeAllowedChapter } from '../services/aiChatService';
 
 const TABS = [
   { id: 'users',      label: 'User Directory',  Icon: Users },
@@ -63,6 +64,7 @@ const TABS = [
   { id: 'monitorRoles',      label: 'Monitor Roles',      Icon: UsersIcon },
   { id: 'pages',             label: 'Page Creation',      Icon: FilePlus },
   { id: 'customTests',       label: 'Custom Tests',       Icon: Target },
+  { id: 'aichat',            label: 'AI Chat Config',     Icon: Bot },
 ];
 
 const ROLE_STYLE = {
@@ -1786,6 +1788,7 @@ export default function AdminServicesPage() {
         { tab === 'monitorRoles'      && <MonitorRolesTab /> }
         { tab === 'pages'             && <PageCreationTab /> }
         { tab === 'customTests'       && <CustomTestsTab /> }
+        { tab === 'aichat'            && <AiChatConfigTab /> }
       </div>
     </div>
   );
@@ -3800,6 +3803,161 @@ function CustomTestsTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── AI Chat Config Tab ─────────────────────────────────────────
+function AiChatConfigTab() {
+  const [chapters, setChapters] = useState([]);
+  const [busy, setBusy] = useState(false);
+
+  // Dropdown state
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedChapter, setSelectedChapter] = useState('');
+
+  useEffect(() => {
+    loadChapters();
+  }, []);
+
+  async function loadChapters() {
+    try {
+      const data = await getAllowedChapters();
+      setChapters(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Derive dropdown options
+  const activeSection = syllabusData.find(s => s.sectionId === selectedSection);
+  const activeSubject = activeSection?.subjects?.find(s => s.subjectId === selectedSubject);
+
+  async function handleAdd(e) {
+    e.preventDefault();
+    if (!selectedChapter) return;
+    
+    // Find the chapter name from the selected ID
+    const chapterObj = activeSubject?.chapters?.find(c => c.chapterId === selectedChapter);
+    if (!chapterObj) return;
+    
+    setBusy(true);
+    try {
+      await addAllowedChapter(chapterObj.chapterName);
+      setSelectedChapter('');
+      loadChapters();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRemove(chapterName) {
+    if (!window.confirm("Remove this chapter from allowed list?")) return;
+    setBusy(true);
+    try {
+      await removeAllowedChapter(chapterName);
+      loadChapters();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="as-card">
+        <h4 className="as-section-title"><Bot size={15} /> Add Allowed Chapter</h4>
+        <p className="as-muted" style={{ marginBottom: '1.25rem' }}>
+          Select a chapter from the syllabus that is available in the Vector DB. 
+          The AI Chat will reject queries that do not match these chapters.
+        </p>
+        <form onSubmit={handleAdd} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          
+          <div style={{ flex: 1, minWidth: '150px' }}>
+            <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Section</label>
+            <select
+              className="as-input"
+              value={selectedSection}
+              onChange={e => {
+                setSelectedSection(e.target.value);
+                setSelectedSubject('');
+                setSelectedChapter('');
+              }}
+              required
+            >
+              <option value="">Select Section</option>
+              {syllabusData.map(sec => (
+                <option key={sec.sectionId} value={sec.sectionId}>{sec.sectionName}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: 1, minWidth: '150px' }}>
+            <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Subject</label>
+            <select
+              className="as-input"
+              value={selectedSubject}
+              onChange={e => {
+                setSelectedSubject(e.target.value);
+                setSelectedChapter('');
+              }}
+              required
+              disabled={!selectedSection}
+            >
+              <option value="">Select Subject</option>
+              {activeSection?.subjects.map(sub => (
+                <option key={sub.subjectId} value={sub.subjectId}>{sub.subjectName}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: 2, minWidth: '200px' }}>
+            <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Chapter</label>
+            <select
+              className="as-input"
+              value={selectedChapter}
+              onChange={e => setSelectedChapter(e.target.value)}
+              required
+              disabled={!selectedSubject}
+            >
+              <option value="">Select Chapter</option>
+              {activeSubject?.chapters.map(chap => (
+                <option key={chap.chapterId} value={chap.chapterId}>{chap.chapterName}</option>
+              ))}
+            </select>
+          </div>
+
+          <button type="submit" className="auth-btn primary" disabled={busy || !selectedChapter} style={{ padding: '0.6rem 1.2rem', height: '42px' }}>
+            {busy ? 'Adding...' : 'Add Chapter'}
+          </button>
+        </form>
+      </div>
+
+      <div className="as-card">
+        <h4 className="as-section-title"><CheckCircle size={15} /> Active Allowed Chapters</h4>
+        {chapters.length === 0 ? (
+          <p className="as-muted">No chapters allowed yet.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {chapters.map((c, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{c}</span>
+                <button 
+                  onClick={() => handleRemove(c)}
+                  disabled={busy}
+                  style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.4rem 0.6rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+                >
+                  <Trash2 size={14} /> Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

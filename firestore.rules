@@ -105,6 +105,12 @@ service cloud.firestore {
     match /users/{phone}/starBatchBookmarks/{bookmarkId} {                                                                              
           allow read, write: if true;                                                                                                       
         }
+    match /users/{phone}/aichats/{chatId} {
+          allow read, write: if true;
+        }
+    match /users/{phone}/aichat_bookmarks/{bookmarkId} {
+          allow read, write: if true;
+        }
     match /starBatchReportedQuestions/{id} { allow read, write: if true; }
     match /starBatchConcepts/{id} { allow read, write: if true; }
     match /periodic_predicted_tests/{id} { allow read, write: if true; }                                                                

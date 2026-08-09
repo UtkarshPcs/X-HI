@@ -1,6 +1,6 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2, Wrench, BookCopy, ClipboardList, GraduationCap, Star } from 'lucide-react';
+import { Home, BookOpen, CalendarHeart, CalendarRange, LogIn, LogOut, ShieldAlert, Bell, User, Users, BookMarked, BarChart2, Wrench, BookCopy, ClipboardList, GraduationCap, Star, Bot } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../auth/roles';
 import NotificationHistory from './NotificationHistory';
@@ -161,6 +161,9 @@ export default function Navbar() {
                   )}
                   <button className="nav-dropdown-item" onClick={() => go('/study-together')}>
                     <GraduationCap size={15} /> Study Together
+                  </button>
+                  <button className="nav-dropdown-item" onClick={() => go('/ai-chat')}>
+                    <Bot size={15} /> AI Chat
                   </button>
                   {currentUser.isStarBatch && (
                     <button className="nav-dropdown-item" onClick={() => go('/star-batch')}>

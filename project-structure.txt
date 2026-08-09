@@ -1,0 +1,1296 @@
+.
+├── aikeys.txt
+├── api
+│   ├── ai-backfill-concepts.js
+│   ├── ai-macro-review.js
+│   ├── ai-periodic-report.js
+│   ├── ai-personalize.js
+│   ├── ai-search-notes.js
+│   ├── ai-suggest-question.js
+│   ├── ai-test-review.js
+│   ├── custom-test-share.js
+│   ├── delete-note-blob.js
+│   ├── _lib
+│   │   └── firebaseAdmin.js
+│   ├── maths-og-image.js
+│   ├── maths-share.js
+│   ├── note-share.js
+│   ├── notice-share.js
+│   ├── og-image.js
+│   ├── page-share.js
+│   ├── send-notification.js
+│   ├── share.js
+│   └── upload-note.js
+├── apikeys.txt
+├── audit_resume.txt
+├── balmy-nuance-472404-q9-firebase-adminsdk-fbsvc-c26d120cb3.json
+├── clean_parse_hw.cjs
+├── Diagram_Test.json
+├── dist
+│   ├── assets
+│   │   ├── activity-RWmFPp-o.js
+│   │   ├── AdminPanel-BFo-p8nj.js
+│   │   ├── AdminServicesPage-0jXPp7ef.js
+│   │   ├── Angle-wkpUvdw0.js
+│   │   ├── arrow-left-6NUm6STv.js
+│   │   ├── arrow-right-NAvN01VX.js
+│   │   ├── attendanceUtils-CQTRJuF5.js
+│   │   ├── bookmark-DvqgcdTA.js
+│   │   ├── calendar-days-BG-6XWI3.js
+│   │   ├── calendar-DccvgqHY.js
+│   │   ├── calendarOverrideService-D_gV9uud.js
+│   │   ├── camera-5N_KRDpA.js
+│   │   ├── chevron-down-B9Y3Wf28.js
+│   │   ├── chevron-left-Cdf6NCEx.js
+│   │   ├── chevron-right-DRwlIPOv.js
+│   │   ├── chevron-up-BgPzS-gi.js
+│   │   ├── circle-alert-3ZdmZLaU.js
+│   │   ├── circle-check-Ce6kyYva.js
+│   │   ├── Circle-CjGXiNqq.js
+│   │   ├── circle-x-BgBYOBrs.js
+│   │   ├── ClassInfo-ML2Y8k4d.js
+│   │   ├── ClassInfoPage-C5bOih3_.js
+│   │   ├── classworkService-DpBMUDgC.js
+│   │   ├── clock-Dr380ne6.js
+│   │   ├── ConcaveLensRay-B_F0iO6C.js
+│   │   ├── ConcaveMirrorRay-hVROcwTJ.js
+│   │   ├── Construction-BgJVISIj.js
+│   │   ├── ConvexLensRay-B22Fj62n.js
+│   │   ├── ConvexMirrorRay-BxTnw5ye.js
+│   │   ├── CoordinatePlane-BsHMHA2j.js
+│   │   ├── copy-BR6F0P8U.js
+│   │   ├── CustomTestPlayerPage-85e4govk.js
+│   │   ├── customTestService-Dj9VshIM.js
+│   │   ├── DiagramRenderer-CTrF3tVz.js
+│   │   ├── DynamicPage-Bjxg3MMn.js
+│   │   ├── dynamicPageService-D52c6yZx.js
+│   │   ├── ElectricCircuit-dw8zMHjQ.js
+│   │   ├── ElectrolysisSetup-BqCxWRd8.js
+│   │   ├── eye-baKZxeXF.js
+│   │   ├── EyeDefect-Cd9fV9MZ.js
+│   │   ├── FeatureLaunchPopup-BHyO0jTk.js
+│   │   ├── file-text-DRDfP8DG.js
+│   │   ├── flag-DnpZY01k.js
+│   │   ├── flask-conical-ClPDTpHi.js
+│   │   ├── formatMath-qN3ibqFI.js
+│   │   ├── FormatToolbar-koPl6i9t.js
+│   │   ├── funnel-CGBUggom.js
+│   │   ├── HistoricalTestAnalysisPage-0g-Gpic8.js
+│   │   ├── holidayData-Cza53wiW.js
+│   │   ├── HolidayHomework-CW_HtCOO.js
+│   │   ├── Homework-Dla7QIF6.js
+│   │   ├── html2canvas-B8jBlSvl.js
+│   │   ├── HumanBrain-B3FQ72R9.js
+│   │   ├── HumanDigestiveSystem-KmJvYK8z.js
+│   │   ├── HumanEye-DK2Qm_o5.js
+│   │   ├── HumanHeart-CH9_DIv7.js
+│   │   ├── HumanRespiratorySystem-77SmaHbf.js
+│   │   ├── image-CJLmohXU.js
+│   │   ├── index-BIg1zUaT.css
+│   │   ├── index-CSiqToAa.js
+│   │   ├── index.es-BT248iqH.js
+│   │   ├── KaTeX_AMS-Regular-BQhdFMY1.woff2
+│   │   ├── KaTeX_AMS-Regular-DMm9YOAa.woff
+│   │   ├── KaTeX_AMS-Regular-DRggAlZN.ttf
+│   │   ├── KaTeX_Caligraphic-Bold-ATXxdsX0.ttf
+│   │   ├── KaTeX_Caligraphic-Bold-BEiXGLvX.woff
+│   │   ├── KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2
+│   │   ├── KaTeX_Caligraphic-Regular-CTRA-rTL.woff
+│   │   ├── KaTeX_Caligraphic-Regular-Di6jR-x-.woff2
+│   │   ├── KaTeX_Caligraphic-Regular-wX97UBjC.ttf
+│   │   ├── katex-DEcVZfaU.css
+│   │   ├── KaTeX_Fraktur-Bold-BdnERNNW.ttf
+│   │   ├── KaTeX_Fraktur-Bold-BsDP51OF.woff
+│   │   ├── KaTeX_Fraktur-Bold-CL6g_b3V.woff2
+│   │   ├── KaTeX_Fraktur-Regular-CB_wures.ttf
+│   │   ├── KaTeX_Fraktur-Regular-CTYiF6lA.woff2
+│   │   ├── KaTeX_Fraktur-Regular-Dxdc4cR9.woff
+│   │   ├── KaTeX_Main-Bold-Cx986IdX.woff2
+│   │   ├── KaTeX_Main-BoldItalic-DxDJ3AOS.woff2
+│   │   ├── KaTeX_Main-BoldItalic-DzxPMmG6.ttf
+│   │   ├── KaTeX_Main-BoldItalic-SpSLRI95.woff
+│   │   ├── KaTeX_Main-Bold-Jm3AIy58.woff
+│   │   ├── KaTeX_Main-Bold-waoOVXN0.ttf
+│   │   ├── KaTeX_Main-Italic-3WenGoN9.ttf
+│   │   ├── KaTeX_Main-Italic-BMLOBm91.woff
+│   │   ├── KaTeX_Main-Italic-NWA7e6Wa.woff2
+│   │   ├── KaTeX_Main-Regular-B22Nviop.woff2
+│   │   ├── KaTeX_Main-Regular-Dr94JaBh.woff
+│   │   ├── KaTeX_Main-Regular-ypZvNtVU.ttf
+│   │   ├── KaTeX_Math-BoldItalic-B3XSjfu4.ttf
+│   │   ├── KaTeX_Math-BoldItalic-CZnvNsCZ.woff2
+│   │   ├── KaTeX_Math-BoldItalic-iY-2wyZ7.woff
+│   │   ├── KaTeX_Math-Italic-DA0__PXp.woff
+│   │   ├── KaTeX_Math-Italic-flOr_0UB.ttf
+│   │   ├── KaTeX_Math-Italic-t53AETM-.woff2
+│   │   ├── katex.min-BEzAzwb2.js
+│   │   ├── KaTeX_SansSerif-Bold-CFMepnvq.ttf
+│   │   ├── KaTeX_SansSerif-Bold-D1sUS0GD.woff2
+│   │   ├── KaTeX_SansSerif-Bold-DbIhKOiC.woff
+│   │   ├── KaTeX_SansSerif-Italic-C3H0VqGB.woff2
+│   │   ├── KaTeX_SansSerif-Italic-DN2j7dab.woff
+│   │   ├── KaTeX_SansSerif-Italic-YYjJ1zSn.ttf
+│   │   ├── KaTeX_SansSerif-Regular-BNo7hRIc.ttf
+│   │   ├── KaTeX_SansSerif-Regular-CS6fqUqJ.woff
+│   │   ├── KaTeX_SansSerif-Regular-DDBCnlJ7.woff2
+│   │   ├── KaTeX_Script-Regular-C5JkGWo-.ttf
+│   │   ├── KaTeX_Script-Regular-D3wIWfF6.woff2
+│   │   ├── KaTeX_Script-Regular-D5yQViql.woff
+│   │   ├── KaTeX_Size1-Regular-C195tn64.woff
+│   │   ├── KaTeX_Size1-Regular-Dbsnue_I.ttf
+│   │   ├── KaTeX_Size1-Regular-mCD8mA8B.woff2
+│   │   ├── KaTeX_Size2-Regular-B7gKUWhC.ttf
+│   │   ├── KaTeX_Size2-Regular-Dy4dx90m.woff2
+│   │   ├── KaTeX_Size2-Regular-oD1tc_U0.woff
+│   │   ├── KaTeX_Size3-Regular-CTq5MqoE.woff
+│   │   ├── KaTeX_Size3-Regular-DgpXs0kz.ttf
+│   │   ├── KaTeX_Size4-Regular-BF-4gkZK.woff
+│   │   ├── KaTeX_Size4-Regular-Dl5lxZxV.woff2
+│   │   ├── KaTeX_Size4-Regular-DWFBv043.ttf
+│   │   ├── KaTeX_Typewriter-Regular-C0xS9mPB.woff
+│   │   ├── KaTeX_Typewriter-Regular-CO6r4hn1.woff2
+│   │   ├── KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf
+│   │   ├── layers-CojnNnNP.js
+│   │   ├── LensSignConvention-CBFwxZT8.js
+│   │   ├── lib-BziaEjma.js
+│   │   ├── lib-DZlUrviK.js
+│   │   ├── LineSegment-t6voYFQ2.js
+│   │   ├── list-ordered-ldpbTudH.js
+│   │   ├── lock-3GZjjywz.js
+│   │   ├── lock-open-BZ63mThc.js
+│   │   ├── ManageNoticesPage-B7aQ-lYw.js
+│   │   ├── marksService-CmZIPAZ6.js
+│   │   ├── mathMarks-phlMSGNc.js
+│   │   ├── MathsDashboard-BK6Q1MR_.js
+│   │   ├── MirrorSignConvention-CGjnqeCS.js
+│   │   ├── Nephron-DLICnjDX.js
+│   │   ├── Neuron-2Hi1YUi6.js
+│   │   ├── NotesPage-gSjwwGsx.js
+│   │   ├── notesService-x3Doa09F.js
+│   │   ├── noticeService-DUWAUX4x.js
+│   │   ├── NoticesPage-F0ZSKIKK.js
+│   │   ├── NotificationsPage-DJSPasrO.js
+│   │   ├── notify-LGEuRSdU.js
+│   │   ├── NumberLine-D0vxKybZ.js
+│   │   ├── ParallelLines-CPjnt39P.js
+│   │   ├── pencil-x5jaHe_t.js
+│   │   ├── PeriodicPredictedAnalysisPage-CY2jn9z8.js
+│   │   ├── periodicPredictedService-Bx9FjzcO.js
+│   │   ├── PeriodicPredictedTestPlayerPage-S6LoemVj.js
+│   │   ├── PhScale-CFbnREIQ.js
+│   │   ├── play-BKibDe2u.js
+│   │   ├── plus-CnPGC-G2.js
+│   │   ├── Polygon-Bbql9YOb.js
+│   │   ├── ProfilePage-BXPKtle2.js
+│   │   ├── purify.es-DeNTQ002.js
+│   │   ├── Quadrilateral-B9Afzm-o.js
+│   │   ├── RecordAdminPage-DngAsaAq.js
+│   │   ├── RecordMonitorPage-DvAufhBH.js
+│   │   ├── RecordPage-BezCQ7gT.js
+│   │   ├── recordsService-BdAOiOfw.js
+│   │   ├── RecordTeacherPage-BGXbING4.js
+│   │   ├── ReflexArc-CAkWGRj6.js
+│   │   ├── refresh-cw-BQXJsAbi.js
+│   │   ├── routine-Cutqs6qI.js
+│   │   ├── save-wVwpJ-3r.js
+│   │   ├── SchoolCalendar-C_UpZ94N.js
+│   │   ├── search-CCmFEooj.js
+│   │   ├── send-BeUHm7OG.js
+│   │   ├── share-2-B8mhgipX.js
+│   │   ├── shield-check-DWLyuDNo.js
+│   │   ├── sparksService-Dp6ztW0Q.js
+│   │   ├── starBatchBookmarkService-5AmBy5jc.js
+│   │   ├── StarBatchConceptsHub-DzsAcRxC.js
+│   │   ├── StarBatchMixedSubjectiveTestPlayerPage-Ctjd3Hyx.js
+│   │   ├── StarBatchMixedTestModulePage-DsLmO6r2.js
+│   │   ├── StarBatchPage-DaeRlRZu.js
+│   │   ├── starBatchService-BmqapEAf.js
+│   │   ├── StarBatchSubjectiveTestPlayerPage-BzIEpwiu.js
+│   │   ├── starBatchSubjectiveTestService-ChV6erFk.js
+│   │   ├── StarBatchSyllabusPage-BI0pSGY_.js
+│   │   ├── starBatchSyllabusService-ByhwKO-j.js
+│   │   ├── StarBatchSyllabusTrackingPage-DkOnI1PS.js
+│   │   ├── StarBatchTestModulePage-85gYjQQD.js
+│   │   ├── StarBatchTestPlayerPage-CIpYjbT1.js
+│   │   ├── starBatchTestService-Bjt0Tz_v.js
+│   │   ├── starBatchTrackingService--KX1VwlG.js
+│   │   ├── StarConceptChapterPage-DW1w6BsI.js
+│   │   ├── Stomata-CHTZbo27.js
+│   │   ├── StudentDashboard-R5C0l1ts.js
+│   │   ├── StudyRoomPage-DGPmxazE.js
+│   │   ├── studyRoomService-BYfjmNUL.js
+│   │   ├── StudyTogetherPage-BzYqfyBC.js
+│   │   ├── SubjectiveTestAnalyticsDashboard-D2A8_t02.js
+│   │   ├── sun-CQhHZwDC.js
+│   │   ├── syllabusData-D7e35C1m.js
+│   │   ├── SyllabusPage-BF-wEfkv.js
+│   │   ├── syllabusStats-CHA1GyFb.js
+│   │   ├── target-DnMsRXNX.js
+│   │   ├── TeacherToolsPage-DKtgmmML.js
+│   │   ├── TestAnalyticsDashboard-BnhKTM8-.js
+│   │   ├── TestDataPage-JmOIyWug.js
+│   │   ├── testDataService-D7vvtr0a.js
+│   │   ├── TestScoresPage-p1U4bUqo.js
+│   │   ├── TestTubeReaction-CUI_rfxm.js
+│   │   ├── trash-2-tLwTUvTj.js
+│   │   ├── trending-down-DQMTNjrX.js
+│   │   ├── Triangle-DsYDNYcs.js
+│   │   ├── trophy-C-xMUIXg.js
+│   │   ├── typeof-DXtr3iP1.js
+│   │   ├── UniversalIndicator-XkzJKR2W.js
+│   │   ├── UploadNoteModal-BEFLjBF2.js
+│   │   ├── useToast-C0Y0Ix-5.js
+│   │   └── zap-Cor8Z006.js
+│   ├── favicon.svg
+│   ├── firebase-messaging-sw.js
+│   ├── holiday_homework
+│   │   ├── Biology.pdf
+│   │   ├── Chemistry.pdf
+│   │   ├── Civics2.pdf
+│   │   ├── Civics.pdf
+│   │   ├── Economics.pdf
+│   │   ├── English.pdf
+│   │   ├── English Sample Paper .pdf
+│   │   ├── Geography.pdf
+│   │   ├── Hindi.pdf
+│   │   ├── History2.pdf
+│   │   ├── History.pdf
+│   │   ├── holiday homework.txt
+│   │   ├── IT.pdf
+│   │   ├── Maths Activity.pdf
+│   │   ├── Maths.pdf
+│   │   ├── Maths Project.pdf
+│   │   ├── Physics.pdf
+│   │   ├── Physics  Project.txt
+│   │   ├── Social Science.txt
+│   │   └── SST Project.pdf
+│   ├── icons.svg
+│   ├── index.html
+│   └── manifest.json
+├── .env
+├── .env.local
+├── eslint.config.js
+├── extract.cjs
+├── firebase_backup_2026-07-14T17-04-00-455Z
+│   ├── activityLogs
+│   │   ├── 6206413700.json
+│   │   ├── 7004827265.json
+│   │   ├── 7209514454.json
+│   │   ├── 7634861404.json
+│   │   ├── 7717762410.json
+│   │   ├── 7857866182.json
+│   │   ├── 7870503833.json
+│   │   ├── 7903808985.json
+│   │   ├── 8102783645.json
+│   │   ├── 8235751399.json
+│   │   ├── 8294399100.json
+│   │   ├── 8521278692.json
+│   │   ├── 8825310548.json
+│   │   ├── 9103289322.json
+│   │   ├── 9204219724.json
+│   │   ├── 9304213077.json
+│   │   ├── 9508796976.json
+│   │   ├── 9572049552.json
+│   │   ├── 9771954188.json
+│   │   ├── 9798163463.json
+│   │   ├── 9798404039.json
+│   │   └── 9999999999.json
+│   ├── appConfig
+│   │   └── ctaBanner.json
+│   ├── classwork
+│   │   ├── 2026-06-19.json
+│   │   ├── 2026-06-20.json
+│   │   ├── 2026-06-22.json
+│   │   ├── 2026-06-23.json
+│   │   ├── 2026-06-24.json
+│   │   ├── 2026-06-25.json
+│   │   ├── 2026-06-27.json
+│   │   ├── 2026-06-29.json
+│   │   ├── 2026-06-30.json
+│   │   ├── 2026-07-01.json
+│   │   ├── 2026-07-02.json
+│   │   ├── 2026-07-03.json
+│   │   ├── 2026-07-04.json
+│   │   ├── 2026-07-06.json
+│   │   ├── 2026-07-07.json
+│   │   ├── 2026-07-08.json
+│   │   ├── 2026-07-09.json
+│   │   ├── 2026-07-10.json
+│   │   ├── 2026-07-11.json
+│   │   ├── 2026-07-13.json
+│   │   └── 2026-07-14.json
+│   ├── config
+│   │   ├── calendarOverride.json
+│   │   ├── syllabusCompleted.json
+│   │   ├── syllabusExtraTopics.json
+│   │   └── syllabusHiddenTopics.json
+│   ├── ctaBannerClicks
+│   │   ├── 10.json
+│   │   ├── 23.json
+│   │   ├── 40.json
+│   │   ├── 85.json
+│   │   ├── 8.json
+│   │   └── 9999999999.json
+│   ├── fcmTokens
+│   │   ├── cKiMJ79al7PaUxfs-t2tXQ:APA91bG9GtdnOAgGaVfus0qIpET4kAIDSXrUvl41j9PEyyGyjfWiSKfxgZPjaSnxuapQlGArLYighZS3fXa65nWJGslr3QkdlKV1IXuFqOTeIzEyPzMrt0U.json
+│   │   ├── cMDapT7Gy7GDKjEQt7JaXq:APA91bEpV4N1P7L29qaPGT18elbyGDLCw9CYy8RlEiHw6eRWphNVYRRAJPUDucNc4NE4BBfR-X1p0dVS6YONlp22f7S3pYipRaJHDqRPZgcX3ymFrddgQeU.json
+│   │   ├── dhhvksyez4dYCyZUxuRUt0:APA91bGcuu8efp-jEm9E2qIRK4K50UZ7uJoP2o9TyUiX-E1ktHjUlmsXHfytFHTUDEJ-YAc9y0Kj8DmnRN-9awm3hpIej3yDtKgVoFM8H-P0QAq3Cc_rOww.json
+│   │   ├── dQZYwRdYiHHN4PKyJ_peNE:APA91bH2tI7hc7moJ_cKf7y5GJT167-iqpLVu4cw7pgzevE48HOTH4Fc5yAzJS75P_Rp30l7i7ciFD7jy4V4kd4MebbDGcbh6NWYj3Pg8i46HENI9v5-cOc.json
+│   │   ├── eQ6TTtCC7wQF-YCQ861wNW:APA91bEax4yyB4FlsxYh0nmq49kdYBxavhDnBfVySM5CwZeUdAlp3k3LdElKlT8M65mU_DBhXklKarhLmkc1mygCH6OmqzIa3n2sr7rC7U5Qh7cxH8Orrh0.json
+│   │   ├── f0WIcjBUJj4KLHNXBrVy-t:APA91bEpJEb4khUMyEtjDkgfxsGyBxsfAeyXgqoFcv2YW1ZfFkvXvkAzdRT3B5CU0jtILu8g0nDPGRCfZnMOakr2DL5Mwc3DIOSYbZOFAWiQA392VtgaK-Y.json
+│   │   ├── f929sAw3GP3yiWcg4lN8IB:APA91bE8wsyZ7hIeZ0yvd_d2Y8PadnVUjV0-snjaMEW1CgfJLJ0M9eTQ8fPz9ogr6D1Lt7Q7XzJe50GjJ1-SmmU4-UDhQRRv3-JH1Xqs2fauH1SJjl6YsH8.json
+│   │   └── frwgWdO5oLdxcpgtx1hJ5u:APA91bFxu3aqjsWrsrvEUMzxHCxgy6Vkblqm2SDgY47morlYaAqEkUCm1l0en11iXtZ-8uqK5B0SRXnqhsQ0YPuIgxcfOBGmufe4uJV28o3Emx7h-nwjps0.json
+│   ├── homework
+│   │   ├── 10.json
+│   │   ├── 11.json
+│   │   ├── 12.json
+│   │   ├── 13.json
+│   │   ├── 14.json
+│   │   ├── 15.json
+│   │   ├── 16.json
+│   │   ├── 1781654400000.json
+│   │   ├── 1781740800000.json
+│   │   ├── 1781827200000.json
+│   │   ├── 1781913600000.json
+│   │   ├── 1782086400000.json
+│   │   ├── 1782172800000.json
+│   │   ├── 1782259200000.json
+│   │   ├── 1782345600000.json
+│   │   ├── 1782518400000.json
+│   │   ├── 1782691200000.json
+│   │   ├── 1782777600000.json
+│   │   ├── 1782864000000.json
+│   │   ├── 1782950400000.json
+│   │   ├── 1783036800000.json
+│   │   ├── 1783123200000.json
+│   │   ├── 1783296000000.json
+│   │   ├── 1783382400000.json
+│   │   ├── 1783468800000.json
+│   │   ├── 1783555200000.json
+│   │   ├── 1783641600000.json
+│   │   ├── 1783728000000.json
+│   │   ├── 1783900800000.json
+│   │   ├── 1783987200000.json
+│   │   ├── 17.json
+│   │   ├── 18.json
+│   │   ├── 19.json
+│   │   ├── 1.json
+│   │   ├── 20.json
+│   │   ├── 21.json
+│   │   ├── 22.json
+│   │   ├── 23.json
+│   │   ├── 24.json
+│   │   ├── 2.json
+│   │   ├── 3.json
+│   │   ├── 4.json
+│   │   ├── 5.json
+│   │   ├── 6.json
+│   │   ├── 7.json
+│   │   ├── 8.json
+│   │   └── 9.json
+│   ├── in_app_notices
+│   │   └── ksMc9v6q9jaSpW99QOyx.json
+│   ├── marksComplaints
+│   │   ├── cgRVMeT3vnoYNNrEkRGh.json
+│   │   └── OBCrCi7cPqm7PRaAzOy8.json
+│   ├── marksOverrides
+│   │   └── 23.json
+│   ├── notes
+│   │   ├── 618BAuC8y7s3eH5LO9WN.json
+│   │   ├── AQEHUh3STkVwiKdLGA7l.json
+│   │   ├── AvAbw6HhVIAQnHKbh5td.json
+│   │   ├── BJveBbWkzq2HdguxyROL.json
+│   │   ├── IbpKeqeRFc4uzTkCFzI2.json
+│   │   ├── iJeOLac08MdAjomMsbUx.json
+│   │   ├── jb1caKJgJExNGhcVqAEl.json
+│   │   ├── jGIYbqL4pD09XjMeTLvn.json
+│   │   ├── N3v0GZjYuZJsfsbKD0xw.json
+│   │   ├── nOHAjDpCaooJmH3dWlPR.json
+│   │   ├── pS8FJlgAPvvPcughX5tI.json
+│   │   ├── QH4XdnVALbBC2QdqNeJC.json
+│   │   ├── QpGEOazBvVz39X5wjSax.json
+│   │   ├── QQpmwRvwGof6RV8TY0Jj.json
+│   │   ├── srrZdHuORwd48uTV01PK.json
+│   │   ├── ttAyVltxSAMx0naqPAqz.json
+│   │   ├── Udvg8sXKWQ2rX0K2seWL.json
+│   │   ├── v6b8jctiHacPxRCsxG1c.json
+│   │   ├── vUzExGSp7m9bvF7mxhX4.json
+│   │   ├── yFk4JSgmR2tglM0ssspv.json
+│   │   └── YM5BaFwYkhtBRQ0xWiDQ.json
+│   ├── notices
+│   │   ├── 4FFjSoxPfEWh9Ndu1YVg.json
+│   │   ├── ammh4N3EilCrO639Lluu.json
+│   │   ├── ils4JB5npF3E6izRzTwM.json
+│   │   ├── lnR6Eu5QaejX9ZHxEYsJ.json
+│   │   ├── mJQt0JwelfkjNukO0UgL.json
+│   │   ├── NnrjrAsQq2jLBEu12PBF.json
+│   │   ├── qfEtnFfsCU1WaCIwu55e.json
+│   │   ├── qiLnZI4VFwyL4qcPDXAc.json
+│   │   ├── u4UsqtD2wKXv0kqKwueT.json
+│   │   └── yUtUM9PalMREbGX1MgL7.json
+│   ├── notifications
+│   │   ├── 0Qf5EKbitbBArWK3QJhY.json
+│   │   ├── 0ZKv7t8FREwYViEXAloP.json
+│   │   ├── 26AFCb94DLX4qeA9rXWD.json
+│   │   ├── 3Su5J9zyAmKeezG3WqDw.json
+│   │   ├── 3zcCxTRRjJue0Sg9tDm2.json
+│   │   ├── 5CBXD4mhGPHBHhtE3ljt.json
+│   │   ├── 6mpJ2yf7AbpYPwabb52E.json
+│   │   ├── 7OWgP32s2Q4YMjfeR3oL.json
+│   │   ├── 92G9oa2I7nbpw1ru10qb.json
+│   │   ├── 9aBqG4gZ1H7F0dHd19VQ.json
+│   │   ├── a4ryL8PcWssquCJ7kgkE.json
+│   │   ├── aFxd8IJMbrmtzySAcb2k.json
+│   │   ├── aqK8SSaRCwSfKkowb7PL.json
+│   │   ├── bMOIWHlDWPFMYsoqd4PF.json
+│   │   ├── bZDmLljJ9xOgjC22oTGU.json
+│   │   ├── bZjDxyJT3rc9GTGJmN1M.json
+│   │   ├── C1bGvadwO2q3rl5ygu28.json
+│   │   ├── CdJhTfZWa3m1MZyDDmDc.json
+│   │   ├── COoGGgPzhYmwMBPGbDJF.json
+│   │   ├── dFtl4jfrgIiEiQG9PoRl.json
+│   │   ├── dsNbRKyuRQlJA2cBJekO.json
+│   │   ├── dZFGViht6WyRM3YkfJ0L.json
+│   │   ├── e9988hGgcT65AWvl3GbP.json
+│   │   ├── GiXymCzRtKJsRSWDLEEt.json
+│   │   ├── Gk2sMDuPIdAfZzmf6K5h.json
+│   │   ├── hAie0lwxmZQjY6BA2xyq.json
+│   │   ├── Hh3gngXHlCvpyUp4nOyH.json
+│   │   ├── IKVLFyJPYF49qu4SC6IL.json
+│   │   ├── iqeCup2w2iHQvY4zKVLa.json
+│   │   ├── iWsArJCRKkYHtRIa26Mh.json
+│   │   ├── jeExSiPEdDCiO5dJGza0.json
+│   │   ├── JSoE37FKkb4CLfXx46j8.json
+│   │   ├── JZKgcTCqTPrGtz6IWI9v.json
+│   │   ├── K4POWhpzmKbQgsJeoVlG.json
+│   │   ├── l7fUM59UlN9SXgV2tRxp.json
+│   │   ├── LHOwdxKGbpTLe8s9A1Dk.json
+│   │   ├── MC25Xw0GhmfR34lYulLl.json
+│   │   ├── NBCkG6Y09iMqkmyuNAlA.json
+│   │   ├── NvsV6vsgXomAemLi79vL.json
+│   │   ├── nWYcQIbgHIo8lexCgp3b.json
+│   │   ├── O3YzpM8PaPFeU21hKYTS.json
+│   │   ├── OLo7KGC6IODB0wLKNlZw.json
+│   │   ├── PuhjTfbHPCV5HvsUr8WY.json
+│   │   ├── PzkPepLc7VB9vBzzR6KN.json
+│   │   ├── r8vDegGuYK8EK1DpK7BI.json
+│   │   ├── RarKiDzwdNBYwKyclYHn.json
+│   │   ├── sc9hDVJF404FopXMFepR.json
+│   │   ├── T6VsysH7QvOU8txuI5dL.json
+│   │   ├── UGgpTAkWMf8BdM0EnJ29.json
+│   │   ├── VOxNifGOUhETIaUCLEdS.json
+│   │   ├── WfTKRbijBhm4pB9SYDKy.json
+│   │   ├── XoQi3vj9uvSnDtyKYk5H.json
+│   │   ├── y1fDoKiHw6DMJaVkNM4Z.json
+│   │   ├── YcTV7U4W8H8OqEwNF8Zu.json
+│   │   └── ZE7kEdheSUeEFqg0h1kR.json
+│   ├── record_entries
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_10.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_11.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_15.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_19.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_1.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_23.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_2.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_35.json
+│   │   ├── 6nqbdQRYNIxM6V74PzDS_40.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_10.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_14.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_18.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_1.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_20.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_21.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_22.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_23.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_28.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_2.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_34.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_35.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_37.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_39.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_40.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_4.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_7.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_8.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag_9.json
+│   │   ├── sycXNz78gKfg0SoCCvQy_10.json
+│   │   ├── sycXNz78gKfg0SoCCvQy_23.json
+│   │   ├── sycXNz78gKfg0SoCCvQy_31.json
+│   │   ├── sycXNz78gKfg0SoCCvQy_3.json
+│   │   ├── sycXNz78gKfg0SoCCvQy_40.json
+│   │   ├── sycXNz78gKfg0SoCCvQy_5.json
+│   │   └── sycXNz78gKfg0SoCCvQy_8.json
+│   ├── records
+│   │   ├── 6nqbdQRYNIxM6V74PzDS.json
+│   │   ├── ldHvaknZcGI3KpokJ6ag.json
+│   │   └── sycXNz78gKfg0SoCCvQy.json
+│   ├── settings
+│   │   └── starbatch.json
+│   ├── starBatchMacroReports
+│   │   ├── 6206413700.json
+│   │   ├── 8102783645.json
+│   │   └── 8521278692.json
+│   ├── starBatchQuestions
+│   │   ├── 10UEVk4s3r9iDvMfZyCL.json
+│   │   ├── 25RLreQ7YnpPTwdOQuTs.json
+│   │   ├── 2fSCl2N8XFV29wSUOXEy.json
+│   │   ├── 3KcLrW16Ni0rpFnWkFuZ.json
+│   │   ├── 3wIldT8rps289Db33Y1n.json
+│   │   ├── 4H2Qlh6wxj0ewsIMItQe.json
+│   │   ├── 5A2u2YIVt7SmxgNxExFp.json
+│   │   ├── 5fMZGiDhdbSm7BUac9wh.json
+│   │   ├── 5KMn4yeqEF7zt0i8ppSe.json
+│   │   ├── 61R4QepiMDiBbofjuzuc.json
+│   │   ├── 7kZHREZOSXkxx5oSQqw6.json
+│   │   ├── 7smQffMIvh9NKoYFYzsh.json
+│   │   ├── 7UNHn1JwlX9hJVwrUqrK.json
+│   │   ├── 8hEfVPN1bFmYBCV4kQte.json
+│   │   ├── ADLLkCLK6eUfQSJoCtGa.json
+│   │   ├── aHiLz3578nIuAIBMmo8i.json
+│   │   ├── AiiMEBTKt78nKXUqcOac.json
+│   │   ├── aux6bAlgFC8EpTwSFpGC.json
+│   │   ├── AZplRBziNCeWXEyxZT4f.json
+│   │   ├── B3IHlGaWerw8RMtyKDos.json
+│   │   ├── Bx1KA1FS2N37SJytbxZW.json
+│   │   ├── cMOB8dL1p72ccqoMwM8C.json
+│   │   ├── CpbeblbvWsJyID3vQjoR.json
+│   │   ├── cRQzTY94uaXSAnBPivXe.json
+│   │   ├── CUEhQPExSm2FZK7DqcyJ.json
+│   │   ├── D7eSbLxEf6yP7sGHeMC6.json
+│   │   ├── D7YL8v23ZAr2vzhDOkUj.json
+│   │   ├── De8byNV3ypVnAMKY2DNT.json
+│   │   ├── dqZbWRbh4S4QXgpIhbXw.json
+│   │   ├── E3e5Uk4j5GcFaF10N8Gl.json
+│   │   ├── eFRXXMpcxjVn18f123s5.json
+│   │   ├── egiLeYlMdTt9tCkOiOf0.json
+│   │   ├── EH6D7gi35HwxrB1Uyx02.json
+│   │   ├── EJxPNIpHCVXVD8JxqZLt.json
+│   │   ├── EkZyYt5fjZpguxGc02zK.json
+│   │   ├── eU6WPy2Num6BkkfDxQIG.json
+│   │   ├── FiGc26uEE8imuzwolBAk.json
+│   │   ├── fRrYuGCs6oqrzbbuqNe3.json
+│   │   ├── g4Tjx0J46b1umeAyKM6O.json
+│   │   ├── hJpMgjNiorHhIe2bRXw7.json
+│   │   ├── hMGI7vWq5WRN9B9X04mo.json
+│   │   ├── hPrUeCdLHYFpkAIkqpez.json
+│   │   ├── iarNHCkNqYGJP3fKgkRL.json
+│   │   ├── iBQ1u2vgL0YED8vngLzR.json
+│   │   ├── iJSO2WuvktGosxg92xjg.json
+│   │   ├── IzwSoIQacTCniNcsvLNa.json
+│   │   ├── J5Jm9cSOeezV1YtIARrp.json
+│   │   ├── jl8H3jD6yH6ScM6zHwUk.json
+│   │   ├── JoiWRvzYPEY0BKcegSCX.json
+│   │   ├── jSAKJvOt7mJrpUMCBfSz.json
+│   │   ├── k92mqCjDlhLqCfwIEdhE.json
+│   │   ├── KA7QHx46OMNxMtu2pc6z.json
+│   │   ├── kHdyeX6BlgvVTjooFLJQ.json
+│   │   ├── Ko5q3fBGdkjMgB91qGIp.json
+│   │   ├── Ky6oEuje6z64CWCD4H1n.json
+│   │   ├── LbsJdh3pRvzULBH6rABM.json
+│   │   ├── lLTun6TeXlxXEMwpwXRo.json
+│   │   ├── LoloU6RjwoG4Mw0Wybqm.json
+│   │   ├── LT3a3sbp0i72CfHuS5bj.json
+│   │   ├── NLAQr0IEtyRF0rU3hkm9.json
+│   │   ├── oWAneicWyScg3epgB13Q.json
+│   │   ├── pf5US8VeLhleUH8k0VIW.json
+│   │   ├── pjR5EAHEqvwsDnun3lwc.json
+│   │   ├── Pu5L03K8SqYE2mDoRVjQ.json
+│   │   ├── pUbgFMYhRKRQJSn0E4W0.json
+│   │   ├── pX4vW04jkCcZzPFyMl4R.json
+│   │   ├── q0nTzBCUL8LFAoMjoNPL.json
+│   │   ├── Q7XYRPOIqcoPqV20lK73.json
+│   │   ├── RiZA00rZPrPpVDhMV4uX.json
+│   │   ├── RSQcUtUBT43XHEcOW49p.json
+│   │   ├── ScFjvl5qCa6XnpAno1Qk.json
+│   │   ├── sEssQRj44aDArZ1Rglog.json
+│   │   ├── SGvAREFEUUEr4UEKpHnG.json
+│   │   ├── sIujeN1HVTyrNSNaR1dm.json
+│   │   ├── SKiesQNA89XXZQ1RG8q6.json
+│   │   ├── TLs2WsHg58pmXKYmVBKf.json
+│   │   ├── tO5PTIKx4FDzQPpB2Vpp.json
+│   │   ├── toKF0rb3Uef6VjksteaR.json
+│   │   ├── uHjUkwLtGflmky8QdrS3.json
+│   │   ├── UKPBAaAGBOWBRhYudDFz.json
+│   │   ├── uoo0EqX8UxDY3m0ofMqE.json
+│   │   ├── UP0FZFEl0veErneE7wER.json
+│   │   ├── V5Izf2cN4v4JExCcXMyl.json
+│   │   ├── VNcb7lRKxnghXxZhuTGf.json
+│   │   ├── vP9gCjRA8WhU2XRWke8I.json
+│   │   ├── VpTRgkThwJjGwtLBQISQ.json
+│   │   ├── VrgfJPlBDPLAUp3gSAKI.json
+│   │   ├── vx8MqDoVQskkZqN3Um7F.json
+│   │   ├── VxCpRtsogjq1DLK5m1rh.json
+│   │   ├── wPZ5PGZPS740EN491Rsj.json
+│   │   ├── WSGLVgU6s9n6hBSlpc8m.json
+│   │   ├── WWN7ybN2Zk3tbSfrZxmZ.json
+│   │   ├── Xa9Fask7q3A8FfxmvpX5.json
+│   │   ├── xWCzHkIbfanO5xxFtNMw.json
+│   │   ├── xZtoz8zkaK0q7Hhmb1y2.json
+│   │   ├── YaGfDUZkx48Qgbso5DsA.json
+│   │   ├── yBc0yXwNRgTLCkhXRVh0.json
+│   │   ├── yEXQZfwyG50qIqFVs0a8.json
+│   │   ├── YP2je015GLK1cIvccQiM.json
+│   │   ├── ZbvEtgrgxQBU6lv1RvFv.json
+│   │   ├── zjlB5iYHkCnlN8bT0utb.json
+│   │   ├── zoK9QLvifYuVkinvClmr.json
+│   │   ├── ZV4MCdwQwCqlmTMs6AWh.json
+│   │   └── zYzyqFgOGUHjEj69NWQT.json
+│   ├── starBatchReportedQuestions
+│   │   ├── 23BLy4thCFsg7GfhVEXD.json
+│   │   ├── 5znrvkAuqw5xniyDmdNj.json
+│   │   ├── Qd9Z1ea77JwoXfpCMMOt.json
+│   │   └── U7ohsM5O5pRiNWNlsmxB.json
+│   ├── starBatchTestAttempts
+│   │   ├── 0UTqZEIqlvPaRjPBzzgg.json
+│   │   ├── 1w4h6bYJ41ouIfFneCXU.json
+│   │   ├── 4KJhgElvMEdEA9X63rzf.json
+│   │   ├── 7BYspAYIKR9v4NzqwHUo.json
+│   │   ├── AJNSKh7YjiWvpVDipfiX.json
+│   │   ├── blWHlcxn83uvuBVXPggb.json
+│   │   ├── BRONR6VqhOzovTB0RAgp.json
+│   │   ├── BZJfyv9LoR5C4wddkfmz.json
+│   │   ├── cyTS9LZAjqcRniVerNuE.json
+│   │   ├── dGO4wkrbI8yfjG9OlOle.json
+│   │   ├── f9LI3DJARZmehfxhYrGN.json
+│   │   ├── GkN4RKoSBSu5CMOgrBUX.json
+│   │   ├── hkgbgCIhivVqQDrGK0xb.json
+│   │   ├── JzMptpvOu0Oy7J2WbcM4.json
+│   │   ├── kUeP8eA7aMk2eLdn7E67.json
+│   │   ├── lnJtFfTTs3EY5mhOLNeL.json
+│   │   ├── NrGsbqMlT5HZXVYuemun.json
+│   │   ├── o2ZfBcQKHEXzSpNtvknb.json
+│   │   ├── o8uCxnRSr8HgtWLzwMdE.json
+│   │   ├── RgI92gbuM5e7o79LTHCa.json
+│   │   ├── S8Zak0EgxLBMhdTaWDiF.json
+│   │   ├── Sri9thgD3Q0I7nTsVMLn.json
+│   │   ├── vhRNeTWllUvcYtF6rNof.json
+│   │   ├── VkG6lakoJwvYWGNrQBKY.json
+│   │   ├── vNVh5JiM2Jo0gmpFdup1.json
+│   │   ├── WiN8QyM9HHHwD8NsbXJi.json
+│   │   ├── wTbg8LOTLnEq62u8rJbE.json
+│   │   ├── XedmY5GIKC9ZUPHpHx1x.json
+│   │   ├── ygEcTJLSWIkcYyXf70dU.json
+│   │   └── yQeIGM15qJ41egnAaN7Z.json
+│   ├── starBatchTests
+│   │   ├── 0OoeqjQwQy0CWZKDg9dy.json
+│   │   ├── 2cWTY6AnbAKnJ2lRcCp9.json
+│   │   ├── 9Yd1TJUagwhhvFX9eNsq.json
+│   │   ├── ayPvpo0nKJHPJ14RClFz.json
+│   │   ├── CbwqMNE8mNihOOcg48Uw.json
+│   │   ├── CHIMtJuWOvty4tOYtxtH.json
+│   │   ├── dzS2AskpfXE9l6CDTQ4P.json
+│   │   ├── FYp7vqDPqFqBqsOawawv.json
+│   │   ├── IsVe3rDhaH843dev1Lc1.json
+│   │   ├── J6DvegKU1FNE6LNBswHr.json
+│   │   ├── KMCiNHLX8t0I58pTVbRv.json
+│   │   ├── KRFkHk9mn9e5XkddDxYV.json
+│   │   ├── LXICDHFA4eeJ58x9MAej.json
+│   │   ├── lxNBM4u6AtGf6JZGSJLv.json
+│   │   ├── nlyEbQlLcPYGl6Je7OVf.json
+│   │   ├── nnXkQwMITI6MaWngsIZ3.json
+│   │   ├── qs7MZUO1OxtL5UbUZZ2n.json
+│   │   ├── Shwu0GiJRhlKPSFRvXHp.json
+│   │   ├── v05jU5fGRcGYqUtPaMBg.json
+│   │   ├── VbjSSsv3h55sT2O985E7.json
+│   │   ├── VWOHFO6FtjiFGMSWizlI.json
+│   │   └── YzIxYFsMJxzxPJcLDPo3.json
+│   ├── student_notifications
+│   │   ├── EI2cuwktAnp5vgTPIDGI.json
+│   │   ├── GU77FYQwPMHKYaFhtmp3.json
+│   │   └── TocYxbOm8dXC8onijyoo.json
+│   ├── studyRooms
+│   │   ├── 3NTnOOU06Zm8KSylBGBT
+│   │   │   ├── messages
+│   │   │   │   ├── 45ECH6wfMeWYI3xfmWOD.json
+│   │   │   │   ├── 95cNL6Euwy9fv4eIArgc.json
+│   │   │   │   ├── ANRRCES32ZMHMdFf8U4n.json
+│   │   │   │   ├── dFjvxZtlamO519PIOqUV.json
+│   │   │   │   ├── e2U6J3N94Lpw2YjQBKCv.json
+│   │   │   │   ├── e7quGS5QfJa5jZQpGn7L.json
+│   │   │   │   ├── EpwqNtbMNTt6kuAnfeRb.json
+│   │   │   │   ├── FMVHTLvqaICpt1jkMt0A.json
+│   │   │   │   ├── JOXpMT7Wou4FNtNFGn0M.json
+│   │   │   │   ├── KQ1LICuQD2mFKPZjCSZA.json
+│   │   │   │   ├── p9dxozOZui7IfLZoguNT.json
+│   │   │   │   ├── sJ40RwIu3vWigKb11ICu.json
+│   │   │   │   ├── tQcfq34fIzMyRbTsKnY1.json
+│   │   │   │   ├── u2BrTtJVCExuSSt7pAfw.json
+│   │   │   │   ├── ULLb46J7sUplBcN1d1DB.json
+│   │   │   │   ├── uXQmgPk9jaQvGkuLU1br.json
+│   │   │   │   ├── VICuCxTYlI7mQPyyYs7S.json
+│   │   │   │   └── VJ8corP4lyhCERS7lsr5.json
+│   │   │   └── presence
+│   │   │       ├── 7004827265.json
+│   │   │       └── 8102783645.json
+│   │   └── 3NTnOOU06Zm8KSylBGBT.json
+│   ├── teachers
+│   │   └── NrYHxWufhvpSjXResXOd.json
+│   ├── test_data
+│   │   └── config.json
+│   └── users
+│       ├── 6201719526.json
+│       ├── 6206413700.json
+│       ├── 6207463991.json
+│       ├── 7004827260.json
+│       ├── 7004827265.json
+│       ├── 7634861404.json
+│       ├── 7717762410.json
+│       ├── 7857866182.json
+│       ├── 7870503833.json
+│       ├── 7903808985.json
+│       ├── 8102783645
+│       │   └── starBatchBookmarks
+│       │       ├── maths-0-c0_35.json
+│       │       ├── maths-0-c0_48.json
+│       │       ├── maths-0-c0_57.json
+│       │       ├── maths-0-c1_109.json
+│       │       ├── maths-0-c1_136.json
+│       │       ├── maths-0-c1_46.json
+│       │       ├── maths-0-c1_55.json
+│       │       ├── science-2-c0_22.json
+│       │       ├── science-2-c0_49.json
+│       │       ├── science-2-c0_75.json
+│       │       ├── science-2-c0_7.json
+│       │       ├── science-2-c0_86.json
+│       │       └── science-2-c0_97.json
+│       ├── 8102783645.json
+│       ├── 8235751399.json
+│       ├── 8294399100.json
+│       ├── 8521278692.json
+│       ├── 8825310548.json
+│       ├── 9103289322.json
+│       ├── 9204219724.json
+│       ├── 9304213077.json
+│       ├── 9508796976.json
+│       ├── 9572049552.json
+│       ├── 9771954188.json
+│       ├── 9798163463.json
+│       ├── 9798404039.json
+│       └── 9999999999.json
+├── firebase_backup_2026-07-14T17-17-00-870Z
+│   ├── activityLogs
+│   │   ├── 6206413700.json
+│   │   ├── 7004827265.json
+│   │   ├── 7209514454.json
+│   │   ├── 7634861404.json
+│   │   ├── 7717762410.json
+│   │   ├── 7857866182.json
+│   │   ├── 7870503833.json
+│   │   ├── 7903808985.json
+│   │   ├── 8102783645.json
+│   │   ├── 8235751399.json
+│   │   ├── 8294399100.json
+│   │   ├── 8521278692.json
+│   │   ├── 8825310548.json
+│   │   ├── 9103289322.json
+│   │   ├── 9204219724.json
+│   │   ├── 9304213077.json
+│   │   ├── 9508796976.json
+│   │   ├── 9572049552.json
+│   │   ├── 9771954188.json
+│   │   ├── 9798163463.json
+│   │   ├── 9798404039.json
+│   │   └── 9999999999.json
+│   ├── appConfig
+│   │   └── ctaBanner.json
+│   ├── classwork
+│   │   ├── 2026-06-19.json
+│   │   ├── 2026-06-20.json
+│   │   ├── 2026-06-22.json
+│   │   ├── 2026-06-23.json
+│   │   ├── 2026-06-24.json
+│   │   ├── 2026-06-25.json
+│   │   ├── 2026-06-27.json
+│   │   ├── 2026-06-29.json
+│   │   ├── 2026-06-30.json
+│   │   ├── 2026-07-01.json
+│   │   ├── 2026-07-02.json
+│   │   ├── 2026-07-03.json
+│   │   ├── 2026-07-04.json
+│   │   ├── 2026-07-06.json
+│   │   ├── 2026-07-07.json
+│   │   ├── 2026-07-08.json
+│   │   ├── 2026-07-09.json
+│   │   ├── 2026-07-10.json
+│   │   ├── 2026-07-11.json
+│   │   ├── 2026-07-13.json
+│   │   └── 2026-07-14.json
+│   ├── config
+│   │   ├── calendarOverride.json
+│   │   ├── syllabusCompleted.json
+│   │   ├── syllabusExtraTopics.json
+│   │   └── syllabusHiddenTopics.json
+│   ├── ctaBannerClicks
+│   │   ├── 10.json
+│   │   ├── 23.json
+│   │   ├── 40.json
+│   │   ├── 85.json
+│   │   ├── 8.json
+│   │   └── 9999999999.json
+│   ├── fcmTokens
+│   │   ├── cKiMJ79al7PaUxfs-t2tXQ:APA91bG9GtdnOAgGaVfus0qIpET4kAIDSXrUvl41j9PEyyGyjfWiSKfxgZPjaSnxuapQlGArLYighZS3fXa65nWJGslr3QkdlKV1IXuFqOTeIzEyPzMrt0U.json
+│   │   ├── cMDapT7Gy7GDKjEQt7JaXq:APA91bEpV4N1P7L29qaPGT18elbyGDLCw9CYy8RlEiHw6eRWphNVYRRAJPUDucNc4NE4BBfR-X1p0dVS6YONlp22f7S3pYipRaJHDqRPZgcX3ymFrddgQeU.json
+│   │   ├── dhhvksyez4dYCyZUxuRUt0:APA91bGcuu8efp-jEm9E2qIRK4K50UZ7uJoP2o9TyUiX-E1ktHjUlmsXHfytFHTUDEJ-YAc9y0Kj8DmnRN-9awm3hpIej3yDtKgVoFM8H-P0QAq3Cc_rOww.json
+│   │   ├── dQZYwRdYiHHN4PKyJ_peNE:APA91bH2tI7hc7moJ_cKf7y5GJT167-iqpLVu4cw7pgzevE48HOTH4Fc5yAzJS75P_Rp30l7i7ciFD7jy4V4kd4MebbDGcbh6NWYj3Pg8i46HENI9v5-cOc.json
+│   │   ├── eQ6TTtCC7wQF-YCQ861wNW:APA91bEax4yyB4FlsxYh0nmq49kdYBxavhDnBfVySM5CwZeUdAlp3k3LdElKlT8M65mU_DBhXklKarhLmkc1mygCH6OmqzIa3n2sr7rC7U5Qh7cxH8Orrh0.json
+│   │   ├── f0WIcjBUJj4KLHNXBrVy-t:APA91bEpJEb4khUMyEtjDkgfxsGyBxsfAeyXgqoFcv2YW1ZfFkvXvkAzdRT3B5CU0jtILu8g0nDPGRCfZnMOakr2DL5Mwc3DIOSYbZOFAWiQA392VtgaK-Y.json
+│   │   ├── f929sAw3GP3yiWcg4lN8IB:APA91bE8wsyZ7hIeZ0yvd_d2Y8PadnVUjV0-snjaMEW1CgfJLJ0M9eTQ8fPz9ogr6D1Lt7Q7XzJe50GjJ1-SmmU4-UDhQRRv3-JH1Xqs2fauH1SJjl6YsH8.json
+│   │   └── frwgWdO5oLdxcpgtx1hJ5u:APA91bFxu3aqjsWrsrvEUMzxHCxgy6Vkblqm2SDgY47morlYaAqEkUCm1l0en11iXtZ-8uqK5B0SRXnqhsQ0YPuIgxcfOBGmufe4uJV28o3Emx7h-nwjps0.json
+│   └── homework
+│       ├── 10.json
+│       ├── 11.json
+│       ├── 12.json
+│       ├── 13.json
+│       ├── 14.json
+│       ├── 15.json
+│       ├── 16.json
+│       ├── 1781654400000.json
+│       ├── 1781740800000.json
+│       ├── 1781827200000.json
+│       ├── 1781913600000.json
+│       ├── 1782086400000.json
+│       ├── 1782172800000.json
+│       ├── 17.json
+│       └── 1.json
+├── firebase.json
+├── .firebaserc
+├── firestore.rules
+├── generate_skill.mjs
+├── .gitignore
+├── graphify-out
+│   ├── cache
+│   │   ├── ast
+│   │   │   ├── 01ba72620fee55eaae446f550336d3516c8b7dd1e3ea1b8dbccde64fc0f532a3.json
+│   │   │   ├── 0ccef32009f6f88b4104048b990df0976822bba89b5f916ecf3a9baabfd308ea.json
+│   │   │   ├── 1af5aeb63485868cd8673dcc37d1af8a10e928c041c542f6e983e5c99f26221b.json
+│   │   │   ├── 29079ceac8981b6764d68eb910ee0d2961091e1341fef8a3a78d119bb8ed5164.json
+│   │   │   ├── 29aa5233e28746b4fd5470e817dd303975bc9375025428fa0c259063b2c9f555.json
+│   │   │   ├── 41285bf9f6060a97b43eacce95f4bdce11988fe0adaf11bab79552c277346109.json
+│   │   │   ├── 6cbc356ead1c4a3c32575ac34b7b6297fc9b1e1b0184f855c6d5ff36b3ec9944.json
+│   │   │   ├── 95618605d14c7320930e895682a87f2ab169d296544be77f6b57229efc1a52e4.json
+│   │   │   ├── a2cc71ad86ad167676fbcd8ead4eaaa47c92761f70d0f64c926ed6b47d0b14e8.json
+│   │   │   ├── abaf4d83686f90578ecf8c740bc9dd818992e74d592a85fb2be236f2b2b7eb9c.json
+│   │   │   ├── cb9902f6b3c23d31e2e63bb64e52418e71f21f82fbb3a0c70efedfe9bf4a22d8.json
+│   │   │   └── e14e2c12a9e84d378ae61b7aa78d348dcc70140d600d2e6572ee2ac47ea3c757.json
+│   │   ├── semantic
+│   │   │   ├── 010ee100a793972206a3c50aa0bb043c996857b7cde9d83721706c6a5a16bf8f.json
+│   │   │   ├── 05d553098b36e6ab262c07592bca2bb863d8a57f883251a4c45497fd330d0fc9.json
+│   │   │   ├── 0a4d52e52dd8d32299121496a30bc5160c87c2139cc0d571220d3eea436a3a5f.json
+│   │   │   ├── 0aee0d98ab2f854204735c41704bbfe925239dcde3f35588c43a0a22d0c01558.json
+│   │   │   ├── 0afc29dbb73f2b1f08e44ddd521df0f50071e325f151555c2e3241ed4af35fd5.json
+│   │   │   ├── 0c310b9c433cbe5ab94100ecda27e1e7127fb83f868149987cc3ca33a76dc55f.json
+│   │   │   ├── 0cb3433af6fea46c89380f79df5f8829e38a3f147efd7ef2935a6d3a5cfe9f19.json
+│   │   │   ├── 0f1d491b0033502d73bbbe695dcc0aa8545b9faaef747821c930ea3611702e88.json
+│   │   │   ├── 0f8591879e66b26071cf321335a73109d100d5377c13dfa4b41e4717aab330e2.json
+│   │   │   ├── 13d27119b7f563cb08a781490c5d244ac9d0c9d6a6fc0081cee725cce927416d.json
+│   │   │   ├── 156305e0067dc20fe1dac265a0351feee46e721ac0e6fe4110ce2be4d63d5565.json
+│   │   │   ├── 157d12a4ea6da5fd2c923866890441455ce3d6df0308b3facc7c3a78409910be.json
+│   │   │   ├── 22e73879985d944ffae666a7ff0370fcdcb2d084418e8a089ccf625d8e774b69.json
+│   │   │   ├── 239f0587f06d9e00cd4ecc0f6c2afc0242c9c831a61d8a1d246d98cb7b0dcb4e.json
+│   │   │   ├── 23e2764dcb177535f367d348a076fc3c45789793dcfcc2001fe8e0eb2810a147.json
+│   │   │   ├── 240ae638b22ca824ae449f53ec06fe308f77a02eaf219d5afbdf85e9b2134a18.json
+│   │   │   ├── 282a90ac70bea0f4bce3838c050d98643104c01c52542a866b0f2c320a10e4e4.json
+│   │   │   ├── 3119cd022b4edf0320d04ec3e352046734ed4b5cd772827fcbf147db387d1cc6.json
+│   │   │   ├── 31e57dfb8c593afa3bfe59c7d288fb970cf35355adf3838fc813a7d404c85931.json
+│   │   │   ├── 3339c6a8be848dc5ae624bc3129b0e5123630fc47633b26f0a76c1c5bf3cb1ef.json
+│   │   │   ├── 344e941bdec44ab9e10401afdec086764e8468727454be32639727d68068af8d.json
+│   │   │   ├── 361669e3c4a719a08324eeb849ec98b39542755031a091ea8d5bdb6328659657.json
+│   │   │   ├── 367d30f60dd29cf78bf426bac0ae3a5d0e703b061af6a019b5af97de42ac3491.json
+│   │   │   ├── 3a55f30bbdf7752a5f23bfba2e646a49afdc617be7a5d85f5c4fbe4bd68643b2.json
+│   │   │   ├── 3d52fc09c306d0e1c11d7099e211cefbdb13609fd1e3568e60679fe0afcf7462.json
+│   │   │   ├── 3e8b8f59e3e3cd49a2256fcd9f5957affa025bd3c6edc6ea77ab4a431bf42b4f.json
+│   │   │   ├── 42216a557547bb3043292e803eeb7a6ec749a7fbd9dca3b613d0bb207fefcb37.json
+│   │   │   ├── 44a10cf5155fa60c792e2695921cafb899569e1f182d20c655bdd29696590ed3.json
+│   │   │   ├── 48e36771e938acd98054538dda2d6a869c8c5a13ef0c2df3e9c9b9157bfb5e8c.json
+│   │   │   ├── 4baac388676f32ac9e611407b12ab15146f76c3f0530b21c49463d914a1a6474.json
+│   │   │   ├── 53ff8b62283668e9ed84c73c7e463757bf4351627c1311f7f24892cf872c66fd.json
+│   │   │   ├── 54595006c353c05915d89af39a8a1a8c563543f029bcbc1e48b37c4a1b4a5fca.json
+│   │   │   ├── 587e4a6f7059a56ea160e1ad25b03b0ccca7e65c80bdb4c37569c264c445e2ca.json
+│   │   │   ├── 5b49f4178480cfbf49370506e74d77b89cac0e9b6ebb09e9dfd55e8061223a14.json
+│   │   │   ├── 5f5b39f2796901ca9d6f4fc0751fc5b5032fac201c108fdceae8581b679481ad.json
+│   │   │   ├── 6073465f86cedb9a1a353439803903552c44d04b88176f522604da15c3964504.json
+│   │   │   ├── 6143ee391999ce0946c2a9896958ec8723fdce7c8257b6404a422db2be8e6a21.json
+│   │   │   ├── 61787711b004343b1208f85bb681cf3d205a832702a68a579deb81023c6c23c6.json
+│   │   │   ├── 6391b97cfd8b285811102661de7df00265fcb79707f3ea7a3553d02423bb73cf.json
+│   │   │   ├── 64a70320e4a83b2016257224a42452d4c366c84d4d3db16c2794853dbc62fe7d.json
+│   │   │   ├── 65d16d996c95f923080193eaeedfd7f7f0f3cda42947f10d4276ccd71516a5f7.json
+│   │   │   ├── 662b3997d1882409edaa0e359f02db35bb6cd2dc795b0018835f7d431e9f6c6c.json
+│   │   │   ├── 7062a99ef781acf0c472448807c4509d711bd74f86a2e166441dd2cd1570d5e7.json
+│   │   │   ├── 71aa52de4be9f6dd6cc5c251e30cd8c12d8a31eda645a1e48878e20103a2de6c.json
+│   │   │   ├── 72259fae04ecb90ba41a084f95f0053b0d6813cafcb55fb7353c0cc3fe000560.json
+│   │   │   ├── 729d57920b19bbbe6be9bfc5fb407384794f52bd4dfe8c1fab04d7389604bac7.json
+│   │   │   ├── 7404e32e3654e28fa29b0c601496c8ca7a13b24a658910e0053502e31f5eb7c2.json
+│   │   │   ├── 78f25500dbe8d4398e884eb321887a5f5df1d6e956f44951d3f3cea24928e100.json
+│   │   │   ├── 79161d813aee15e739b455f02972a930049532759ec24ca518750e913d517fb3.json
+│   │   │   ├── 79790a9f1da1964a26b0477f08d19f43e825f763bbe728c14ec1e7dcde848f51.json
+│   │   │   ├── 798e460859b5a02a0df93dd517927e415430a0f3da6944316420fbd05ac34d2e.json
+│   │   │   ├── 7b640c83c515010166db38259604d40f7954ac398e1ce34acfc1580a0361a2a8.json
+│   │   │   ├── 806759bf4d06853d7bdd9031c2d55c2d4618c4dd313c31f9006be4638d8088a0.json
+│   │   │   ├── 8090ee0b7b52cbab8036583ea515f85148b90ff32b7b85f050a70a0307b4af99.json
+│   │   │   ├── 80e9e5757acdd14f5248f745e02a333f2f022fa08690cbfe3fc5955a0036ffbd.json
+│   │   │   ├── 85c7471a34598f06604305c7614631bb4b3f1f89e2087eb6f343395cd7ae23ad.json
+│   │   │   ├── 8baf35da73c6fad2d82981ecef58c2223424079a5f70ce7911a7d2d7b1dac53c.json
+│   │   │   ├── 8ca8f8855852aaf606b712601fbc7c8791e47c428f56408a7d5c21c83168d968.json
+│   │   │   ├── 8cc39319fd93880fbecda7943b0f71b780f440b43c9b30dbbf32afad24c26c96.json
+│   │   │   ├── 901988a1095e0de67cc35233b20be91dd91b8d69e5dfd75116d2f1a50f28744b.json
+│   │   │   ├── 902b69de8d8bf238a84e43ced28a8cc962d1d93eb2268c1ca15a194bdbb4ca0e.json
+│   │   │   ├── 96c66bfdc1910e55bfff95d5eb2c25b645d8b0d1d5c24b19bf5465836a1ca8cc.json
+│   │   │   ├── 9752b0dcfb1d8e70332fbe514dc694c9ecba593c37c674d52585891e248eeef9.json
+│   │   │   ├── 984b8a42b22a94b5e6472384b3c153c51073e5bccbf54c099169f00810b4e60f.json
+│   │   │   ├── 99930dc3094531417ea0c0c6bbf4dc2d21ca2d1a22fbe708c5210d311301633f.json
+│   │   │   ├── 9ce020cb45f57a7b934436d1e9f551c6682fe64c05ad1c89f8d53262e10bdf54.json
+│   │   │   ├── 9d0ed385ec9ebb9dbb8a68d9d5c5d55088c7cb7bb8343f10d810b44c66c3c743.json
+│   │   │   ├── 9fcb55235934099ab90f9b0d0d3503553c03d41954bb58d201593a764989a093.json
+│   │   │   ├── a0fd7678f6b0c85bfc3b62d47490489b8fb11df002f8df561c95d535e75948fd.json
+│   │   │   ├── a31ec2bd5bba76b9c662463a1089a4cd240b657f032bb732f6cf04f65bf6795e.json
+│   │   │   ├── a647cf62ab641dafa527bb9aa65323d2e2192cecebd71a4876c4caae644924d0.json
+│   │   │   ├── a662f582b9b362870e439287389951fc116eb90c52c6a53b1ba3f6f96424ce24.json
+│   │   │   ├── a9e8cb96c52946facdbdb657785cb3e21aa8c2c79a2e79daee7af5f78dba4a46.json
+│   │   │   ├── aa07073c47f55d845b4f2ef9897cd63b2e98af1089d7011f614f8c1738965ee7.json
+│   │   │   ├── ac291eb88ad2b43409562bc191dc2ddd91fb30fa326d4cedbb2448d83805101c.json
+│   │   │   ├── acf81171378a97a0d09d57c2865ae6e6a10f82faf9a286553b5bb4bbe0294e45.json
+│   │   │   ├── b387c02c6b89e00e196358fb912991ac7b576fc46ba7808f4d330de9659c8f91.json
+│   │   │   ├── b4134076add920a22f0ccc136aafebce067aa29a9530ae7e0f78d6324916a0a1.json
+│   │   │   ├── b4bbce70821f2b0e02892fb0f556d273689b13aa2b907702a57666ab0be01721.json
+│   │   │   ├── b64a6704314f2998004aa6044dea6980e55f9b0ce4b5ce703fb608c42b732a94.json
+│   │   │   ├── b67876c96786b353a36f866022a4fdbffaf61b0baef2700e84f0e4181f5d48f7.json
+│   │   │   ├── bc25c8b0c47a5cc898cdad059c87708e8087c4981139f2c17554436af5b73bfe.json
+│   │   │   ├── c01591aedf7a91dc02e9064ea48be98304f1aebf200b1944e92b388e4ed8f475.json
+│   │   │   ├── c233ff630eb8682117dcf2b50955ea1c284310a16e1cf4a513c645386bfb09be.json
+│   │   │   ├── c41b4cc6e4ea2c47c0276908fed12923fd8d1f56d7f52e57648e5cc9afd0d391.json
+│   │   │   ├── caa1f6e63531775afa84cab8f5dab8f892d42e1972d4fffc1e0703b15a138e6c.json
+│   │   │   ├── ccea01f673e7f46a361d0dc0e28d0aa32899cc19c3770288e29f9f9aeb15529f.json
+│   │   │   ├── cd93cc428590178647642f51ddc0bcc18991cc81861040e2ebf6740e76f05ea1.json
+│   │   │   ├── d8fd38d1d82095f588a63dc2a49803571f24e1d100a831804235a855d474aac9.json
+│   │   │   ├── e10ee79dc9bacf40a2df72b48b57694b64529dfb0720d6d1e3aae940ddc3b29c.json
+│   │   │   ├── e2bf36cfc80ebb2d4108b819d048782e687d7950477690b70b1171216d05e761.json
+│   │   │   ├── e478c11c78a744f48e3a691633e1dacd55c67085b0c13a531ffa8792a4e6568c.json
+│   │   │   ├── e8417aa566fd56c9608adbdc3ee69c433f92250cd199eb2ab572ee08959512e8.json
+│   │   │   ├── f3542f73925a10d96cc3d43d33473351d61ff0d0577b70cf882a093cd6ce9706.json
+│   │   │   ├── f440a622fefcefebe64957b80b4056b37109d4b4c5fbc69888db38efc713da98.json
+│   │   │   ├── f6022499badf61b3400e93d8fd665ba92127b4924590acb7f0d06438135158ba.json
+│   │   │   ├── f990072c140cda6cd6fa5be30e94aaca2afb0308ef53a94e091cb27950d53984.json
+│   │   │   └── ff0ac18ee7dff7ef4280f79e622c9c25aec02cf5e90f68b0999d43976b36e53b.json
+│   │   └── stat-index.json
+│   ├── cost.json
+│   ├── graph.html
+│   ├── .graphify_python
+│   ├── graph.json
+│   ├── GRAPH_REPORT.md
+│   └── manifest.json
+├── index.html
+├── MATHS_MARKS_MODULE_PHASE2.md
+├── migrate.mjs
+├── package.json
+├── parsed_hw.json
+├── parse_holiday.cjs
+├── parse_hw.cjs
+├── periodic_predicted_skill.md
+├── project-structure.txt
+├── public
+│   ├── favicon.svg
+│   ├── firebase-messaging-sw.js
+│   ├── holiday_homework
+│   │   ├── Biology.pdf
+│   │   ├── Chemistry.pdf
+│   │   ├── Civics2.pdf
+│   │   ├── Civics.pdf
+│   │   ├── Economics.pdf
+│   │   ├── English.pdf
+│   │   ├── English Sample Paper .pdf
+│   │   ├── Geography.pdf
+│   │   ├── Hindi.pdf
+│   │   ├── History2.pdf
+│   │   ├── History.pdf
+│   │   ├── holiday homework.txt
+│   │   ├── IT.pdf
+│   │   ├── Maths Activity.pdf
+│   │   ├── Maths.pdf
+│   │   ├── Maths Project.pdf
+│   │   ├── Physics.pdf
+│   │   ├── Physics  Project.txt
+│   │   ├── Social Science.txt
+│   │   └── SST Project.pdf
+│   ├── icons.svg
+│   └── manifest.json
+├── PUSH_NOTIFICATIONS_SETUP.md
+├── README.md
+├── Real DATA
+│   ├── Holiday homework
+│   │   ├── Civics.pdf
+│   │   ├── Economics.pdf
+│   │   ├── English.pdf
+│   │   ├── Hindi.pdf
+│   │   ├── History.pdf
+│   │   ├── holiday homework.txt
+│   │   ├── Maths Activity.pdf
+│   │   ├── Maths.pdf
+│   │   ├── Maths Project.pdf
+│   │   └── Social Science.txt
+│   ├── homework Record.md
+│   ├── Monitor.txt
+│   ├── Roll no.txt
+│   ├── routine.md
+│   ├── School Data
+│   │   └── School Calneder
+│   └── Syllabus
+│       ├── English
+│       │   └── Egnlish.json
+│       ├── hindi
+│       │   └── hindi.json
+│       ├── IT
+│       │   └── It.json
+│       ├── maths
+│       │   └── maths.json
+│       ├── Science
+│       │   └── Science.json
+│       └── SST
+│           └── Sst.json
+├── reset_test_pwd.cjs
+├── science_exam_set_b_v3.json
+├── scripts
+│   ├── backfill_math_concepts.js
+│   ├── backup_db.js
+│   ├── buildSyllabus.mjs
+│   └── rebuild_player.cjs
+├── src
+│   ├── ai
+│   │   ├── AIDashboardSection.jsx
+│   │   ├── AIPersonalizationContext.jsx
+│   │   ├── aiService.js
+│   │   ├── components
+│   │   │   ├── AICardGrid.jsx
+│   │   │   ├── AICard.jsx
+│   │   │   ├── AIFocusCard.jsx
+│   │   │   ├── AIMotivationBanner.jsx
+│   │   │   ├── AIPriorityActions.jsx
+│   │   │   └── AIWelcomeBanner.jsx
+│   │   ├── contextEngine.js
+│   │   └── prompts
+│   │       └── personalization.js
+│   ├── App.css
+│   ├── App.jsx
+│   ├── assets
+│   │   ├── hero.png
+│   │   ├── react.svg
+│   │   └── vite.svg
+│   ├── auth
+│   │   ├── AuthContext.jsx
+│   │   ├── authService.js
+│   │   ├── nameMatch.js
+│   │   ├── roles.js
+│   │   └── rollList.js
+│   ├── components
+│   │   ├── AccessCodeGate.jsx
+│   │   ├── AttendanceCalendar.jsx
+│   │   ├── AuthModal.jsx
+│   │   ├── ClassInfo.jsx
+│   │   ├── CopyWhatsAppButton.jsx
+│   │   ├── CTABanner.jsx
+│   │   ├── DiagramRenderer.jsx
+│   │   ├── dynamic
+│   │   │   └── JsonRenderer.jsx
+│   │   ├── FeatureLaunchPopup.jsx
+│   │   ├── ForegroundToast.jsx
+│   │   ├── FormatToolbar.jsx
+│   │   ├── InAppPushManager.jsx
+│   │   ├── InstallPrompt.jsx
+│   │   ├── MarksBanner.jsx
+│   │   ├── MarksManager.jsx
+│   │   ├── MergeBanner.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── NotesViewer.jsx
+│   │   ├── NoticeBar.jsx
+│   │   ├── NoticeText.jsx
+│   │   ├── NotificationHistory.jsx
+│   │   ├── NotificationPrompt.jsx
+│   │   ├── Onboarding.jsx
+│   │   ├── PeriodicPredictedDashCard.jsx
+│   │   ├── PeriodicTestAnalyticsDashboard.jsx
+│   │   ├── ProfileCompletionBanner.jsx
+│   │   ├── ShareCard.jsx
+│   │   ├── study
+│   │   │   ├── CreateRoomModal.jsx
+│   │   │   ├── LiveQuizPlayer.jsx
+│   │   │   ├── MembersList.jsx
+│   │   │   ├── QuizSetupModal.jsx
+│   │   │   ├── RoomChat.jsx
+│   │   │   ├── RoomHeader.jsx
+│   │   │   └── YouTubePlayer.jsx
+│   │   ├── SubjectiveTestAnalyticsDashboard.jsx
+│   │   ├── SyllabusProgressBar.jsx
+│   │   ├── TeacherRecordsView.jsx
+│   │   ├── TeacherSyllabusView.jsx
+│   │   ├── TestAnalyticsDashboard.jsx
+│   │   ├── TestDataDashCard.jsx
+│   │   ├── TopicMasteryReportCard.jsx
+│   │   ├── UploadNoteModal.jsx
+│   │   └── WhatsNew.jsx
+│   ├── data
+│   │   ├── attendanceUtils.js
+│   │   ├── calendarData.js
+│   │   ├── holidayData.js
+│   │   ├── homeworkData.js
+│   │   ├── mathMarks.js
+│   │   ├── periodicTopicTaxonomy.js
+│   │   ├── routine.js
+│   │   ├── syllabusData.js
+│   │   └── syllabusStats.js
+│   ├── firebase.js
+│   ├── hooks
+│   │   ├── useActivityLogger.js
+│   │   ├── useLiveQuiz.js
+│   │   ├── useRoomChat.js
+│   │   ├── useRoomPresence.js
+│   │   └── useStudyRoom.js
+│   ├── index.css
+│   ├── main.jsx
+│   ├── pages
+│   │   ├── AdminPanel.jsx
+│   │   ├── AdminServicesPage.jsx
+│   │   ├── AiChatPage.css
+│   │   ├── AiChatPage.jsx
+│   │   ├── ClassInfoPage.jsx
+│   │   ├── CustomTestPlayerPage.jsx
+│   │   ├── DynamicPage.jsx
+│   │   ├── HistoricalTestAnalysisPage.jsx
+│   │   ├── HolidayHomework.jsx
+│   │   ├── Homework.jsx
+│   │   ├── ManageNoticesPage.jsx
+│   │   ├── MathsDashboard.jsx
+│   │   ├── NotesPage.jsx
+│   │   ├── NoticesPage.jsx
+│   │   ├── NotificationsPage.jsx
+│   │   ├── PeriodicPredictedAnalysisPage.jsx
+│   │   ├── PeriodicPredictedTestPlayerPage.jsx
+│   │   ├── ProfilePage.jsx
+│   │   ├── RecordAdminPage.jsx
+│   │   ├── RecordMonitorPage.jsx
+│   │   ├── RecordPage.jsx
+│   │   ├── RecordTeacherPage.jsx
+│   │   ├── SchoolCalendar.jsx
+│   │   ├── StarBatchConceptsHub.jsx
+│   │   ├── StarBatchMixedSubjectiveTestPlayerPage.jsx
+│   │   ├── StarBatchMixedTestModulePage.jsx
+│   │   ├── StarBatchPage.jsx
+│   │   ├── StarBatchSubjectiveTestPlayerPage.jsx
+│   │   ├── StarBatchSyllabusPage.jsx
+│   │   ├── StarBatchSyllabusTrackingPage.jsx
+│   │   ├── StarBatchTestModulePage.jsx
+│   │   ├── StarBatchTestPlayerPage.jsx
+│   │   ├── StarConceptChapterPage.jsx
+│   │   ├── StudentDashboard.jsx
+│   │   ├── StudyRoomPage.jsx
+│   │   ├── StudyTogetherPage.jsx
+│   │   ├── SyllabusPage.jsx
+│   │   ├── TeacherDashboard.jsx
+│   │   ├── TeacherToolsPage.jsx
+│   │   ├── TestDataPage.jsx
+│   │   └── TestScoresPage.jsx
+│   ├── services
+│   │   ├── adminService.js
+│   │   ├── aiChatService.js
+│   │   ├── calendarOverrideService.js
+│   │   ├── classworkService.js
+│   │   ├── ctaBannerService.js
+│   │   ├── customTestService.js
+│   │   ├── dynamicPageService.js
+│   │   ├── featureLaunchService.js
+│   │   ├── homeworkService.js
+│   │   ├── inAppNoticeService.js
+│   │   ├── llmService.js
+│   │   ├── marksService.js
+│   │   ├── mathTestService.js
+│   │   ├── mergeService.js
+│   │   ├── notesService.js
+│   │   ├── noticeService.js
+│   │   ├── notificationHistoryService.js
+│   │   ├── notify.js
+│   │   ├── periodicPredictedService.js
+│   │   ├── pushService.js
+│   │   ├── recordsService.js
+│   │   ├── sparksService.js
+│   │   ├── starBatchBookmarkService.js
+│   │   ├── starBatchConceptsService.js
+│   │   ├── starBatchService.js
+│   │   ├── starBatchSubjectiveTestService.js
+│   │   ├── starBatchSyllabusService.js
+│   │   ├── starBatchTestService.js
+│   │   ├── starBatchTrackingService.js
+│   │   ├── studyRoomService.js
+│   │   ├── syllabusService.js
+│   │   ├── teacherService.js
+│   │   └── testDataService.js
+│   ├── svg-library
+│   │   ├── biology
+│   │   │   ├── HumanBrain.jsx
+│   │   │   ├── HumanDigestiveSystem.jsx
+│   │   │   ├── HumanEye.jsx
+│   │   │   ├── HumanHeart.jsx
+│   │   │   ├── HumanRespiratorySystem.jsx
+│   │   │   ├── Nephron.jsx
+│   │   │   ├── Neuron.jsx
+│   │   │   ├── ReflexArc.jsx
+│   │   │   └── Stomata.jsx
+│   │   ├── chemistry
+│   │   │   ├── ElectrolysisSetup.jsx
+│   │   │   ├── PhScale.jsx
+│   │   │   ├── TestTubeReaction.jsx
+│   │   │   └── UniversalIndicator.jsx
+│   │   ├── mathematics
+│   │   │   ├── Angle.jsx
+│   │   │   ├── Circle.jsx
+│   │   │   ├── Construction.jsx
+│   │   │   ├── CoordinatePlane.jsx
+│   │   │   ├── LineSegment.jsx
+│   │   │   ├── NumberLine.jsx
+│   │   │   ├── ParallelLines.jsx
+│   │   │   ├── Polygon.jsx
+│   │   │   ├── Quadrilateral.jsx
+│   │   │   └── Triangle.jsx
+│   │   └── physics
+│   │       ├── ConcaveLensRay.jsx
+│   │       ├── ConcaveMirrorRay.jsx
+│   │       ├── ConvexLensRay.jsx
+│   │       ├── ConvexMirrorRay.jsx
+│   │       ├── ElectricCircuit.jsx
+│   │       ├── EyeDefect.jsx
+│   │       ├── LensSignConvention.jsx
+│   │       └── MirrorSignConvention.jsx
+│   ├── utils
+│   │   ├── formatMath.js
+│   │   └── whatsappFormat.js
+│   └── ux
+│       ├── admin
+│       │   └── UXCampaignAdmin.jsx
+│       ├── campaignConfig.jsx
+│       ├── campaignService.js
+│       ├── components
+│       │   ├── CampaignBanner.jsx
+│       │   ├── CampaignModal.jsx
+│       │   ├── InstallPromptWrapper.jsx
+│       │   ├── NotificationPromptBanner.jsx
+│       │   ├── ToastContainer.jsx
+│       │   ├── TourRunner.jsx
+│       │   ├── UXRenderer.jsx
+│       │   └── UXTooltip.jsx
+│       ├── hooks
+│       │   └── useToast.js
+│       └── UXProvider.jsx
+├── star_batch_bulk_template.json
+├── STAR_BATCH_BULK_UPLOAD_GUIDE.md
+├── star_batch_concepts_skill.md
+├── star_batch_subjective_test_sample.json
+├── star_batch_test_sample.json
+├── star_batch_test_skill.md
+├── structure.txt
+├── test1.json
+├── test_json.cjs
+├── test_json_error.cjs
+├── test_regex.cjs
+├── update_starBatchTestService.mjs
+├── UX_SYSTEM.md
+├── vercel.json
+└── vite.config.js
+
+86 directories, 1208 files

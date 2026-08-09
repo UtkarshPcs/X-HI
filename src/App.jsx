@@ -51,6 +51,7 @@ const StarConceptChapterPage = lazy(() => import('./pages/StarConceptChapterPage
 const PeriodicPredictedAnalysisPage = lazy(() => import('./pages/PeriodicPredictedAnalysisPage'));
 const PeriodicPredictedTestPlayerPage = lazy(() => import('./pages/PeriodicPredictedTestPlayerPage'));
 const CustomTestPlayerPage = lazy(() => import('./pages/CustomTestPlayerPage'));
+const AiChatPage = lazy(() => import('./pages/AiChatPage'));
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -165,6 +166,7 @@ function AppInner() {
               <Route path="/periodic-predicted" element={<PeriodicPredictedAnalysisPage />} />
               <Route path="/periodic-predicted/test/:subject/:setNumber" element={<PeriodicPredictedTestPlayerPage />} />
               <Route path="/custom-tests/:testId" element={<CustomTestPlayerPage />} />
+              <Route path="/ai-chat" element={<AiChatPage />} />
               <Route path="/p/:pageId" element={<DynamicPage />} />
             </Routes>
           </Suspense>
