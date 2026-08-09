@@ -338,7 +338,6 @@
   .ai-glass-panel.ai-sidebar {
     position: fixed; top: 0; left: 0; bottom: 0;
     width: 85%; max-width: 320px;
-    height: 100%; /* Use 100% instead of 100vh to respect safe areas */
     z-index: 200;
     transform: translateX(-105%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -357,6 +356,7 @@
     z-index: 150;
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
+    cursor: pointer;
   }
 
   .ai-mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
