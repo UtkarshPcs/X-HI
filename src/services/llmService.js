@@ -129,3 +129,41 @@ ${contextResults}`;
     return "I encountered an unexpected issue while processing your request. Please try again later.";
   }
 }
+
+export async function processSyllabusChatQuery(query, syllabusData) {
+  try {
+    const minifiedSyllabus = syllabusData.map(sec => ({
+      sectionId: sec.sectionId,
+      sectionName: sec.sectionName,
+      subjects: sec.subjects.map(sub => ({
+        subjectId: sub.subjectId,
+        subjectName: sub.subjectName,
+        chapters: sub.chapters.map(ch => ({
+          chapterId: ch.chapterId,
+          chapterName: ch.chapterName
+        }))
+      }))
+    }));
+
+    const systemPrompt = `You are a helpful AI assistant integrated into a student's Syllabus Tracker.
+Your job is to parse the user's message indicating what chapters they have completed today, and map those to the exact chapterIds from the provided syllabus data.
+
+Here is the syllabus structure in JSON (array of sections, containing subjects, containing chapters):
+${JSON.stringify(minifiedSyllabus)}
+
+Extract all chapters the user claims to have completed.
+Return a STRICT JSON object in this format:
+{
+  "chaptersToUpdate": ["chapterId1", "chapterId2"],
+  "message": "A friendly confirmation message to the user acknowledging the chapters they completed."
+}
+Do not output any other text besides the JSON.`;
+
+    const rawOutput = await callLLM(systemPrompt, query, 'json');
+    const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error("Syllabus Chat Error:", error);
+    throw error;
+  }
+}

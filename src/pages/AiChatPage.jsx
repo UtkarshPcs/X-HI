@@ -299,7 +299,14 @@ export default function AiChatPage() {
             <div className="solver-result-view">
               <div className="solver-question-card">
                 <h4 className="solver-card-label">Your Doubt</h4>
-                <p className="solver-question-text">{currentChat.userMessage}</p>
+                <div className="solver-question-text">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  >
+                    {preprocessLaTeX(currentChat.userMessage)}
+                  </ReactMarkdown>
+                </div>
               </div>
 
               <div className="solver-answer-card">

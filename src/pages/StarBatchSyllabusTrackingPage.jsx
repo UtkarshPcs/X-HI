@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { syllabusData } from '../data/syllabusData';
 import { getSyllabusProgress, toggleTaskCompletion, getTrackingConfig } from '../services/starBatchTrackingService';
+import { processSyllabusChatQuery } from '../services/llmService';
 import { useAuth } from '../auth/AuthContext';
-import { Target, ChevronRight, ChevronLeft, CheckCircle, Circle, LayoutList } from 'lucide-react';
+import { Target, ChevronRight, ChevronLeft, CheckCircle, Circle, LayoutList, Bot, Send, Sparkles } from 'lucide-react';
 
 export default function StarBatchSyllabusTrackingPage() {
   const { currentUser } = useAuth();
@@ -13,6 +14,10 @@ export default function StarBatchSyllabusTrackingPage() {
   const [completedTasks, setCompletedTasks] = useState({});
   const [trackingConfig, setTrackingConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatResponse, setChatResponse] = useState(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -334,6 +339,51 @@ export default function StarBatchSyllabusTrackingPage() {
   // LEVEL 1: Sections (Root)
   const overallProgress = calculateOverallProgress();
 
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim() || isChatLoading) return;
+
+    setIsChatLoading(true);
+    setChatResponse(null);
+    try {
+      const result = await processSyllabusChatQuery(chatInput, syllabusData);
+      
+      if (result.chaptersToUpdate && result.chaptersToUpdate.length > 0) {
+        let updatedData = { ...completedTasks };
+        
+        for (const chapId of result.chaptersToUpdate) {
+          let targetSecId = null;
+          for (const sec of syllabusData) {
+            for (const sub of sec.subjects) {
+              if (sub.chapters.some(c => c.chapterId === chapId)) {
+                targetSecId = sec.sectionId;
+                break;
+              }
+            }
+            if (targetSecId) break;
+          }
+
+          if (targetSecId) {
+            const tasks = getTasksForSection(targetSecId);
+            for (const task of tasks) {
+              const key = `${chapId}-${task.id}`;
+              updatedData[key] = true;
+              await toggleTaskCompletion(currentUser.phone, chapId, task.id, true);
+            }
+          }
+        }
+        setCompletedTasks(updatedData);
+      }
+      setChatResponse(result.message);
+      setChatInput('');
+    } catch (err) {
+      console.error(err);
+      setChatResponse("Sorry, I couldn't process that. Please try again.");
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
   return (
     <div style={{ animation: 'fade-in 0.4s ease' }}>
       <Breadcrumb />
@@ -355,6 +405,38 @@ export default function StarBatchSyllabusTrackingPage() {
           </div>
           <ProgressBar percentage={overallProgress.percentage} color="#fbbf24" />
         </div>
+      </div>
+
+      {/* AI Syllabus Update Chat */}
+      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '16px', padding: '1.5rem', marginBottom: '2rem', boxShadow: '0 4px 20px rgba(139, 92, 246, 0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <Sparkles size={20} color="#a78bfa" />
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fff' }}>Smart Track with AI</h2>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.6)', margin: '0 0 1rem', fontSize: '0.9rem' }}>
+          Just tell me what chapters you completed today, and I'll update your syllabus progress automatically!
+        </p>
+        
+        <form onSubmit={handleChatSubmit} style={{ display: 'flex', gap: '0.75rem', marginBottom: chatResponse ? '1rem' : '0' }}>
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            placeholder="e.g., I completed Light reflection today"
+            disabled={isChatLoading}
+            style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.75rem 1rem', color: '#fff', fontSize: '0.95rem' }}
+          />
+          <button type="submit" disabled={isChatLoading || !chatInput.trim()} style={{ background: 'linear-gradient(135deg, var(--primary), #7c3aed)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (isChatLoading || !chatInput.trim()) ? 0.5 : 1 }}>
+            {isChatLoading ? <span className="loader" style={{ width: '20px', height: '20px', borderWidth: '2px' }} /> : <Send size={18} />}
+          </button>
+        </form>
+
+        {chatResponse && (
+          <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px', padding: '1rem', color: '#10b981', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+            <Bot size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <span style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{chatResponse}</span>
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
