@@ -167,3 +167,29 @@ Do not output any other text besides the JSON.`;
     throw error;
   }
 }
+
+export async function transcribeAudio(audioBlob) {
+  if (!AI_API_KEY) {
+    throw new Error("Groq API Key is missing. Please set GROQ_API_KEY in your local environment.");
+  }
+  
+  const formData = new FormData();
+  formData.append('file', audioBlob, 'audio.webm');
+  formData.append('model', 'whisper-large-v3-turbo');
+
+  const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${AI_API_KEY}`
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to transcribe audio');
+  }
+
+  const data = await response.json();
+  return data.text;
+}

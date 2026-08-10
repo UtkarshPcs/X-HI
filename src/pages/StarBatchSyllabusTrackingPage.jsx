@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { syllabusData } from '../data/syllabusData';
 import { getSyllabusProgress, toggleTaskCompletion, getTrackingConfig } from '../services/starBatchTrackingService';
-import { processSyllabusChatQuery } from '../services/llmService';
+import { processSyllabusChatQuery, transcribeAudio } from '../services/llmService';
 import { useAuth } from '../auth/AuthContext';
-import { Target, ChevronRight, ChevronLeft, CheckCircle, Circle, LayoutList, Bot, Send, Sparkles } from 'lucide-react';
+import { Target, ChevronRight, ChevronLeft, CheckCircle, Circle, LayoutList, Bot, Send, Sparkles, Mic, Square } from 'lucide-react';
 
 export default function StarBatchSyllabusTrackingPage() {
   const { currentUser } = useAuth();
@@ -18,6 +18,10 @@ export default function StarBatchSyllabusTrackingPage() {
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatResponse, setChatResponse] = useState(null);
+
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -339,14 +343,11 @@ export default function StarBatchSyllabusTrackingPage() {
   // LEVEL 1: Sections (Root)
   const overallProgress = calculateOverallProgress();
 
-  const handleChatSubmit = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim() || isChatLoading) return;
-
+  const processChat = async (queryText) => {
     setIsChatLoading(true);
     setChatResponse(null);
     try {
-      const result = await processSyllabusChatQuery(chatInput, syllabusData);
+      const result = await processSyllabusChatQuery(queryText, syllabusData);
       
       if (result.chaptersToUpdate && result.chaptersToUpdate.length > 0) {
         let updatedData = { ...completedTasks };
@@ -384,6 +385,55 @@ export default function StarBatchSyllabusTrackingPage() {
     }
   };
 
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim() || isChatLoading) return;
+    await processChat(chatInput);
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        audioChunksRef.current = [];
+        setIsChatLoading(true);
+        try {
+          const text = await transcribeAudio(audioBlob);
+          setChatInput(text);
+          await processChat(text);
+        } catch (err) {
+          console.error(err);
+          setChatResponse("Failed to transcribe audio. Please try typing instead.");
+          setIsChatLoading(false);
+        }
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      audioChunksRef.current = [];
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      alert("Could not access microphone. Please ensure permissions are granted.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
   return (
     <div style={{ animation: 'fade-in 0.4s ease' }}>
       <Breadcrumb />
@@ -418,12 +468,34 @@ export default function StarBatchSyllabusTrackingPage() {
         </p>
         
         <form onSubmit={handleChatSubmit} style={{ display: 'flex', gap: '0.75rem', marginBottom: chatResponse ? '1rem' : '0' }}>
+          <button 
+            type="button" 
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={isChatLoading && !isRecording}
+            style={{ 
+              background: isRecording ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)', 
+              color: isRecording ? '#ef4444' : 'var(--primary)', 
+              border: `1px solid ${isRecording ? '#ef4444' : 'rgba(139, 92, 246, 0.3)'}`, 
+              borderRadius: '12px', 
+              padding: '0 1rem', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+              animation: isRecording ? 'pulse 1.5s infinite' : 'none'
+            }}
+            title={isRecording ? "Stop Recording" : "Use Voice Input"}
+          >
+            {isRecording ? <Square size={18} fill="currentColor" /> : <Mic size={20} />}
+          </button>
+          
           <input
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            placeholder="e.g., I completed Light reflection today"
-            disabled={isChatLoading}
+            placeholder={isRecording ? "Listening... click stop when done" : "e.g., I completed Light reflection today"}
+            disabled={isChatLoading || isRecording}
             style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.75rem 1rem', color: '#fff', fontSize: '0.95rem' }}
           />
           <button type="submit" disabled={isChatLoading || !chatInput.trim()} style={{ background: 'linear-gradient(135deg, var(--primary), #7c3aed)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (isChatLoading || !chatInput.trim()) ? 0.5 : 1 }}>
