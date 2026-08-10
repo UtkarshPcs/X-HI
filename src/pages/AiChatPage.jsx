@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, Copy, Bookmark, Trash2, Plus, Clock, MessageSquare, CheckCircle, Menu, X } from 'lucide-react';
+import { Bot, Copy, Bookmark, Trash2, Plus, Clock, CheckCircle, Menu, X, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -29,7 +29,7 @@ const preprocessLaTeX = (content) => {
     .replace(/\\\)/g, '$');
 };
 
-function LoadingIndicator() {
+function SolverLoading() {
   const [msgIdx, setMsgIdx] = React.useState(0);
 
   React.useEffect(() => {
@@ -40,13 +40,14 @@ function LoadingIndicator() {
   }, []);
 
   return (
-    <div className="ai-bubble" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-      <div className="ai-loading-dots">
-        <div className="ai-dot"></div>
-        <div className="ai-dot"></div>
-        <div className="ai-dot"></div>
+    <div className="solver-loading-container">
+      <div className="solver-spinner-wrapper">
+        <div className="solver-pulse-ring"></div>
+        <div className="solver-pulse-ring delay"></div>
+        <Bot size={50} className="solver-spinner-icon" />
       </div>
-      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{LOADING_MESSAGES[msgIdx]}</span>
+      <h3 className="solver-loading-text">{LOADING_MESSAGES[msgIdx]}</h3>
+      <p className="solver-loading-subtext">The Smart Solver is working on your doubt...</p>
     </div>
   );
 }
@@ -60,13 +61,11 @@ export default function AiChatPage() {
   const [bookmarks, setBookmarks] = useState([]);
   const [allowedChapters, setAllowedChapters] = useState([]);
   
-  const [currentChat, setCurrentChat] = useState(null); // { userMessage, aiResponse }
+  const [currentChat, setCurrentChat] = useState(null);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -91,14 +90,6 @@ export default function AiChatPage() {
     }
   }
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [currentChat, isLoading]);
-
   useEffect(() => {
     document.body.classList.add('ai-chat-active');
     return () => {
@@ -111,7 +102,6 @@ export default function AiChatPage() {
     if (!input.trim() || isLoading) return;
     
     const userMsg = input.trim();
-    setInput('');
     setIsLoading(true);
     setCurrentChat({ id: 'temp', userMessage: userMsg, aiResponse: null });
     
@@ -121,7 +111,6 @@ export default function AiChatPage() {
       const savedChat = await saveAiChat(currentUser.phone, userMsg, response);
       if (savedChat) {
         setCurrentChat(savedChat);
-        // Refresh history to enforce 10 chat limit on UI
         const freshHistory = await getAiChats(currentUser.phone);
         setHistory(freshHistory);
       } else {
@@ -156,7 +145,7 @@ export default function AiChatPage() {
   };
 
   const handleDeleteHistory = async (chatId) => {
-    if (!window.confirm("Delete this chat?")) return;
+    if (!window.confirm("Delete this doubt?")) return;
     try {
       await deleteAiChat(currentUser.phone, chatId);
       setHistory(prev => prev.filter(c => c.id !== chatId));
@@ -168,6 +157,13 @@ export default function AiChatPage() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(e);
+    }
+  };
+
   const renderSidebarItem = (chat, isBookmarkTab = false) => {
     const isActive = currentChat?.id === chat.id;
     return (
@@ -176,7 +172,7 @@ export default function AiChatPage() {
         className={`ai-history-card ${isActive ? 'active' : ''}`}
         onClick={() => {
           setCurrentChat(chat);
-          setIsMobileMenuOpen(false); // Close mobile sidebar on select
+          setIsMobileMenuOpen(false);
         }}
       >
         <div className="ai-history-title">{chat.userMessage}</div>
@@ -187,7 +183,7 @@ export default function AiChatPage() {
           <button 
             className="ai-history-delete" 
             onClick={(e) => { e.stopPropagation(); handleDeleteHistory(chat.id); }}
-            title="Delete Chat"
+            title="Delete Doubt"
           >
             <Trash2 size={14} />
           </button>
@@ -223,7 +219,6 @@ export default function AiChatPage() {
               <Bookmark size={16} /> Bookmarks
             </button>
             
-            {/* Close button for mobile */}
             <button 
               className="ai-mobile-menu-btn" 
               style={{ display: isMobileMenuOpen ? 'flex' : 'none', marginLeft: '0.5rem', border: 'none' }}
@@ -235,13 +230,13 @@ export default function AiChatPage() {
           <div className="ai-sidebar-content">
           {activeTab === 'history' ? (
             history.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '1rem' }}>No recent chats.</p>
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '1rem' }}>No recent doubts.</p>
             ) : (
               history.map(c => renderSidebarItem(c, false))
             )
           ) : (
             bookmarks.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '1rem' }}>No bookmarked chats.</p>
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '1rem' }}>No bookmarked doubts.</p>
             ) : (
               bookmarks.map(c => renderSidebarItem(c, true))
             )
@@ -249,7 +244,7 @@ export default function AiChatPage() {
           </div>
         </div>
 
-      {/* Main Chat Area */}
+      {/* Main Area */}
       <div className="ai-glass-panel ai-main">
         <div className="ai-chat-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -259,87 +254,90 @@ export default function AiChatPage() {
             >
               <Menu size={20} />
             </button>
-            <h2 className="ai-chat-title"><Bot size={24} /> 10th HI AI</h2>
+            <h2 className="ai-chat-title"><Sparkles size={24} color="#a78bfa" /> Smart Solver</h2>
           </div>
-          <button className="ai-new-chat-btn" onClick={() => setCurrentChat(null)}>
-            <Plus size={16} /> New Chat
+          <button className="ai-new-chat-btn" onClick={() => { setCurrentChat(null); setInput(''); }}>
+            <Plus size={16} /> New Doubt
           </button>
         </div>
 
-        <div className="ai-chat-messages">
+        <div className="solver-main-content">
           {!currentChat && !isLoading && (
-            <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--text-muted)', maxWidth: 400 }}>
-              <Bot size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-              <h3>How can I help you learn today?</h3>
-              <p>Ask a question about any of the available chapters. I'll strictly use our verified textbook data to answer.</p>
+            <div className="solver-hero">
+              <div className="solver-hero-icon-container">
+                <Bot size={64} className="solver-hero-icon" />
+              </div>
+              <h1 className="solver-hero-title">What's your doubt today?</h1>
+              <p className="solver-hero-subtitle">Our Smart Solver uses verified textbook data to give you exact, step-by-step answers.</p>
+              
+              <form className="solver-hero-form" onSubmit={handleSend}>
+                <textarea
+                  className="solver-textarea"
+                  placeholder="Type your doubt here... (e.g. Explain Newton's First Law)"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  rows={4}
+                  disabled={isLoading}
+                  autoFocus
+                />
+                <div className="solver-form-footer">
+                  <span className="solver-hint">Press Enter to solve, Shift + Enter for new line</span>
+                  <button type="submit" className="solver-submit-btn" disabled={!input.trim() || isLoading}>
+                    <Sparkles size={18} /> Solve Doubt
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
-          {currentChat && (
-            <>
-              {/* User Message */}
-              <div className="ai-message user">
-                <div className="ai-bubble">{currentChat.userMessage}</div>
-              </div>
-
-              {/* AI Response or Loading */}
-              <div className="ai-message ai">
-                {currentChat.aiResponse ? (
-                  <>
-                    <div className="ai-bubble">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkMath]}
-                        rehypePlugins={[rehypeRaw, rehypeKatex]}
-                      >
-                        {preprocessLaTeX(currentChat.aiResponse)}
-                      </ReactMarkdown>
-                    </div>
-                    {currentChat.id !== 'temp' && (
-                      <div className="ai-actions">
-                        <button 
-                          className="ai-action-btn"
-                          onClick={() => handleCopy(currentChat.aiResponse, currentChat.id)}
-                          title="Copy Answer"
-                        >
-                          {copiedId === currentChat.id ? <CheckCircle size={14} /> : <Copy size={14} />} 
-                          {copiedId === currentChat.id ? 'Copied' : 'Copy'}
-                        </button>
-                        <button 
-                          className={`ai-action-btn ${bookmarks.some(b => b.id === currentChat.id) ? 'active' : ''}`}
-                          onClick={() => handleBookmark(currentChat)}
-                          title="Bookmark Chat"
-                        >
-                          <Bookmark size={14} fill={bookmarks.some(b => b.id === currentChat.id) ? 'currentColor' : 'none'} /> 
-                          {bookmarks.some(b => b.id === currentChat.id) ? 'Bookmarked' : 'Bookmark'}
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <LoadingIndicator />
-                )}
-              </div>
-            </>
+          {isLoading && (
+            <SolverLoading />
           )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        <div className="ai-chat-input-container">
-          <form className="ai-chat-form" onSubmit={handleSend}>
-            <input
-              type="text"
-              className="ai-input"
-              placeholder="Ask an academic question..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              disabled={isLoading}
-            />
-            <button type="submit" className="ai-send-btn" disabled={!input.trim() || isLoading}>
-              <Send size={18} />
-            </button>
-          </form>
+          {currentChat && !isLoading && currentChat.aiResponse && (
+            <div className="solver-result-view">
+              <div className="solver-question-card">
+                <h4 className="solver-card-label">Your Doubt</h4>
+                <p className="solver-question-text">{currentChat.userMessage}</p>
+              </div>
+
+              <div className="solver-answer-card">
+                <div className="solver-card-header">
+                  <h4 className="solver-card-label"><Sparkles size={16} color="#a78bfa"/> Smart Solver Output</h4>
+                  <div className="solver-actions">
+                    <button 
+                      className="ai-action-btn"
+                      onClick={() => handleCopy(currentChat.aiResponse, currentChat.id)}
+                      title="Copy Answer"
+                    >
+                      {copiedId === currentChat.id ? <CheckCircle size={14} /> : <Copy size={14} />} 
+                      {copiedId === currentChat.id ? 'Copied' : 'Copy'}
+                    </button>
+                    <button 
+                      className={`ai-action-btn ${bookmarks.some(b => b.id === currentChat.id) ? 'active' : ''}`}
+                      onClick={() => handleBookmark(currentChat)}
+                      title="Bookmark Doubt"
+                    >
+                      <Bookmark size={14} fill={bookmarks.some(b => b.id === currentChat.id) ? 'currentColor' : 'none'} /> 
+                      {bookmarks.some(b => b.id === currentChat.id) ? 'Bookmarked' : 'Bookmark'}
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="solver-answer-content">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  >
+                    {preprocessLaTeX(currentChat.aiResponse)}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        </div>
+      </div>
       </div>
     </div>
   );
