@@ -476,40 +476,80 @@ export default function StarBatchSyllabusTrackingPage() {
           Just tell me what chapters you completed today, and I'll update your syllabus progress automatically!
         </p>
         
-        <form onSubmit={handleChatSubmit} style={{ display: 'flex', gap: '0.75rem', marginBottom: chatResponse ? '1rem' : '0' }}>
-          <button 
-            type="button" 
-            onClick={isRecording ? stopRecording : startRecording}
-            disabled={isChatLoading && !isRecording}
-            style={{ 
-              background: isRecording ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)', 
-              color: isRecording ? '#ef4444' : 'var(--primary)', 
-              border: `1px solid ${isRecording ? '#ef4444' : 'rgba(139, 92, 246, 0.3)'}`, 
-              borderRadius: '12px', 
-              padding: '0 1rem', 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              animation: isRecording ? 'pulse 1.5s infinite' : 'none'
-            }}
-            title={isRecording ? "Stop Recording" : "Use Voice Input"}
-          >
-            {isRecording ? <Square size={18} fill="currentColor" /> : <Mic size={20} />}
-          </button>
-          
-          <input
-            type="text"
+        <form onSubmit={handleChatSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: chatResponse ? '1rem' : '0' }}>
+          <textarea
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            placeholder={isRecording ? "Listening... click stop when done" : "e.g., I completed Light reflection today"}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleChatSubmit(e);
+              }
+            }}
+            placeholder={isRecording ? "Listening... click stop when done" : "e.g., I watched the lecture and read NCERT for Light Reflection today"}
             disabled={isChatLoading || isRecording}
-            style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.75rem 1rem', color: '#fff', fontSize: '0.95rem' }}
+            rows={3}
+            style={{ 
+              width: '100%', 
+              background: 'rgba(0,0,0,0.3)', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              borderRadius: '12px', 
+              padding: '0.875rem 1rem', 
+              color: '#fff', 
+              fontSize: '0.95rem',
+              resize: 'vertical',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box'
+            }}
           />
-          <button type="submit" disabled={isChatLoading || !chatInput.trim()} style={{ background: 'linear-gradient(135deg, var(--primary), #7c3aed)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (isChatLoading || !chatInput.trim()) ? 0.5 : 1 }}>
-            {isChatLoading ? <span className="loader" style={{ width: '20px', height: '20px', borderWidth: '2px' }} /> : <Send size={18} />}
-          </button>
+          
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+            <button 
+              type="button" 
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isChatLoading && !isRecording}
+              style={{ 
+                background: isRecording ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)', 
+                color: isRecording ? '#ef4444' : 'var(--primary)', 
+                border: `1px solid ${isRecording ? '#ef4444' : 'rgba(139, 92, 246, 0.3)'}`, 
+                borderRadius: '12px', 
+                padding: '0.75rem 1.25rem', 
+                cursor: 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+                animation: isRecording ? 'pulse 1.5s infinite' : 'none',
+                flex: '1 1 auto',
+                maxWidth: '200px'
+              }}
+              title={isRecording ? "Stop Recording" : "Use Voice Input"}
+            >
+              {isRecording ? <><Square size={18} fill="currentColor" /> <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Stop</span></> : <><Mic size={18} /> <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Voice Input</span></>}
+            </button>
+            <button 
+              type="submit" 
+              disabled={isChatLoading || !chatInput.trim()} 
+              style={{ 
+                background: 'linear-gradient(135deg, var(--primary), #7c3aed)', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: '12px', 
+                padding: '0.75rem 1.5rem', 
+                cursor: 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem', 
+                justifyContent: 'center', 
+                opacity: (isChatLoading || !chatInput.trim()) ? 0.5 : 1,
+                flex: '1 1 auto',
+                maxWidth: '200px'
+              }}
+            >
+              {isChatLoading ? <span className="loader" style={{ width: '18px', height: '18px', borderWidth: '2px' }} /> : <><Send size={16} /> <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Update Progress</span></>}
+            </button>
+          </div>
         </form>
 
         {chatResponse && (
