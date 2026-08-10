@@ -130,7 +130,7 @@ ${contextResults}`;
   }
 }
 
-export async function processSyllabusChatQuery(query, syllabusData) {
+export async function processSyllabusChatQuery(query, syllabusData, trackingConfig) {
   try {
     const minifiedSyllabus = syllabusData.map(sec => ({
       sectionId: sec.sectionId,
@@ -146,16 +146,29 @@ export async function processSyllabusChatQuery(query, syllabusData) {
     }));
 
     const systemPrompt = `You are a helpful AI assistant integrated into a student's Syllabus Tracker.
-Your job is to parse the user's message indicating what chapters they have completed today, and map those to the exact chapterIds from the provided syllabus data.
+Your job is to parse the user's message indicating what chapters they have completed today, and map those to the exact chapterIds from the provided syllabus data. Additionally, extract WHICH tasks they completed for those chapters based on the task list below.
 
-Here is the syllabus structure in JSON (array of sections, containing subjects, containing chapters):
+Here is the syllabus structure in JSON:
 ${JSON.stringify(minifiedSyllabus)}
 
-Extract all chapters the user claims to have completed.
+Here are the available checklist tasks (global config):
+${JSON.stringify(trackingConfig)}
+
+Rules:
+1. Extract the chapters the user claims to have studied.
+2. Extract the SPECIFIC tasks they claim to have done (e.g. if they say "read ncert", that maps to the "ncert-reading" task. If they say "watched lecture", map to "class-notes").
+3. If they don't specify any tasks and just say they finished the chapter, you can return "ALL". But if they specify tasks, ONLY return those exact taskIds.
+4. If they just say "I read NCERT for chapter 3 History", only check "ncert-reading" for chapter 3 History.
+
 Return a STRICT JSON object in this format:
 {
-  "chaptersToUpdate": ["chapterId1", "chapterId2"],
-  "message": "A friendly confirmation message to the user acknowledging the chapters they completed."
+  "updates": [
+    {
+      "chapterId": "chapterId-here",
+      "taskIds": ["ncert-reading", "class-notes"] // or "ALL" if they completed the whole chapter
+    }
+  ],
+  "message": "A friendly confirmation message to the user acknowledging exactly what was marked."
 }
 Do not output any other text besides the JSON.`;
 

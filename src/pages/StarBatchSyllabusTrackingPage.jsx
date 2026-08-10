@@ -347,12 +347,13 @@ export default function StarBatchSyllabusTrackingPage() {
     setIsChatLoading(true);
     setChatResponse(null);
     try {
-      const result = await processSyllabusChatQuery(queryText, syllabusData);
+      const result = await processSyllabusChatQuery(queryText, syllabusData, trackingConfig);
       
-      if (result.chaptersToUpdate && result.chaptersToUpdate.length > 0) {
+      if (result.updates && result.updates.length > 0) {
         let updatedData = { ...completedTasks };
         
-        for (const chapId of result.chaptersToUpdate) {
+        for (const update of result.updates) {
+          const chapId = update.chapterId;
           let targetSecId = null;
           for (const sec of syllabusData) {
             for (const sub of sec.subjects) {
@@ -365,8 +366,16 @@ export default function StarBatchSyllabusTrackingPage() {
           }
 
           if (targetSecId) {
-            const tasks = getTasksForSection(targetSecId);
-            for (const task of tasks) {
+            const availableTasks = getTasksForSection(targetSecId);
+            let tasksToUpdate = [];
+            
+            if (update.taskIds === "ALL" || (Array.isArray(update.taskIds) && update.taskIds.includes("ALL"))) {
+              tasksToUpdate = availableTasks;
+            } else if (Array.isArray(update.taskIds)) {
+              tasksToUpdate = availableTasks.filter(t => update.taskIds.includes(t.id));
+            }
+
+            for (const task of tasksToUpdate) {
               const key = `${chapId}-${task.id}`;
               updatedData[key] = true;
               await toggleTaskCompletion(currentUser.phone, chapId, task.id, true);
