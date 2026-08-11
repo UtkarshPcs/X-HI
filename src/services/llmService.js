@@ -213,7 +213,14 @@ Return a JSON object with a single key "tasks" which is an array of task objects
 Each task object must have:
 - "subject": string (e.g., Math, Science)
 - "description": string (the actual task)
-Return ONLY the JSON object, e.g., {"tasks": [{"subject": "Math", "description": "Do chapter 5"}]}.`;
+
+CRITICAL INSTRUCTION:
+Group all tasks by subject. There must be ONLY ONE object per subject.
+If there are multiple tasks for the same subject, combine them into the same "description" string, separated by a line break (\\n).
+For example, if you hear "Math do chapter 5 and also Math solve page 12", return:
+{"tasks": [{"subject": "Math", "description": "Do chapter 5\\nSolve page 12"}]}
+
+Return ONLY the JSON object.`;
 
   const rawOutput = await callLLM(systemPrompt, transcript);
   const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
