@@ -215,10 +215,18 @@ Each task object must have:
 - "description": string (the actual task)
 Return ONLY the JSON object, e.g., {"tasks": [{"subject": "Math", "description": "Do chapter 5"}]}.`;
 
-  const rawOutput = await callLLM(systemPrompt, transcript, 'json');
-  const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-  const parsed = JSON.parse(cleanJson);
-  return parsed.tasks || [];
+  const rawOutput = await callLLM(systemPrompt, transcript);
+  const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return parsed.tasks || [];
+    } catch (e) {
+      console.error("Failed to parse homework JSON:", e);
+      return [];
+    }
+  }
+  return [];
 }
 
 export async function parseDictatedClasswork(transcript, scheduleList) {
@@ -230,8 +238,16 @@ Return a JSON object with a single key "notes" where keys inside it are the peri
 Example: {"notes": {"1": "Completed chapter 5", "3": "Read page 20"}}
 Return ONLY the JSON object. Do not output anything else.`;
 
-  const rawOutput = await callLLM(systemPrompt, transcript, 'json');
-  const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-  const parsed = JSON.parse(cleanJson);
-  return parsed.notes || {};
+  const rawOutput = await callLLM(systemPrompt, transcript);
+  const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return parsed.notes || {};
+    } catch (e) {
+      console.error("Failed to parse classwork JSON:", e);
+      return {};
+    }
+  }
+  return {};
 }
