@@ -52,6 +52,7 @@ const PeriodicPredictedAnalysisPage = lazy(() => import('./pages/PeriodicPredict
 const PeriodicPredictedTestPlayerPage = lazy(() => import('./pages/PeriodicPredictedTestPlayerPage'));
 const CustomTestPlayerPage = lazy(() => import('./pages/CustomTestPlayerPage'));
 const AiChatPage = lazy(() => import('./pages/AiChatPage'));
+const TestJSONPreviewerPage = lazy(() => import('./pages/TestJSONPreviewerPage'));
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -168,6 +169,7 @@ function AppInner() {
               <Route path="/custom-tests/:testId" element={<CustomTestPlayerPage />} />
               <Route path="/ai-chat" element={<AiChatPage />} />
               <Route path="/p/:pageId" element={<DynamicPage />} />
+              <Route path="/test-preview" element={<TestJSONPreviewerPage />} />
             </Routes>
           </Suspense>
         </main>
