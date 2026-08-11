@@ -126,6 +126,7 @@ If a question requires a written answer, proof, steps, or is a **Case-Based ques
 ### CRITICAL RULES FOR JSXGRAPH USAGE:
 1. **ONLY WHEN NECESSARY**: Do NOT generate a diagram for every random question. Only include a `diagram` block if the original PDF question explicitly had a figure, refers to a figure (e.g., "In the given figure..."), or if a visual diagram is absolutely mandatory to solve the geometric problem.
 2. **FLAWLESS MATHEMATICAL ACCURACY**: The JSXGraph engine faithfully renders EXACTLY what coordinates you provide. If you specify a point on a line segment, you MUST accurately calculate the math (using the section formula, slope, etc.) to ensure the point mathematically lies on that line. Do NOT guess coordinates. If a line is parallel or perpendicular, the coordinates must perfectly reflect that geometric truth, otherwise lines will stick out or look broken.
+3. **COMMON DIAGRAMS**: If a single diagram applies to multiple questions (e.g., a case study or a heading saying "Questions 1-5 refer to the following figure"), you MUST copy and insert that exact same `diagram` object into the JSON for EVERY SINGLE ONE of those questions. Since questions are rendered individually on the screen, each question must carry its own copy of the diagram.
 
 - **template**: `"jsxgraph"`
 - **boundingBox**: Array of 4 numbers `[minX, maxY, maxX, minY]` (e.g., `[-1, 6, 7, -1]`). Adjust this based on the coordinates used in the figure.
