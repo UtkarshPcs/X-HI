@@ -234,8 +234,8 @@ export async function parseDictatedClasswork(transcript, scheduleList) {
 Here is the current schedule for the day:
 ${JSON.stringify(scheduleList)}
 Based on the dictated text, fill in the "note" for the corresponding subjects or periods.
-Return a JSON object with a single key "notes" where keys inside it are the period numbers (strings) and values are the notes.
-Example: {"notes": {"1": "Completed chapter 5", "3": "Read page 20"}}
+Return a JSON object with a single key "notes" where keys inside it are the exact period labels from the schedule (e.g., "1st", "2nd", "3rd") and values are the notes.
+Example: {"notes": {"1st": "Completed chapter 5", "3rd": "Read page 20"}}
 Return ONLY the JSON object. Do not output anything else.`;
 
   const rawOutput = await callLLM(systemPrompt, transcript);
