@@ -139,15 +139,44 @@ If a question requires a written answer, proof, steps, or is a **Case-Based ques
   - **Circles**: `circle A 5` (center A, radius 5) or `circle A B` (center A, through point B)
   - **Angles**: `angle ABC`
 
-**Example Usage**:
+### JSXGraph Examples Gallery
+
+Here are common geometry scenarios and exactly how to write their `dsl` to ensure mathematical accuracy. Notice that points are automatically labeled with their variable name (e.g. `A = (0,0)` creates a point labeled "A").
+
+**Example 1: Basic Proportionality Theorem (BPT) / Thales Theorem**
+*Question: In $\\triangle ABC$, a line $DE \\parallel BC$ intersects $AB$ at $D$ and $AC$ at $E$.*
 ```json
 "diagram": {
   "template": "jsxgraph",
-  "boundingBox": [-2, 5, 8, -2],
-  "showAxis": true,
-  "dsl": "A = (0,0); B = (6,0); C = (2,4); triangle ABC; angle ABC; segment AB"
+  "boundingBox": [-1, 6, 7, -1],
+  "showAxis": false,
+  "dsl": "A = (3,5); B = (0,0); C = (6,0); triangle ABC; D = (1.5, 2.5); E = (4.5, 2.5); segment DE"
 }
 ```
+*(Notice how D and E are calculated mathematically as the exact midpoints of AB and AC to guarantee they lie perfectly on the lines and DE is perfectly horizontal like BC).*
+
+**Example 2: Circles with Tangents**
+*Question: A tangent $PQ$ at a point $P$ of a circle of radius 5 cm meets a line through the centre $O$.*
+```json
+"diagram": {
+  "template": "jsxgraph",
+  "boundingBox": [-6, 6, 10, -6],
+  "showAxis": false,
+  "dsl": "O = (0,0); P = (0,5); circle O P; Q = (8,5); segment OP; segment PQ; segment OQ"
+}
+```
+
+**Example 3: Right Angled Triangle & Pythagorean Theorem**
+*Question: A ladder is leaning against a wall. The foot of the ladder is 3m away from the wall...*
+```json
+"diagram": {
+  "template": "jsxgraph",
+  "boundingBox": [-1, 5, 5, -1],
+  "showAxis": false,
+  "dsl": "C = (0,0); B = (3,0); A = (0,4); triangle ABC; angle BCA; segment AB"
+}
+```
+*(Here `C` is placed at the origin to trivially make $\\angle BCA = 90^\\circ$ since $B$ is on the x-axis and $A$ is on the y-axis).*
 
 ## ParallelLines
 - **Highlight IDs**: `line-l`, `line-m`, `transversal-t`

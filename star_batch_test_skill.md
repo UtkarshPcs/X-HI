@@ -67,6 +67,37 @@ Your output must be a JSON array of objects, separating out each chapter. Do not
     2. **FLAWLESS MATHEMATICAL ACCURACY**: The JSXGraph engine faithfully renders EXACTLY what coordinates you provide. If you specify a point on a line segment, you MUST accurately calculate the math (using the section formula, slope, etc.) to ensure the point mathematically lies on that line. Do NOT guess coordinates. If a line is parallel or perpendicular, the coordinates must perfectly reflect that geometric truth, otherwise lines will stick out or look broken.
     3. **COMMON DIAGRAMS**: If a single diagram applies to multiple questions (e.g., a case study or a heading saying "Questions 1-5 refer to the following figure"), you MUST copy and insert that exact same `diagram` object into the JSON for EVERY SINGLE ONE of those questions. Since questions are rendered individually on the screen, each question must carry its own copy of the diagram.
 
+    **JSXGraph Examples Gallery:**
+    *Example 1: Basic Proportionality Theorem (BPT) / Thales Theorem*
+    ```json
+    "diagram": {
+      "template": "jsxgraph",
+      "boundingBox": [-1, 6, 7, -1],
+      "showAxis": false,
+      "dsl": "A = (3,5); B = (0,0); C = (6,0); triangle ABC; D = (1.5, 2.5); E = (4.5, 2.5); segment DE"
+    }
+    ```
+    
+    *Example 2: Circles with Tangents*
+    ```json
+    "diagram": {
+      "template": "jsxgraph",
+      "boundingBox": [-6, 6, 10, -6],
+      "showAxis": false,
+      "dsl": "O = (0,0); P = (0,5); circle O P; Q = (8,5); segment OP; segment PQ; segment OQ"
+    }
+    ```
+    
+    *Example 3: Right Angled Triangle & Pythagorean Theorem*
+    ```json
+    "diagram": {
+      "template": "jsxgraph",
+      "boundingBox": [-1, 5, 5, -1],
+      "showAxis": false,
+      "dsl": "C = (0,0); B = (3,0); A = (0,4); triangle ABC; angle BCA; segment AB"
+    }
+    ```
+
 ## ID Reference Guide
 
 You MUST use the exact IDs provided below for the `sectionId`, `subjectId`, and `chapterId` fields. Do NOT invent or guess IDs.
