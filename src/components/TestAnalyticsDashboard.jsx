@@ -9,6 +9,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../utils/formatMath';
+import DiagramRenderer from './DiagramRenderer';
 
 export default function TestAnalyticsDashboard({ result, activeQuestions, answers, averageScore, test }) {
   const { currentUser } = useAuth();
@@ -439,6 +440,12 @@ export default function TestAnalyticsDashboard({ result, activeQuestions, answer
                           {formatMath(q.text)}
                         </ReactMarkdown>
                       </div>
+                      
+                      {q.diagram && (
+                        <div style={{ margin: '1rem 0' }}>
+                          <DiagramRenderer diagram={q.diagram} />
+                        </div>
+                      )}
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
                         {(q.options || []).map((opt, oIdx) => {

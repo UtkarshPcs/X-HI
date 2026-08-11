@@ -206,3 +206,29 @@ export async function transcribeAudio(audioBlob) {
   const data = await response.json();
   return data.text;
 }
+
+export async function parseDictatedHomework(transcript) {
+  const systemPrompt = `You are an assistant that extracts homework tasks from a dictation.
+Return a JSON array of tasks. Each task must have:
+- "subject": string (e.g., Math, Science)
+- "description": string (the actual task)
+Return ONLY the JSON array, e.g., [{"subject": "Math", "description": "Do chapter 5"}].`;
+
+  const rawOutput = await callLLM(systemPrompt, transcript, 'json');
+  const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleanJson);
+}
+
+export async function parseDictatedClasswork(transcript, scheduleList) {
+  const systemPrompt = `You are an assistant that extracts classwork notes for specific subjects or periods from a dictation.
+Here is the current schedule for the day:
+${JSON.stringify(scheduleList)}
+Based on the dictated text, fill in the "note" for the corresponding subjects or periods.
+Return a JSON object where keys are the period numbers (strings) and values are the notes.
+Example: {"1": "Completed chapter 5", "3": "Read page 20"}
+Return ONLY the JSON object. Do not output anything else.`;
+
+  const rawOutput = await callLLM(systemPrompt, transcript, 'json');
+  const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleanJson);
+}

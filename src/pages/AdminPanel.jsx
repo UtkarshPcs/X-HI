@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon, Sparkles } from 'lucide-react';
+import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon, Sparkles, Mic, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import FormatToolbar from '../components/FormatToolbar';
 import NoticeText from '../components/NoticeText';
@@ -25,6 +25,72 @@ import { getCTABannerConfig, saveCTABannerConfig, getCTAClicks } from '../servic
 import { getFeatureLaunches, createFeatureLaunch, deleteFeatureLaunch } from '../services/featureLaunchService';
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { FeatureLaunchUI } from '../components/FeatureLaunchPopup';
+import { transcribeAudio, parseDictatedHomework, parseDictatedClasswork } from '../services/llmService';
+
+function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
+  const [recording, setRecording] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const mediaRecorder = useRef(null);
+  const audioChunks = useRef([]);
+
+  const toggleRecording = async () => {
+    if (recording) {
+      mediaRecorder.current.stop();
+      setRecording(false);
+      mediaRecorder.current.stream.getTracks().forEach(t => t.stop());
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder.current = new MediaRecorder(stream);
+        audioChunks.current = [];
+        mediaRecorder.current.ondataavailable = e => {
+          if (e.data.size > 0) audioChunks.current.push(e.data);
+        };
+        mediaRecorder.current.onstop = async () => {
+          const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+          setProcessing(true);
+          try {
+            const transcript = await transcribeAudio(audioBlob);
+            if (isClasswork) {
+              const parsed = await parseDictatedClasswork(transcript, scheduleList);
+              onResult(parsed);
+            } else {
+              const parsed = await parseDictatedHomework(transcript);
+              onResult(parsed);
+            }
+          } catch (err) {
+            alert('Failed to process dictation: ' + err.message);
+          }
+          setProcessing(false);
+        };
+        mediaRecorder.current.start();
+        setRecording(true);
+      } catch (err) {
+        alert('Microphone access denied or error: ' + err.message);
+      }
+    }
+  };
+
+  if (processing) {
+    return (
+      <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>
+        Processing...
+      </button>
+    );
+  }
+
+  return (
+    <button 
+      type="button" 
+      disabled={disabled}
+      onClick={toggleRecording} 
+      className={`auth-btn ${recording ? 'primary' : 'secondary'}`} 
+      style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', background: recording ? '#ef4444' : undefined, borderColor: recording ? '#ef4444' : undefined }}
+    >
+      {recording ? <><Square size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Stop</> : <><Mic size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Dictate AI</>}
+    </button>
+  );
+}
 
 function canAccess(user) {
   return user && (user.isAdmin || user.role === ROLES.MONITOR || user.role === ROLES.ADMIN);
@@ -115,6 +181,12 @@ function HomeworkManager({ currentUser }) {
     setTasks(newTasks);
   };
 
+  const handleDictation = (parsedTasks) => {
+    if (parsedTasks && parsedTasks.length > 0) {
+      setTasks(parsedTasks.map(t => ({ ...t, type: 'homework' })));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!date || tasks.length === 0) return alert('Please enter date and at least one task');
@@ -161,9 +233,12 @@ function HomeworkManager({ currentUser }) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <label style={{ color: 'var(--text-secondary)' }}>Tasks</label>
-            <button type="button" onClick={handleAddTask} className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>
-              <Plus size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Add Task
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <DictateButton onResult={handleDictation} disabled={loading} />
+              <button type="button" onClick={handleAddTask} className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>
+                <Plus size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Add Task
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -644,6 +719,17 @@ function ClassworkManager({ currentUser }) {
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, note } : r)));
   }
 
+  const handleDictation = (parsedNotes) => {
+    if (parsedNotes) {
+      setRows(prev => prev.map(row => {
+        if (parsedNotes[row.period]) {
+          return { ...row, note: parsedNotes[row.period] };
+        }
+        return row;
+      }));
+    }
+  };
+
   async function handleSave(e) {
     e.preventDefault();
     if (!date || rows.length === 0) return;
@@ -697,6 +783,14 @@ function ClassworkManager({ currentUser }) {
         <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
       ) : rows.length > 0 ? (
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+            <DictateButton 
+              isClasswork 
+              scheduleList={rows.map(r => ({ period: r.period, subject: r.subject }))} 
+              onResult={handleDictation} 
+              disabled={loading || saving} 
+            />
+          </div>
           {rows.map((row, idx) => (
             <div key={row.period} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

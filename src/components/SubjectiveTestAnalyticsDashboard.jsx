@@ -6,6 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../utils/formatMath';
+import DiagramRenderer from './DiagramRenderer';
 
 export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestions, averageScore, test }) {
   const [expandedMistakes, setExpandedMistakes] = useState({});
@@ -381,6 +382,12 @@ export default function SubjectiveTestAnalyticsDashboard({ result, activeQuestio
                           {formatMath(q.text)}
                         </ReactMarkdown>
                       </div>
+                      
+                      {q.diagram && (
+                        <div style={{ margin: '1rem 0' }}>
+                          <DiagramRenderer diagram={q.diagram} />
+                        </div>
+                      )}
                       
                       <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(16,185,129,0.05)', borderRadius: '8px', borderLeft: '4px solid #10b981' }}>
                         <h4 style={{ margin: '0 0 0.5rem 0', color: '#10b981', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Step Marking Scheme</h4>

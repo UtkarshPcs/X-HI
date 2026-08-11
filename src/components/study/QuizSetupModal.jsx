@@ -65,6 +65,39 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
   useEffect(() => { setSelectedSubject(''); setSelectedChapter(''); }, [selectedSection]);
   useEffect(() => { setSelectedChapter(''); }, [selectedSubject]);
 
+  // Compute how many fresh questions are left per difficulty for the selected chapter
+  const difficultyCounts = useMemo(() => {
+    const counts = { easy: 0, medium: 0, hard: 0, difficult: 0 };
+    if (!selectedChapter) return counts;
+    const matchingTests = tests.filter(t => (t.chapterId || t.id) === selectedChapter);
+    if (matchingTests.length === 0) return counts;
+
+    let allQuestions = (matchingTests[0].questions || []).map((q, idx) => ({ ...q, originalIndex: idx })).filter(q => !q.isDeleted);
+    let freshQuestions = allQuestions.filter(q => !askedQuestionIds.includes(q.originalIndex));
+
+    freshQuestions.forEach(q => {
+      const d = (q.difficulty || 'Medium').toLowerCase();
+      if (d === 'easy') counts.easy++;
+      else if (d === 'hard') counts.hard++;
+      else if (d === 'super hard' || d === 'difficult') counts.difficult++;
+      else counts.medium++;
+    });
+    return counts;
+  }, [selectedChapter, tests, askedQuestionIds]);
+
+  const totalFresh = difficultyCounts.easy + difficultyCounts.medium + difficultyCounts.hard + difficultyCounts.difficult;
+  const isExhausted = (diff) => totalFresh > 0 && difficultyCounts[diff] === 0;
+
+  // Auto-switch difficulty if the current one is exhausted
+  useEffect(() => {
+    if (totalFresh > 0 && difficultyCounts[quizDifficulty] === 0) {
+      if (difficultyCounts.medium > 0) setQuizDifficulty('medium');
+      else if (difficultyCounts.easy > 0) setQuizDifficulty('easy');
+      else if (difficultyCounts.hard > 0) setQuizDifficulty('hard');
+      else if (difficultyCounts.difficult > 0) setQuizDifficulty('difficult');
+    }
+  }, [difficultyCounts, totalFresh, quizDifficulty]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -216,10 +249,10 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
             <div style={styles.field}>
               <label style={styles.label}><Star size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Difficulty</label>
               <select style={styles.select} value={quizDifficulty} onChange={e => setQuizDifficulty(e.target.value)}>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-                <option value="difficult">Super Hard</option>
+                <option value="easy" disabled={isExhausted('easy')}>Easy {isExhausted('easy') ? '(Exhausted)' : ''}</option>
+                <option value="medium" disabled={isExhausted('medium')}>Medium {isExhausted('medium') ? '(Exhausted)' : ''}</option>
+                <option value="hard" disabled={isExhausted('hard')}>Hard {isExhausted('hard') ? '(Exhausted)' : ''}</option>
+                <option value="difficult" disabled={isExhausted('difficult')}>Super Hard {isExhausted('difficult') ? '(Exhausted)' : ''}</option>
               </select>
             </div>
 

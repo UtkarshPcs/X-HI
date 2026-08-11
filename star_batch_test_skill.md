@@ -51,6 +51,20 @@ Your output must be a JSON array of objects, separating out each chapter. Do not
   - `correctOptionIndex`: (Integer) The 0-based index of the correct option in the `options` array.
   - `difficulty`: (String) "Easy", "Medium", or "Hard".
   - `topic`: (String) The specific topic the question belongs to (e.g. "Laws of Reflection").
+  - `diagram`: (Object, Optional) Use this to generate procedural diagrams. For mathematics geometry, use the `jsxgraph` template:
+    ```json
+    "diagram": {
+      "template": "jsxgraph",
+      "boundingBox": [-2, 5, 8, -2],
+      "showAxis": true,
+      "dsl": "A = (0,0); B = (6,0); C = (2,4); triangle ABC; angle ABC; segment AB"
+    }
+    ```
+    *(The `dsl` string is a semicolon-separated list of geometry commands: `A=(x,y)`, `line AB`, `segment AB`, `triangle ABC`, `circle A 5`, `angle ABC`).*
+    
+    **CRITICAL RULES FOR JSXGRAPH USAGE:**
+    1. **ONLY WHEN NECESSARY**: Do NOT generate a diagram for every random question. Only include a `diagram` block if the question explicitly refers to a figure (e.g., "In the given figure...") or if a visual diagram is absolutely mandatory to solve the geometric problem.
+    2. **FLAWLESS MATHEMATICAL ACCURACY**: The JSXGraph engine faithfully renders EXACTLY what coordinates you provide. If you specify a point on a line segment, you MUST accurately calculate the math (using the section formula, slope, etc.) to ensure the point mathematically lies on that line. Do NOT guess coordinates. If a line is parallel or perpendicular, the coordinates must perfectly reflect that geometric truth, otherwise lines will stick out or look broken.
 
 ## ID Reference Guide
 

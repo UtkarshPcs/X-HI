@@ -1,0 +1,291 @@
+{
+  "chapterId": "maths-0-c5",
+  "subjectId": "maths-0",
+  "sectionId": "maths",
+  "title": "Triangles Ch 6 - BPT and Similarity Subjective Test",
+  "type": "subjective",
+  "questions": [
+    {
+      "text": "State and prove the Basic Proportionality Theorem (Thales Theorem).",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 7, 9, -1],
+        "showAxis": false,
+        "dsl": "A = (4,6); B = (0,0); C = (8,0); D = (2,3); E = (6,3); triangle ABC; segment DE; segment BE; segment CD; M = (4.77, 4.85); N = (3.23, 4.85); segment EN; segment DM"
+      },
+      "marks": 5,
+      "difficulty": "Hard",
+      "topic": "Basic Proportionality Theorem",
+      "answerSteps": [
+        {
+          "stepText": "**Statement**: If a line is drawn parallel to one side of a triangle intersecting the other two sides, then it divides the two sides in the same ratio.",
+          "marks": 1
+        },
+        {
+          "stepText": "**Given**: A $\\triangle ABC$ in which a line parallel to side $BC$ intersects other two sides $AB$ and $AC$ at $D$ and $E$ respectively. **To Prove**: $\\frac{AD}{DB} = \\frac{AE}{EC}$",
+          "marks": 1
+        },
+        {
+          "stepText": "**Construction**: Join $BE$ and $CD$ and then draw $DM \\perp AC$ and $EN \\perp AB$.",
+          "marks": 0.5
+        },
+        {
+          "stepText": "**Proof**: Area of $\\triangle ADE = \\frac{1}{2} \\times \\text{base} \\times \\text{height} = \\frac{1}{2} \\times AD \\times EN$. Similarly, Area of $\\triangle BDE = \\frac{1}{2} \\times DB \\times EN$. Therefore, $\\frac{\\text{Area}(\\triangle ADE)}{\\text{Area}(\\triangle BDE)} = \\frac{AD}{DB}$ (Equation 1)",
+          "marks": 1
+        },
+        {
+          "stepText": "Also, Area of $\\triangle ADE = \\frac{1}{2} \\times AE \\times DM$ and Area of $\\triangle DEC = \\frac{1}{2} \\times EC \\times DM$. Therefore, $\\frac{\\text{Area}(\\triangle ADE)}{\\text{Area}(\\triangle DEC)} = \\frac{AE}{EC}$ (Equation 2)",
+          "marks": 1
+        },
+        {
+          "stepText": "Since $\\triangle BDE$ and $\\triangle DEC$ are on the same base $DE$ and between the same parallels $BC$ and $DE$, $\\text{Area}(\\triangle BDE) = \\text{Area}(\\triangle DEC)$. From Eq 1 and Eq 2, we get $\\frac{AD}{DB} = \\frac{AE}{EC}$. Hence proved.",
+          "marks": 0.5
+        }
+      ]
+    },
+    {
+      "text": "In the given figure, $DE \\parallel BC$. If $AD = x$, $DB = x - 2$, $AE = x + 2$, and $EC = x - 1$, find the value of $x$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 6, 8, -1],
+        "showAxis": false,
+        "dsl": "A = (3,5); B = (0,0); C = (7,0); D = (1.5, 2.5); E = (5, 2.5); triangle ABC; segment DE"
+      },
+      "marks": 3,
+      "difficulty": "Medium",
+      "topic": "Basic Proportionality Theorem Application",
+      "answerSteps": [
+        {
+          "stepText": "In $\\triangle ABC$, we are given that $DE \\parallel BC$. By the Basic Proportionality Theorem (BPT), we know that $\\frac{AD}{DB} = \\frac{AE}{EC}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Substitute the given values into the BPT equation: $\\frac{x}{x - 2} = \\frac{x + 2}{x - 1}$",
+          "marks": 0.5
+        },
+        {
+          "stepText": "Cross multiply to solve for $x$: $x(x - 1) = (x + 2)(x - 2) \\implies x^2 - x = x^2 - 4$",
+          "marks": 1
+        },
+        {
+          "stepText": "Cancel $x^2$ from both sides: $-x = -4 \\implies x = 4$.",
+          "marks": 0.5
+        }
+      ]
+    },
+    {
+      "text": "In $\\triangle ABC$, $DE \\parallel BC$. If $AD = 2$ cm, $DB = 3$ cm, and $AE = 4$ cm, find the length of $EC$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 5, 6, -1],
+        "showAxis": false,
+        "dsl": "A = (2,4); B = (0,0); C = (5,0); D = (1.2, 2.4); E = (3.2, 2.4); triangle ABC; segment DE"
+      },
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Basic Proportionality Theorem Application",
+      "answerSteps": [
+        {
+          "stepText": "By Basic Proportionality Theorem, $\\frac{AD}{DB} = \\frac{AE}{EC}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Substituting the values: $\\frac{2}{3} = \\frac{4}{EC} \\implies 2 \\times EC = 12 \\implies EC = 6$ cm.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "If $\\triangle ABC \\sim \\triangle DEF$, $\\angle A = 40^{\\circ}$ and $\\angle E = 80^{\\circ}$, find the value of $\\angle C$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 7, 9, -1],
+        "showAxis": false,
+        "dsl": "A = (1,3); B = (0,0); C = (3,0); triangle ABC; D = (4,6); E = (2,0); F = (8,0); triangle DEF"
+      },
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Similarity",
+      "answerSteps": [
+        {
+          "stepText": "Since $\\triangle ABC \\sim \\triangle DEF$, corresponding angles are equal. Therefore, $\\angle B = \\angle E = 80^{\\circ}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "In $\\triangle ABC$, sum of angles is $180^{\\circ}$. So, $\\angle C = 180^{\\circ} - (40^{\\circ} + 80^{\\circ}) = 180^{\\circ} - 120^{\\circ} = 60^{\\circ}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "The ratio of corresponding sides of two similar triangles is $4:9$. Find the ratio of their areas.",
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Areas of Similar Triangles",
+      "answerSteps": [
+        {
+          "stepText": "The theorem of areas of similar triangles states that the ratio of the areas of two similar triangles is equal to the square of the ratio of their corresponding sides.",
+          "marks": 1
+        },
+        {
+          "stepText": "Ratio of areas = $(4/9)^2 = \\frac{16}{81}$. So the ratio is $16:81$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In $\\triangle PQR$, $ST \\parallel QR$. If $\\frac{PS}{SQ} = \\frac{3}{5}$ and $PR = 24$ cm, find the length of $PT$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 6, 7, -1],
+        "showAxis": false,
+        "dsl": "P = (2,5); Q = (0,0); R = (6,0); S = (1.25, 3.12); T = (3.5, 3.12); triangle PQR; segment ST"
+      },
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Basic Proportionality Theorem Application",
+      "answerSteps": [
+        {
+          "stepText": "By Basic Proportionality Theorem, $\\frac{PS}{SQ} = \\frac{PT}{TR}$. Since $TR = PR - PT = 24 - PT$.",
+          "marks": 1
+        },
+        {
+          "stepText": "$\\frac{3}{5} = \\frac{PT}{24 - PT} \\implies 3(24 - PT) = 5PT \\implies 72 - 3PT = 5PT \\implies 8PT = 72 \\implies PT = 9$ cm.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "A vertical stick 20m long casts a shadow 10m long on the ground. At the same time, a tower casts a shadow 50m long. Find the height of the tower.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 6, 8, -1],
+        "showAxis": false,
+        "dsl": "A = (0,2); B = (0,0); C = (1,0); triangle ABC; D = (3,5); E = (3,0); F = (5.5,0); triangle DEF"
+      },
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Similarity Applications",
+      "answerSteps": [
+        {
+          "stepText": "Let the height of the tower be $h$. At any given time, the angle of elevation of the sun is the same, so the triangle formed by the stick and its shadow is similar to the triangle formed by the tower and its shadow (AA Similarity).",
+          "marks": 1
+        },
+        {
+          "stepText": "Therefore, ratios of corresponding sides are equal: $\\frac{\\text{Height of stick}}{\\text{Shadow of stick}} = \\frac{\\text{Height of tower}}{\\text{Shadow of tower}} \\implies \\frac{20}{10} = \\frac{h}{50} \\implies 2 = \\frac{h}{50} \\implies h = 100$m.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "$\\triangle ABC \\sim \\triangle PQR$. The area of $\\triangle ABC$ is $36$ cm$^2$ and the area of $\\triangle PQR$ is $81$ cm$^2$. If $AB = 4$ cm, find the length of $PQ$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 4, 10, -1],
+        "showAxis": false,
+        "dsl": "A = (1,2); B = (0,0); C = (3,0); triangle ABC; P = (5,3); Q = (4,0); R = (8.5,0); triangle PQR"
+      },
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Areas of Similar Triangles",
+      "answerSteps": [
+        {
+          "stepText": "The ratio of the areas of two similar triangles is equal to the ratio of the squares of their corresponding sides. So, $\\frac{\\text{Area}(\\triangle ABC)}{\\text{Area}(\\triangle PQR)} = \\frac{AB^2}{PQ^2}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "$\\frac{36}{81} = \\frac{4^2}{PQ^2} \\implies \\frac{36}{81} = \\frac{16}{PQ^2} \\implies PQ^2 = \\frac{16 \\times 81}{36} = \\frac{1296}{36} = 36 \\implies PQ = 6$ cm.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In a trapezium $ABCD$, $AB \\parallel DC$. The diagonals $AC$ and $BD$ intersect at point $O$. Prove that $\\frac{AO}{OC} = \\frac{BO}{OD}$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 5, 6, -1],
+        "showAxis": false,
+        "dsl": "A = (1,4); B = (4,4); C = (5,0); D = (0,0); polygon ABCD; segment AC; segment BD; O = (2.5, 2.4)"
+      },
+      "marks": 2,
+      "difficulty": "Hard",
+      "topic": "Similarity",
+      "answerSteps": [
+        {
+          "stepText": "In $\\triangle AOB$ and $\\triangle COD$, $AB \\parallel DC$ and $AC$ is a transversal. Therefore, $\\angle OAB = \\angle OCD$ (Alternate interior angles).",
+          "marks": 1
+        },
+        {
+          "stepText": "Also $\\angle AOB = \\angle COD$ (Vertically opposite angles). By AA Similarity criterion, $\\triangle AOB \\sim \\triangle COD$. Therefore, corresponding sides are proportional: $\\frac{AO}{CO} = \\frac{BO}{DO} \\implies \\frac{AO}{OC} = \\frac{BO}{OD}$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "Two isosceles triangles have equal vertical angles and their areas are in the ratio $16:25$. Find the ratio of their corresponding heights.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 5, 9, -1],
+        "showAxis": false,
+        "dsl": "A = (1.5,3); B = (0,0); C = (3,0); triangle ABC; D = (6,4); E = (4,0); F = (8,0); triangle DEF"
+      },
+      "marks": 2,
+      "difficulty": "Medium",
+      "topic": "Areas of Similar Triangles",
+      "answerSteps": [
+        {
+          "stepText": "Since the isosceles triangles have equal vertical angles, they are similar by AA similarity (as the base angles will also be equal).",
+          "marks": 1
+        },
+        {
+          "stepText": "For similar triangles, the ratio of their areas is equal to the square of the ratio of their corresponding heights. So, $\\frac{16}{25} = \\left(\\frac{h_1}{h_2}\\right)^2 \\implies \\frac{h_1}{h_2} = \\frac{\\sqrt{16}}{\\sqrt{25}} = \\frac{4}{5}$. The ratio is $4:5$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In $\\triangle ABC$, $D$ and $E$ are points on $AB$ and $AC$ such that $AD = 2.4$ cm, $DB = 3.6$ cm, $AE = 3.2$ cm, and $EC = 4.8$ cm. Determine whether $DE \\parallel BC$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 5, 7, -1],
+        "showAxis": false,
+        "dsl": "A = (2.5,4); B = (0,0); C = (6,0); D = (1.5, 2.4); E = (3.9, 2.4); triangle ABC; segment DE"
+      },
+      "marks": 2,
+      "difficulty": "Easy",
+      "topic": "Converse of BPT",
+      "answerSteps": [
+        {
+          "stepText": "Calculate the ratios: $\\frac{AD}{DB} = \\frac{2.4}{3.6} = \\frac{2}{3}$ and $\\frac{AE}{EC} = \\frac{3.2}{4.8} = \\frac{2}{3}$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Since $\\frac{AD}{DB} = \\frac{AE}{EC}$, by the converse of the Basic Proportionality Theorem, $DE$ must be parallel to $BC$. Yes, $DE \\parallel BC$.",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "text": "In a right $\\triangle ABC$ right angled at $B$, $BD \\perp AC$. If $AD = 4$ cm and $CD = 9$ cm, find $BD$.",
+      "diagram": {
+        "template": "jsxgraph",
+        "boundingBox": [-1, 6, 5, -1],
+        "showAxis": false,
+        "dsl": "A = (0,5); B = (0,0); C = (4,0); triangle ABC; segment BD; D = (2.44, 1.95)"
+      },
+      "marks": 2,
+      "difficulty": "Hard",
+      "topic": "Similarity in Right Triangles",
+      "answerSteps": [
+        {
+          "stepText": "In a right angled triangle, if a perpendicular is drawn from the right angle to the hypotenuse, the triangles on each side of the perpendicular are similar to each other. So, $\\triangle ADB \\sim \\triangle BDC$.",
+          "marks": 1
+        },
+        {
+          "stepText": "Since corresponding sides are proportional, $\\frac{AD}{BD} = \\frac{BD}{CD} \\implies BD^2 = AD \\times CD = 4 \\times 9 = 36 \\implies BD = 6$ cm.",
+          "marks": 1
+        }
+      ]
+    }
+  ]
+}

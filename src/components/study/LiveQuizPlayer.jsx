@@ -621,9 +621,10 @@ export default function LiveQuizPlayer({
                   style={{ ...styles.option, ...styles[optStateClass] }} 
                   onClick={() => {
                     if (disabled) return;
-                    setOptimisticOption(idx);
+                    const newOption = effectiveSelectedOption === idx ? null : idx;
+                    setOptimisticOption(newOption);
                     setOptimisticForQ(currentQuestionIndex);
-                    submitAnswer(currentQuestionIndex, idx);
+                    submitAnswer(currentQuestionIndex, newOption);
                   }}
                 >
                   <div style={{ ...styles.optCircle, ...styles[`circle_${optStateClass}`] }}>

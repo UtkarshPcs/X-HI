@@ -39,6 +39,9 @@ const PhScale = React.lazy(() => import('../svg-library/chemistry/PhScale'));
 const TestTubeReaction = React.lazy(() => import('../svg-library/chemistry/TestTubeReaction'));
 const UniversalIndicator = React.lazy(() => import('../svg-library/chemistry/UniversalIndicator'));
 
+// Mathematics (Interactive/JSXGraph)
+const JSXGraphRenderer = React.lazy(() => import('./JSXGraphRenderer'));
+
 const TEMPLATES = {
   // Mathematics
   'angle': Angle,
@@ -51,6 +54,7 @@ const TEMPLATES = {
   'polygon': Polygon,
   'quadrilateral': Quadrilateral,
   'triangle': Triangle,
+  'jsxgraph': JSXGraphRenderer,
 
   // Physics
   'concave_lens_ray': ConcaveLensRay,

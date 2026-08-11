@@ -62,6 +62,33 @@ The subjective test JSON must follow this exact structure and typing:
 
 # Mathematics SVG Library Documentation
 
+## JSXGraph (Advanced Geometry DSL)
+**IMPORTANT:** For mathematical geometry (triangles, circles, coordinate geometry, angles), you MUST use the `jsxgraph` template. It uses a custom DSL (Domain Specific Language) to draw accurate interactive figures. Do NOT use the static SVG templates for standard geometric figures.
+
+### CRITICAL RULES FOR JSXGRAPH USAGE:
+1. **ONLY WHEN NECESSARY**: Do NOT generate a diagram for every random question. Only include a `diagram` block if the question explicitly refers to a figure (e.g., "In the given figure...") or if a visual diagram is absolutely mandatory to solve the geometric problem.
+2. **FLAWLESS MATHEMATICAL ACCURACY**: The JSXGraph engine faithfully renders EXACTLY what coordinates you provide. If you specify a point on a line segment, you MUST accurately calculate the math (using the section formula, slope, etc.) to ensure the point mathematically lies on that line. Do NOT guess coordinates. If a line is parallel or perpendicular, the coordinates must perfectly reflect that geometric truth, otherwise lines will stick out or look broken.
+
+- **template**: `"jsxgraph"`
+- **boundingBox**: Array of 4 numbers `[minX, maxY, maxX, minY]` (e.g., `[-1, 6, 7, -1]`). Adjust this based on the coordinates used in the figure.
+- **showAxis**: Boolean (`true` or `false`)
+- **dsl**: A string of semicolon-separated commands.
+  - **Points**: `A = (x, y)`
+  - **Lines/Segments**: `line AB` or `segment AB`
+  - **Polygons**: `triangle ABC`, `rectangle ABCD`, `polygon ABCDE`
+  - **Circles**: `circle A 5` (center A, radius 5) or `circle A B` (center A, through point B)
+  - **Angles**: `angle ABC`
+
+**Example Usage**:
+```json
+"diagram": {
+  "template": "jsxgraph",
+  "boundingBox": [-2, 5, 8, -2],
+  "showAxis": true,
+  "dsl": "A = (0,0); B = (6,0); C = (2,4); triangle ABC; angle ABC; segment AB"
+}
+```
+
 ## ParallelLines
 - **Highlight IDs**: `line-l`, `line-m`, `transversal-t`
 - **Pointer References**: Pointer 1 (Intersection of l and t), Pointer 2 (Intersection of m and t)
