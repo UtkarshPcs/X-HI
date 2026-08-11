@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon, Sparkles, Mic, Square } from 'lucide-react';
+import { ShieldAlert, Plus, Save, Trash2, Megaphone, Bold, Italic, List, Pencil, X, CalendarX, BookMarked, ChevronRight, Check, Send, ClipboardList, Users, Mail, Bell, RefreshCw, MousePointerClick, Eye, EyeOff, Link as LinkIcon, Sparkles, Mic, Square, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import FormatToolbar from '../components/FormatToolbar';
 import NoticeText from '../components/NoticeText';
@@ -28,15 +28,13 @@ import { FeatureLaunchUI } from '../components/FeatureLaunchPopup';
 import { transcribeAudio, parseDictatedHomework, parseDictatedClasswork } from '../services/llmService';
 
 function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
-  const [recording, setRecording] = useState(false);
-  const [processing, setProcessing] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle, listening, transcribing, arranging
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
 
   const toggleRecording = async () => {
-    if (recording) {
+    if (status === 'listening') {
       mediaRecorder.current.stop();
-      setRecording(false);
       mediaRecorder.current.stream.getTracks().forEach(t => t.stop());
     } else {
       try {
@@ -48,9 +46,10 @@ function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
         };
         mediaRecorder.current.onstop = async () => {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-          setProcessing(true);
+          setStatus('transcribing');
           try {
             const transcript = await transcribeAudio(audioBlob);
+            setStatus('arranging');
             if (isClasswork) {
               const parsed = await parseDictatedClasswork(transcript, scheduleList);
               onResult(parsed);
@@ -61,20 +60,29 @@ function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
           } catch (err) {
             alert('Failed to process dictation: ' + err.message);
           }
-          setProcessing(false);
+          setStatus('idle');
         };
         mediaRecorder.current.start();
-        setRecording(true);
+        setStatus('listening');
       } catch (err) {
         alert('Microphone access denied or error: ' + err.message);
+        setStatus('idle');
       }
     }
   };
 
-  if (processing) {
+  if (status === 'transcribing') {
     return (
-      <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>
-        Processing...
+      <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <Loader2 size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> Transcribing...
+      </button>
+    );
+  }
+  
+  if (status === 'arranging') {
+    return (
+      <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <Loader2 size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> Arranging...
       </button>
     );
   }
@@ -84,10 +92,10 @@ function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
       type="button" 
       disabled={disabled}
       onClick={toggleRecording} 
-      className={`auth-btn ${recording ? 'primary' : 'secondary'}`} 
-      style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', background: recording ? '#ef4444' : undefined, borderColor: recording ? '#ef4444' : undefined }}
+      className={`auth-btn ${status === 'listening' ? 'primary' : 'secondary'}`} 
+      style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', background: status === 'listening' ? '#ef4444' : undefined, borderColor: status === 'listening' ? '#ef4444' : undefined }}
     >
-      {recording ? <><Square size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Stop</> : <><Mic size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Dictate AI</>}
+      {status === 'listening' ? <><Square size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Stop</> : <><Mic size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Dictate AI</>}
     </button>
   );
 }

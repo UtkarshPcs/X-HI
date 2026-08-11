@@ -209,14 +209,16 @@ export async function transcribeAudio(audioBlob) {
 
 export async function parseDictatedHomework(transcript) {
   const systemPrompt = `You are an assistant that extracts homework tasks from a dictation.
-Return a JSON array of tasks. Each task must have:
+Return a JSON object with a single key "tasks" which is an array of task objects.
+Each task object must have:
 - "subject": string (e.g., Math, Science)
 - "description": string (the actual task)
-Return ONLY the JSON array, e.g., [{"subject": "Math", "description": "Do chapter 5"}].`;
+Return ONLY the JSON object, e.g., {"tasks": [{"subject": "Math", "description": "Do chapter 5"}]}.`;
 
   const rawOutput = await callLLM(systemPrompt, transcript, 'json');
   const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-  return JSON.parse(cleanJson);
+  const parsed = JSON.parse(cleanJson);
+  return parsed.tasks || [];
 }
 
 export async function parseDictatedClasswork(transcript, scheduleList) {
@@ -224,11 +226,12 @@ export async function parseDictatedClasswork(transcript, scheduleList) {
 Here is the current schedule for the day:
 ${JSON.stringify(scheduleList)}
 Based on the dictated text, fill in the "note" for the corresponding subjects or periods.
-Return a JSON object where keys are the period numbers (strings) and values are the notes.
-Example: {"1": "Completed chapter 5", "3": "Read page 20"}
+Return a JSON object with a single key "notes" where keys inside it are the period numbers (strings) and values are the notes.
+Example: {"notes": {"1": "Completed chapter 5", "3": "Read page 20"}}
 Return ONLY the JSON object. Do not output anything else.`;
 
   const rawOutput = await callLLM(systemPrompt, transcript, 'json');
   const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-  return JSON.parse(cleanJson);
+  const parsed = JSON.parse(cleanJson);
+  return parsed.notes || {};
 }
