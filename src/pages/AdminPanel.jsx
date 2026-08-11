@@ -28,7 +28,8 @@ import { FeatureLaunchUI } from '../components/FeatureLaunchPopup';
 import { transcribeAudio, parseDictatedHomework, parseDictatedClasswork } from '../services/llmService';
 
 function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
-  const [status, setStatus] = useState('idle'); // idle, listening, transcribing, arranging
+  const [status, setStatus] = useState('idle'); // idle, listening, transcribing, reviewing, arranging
+  const [transcript, setTranscript] = useState('');
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
 
@@ -48,19 +49,13 @@ function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
           setStatus('transcribing');
           try {
-            const transcript = await transcribeAudio(audioBlob);
-            setStatus('arranging');
-            if (isClasswork) {
-              const parsed = await parseDictatedClasswork(transcript, scheduleList);
-              onResult(parsed);
-            } else {
-              const parsed = await parseDictatedHomework(transcript);
-              onResult(parsed);
-            }
+            const resultText = await transcribeAudio(audioBlob);
+            setTranscript(resultText);
+            setStatus('reviewing');
           } catch (err) {
             alert('Failed to process dictation: ' + err.message);
+            setStatus('idle');
           }
-          setStatus('idle');
         };
         mediaRecorder.current.start();
         setStatus('listening');
@@ -71,32 +66,86 @@ function DictateButton({ onResult, isClasswork, scheduleList, disabled }) {
     }
   };
 
-  if (status === 'transcribing') {
+  const handleProcessAI = async () => {
+    if (!transcript.trim()) return;
+    setStatus('arranging');
+    try {
+      if (isClasswork) {
+        const parsed = await parseDictatedClasswork(transcript, scheduleList);
+        onResult(parsed);
+      } else {
+        const parsed = await parseDictatedHomework(transcript);
+        onResult(parsed);
+      }
+    } catch (err) {
+      alert('Failed to arrange via AI: ' + err.message);
+    }
+    setStatus('idle');
+    setTranscript('');
+  };
+
+  if (status === 'reviewing') {
     return (
-      <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-        <Loader2 size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> Transcribing...
-      </button>
-    );
-  }
-  
-  if (status === 'arranging') {
-    return (
-      <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-        <Loader2 size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> Arranging...
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '320px', maxWidth: '100%', background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+          <span>Review Transcript:</span>
+          <span style={{ color: '#6ee7b7' }}>Ready to Send</span>
+        </div>
+        <textarea
+          value={transcript}
+          onChange={(e) => setTranscript(e.target.value)}
+          rows={3}
+          style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-primary)', resize: 'vertical' }}
+        />
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+          <button type="button" onClick={() => setStatus('idle')} className="auth-btn secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem' }}>Cancel</button>
+          <button type="button" onClick={handleProcessAI} className="auth-btn primary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <Sparkles size={14} /> Send to AI
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <button 
-      type="button" 
-      disabled={disabled}
-      onClick={toggleRecording} 
-      className={`auth-btn ${status === 'listening' ? 'primary' : 'secondary'}`} 
-      style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', background: status === 'listening' ? '#ef4444' : undefined, borderColor: status === 'listening' ? '#ef4444' : undefined }}
-    >
-      {status === 'listening' ? <><Square size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Stop</> : <><Mic size={14} style={{ display: 'inline', marginRight: '0.25rem' }} /> Dictate AI</>}
-    </button>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes ai-pulse-bar {
+          0% { height: 6px; opacity: 0.5; }
+          100% { height: 16px; opacity: 1; }
+        }
+      `}} />
+      {status === 'transcribing' ? (
+        <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <Loader2 size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> Transcribing...
+        </button>
+      ) : status === 'arranging' ? (
+        <button type="button" disabled className="auth-btn secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <Loader2 size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> Arranging...
+        </button>
+      ) : (
+        <button 
+          type="button" 
+          disabled={disabled}
+          onClick={toggleRecording} 
+          className={`auth-btn ${status === 'listening' ? 'primary' : 'secondary'}`} 
+          style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem', background: status === 'listening' ? '#ef4444' : undefined, borderColor: status === 'listening' ? '#ef4444' : undefined, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          {status === 'listening' ? (
+            <>
+              <Square size={14} /> Stop
+              <div style={{ display: 'flex', gap: '3px', alignItems: 'center', marginLeft: '4px', height: '16px' }}>
+                <div style={{ width: '3px', background: 'white', borderRadius: '2px', animation: 'ai-pulse-bar 0.4s infinite alternate' }} />
+                <div style={{ width: '3px', background: 'white', borderRadius: '2px', animation: 'ai-pulse-bar 0.4s infinite alternate 0.2s' }} />
+                <div style={{ width: '3px', background: 'white', borderRadius: '2px', animation: 'ai-pulse-bar 0.4s infinite alternate 0.4s' }} />
+              </div>
+            </>
+          ) : (
+            <><Mic size={14} /> Dictate AI</>
+          )}
+        </button>
+      )}
+    </>
   );
 }
 
