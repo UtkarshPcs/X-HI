@@ -100,6 +100,28 @@ export function useLiveQuiz(roomId, room, currentUser, onlineMembers) {
     }
   }, [answers, quizState?.status, quizState?.quizMode, quizState?.currentQuestionIndex, isActingAdmin, isDecentralizedFallback, roomId]);
 
+  // Dynamic Pace: jump timer to 10s when 50% answers are received
+  useEffect(() => {
+    if (quizState?.status === 'active' && quizState?.quizMode === 'dynamic' && quizState?.questionStartedAt) {
+      const currentAnswers = answers.filter(a => a.id.startsWith(`q_${quizState.currentQuestionIndex}_`));
+      
+      const requiredAnswers = Math.max(1, Math.ceil(onlineMembers.length / 2));
+      
+      if (currentAnswers.length >= requiredAnswers) {
+        const started = quizState.questionStartedAt;
+        const elapsed = Math.floor((Date.now() - started) / 1000);
+        const remaining = Math.max(0, quizState.timePerQuestion - elapsed);
+        
+        if (remaining > 10) {
+          if (isActingAdmin || isDecentralizedFallback) {
+            const newStartedAt = Date.now() - (quizState.timePerQuestion - 10) * 1000;
+            updateQuizState(roomId, { 'quizState.questionStartedAt': newStartedAt }).catch(() => {});
+          }
+        }
+      }
+    }
+  }, [answers, onlineMembers.length, quizState?.status, quizState?.quizMode, quizState?.currentQuestionIndex, quizState?.questionStartedAt, quizState?.timePerQuestion, isActingAdmin, isDecentralizedFallback, roomId]);
+
   const submitAnswer = useCallback(async (qIndex, optionIndex) => {
     if (!roomId || !currentUser || !quizState?.quizId) return;
     try {

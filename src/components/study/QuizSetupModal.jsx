@@ -160,7 +160,7 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
       difficulty: targetDifficultyStr,
       questions: selectedQuestions,
       quizMode,
-      timePerQuestion,
+      timePerQuestion: quizMode === 'dynamic' ? 180 : timePerQuestion,
       currentQuestionIndex: 0,
       status: 'reading',
       questionStartedAt: null,
@@ -263,7 +263,8 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
 
             <div style={styles.field}>
               <label style={styles.label}><Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Time Limit</label>
-              <select style={styles.select} value={timePerQuestion} onChange={e => setTimePerQuestion(Number(e.target.value))}>
+              <select style={styles.select} value={quizMode === 'dynamic' ? 180 : timePerQuestion} onChange={e => setTimePerQuestion(Number(e.target.value))} disabled={quizMode === 'dynamic'}>
+                {quizMode === 'dynamic' && <option value={180}>180 Seconds (Dynamic)</option>}
                 <option value={15}>15 Seconds</option>
                 <option value={30}>30 Seconds</option>
                 <option value={60}>60 Seconds</option>
@@ -284,6 +285,9 @@ export default function QuizSetupModal({ onClose, onStart, onlineMembers, curren
               </button>
               <button type="button" onClick={() => setQuizMode('fastest')} style={{ ...styles.modeBtn, ...(quizMode === 'fastest' ? styles.modeBtnActive : {}) }}>
                 Fastest Finger First <span style={styles.modeDesc}>Only first answer locks.</span>
+              </button>
+              <button type="button" onClick={() => setQuizMode('dynamic')} style={{ ...styles.modeBtn, ...(quizMode === 'dynamic' ? styles.modeBtnActive : {}) }}>
+                Dynamic Pace <span style={styles.modeDesc}>Adapts to majority speed.</span>
               </button>
             </div>
           </div>

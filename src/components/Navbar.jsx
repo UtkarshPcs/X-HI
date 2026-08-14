@@ -163,7 +163,7 @@ export default function Navbar() {
                     <GraduationCap size={15} /> Study Together
                   </button>
                   <button className="nav-dropdown-item" onClick={() => go('/ai-chat')}>
-                    <Bot size={15} /> AI Chat
+                    <Bot size={15} /> Smart solver
                   </button>
                   {currentUser.isStarBatch && (
                     <button className="nav-dropdown-item" onClick={() => go('/star-batch')}>

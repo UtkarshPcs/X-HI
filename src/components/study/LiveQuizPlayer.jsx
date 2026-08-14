@@ -478,7 +478,12 @@ export default function LiveQuizPlayer({
       <div style={styles.header}>
         <div style={styles.qIndex}>Question {currentQuestionIndex + 1} of {questions.length}</div>
         <div style={styles.timer(timeRemaining)}>
-          <Clock size={18} /> 00:{timeRemaining < 10 ? `0${timeRemaining}` : timeRemaining}
+          <Clock size={18} /> 
+          {quizMode === 'dynamic' && timeRemaining > 10 && status === 'active' ? (
+             <span style={{ marginLeft: 4 }}>∞</span>
+          ) : (
+            <span style={{ marginLeft: 4 }}>00:{timeRemaining < 10 ? `0${timeRemaining}` : timeRemaining}</span>
+          )}
         </div>
       </div>
 
@@ -519,7 +524,7 @@ export default function LiveQuizPlayer({
                   <Users size={16} color="var(--primary)" />
                   <div style={styles.metaText}>
                     <span style={styles.metaLabel}>Mode</span>
-                    <span style={styles.metaValue}>{quizState.quizMode === 'fastest' ? 'Fastest Finger First' : 'All Players'}</span>
+                    <span style={styles.metaValue}>{quizState.quizMode === 'fastest' ? 'Fastest Finger First' : quizState.quizMode === 'dynamic' ? 'Dynamic Pace' : 'All Players'}</span>
                   </div>
                 </div>
                 <div style={styles.metaItem}>
