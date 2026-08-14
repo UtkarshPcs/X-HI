@@ -65,6 +65,8 @@ export default async function handler(req, res) {
 
     const db = adminDb();
     const results = [];
+    const uploadId = Date.now().toString();
+    let totalUploadedCount = 0;
 
     for (const testData of json) {
       if (!testData.chapterId) {
@@ -99,6 +101,7 @@ export default async function handler(req, res) {
           const key = getQKey(q);
           if (key !== '|' && !existingKeys.has(key)) {
             existingKeys.add(key);
+            q.uploadId = uploadId;
             newUniqueQuestions.push(q);
           }
         }
@@ -109,6 +112,7 @@ export default async function handler(req, res) {
             title: testData.title || existingData.title || getFriendlyTitle(testData.chapterId, isSubjective)
           }, { merge: true });
         }
+        totalUploadedCount += newUniqueQuestions.length;
         results.push({ 
           id: existingTestId, 
           chapterId: testData.chapterId, 
@@ -117,6 +121,7 @@ export default async function handler(req, res) {
           type: isSubjective ? 'subjective' : 'objective' 
         });
       } else {
+        testData.questions.forEach(q => q.uploadId = uploadId);
         const docRef = await db.collection(collectionName).add({
           chapterId: testData.chapterId,
           subjectId: testData.subjectId || 'Unknown',
@@ -126,6 +131,7 @@ export default async function handler(req, res) {
           questions: testData.questions,
           createdAt: FieldValue.serverTimestamp()
         });
+        totalUploadedCount += testData.questions.length;
         results.push({ 
           id: docRef.id, 
           chapterId: testData.chapterId, 
@@ -134,6 +140,16 @@ export default async function handler(req, res) {
           type: isSubjective ? 'subjective' : 'objective' 
         });
       }
+    }
+
+    if (totalUploadedCount > 0) {
+      await db.collection('starBatchUploadTracker').doc(uploadId).set({
+        uploadId,
+        timestamp: FieldValue.serverTimestamp(),
+        totalQuestions: totalUploadedCount,
+        chapters: Array.from(new Set(json.map(t => t.chapterId))),
+        source: 'API'
+      });
     }
 
     return res.status(200).json({ ok: true, results });

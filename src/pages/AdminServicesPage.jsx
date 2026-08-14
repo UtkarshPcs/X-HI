@@ -41,6 +41,7 @@ import { getHomework } from '../services/homeworkService';
 import { createPage, updatePage, getPage, getAllPages, deletePage } from '../services/dynamicPageService';
 import { createCustomTest, updateCustomTest, getCustomTests, getCustomTestAttempts } from '../services/customTestService';
 import { getAllowedChapters, addAllowedChapter, removeAllowedChapter } from '../services/aiChatService';
+import { getUploadHistory, deleteUpload } from '../services/starBatchUploadService';
 
 const TABS = [
   { id: 'users',      label: 'User Directory',  Icon: Users },
@@ -58,6 +59,7 @@ const TABS = [
   { id: 'starbatch',  label: 'Star Batch',       Icon: Star },
   { id: 'mathfixer',  label: 'Math Fixer',       Icon: Sparkles },
   { id: 'reportedQs', label: 'Reported Questions', Icon: Flag },
+  { id: 'uploadHistory', label: 'Upload History', Icon: UploadCloud },
   { id: 'periodicPredicted', label: 'Predicted Analysis', Icon: Target },
   { id: 'customAccounts',    label: 'Custom Accounts',    Icon: UserPlus },
   { id: 'accessCodes',       label: 'Access Codes',       Icon: ShieldCheck },
@@ -1782,6 +1784,7 @@ export default function AdminServicesPage() {
         { tab === 'starbatch'  && <StarBatchTab /> }
         { tab === 'mathfixer'  && <MathFixerTab /> }
         { tab === 'reportedQs' && <ReportedQuestionsTab /> }
+        {tab === 'uploadHistory' && <UploadHistoryTab />}
         { tab === 'periodicPredicted' && <PeriodicPredictedAdminTab /> }
         { tab === 'customAccounts'    && <CustomAccountsTab /> }
         { tab === 'accessCodes'       && <AccessCodesTab /> }
@@ -3958,6 +3961,107 @@ function AiChatConfigTab() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Upload History Tab ─────────────────────────────────────────
+function UploadHistoryTab() {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  async function fetchHistory() {
+    try {
+      setLoading(true);
+      const data = await getUploadHistory();
+      setHistory(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(uploadId) {
+    if (!window.confirm("Are you sure you want to delete this upload? This will remove all questions added in this upload.")) return;
+    try {
+      setDeletingId(uploadId);
+      await deleteUpload(uploadId);
+      setHistory(prev => prev.filter(u => u.uploadId !== uploadId));
+    } catch (err) {
+      alert("Error deleting upload: " + err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  if (loading) return <div style={{ color: 'var(--text-muted)' }}>Loading history...</div>;
+  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+
+  return (
+    <div style={{ maxWidth: 900 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.2rem', color: '#fff' }}>Star Test API Upload History</h2>
+        <button className="auth-btn outline" onClick={fetchHistory} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <RefreshCw size={14} /> Refresh
+        </button>
+      </div>
+      
+      {history.length === 0 ? (
+        <p style={{ color: 'var(--text-muted)' }}>No API uploads found.</p>
+      ) : (
+        <div className="as-table-wrap">
+          <table className="as-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Upload ID</th>
+                <th>Chapters</th>
+                <th>Total Questions</th>
+                <th>Source</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map(u => (
+                <tr key={u.uploadId}>
+                  <td>{u.timestamp?.toDate ? u.timestamp.toDate().toLocaleString() : 'N/A'}</td>
+                  <td><code style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', padding: '2px 4px', borderRadius: 4 }}>{u.uploadId}</code></td>
+                  <td>
+                    {u.chapters && u.chapters.length > 0 ? (
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        {u.chapters.map(c => (
+                          <span key={c} style={{ fontSize: '0.75rem', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '2px 6px', borderRadius: 12 }}>
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    ) : '-'}
+                  </td>
+                  <td>{u.totalQuestions}</td>
+                  <td>{u.source}</td>
+                  <td>
+                    <button 
+                      className="auth-btn outline" 
+                      onClick={() => handleDelete(u.uploadId)}
+                      disabled={deletingId === u.uploadId}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', borderColor: 'var(--error)' }}
+                    >
+                      {deletingId === u.uploadId ? 'Deleting...' : 'Delete / Revert'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
