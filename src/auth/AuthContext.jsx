@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
       getTeacher(teacherSession)
         .then(t => {
           if (t) {
-            const u = { ...t, role: ROLES.TEACHER };
+            const u = { ...t, role: ROLES.TEACHER, accessCodeVerified: true };
             setCurrentUser(u);
             localStorage.setItem('auth_user_cache', JSON.stringify(u));
           }
@@ -167,7 +167,7 @@ export function AuthProvider({ children }) {
   async function loginTeacherCtx(id, password) {
     const teacher = await loginTeacher(id, password);
     if (!teacher) throw new Error('Incorrect password. Try again.');
-    const user = { ...teacher, role: ROLES.TEACHER };
+    const user = { ...teacher, role: ROLES.TEACHER, accessCodeVerified: true };
     setCurrentUser(user);
     localStorage.setItem('teacher_session', id);
     localStorage.setItem('auth_user_cache', JSON.stringify(user));

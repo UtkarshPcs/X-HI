@@ -11,6 +11,7 @@ export default function AccessCodeGate() {
   // The gate is only shown for logged in, unverified, non-custom/teacher users.
   // We handle this condition in App.jsx rendering, but we can also double check here.
   if (!currentUser) return null;
+  if (currentUser.role === 'ADMIN' || currentUser.role === 'TEACHER') return null;
   if (currentUser.accessCodeVerified) return null;
 
   async function handleSubmit(e) {
