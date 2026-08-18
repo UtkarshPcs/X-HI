@@ -469,11 +469,57 @@ export default function LiveQuizPlayer({
     return <QuizReportCard scores={scores} onEndQuiz={endQuiz} isActingAdmin={isActingAdmin} currentUserPhone={currentUser.phone} />;
   }
 
+  // Anti-cheating logic: Prevent screenshots by obscuring when tab loses focus, and block typical screenshot shortcuts
+  const [isObscured, setIsObscured] = useState(false);
+  
+  useEffect(() => {
+    const handleVisibility = () => setIsObscured(document.hidden);
+    const handleBlur = () => setIsObscured(true);
+    const handleFocus = () => setIsObscured(false);
+    
+    const handleKeyDown = (e) => {
+      // Block PrintScreen or Cmd+Shift+S or Windows+Shift+S
+      if (e.key === 'PrintScreen' || ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 's' || e.key === 'S' || e.key === '3' || e.key === '4'))) {
+        try { navigator.clipboard.writeText(''); } catch(err) {}
+        setIsObscured(true);
+        setTimeout(() => setIsObscured(false), 3000);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   // Should the full leaderboard show? Only during reading/revealing (not during active answering)
   const showFullLeaderboard = status === 'reading' || status === 'revealing';
 
   return (
-    <div style={styles.container}>
+    <div 
+      style={{
+        ...styles.container, 
+        userSelect: 'none', 
+        WebkitUserSelect: 'none',
+        filter: isObscured ? 'blur(20px) grayscale(100%)' : 'none',
+        transition: 'filter 0.1s'
+      }}
+      onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => { e.preventDefault(); try { navigator.clipboard.writeText(''); } catch(err) {} }}
+      onDragStart={(e) => e.preventDefault()}
+    >
+      {isObscured && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+          Screenshots are disabled.
+        </div>
+      )}
       {/* Header Info */}
       <div style={styles.header}>
         <div style={styles.qIndex}>Question {currentQuestionIndex + 1} of {questions.length}</div>
