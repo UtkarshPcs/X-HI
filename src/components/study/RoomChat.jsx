@@ -5,7 +5,7 @@
  */
 
 import { memo, useRef, useEffect, useState, useCallback } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Pin, X } from 'lucide-react';
 
 function formatTime(ts) {
   if (!ts) return '';
@@ -30,9 +30,15 @@ function avatarColour(phone) {
 }
 
 // Single chat message bubble
-const ChatMessage = memo(function ChatMessage({ msg, isOwn }) {
+const ChatMessage = memo(function ChatMessage({ msg, isOwn, isPrivileged, onPin }) {
+  const [hover, setHover] = useState(false);
+  
   return (
-    <div style={{ ...styles.msgRow, justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
+    <div 
+      style={{ ...styles.msgRow, justifyContent: isOwn ? 'flex-end' : 'flex-start' }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
       {!isOwn && (
         <span
           style={{ ...styles.msgAvatar, background: avatarColour(msg.senderPhone) }}
@@ -41,7 +47,7 @@ const ChatMessage = memo(function ChatMessage({ msg, isOwn }) {
           {getInitials(msg.senderName)}
         </span>
       )}
-      <div style={{ maxWidth: '75%' }}>
+      <div style={{ maxWidth: '75%', position: 'relative' }}>
         {!isOwn && (
           <span style={styles.msgSender}>{msg.senderName}</span>
         )}
@@ -58,6 +64,27 @@ const ChatMessage = memo(function ChatMessage({ msg, isOwn }) {
             {formatTime(msg.createdAt)}
           </span>
         </div>
+        {/* Pin button for admin */}
+        {isPrivileged && hover && (
+          <button 
+            onClick={() => onPin(msg)}
+            style={{
+              position: 'absolute',
+              top: isOwn ? 0 : 20,
+              [isOwn ? 'left' : 'right']: -30,
+              background: 'var(--surface-light)',
+              border: 'none',
+              borderRadius: '50%',
+              width: 24, height: 24,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'var(--text-muted)'
+            }}
+            title="Pin Message"
+          >
+            <Pin size={12} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -70,9 +97,13 @@ const ChatMessage = memo(function ChatMessage({ msg, isOwn }) {
  *   onSend: (text: string) => void,
  *   currentUserPhone: string,
  *   disabled?: boolean,
+ *   pinnedMessage?: object,
+ *   onPin?: (msg: object) => void,
+ *   onUnpin?: () => void,
+ *   isPrivileged?: boolean
  * }} props
  */
-const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUserPhone, disabled }) {
+const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUserPhone, disabled, pinnedMessage, onPin, onUnpin, isPrivileged }) {
   const [text, setText]         = useState('');
   const bottomRef               = useRef(null);
   const chatBodyRef             = useRef(null);
@@ -115,6 +146,33 @@ const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUser
 
   return (
     <div style={styles.root}>
+      {/* Pinned Message Banner */}
+      {pinnedMessage && (
+        <div style={{
+          background: 'rgba(245, 197, 66, 0.1)',
+          borderBottom: '1px solid rgba(245, 197, 66, 0.2)',
+          padding: '0.75rem',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '0.75rem'
+        }}>
+          <Pin size={16} color="#fbbf24" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fbbf24', marginBottom: '2px' }}>
+              Pinned by {pinnedMessage.senderName}
+            </div>
+            <div style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {pinnedMessage.text}
+            </div>
+          </div>
+          {isPrivileged && (
+            <button onClick={onUnpin} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}>
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Message list */}
       <div
         style={styles.body}
@@ -135,6 +193,8 @@ const RoomChat = memo(function RoomChat({ messages, sending, onSend, currentUser
               key={msg.id}
               msg={msg}
               isOwn={msg.senderPhone === currentUserPhone}
+              isPrivileged={isPrivileged}
+              onPin={onPin}
             />
           ))
         )}

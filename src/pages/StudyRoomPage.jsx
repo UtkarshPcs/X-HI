@@ -29,7 +29,7 @@ import RoomHeader from '../components/study/RoomHeader';
 import { useLiveQuiz } from '../hooks/useLiveQuiz';
 import LiveQuizPlayer from '../components/study/LiveQuizPlayer';
 import QuizSetupModal from '../components/study/QuizSetupModal';
-import { startQuiz } from '../services/studyRoomService';
+import { startQuiz, pinMessage, unpinMessage } from '../services/studyRoomService';
 
 // ── Mobile: Chat / Members sub-tab bar (used inside the chat panel) ─────────
 function MobileChatMembersTabs({ activeTab, onTabChange, memberCount, unread }) {
@@ -443,6 +443,10 @@ export default function StudyRoomPage() {
             onSend={send}
             currentUserPhone={currentUser.phone}
             disabled={!currentUser}
+            pinnedMessage={room.pinnedMessage}
+            onPin={(msg) => pinMessage(room.id, msg)}
+            onUnpin={() => unpinMessage(room.id)}
+            isPrivileged={isPrivileged}
           />
         )}
       </div>
@@ -627,6 +631,10 @@ export default function StudyRoomPage() {
               onSend={send}
               currentUserPhone={currentUser.phone}
               disabled={!currentUser}
+              pinnedMessage={room.pinnedMessage}
+              onPin={(msg) => pinMessage(room.id, msg)}
+              onUnpin={() => unpinMessage(room.id)}
+              isPrivileged={isPrivileged}
             />
           </div>
         </div>

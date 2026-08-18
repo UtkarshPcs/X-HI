@@ -446,6 +446,27 @@ export async function sendMessage(roomId, user, text) {
 }
 
 /**
+ * Pins a message to the room.
+ * @param {string} roomId
+ * @param {object} message
+ */
+export async function pinMessage(roomId, message) {
+  await updateDoc(doc(db, ROOMS_COL, roomId), {
+    pinnedMessage: message
+  });
+}
+
+/**
+ * Unpins the current message.
+ * @param {string} roomId
+ */
+export async function unpinMessage(roomId) {
+  await updateDoc(doc(db, ROOMS_COL, roomId), {
+    pinnedMessage: null
+  });
+}
+
+/**
  * Real-time listener for chat messages (latest MAX_MESSAGES, ordered by createdAt asc).
  * @param {string} roomId
  * @param {function} callback - called with message array
