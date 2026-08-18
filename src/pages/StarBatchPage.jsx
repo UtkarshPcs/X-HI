@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { unlockStarBatchWithCode } from '../services/starBatchService';
-import { Lock, Star, Sparkles, ChevronRight, ShieldAlert, Target, BookOpen, CheckCircle } from 'lucide-react';
+import { Lock, Star, Sparkles, ChevronRight, ShieldAlert, Target, BookOpen, CheckCircle, Crown, Users } from 'lucide-react';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 30_000;
@@ -322,6 +322,34 @@ export default function StarBatchPage() {
               <BookOpen size={20} color="#fbbf24" /> Important Concepts Hub
             </h3>
             <p className="as-muted" style={{ margin: 0 }}>Community-driven knowledge base. Revise key formulas and concepts chapter-wise.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+        </div>
+
+        <div
+          className="as-card star-quick-link"
+          onClick={() => navigate('/study-together')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <Users size={20} color="#fbbf24" /> Study Together Rooms
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>Join collaborative study rooms with synchronized YouTube and live multiplayer quizzes.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+        </div>
+
+        <div
+          className="as-card star-quick-link"
+          onClick={() => navigate('/star-leaderboard')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <Crown size={20} color="#fbbf24" /> Global Quiz Leaderboard
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>See the top players who dominate the live multiplayer Room Quizzes.</p>
           </div>
           <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
         </div>

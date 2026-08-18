@@ -482,7 +482,7 @@ export default function LiveQuizPlayer({
   }, [status, currentQuestionIndex, effectiveSelectedOption, currentQuestion, scores, currentUser, updateMyScore, scoreCalculatedForQ, quizState.timePerQuestion, timeRemaining]);
 
   if (status === 'finished') {
-    return <QuizReportCard scores={scores} onEndQuiz={endQuiz} isActingAdmin={isActingAdmin} currentUserPhone={currentUser.phone} />;
+    return <QuizReportCard scores={scores} onEndQuiz={endQuiz} isActingAdmin={isActingAdmin} currentUserPhone={currentUser.phone} quizState={quizState} />;
   }
 
   // Anti-cheating logic: Prevent screenshots by obscuring when tab loses focus, and block typical screenshot shortcuts
@@ -750,7 +750,9 @@ export default function LiveQuizPlayer({
 }
 
 // ── Final Report Card ────────────────────────────────────────────────────────
-function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) {
+import { recordGlobalQuizResult } from '../../services/globalQuizLeaderboardService';
+
+function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone, quizState }) {
   const sorted = computeDenseRanks(scores);
   const winner = sorted[0];
 
@@ -761,6 +763,13 @@ function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) 
   const totalAnswered = myData ? ((myData.correctCount || 0) + (myData.wrongCount || 0)) : 0;
   const avgTime = (myData && totalAnswered > 0 && myData.totalTime) ? (myData.totalTime / totalAnswered).toFixed(1) + 's' : '-';
   const accuracy = (myData && totalAnswered > 0) ? Math.round((myData.correctCount / totalAnswered) * 100) + '%' : '-';
+
+  // Admin records the result globally once when the quiz finishes
+  useEffect(() => {
+    if (isActingAdmin && quizState?.quizId) {
+      recordGlobalQuizResult(quizState.quizId, quizState, scores).catch(console.error);
+    }
+  }, [isActingAdmin, quizState, scores]);
 
   return (
     <div style={styles.container}>
