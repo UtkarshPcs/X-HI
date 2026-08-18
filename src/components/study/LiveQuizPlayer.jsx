@@ -22,33 +22,48 @@ function getInitials(name) {
   return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
+function computeDenseRanks(scores) {
+  const sorted = [...scores].sort((a, b) => b.score - a.score);
+  let currentRank = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i].score < sorted[i - 1].score) {
+      currentRank++;
+    }
+    sorted[i].rank = currentRank;
+  }
+  return sorted;
+}
+
 // ── Compact score strip (shown during active questions) ──────────────────────
 function CompactScoreStrip({ scores, currentUserPhone }) {
-  const sorted = useMemo(() => [...scores].sort((a, b) => b.score - a.score), [scores]);
-  const myRank = sorted.findIndex(s => s.id === currentUserPhone);
-  const myScore = sorted[myRank];
+  const sorted = useMemo(() => computeDenseRanks(scores), [scores]);
+  const myIndex = sorted.findIndex(s => s.id === currentUserPhone);
+  const myScore = sorted[myIndex];
 
   if (scores.length === 0) return null;
+
+  const top3 = sorted.filter(s => s.rank < 3);
+  const othersCount = sorted.length - top3.length;
 
   return (
     <div style={stripStyles.root}>
       {/* Top 3 mini avatars */}
       <div style={stripStyles.podium}>
-        {sorted.slice(0, 3).map((s, i) => (
+        {top3.slice(0, 4).map((s, i) => (
           <div key={s.id} style={{
             ...stripStyles.miniAvatar,
-            background: RANK_GLOWS[i],
-            border: `1.5px solid ${RANK_COLORS[i] || 'rgba(255,255,255,0.1)'}`,
-            ...(s.id === currentUserPhone ? { boxShadow: `0 0 0 2px ${RANK_COLORS[i]}` } : {}),
-          }} title={`#${i + 1} ${s.name}: ${s.score}pts`}>
-            <span style={{ fontSize: '0.55rem', fontWeight: 700, color: RANK_COLORS[i] || '#fff' }}>
+            background: RANK_GLOWS[s.rank] || 'rgba(255,255,255,0.05)',
+            border: `1.5px solid ${RANK_COLORS[s.rank] || 'rgba(255,255,255,0.1)'}`,
+            ...(s.id === currentUserPhone ? { boxShadow: `0 0 0 2px ${RANK_COLORS[s.rank] || '#fff'}` } : {}),
+          }} title={`#${s.rank + 1} ${s.name}: ${s.score}pts`}>
+            <span style={{ fontSize: '0.55rem', fontWeight: 700, color: RANK_COLORS[s.rank] || '#fff' }}>
               {getInitials(s.name)}
             </span>
           </div>
         ))}
-        {sorted.length > 3 && (
+        {othersCount > 0 && (
           <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginLeft: '0.15rem' }}>
-            +{sorted.length - 3}
+            +{othersCount}
           </span>
         )}
       </div>
@@ -59,9 +74,9 @@ function CompactScoreStrip({ scores, currentUserPhone }) {
           <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>You</span>
           <span style={{
             fontSize: '0.75rem', fontWeight: 700,
-            color: myRank < 3 ? RANK_COLORS[myRank] : '#fff',
+            color: myScore.rank < 3 ? RANK_COLORS[myScore.rank] : '#fff',
           }}>
-            #{myRank + 1}
+            #{myScore.rank + 1}
           </span>
           <span style={{
             fontSize: '0.75rem', fontWeight: 700,
@@ -104,7 +119,7 @@ const stripStyles = {
 
 // ── Full leaderboard panel (shown during reading/revealing) ──────────────────
 function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
-  const sorted = useMemo(() => [...scores].sort((a, b) => b.score - a.score), [scores]);
+  const sorted = useMemo(() => computeDenseRanks(scores), [scores]);
   const maxScore = sorted.length > 0 ? Math.max(sorted[0]?.score || 1, 1) : 1;
 
   if (scores.length === 0) {
@@ -132,7 +147,8 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
         {sorted.map((s, i) => {
           const isMe = s.id === currentUserPhone;
           const barWidth = Math.max(((s.score / maxScore) * 100), 8);
-          const rankColor = RANK_COLORS[i] || 'rgba(255,255,255,0.3)';
+          const r = s.rank;
+          const rankColor = RANK_COLORS[r] || 'rgba(255,255,255,0.3)';
 
           return (
             <div
@@ -140,17 +156,17 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
               style={{
                 ...lbStyles.entry,
                 ...(isMe ? lbStyles.entryMe : {}),
-                ...(i < 3 ? { borderLeft: `3px solid ${rankColor}` } : {}),
+                ...(r < 3 ? { borderLeft: `3px solid ${rankColor}` } : {}),
                 animationDelay: `${i * 60}ms`,
               }}
               className="animate-fade-in"
             >
               {/* Rank */}
               <div style={{ ...lbStyles.rank, color: rankColor }}>
-                {i < 3 ? (
-                  <span style={{ fontSize: '1.1rem' }}>{RANK_MEDALS[i]}</span>
+                {r < 3 ? (
+                  <span style={{ fontSize: '1.1rem' }}>{RANK_MEDALS[r]}</span>
                 ) : (
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>#{i + 1}</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>#{r + 1}</span>
                 )}
               </div>
 
@@ -158,10 +174,10 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
               <div style={lbStyles.nameCol}>
                 <div style={{
                   ...lbStyles.avatar,
-                  background: i < 3 ? RANK_GLOWS[i] : 'rgba(255,255,255,0.05)',
-                  border: `1.5px solid ${i < 3 ? rankColor : 'rgba(255,255,255,0.1)'}`,
+                  background: r < 3 ? RANK_GLOWS[r] : 'rgba(255,255,255,0.05)',
+                  border: `1.5px solid ${r < 3 ? rankColor : 'rgba(255,255,255,0.1)'}`,
                 }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: i < 3 ? rankColor : 'rgba(255,255,255,0.5)' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: r < 3 ? rankColor : 'rgba(255,255,255,0.5)' }}>
                     {getInitials(s.name)}
                   </span>
                 </div>
@@ -178,7 +194,7 @@ function LeaderboardPanel({ scores, currentUserPhone, compact = false }) {
                       ...lbStyles.barFill,
                       width: `${Math.max(barWidth, 0)}%`,
                       background: s.score > 0
-                        ? `linear-gradient(90deg, ${i < 3 ? rankColor : '#7C5CFF'}, ${i < 3 ? rankColor + '88' : '#7C5CFF88'})`
+                        ? `linear-gradient(90deg, ${r < 3 ? rankColor : '#7C5CFF'}, ${r < 3 ? rankColor + '88' : '#7C5CFF88'})`
                         : s.score < 0 ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)',
                     }} />
                   </div>
@@ -735,12 +751,12 @@ export default function LiveQuizPlayer({
 
 // ── Final Report Card ────────────────────────────────────────────────────────
 function QuizReportCard({ scores, onEndQuiz, isActingAdmin, currentUserPhone }) {
-  const sorted = [...scores].sort((a, b) => b.score - a.score);
+  const sorted = computeDenseRanks(scores);
   const winner = sorted[0];
 
   const myIndex = sorted.findIndex(s => s.id === currentUserPhone);
   const myData = myIndex >= 0 ? sorted[myIndex] : null;
-  const myRank = myIndex >= 0 ? myIndex + 1 : '-';
+  const myRank = myIndex >= 0 ? sorted[myIndex].rank + 1 : '-';
   
   const totalAnswered = myData ? ((myData.correctCount || 0) + (myData.wrongCount || 0)) : 0;
   const avgTime = (myData && totalAnswered > 0 && myData.totalTime) ? (myData.totalTime / totalAnswered).toFixed(1) + 's' : '-';
