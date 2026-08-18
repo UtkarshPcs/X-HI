@@ -273,3 +273,87 @@ Return ONLY the JSON object. Do not output anything else.`;
   }
   return {};
 }
+
+export async function generateTermPracticeReport(test, result, questions, userAnswers) {
+  const systemPrompt = `You are an expert AI coach for 10th-grade Indian students (CBSE pattern).
+Your goal is to analyze a student's performance on a Term Practice Test and generate a highly personalized, actionable diagnostic report.
+
+You will receive JSON containing:
+- The questions, their topics, types (objective/subjective), difficulty, and max marks.
+- The student's score for each question.
+- The total score.
+
+Output MUST be a valid JSON matching this schema exactly:
+{
+  "diagnosis": {
+    "summary": "Short punchy sentence summarizing the biggest issue (e.g., 'Your biggest issue isn't knowledge — it's answer execution.')",
+    "strong": ["List of strong areas"],
+    "needs_work": ["Areas needing work"],
+    "weak": ["Weak areas"],
+    "major_issue": "The main reason they are losing marks",
+    "advice": "1-2 sentences of specific advice."
+  },
+  "chapterHealth": [
+    {
+      "topic": "Topic Name",
+      "score": 10,
+      "max": 15,
+      "accuracy": 66,
+      "status": "Needs Work",
+      "insight": "1 sentence insight on what went wrong here"
+    }
+  ],
+  "difficulty": {
+    "easy": { "score": 10, "max": 10, "accuracy": 100 },
+    "medium": { "score": 15, "max": 20, "accuracy": 75 },
+    "hard": { "score": 5, "max": 10, "accuracy": 50 },
+    "insight": "1 sentence summarizing difficulty performance"
+  },
+  "objSubj": {
+    "objective": { "accuracy": 90, "insight": "Your conceptual recognition is strong." },
+    "subjective": { "accuracy": 60, "insight": "You understand the concepts but lose marks while expressing them." },
+    "recommendation": "Focus Area: Practice 3–5 mark answers rather than doing more MCQs."
+  },
+  "recovery": {
+    "easy": 4,
+    "moderate": 3,
+    "deep": 5,
+    "roi": ["Improve subjective answers → +3 marks", "Revise Excretion → +2 marks"],
+    "potentialScore": "72-74/80"
+  },
+  "actionPlan": [
+    {
+      "priority": 1,
+      "topic": "Topic Name",
+      "time": "30 min",
+      "actions": ["Revise concept", "Solve 5 questions"]
+    }
+  ]
+}
+
+CRITICAL: Return ONLY valid JSON. No markdown formatting, no comments.`;
+
+  const userPrompt = JSON.stringify({
+    title: test.title,
+    subject: test.subjectId,
+    totalScore: result.score,
+    maxScore: result.total,
+    performance: questions.map((q, idx) => ({
+      qIdx: idx + 1,
+      topic: q.topic || 'General',
+      type: q.type || (q.marks === 1 ? 'objective' : 'subjective'),
+      difficulty: q.difficulty || 'Medium',
+      marksAvailable: q.marks || 1,
+      marksObtained: userAnswers[idx] || 0
+    }))
+  });
+
+  const rawOutput = await callLLM(systemPrompt, userPrompt, 'json');
+  try {
+    const parsed = JSON.parse(rawOutput.match(/\{[\s\S]*\}/)[0]);
+    return parsed;
+  } catch (e) {
+    console.error("Failed to parse report JSON:", e);
+    return null;
+  }
+}

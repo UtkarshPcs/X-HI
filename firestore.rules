@@ -116,7 +116,9 @@ service cloud.firestore {
     match /periodic_predicted_tests/{id} { allow read, write: if true; }                                                                
     match /periodic_predicted_attempts/{id} { allow read, write: if true; }
     match /appConfig/{id} { allow read, write: if true; }
-     match /featureLaunches/{id} { allow read, write: if true; }
+    match /featureLaunches/{id} { allow read, write: if true; }
+    match /termPracticeTests/{id} { allow read, write: if true; }
+    match /termPracticeTestAttempts/{id} { allow read, write: if true; }
 
     // ---- Default deny ---------------------------------------------------
     // Anything not explicitly matched above (including collections an

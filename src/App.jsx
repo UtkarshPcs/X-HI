@@ -53,6 +53,8 @@ const PeriodicPredictedTestPlayerPage = lazy(() => import('./pages/PeriodicPredi
 const CustomTestPlayerPage = lazy(() => import('./pages/CustomTestPlayerPage'));
 const AiChatPage = lazy(() => import('./pages/AiChatPage'));
 const TestJSONPreviewerPage = lazy(() => import('./pages/TestJSONPreviewerPage'));
+const TermPracticeSetPage = lazy(() => import('./pages/TermPracticeSetPage'));
+const TermPracticeTestPlayerPage = lazy(() => import('./pages/TermPracticeTestPlayerPage'));
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -88,7 +90,7 @@ function AppInner() {
   // Star Batch is an internal-only feature now (no separate external role/
   // login). Still suppress the normal app-wide popups while viewing the
   // Star Batch portal/syllabus pages, since those are a focused sub-area.
-  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-mixed-tests') || pathname.startsWith('/star-mixed-subjective-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests');
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-mixed-tests') || pathname.startsWith('/star-mixed-subjective-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests') || pathname.startsWith('/term-practice');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -170,6 +172,8 @@ function AppInner() {
               <Route path="/ai-chat" element={<AiChatPage />} />
               <Route path="/p/:pageId" element={<DynamicPage />} />
               <Route path="/test-preview" element={<TestJSONPreviewerPage />} />
+              <Route path="/term-practice" element={<TermPracticeSetPage />} />
+              <Route path="/term-practice/test/:testId" element={<TermPracticeTestPlayerPage />} />
             </Routes>
           </Suspense>
         </main>

@@ -16,6 +16,8 @@ export const formatMath = (text) => {
     .replace(/\\\[/g, '$$').replace(/\\\]/g, '$$')
     // Double backslash commands -> single backslash commands
     .replace(/\\\\([a-zA-Z])/g, '\\$1')
+    // Fix invalid KaTeX escaped single quote
+    .replace(/\\'/g, "'")
     // Add two spaces before newlines to ensure Markdown hard line breaks
     .replace(/\n/g, '  \n');
 };

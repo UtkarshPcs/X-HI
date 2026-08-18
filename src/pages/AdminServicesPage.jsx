@@ -28,6 +28,7 @@ import { getTrackingConfig, saveTrackingConfig } from '../services/starBatchTrac
 import { uploadImageToCloudinary } from '../services/starBatchSyllabusService';
 import { uploadTestJSON, getAllTestAttempts, getRecentTests, getAllTests, updateTestQuestions, getPendingReportedQuestions, resolveReportedQuestion } from '../services/starBatchTestService';
 import { uploadSubjectiveTestJSON, getAllSubjectiveTests, getAllSubjectiveTestAttempts } from '../services/starBatchSubjectiveTestService';
+import { uploadTermPracticeTest } from '../services/termPracticeService';
 import { uploadPeriodicTest, getPeriodicTestsMeta, deletePeriodicTest, repairPeriodicTestSequence, getAllRecentPeriodicAttempts, getPeriodicConfig, setPeriodicConfig, backfillLegacyConcepts } from '../services/periodicPredictedService';
 
 // Flat list of all subjects across all sections for the syllabus toggle UI
@@ -2442,7 +2443,7 @@ function StarBatchTab() {
         sampleQuestions = json.questions;
       }
 
-      if (sampleQuestions.length > 0) {
+      if (sampleQuestions.length > 0 && uploadType !== 'termPractice') {
         const sample = sampleQuestions[0];
         if (!!sample.answerSteps) setUploadType('subjective');
         else setUploadType('objective');
@@ -2461,15 +2462,15 @@ function StarBatchTab() {
 
       if (Array.isArray(json)) {
         summary = json.map(test => ({
-          chapterId: test.chapterId || 'Unknown',
-          title: test.title || getFriendlyTitle(test.chapterId),
+          chapterId: test.chapterId || test.subjectId || 'Unknown',
+          title: test.title || getFriendlyTitle(test.chapterId || test.subjectId),
           count: Array.isArray(test.questions) ? test.questions.length : 0,
           marksBreakdown: computeMarks(test.questions)
         }));
       } else {
         summary = [{
-          chapterId: json.chapterId || 'Unknown',
-          title: json.title || json.chapterId || 'Untitled',
+          chapterId: json.chapterId || json.subjectId || 'Unknown',
+          title: json.title || json.chapterId || json.subjectId || 'Untitled',
           count: Array.isArray(json.questions) ? json.questions.length : 0,
           marksBreakdown: computeMarks(json.questions)
         }];
@@ -2554,15 +2555,15 @@ function StarBatchTab() {
 
       if (Array.isArray(json)) {
         summary = json.map(test => ({
-          chapterId: test.chapterId || 'Unknown',
-          title: test.title || getFriendlyTitle(test.chapterId),
+          chapterId: test.chapterId || test.subjectId || 'Unknown',
+          title: test.title || getFriendlyTitle(test.chapterId || test.subjectId),
           count: Array.isArray(test.questions) ? test.questions.length : 0,
           marksBreakdown: computeMarks(test.questions)
         }));
       } else {
         summary = [{
-          chapterId: json.chapterId || 'Unknown',
-          title: json.title || json.chapterId || 'Untitled',
+          chapterId: json.chapterId || json.subjectId || 'Unknown',
+          title: json.title || json.chapterId || json.subjectId || 'Untitled',
           count: Array.isArray(json.questions) ? json.questions.length : 0,
           marksBreakdown: computeMarks(json.questions)
         }];
@@ -2586,10 +2587,12 @@ function StarBatchTab() {
     try {
       if (uploadType === 'subjective') {
         await uploadSubjectiveTestJSON(pendingUpload.data);
+      } else if (uploadType === 'termPractice') {
+        await uploadTermPracticeTest(pendingUpload.data);
       } else {
         await uploadTestJSON(pendingUpload.data);
       }
-      alert(`${uploadType === 'subjective' ? 'Subjective Test' : 'Objective Test'} uploaded successfully!`);
+      alert(`${uploadType === 'subjective' ? 'Subjective Test' : uploadType === 'termPractice' ? 'Term Practice Set' : 'Objective Test'} uploaded successfully!`);
       setPendingUpload(null);
       loadConfig();
     } catch (err) {
@@ -2719,7 +2722,7 @@ function StarBatchTab() {
       </div>
 
       <div className="as-card">
-        <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter Test</h4>
+        <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter Test / Practice Set</h4>
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', color: '#fff' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
             <input type="radio" name="uploadType" value="objective" checked={uploadType === 'objective'} onChange={() => setUploadType('objective')} />
@@ -2729,9 +2732,13 @@ function StarBatchTab() {
             <input type="radio" name="uploadType" value="subjective" checked={uploadType === 'subjective'} onChange={() => setUploadType('subjective')} />
             Subjective
           </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input type="radio" name="uploadType" value="termPractice" checked={uploadType === 'termPractice'} onChange={() => setUploadType('termPractice')} />
+            Term Practice Set
+          </label>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <p className="as-muted" style={{ margin: 0 }}>Upload a valid JSON file containing chapterId, subjectId, sectionId, title, and a questions array.</p>
+          <p className="as-muted" style={{ margin: 0 }}>Upload a valid JSON file containing subjectId/chapterId, title, and a questions array.</p>
           <button className="auth-btn" onClick={() => setShowPasteModal(true)} disabled={busy} style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '0.5rem 1rem' }}>Paste JSON Instead</button>
         </div>
         

@@ -1,0 +1,116 @@
+Based on the latest official exam patterns, here is the exact, subject-wise format for the CBSE Class 10 board exams. 
+
+For the main subjects (Mathematics, Science, Social Science, English, and Hindi), the total is 100 marks: **80 marks for the theory paper** and **20 marks for internal assessments**. The theory exams are 3 hours long and contain no negative marking. Information Technology (IT) follows a 50-50 theory and practical split.
+
+---
+
+### 1. Mathematics (Standard & Basic)
+**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+
+**Section-Wise Format**
+| Section | Question Type | No. of Questions | Marks per Q | Total Marks |
+| :--- | :--- | :--- | :--- | :--- |
+| **A** | Multiple Choice (MCQs) | 20 | 1 | 20 |
+| **B** | Very Short Answer | 5 | 2 | 10 |
+| **C** | Short Answer | 6 | 3 | 18 |
+| **D** | Long Answer | 4 | 5 | 20 |
+| **E** | Source/Case-based | 3 | 4 | 12 |
+
+for MAth the values for every concept are not fixed the algorithm can expierment here 
+
+**Unit-Wise Contents & Weightage**
+* **Algebra** (Polynomials, Quadratic Equations, APs): 20 Marks
+* **Geometry** (Triangles, Circles): 15 Marks
+* **Trigonometry** : 12 Marks
+* **Statistics & Probability**: 11 Marks
+* **Mensuration** (Surface Areas, Volumes): 10 Marks
+* **Number Systems** (Real Numbers): 6 Marks
+* **Coordinate Geometry**: 6 Marks
+
+---
+
+### 2. Science
+**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+
+**Section-Wise Format**
+| Section | Question Type | No. of Questions | Marks per Q | Total Marks |
+| :--- | :--- | :--- | :--- | :--- |
+| **A** | Multiple Choice (MCQs) | 20 | 1 | 20 |
+| **B** | Very Short Answer | 6 | 2 | 12 |
+| **C** | Short Answer | 7 | 3 | 21 |
+| **D** | Long Answer | 3 | 5 | 15 |
+| **E** | Case-based Questions| 3 | 4 | 12 |
+
+**Unit-Wise Contents & Weightage**
+* **Chemical Substances – Nature & Behaviour** (Chemistry): 25 Marks
+* **World of Living** (Biology): 30 Marks
+* **Effects of Current** (Physics): 25 Marks
+
+
+---
+
+### 3. Social Science (SST)
+**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+
+**Section-Wise Format**
+| Section | Question Type | No. of Questions | Marks per Q | Total Marks |
+| :--- | :--- | :--- | :--- | :--- |
+| **A** | Multiple Choice (MCQs) | 20 | 1 | 20 |
+| **B** | Very Short Answer | 4 | 2 | 8 |
+| **C** | Short Answer | 5 | 3 | 15 |
+| **D** | Long Answer | 4 | 5 | 20 |
+| **E** | Case-based Questions| 3 | 4 | 12 |
+| **F** | Map Skill-Based | 1 | 5 | 5 |
+
+**Unit-Wise Contents & Weightage**
+* **History** (India and the Contemporary World – II): 20 Marks
+* **Geography** (Contemporary India – II): 20 Marks
+* **Political Science** (Democratic Politics): 20 Marks
+* **Economics** (Understanding Economic Development): 20 Marks
+
+---
+
+### 4. English (Language & Literature)
+**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+
+**Section-Wise Format & Contents**
+| Section | Component | Total Marks | Content Details |
+| :--- | :--- | :--- | :--- |
+| **A** | Reading Skills | 20 | 1 Discursive passage (10 marks) & 1 Case-based factual passage (10 marks) |
+| **B** | Writing Skills & Grammar | 20 | Grammar rules (10 marks), Formal Letter (5 marks), Analytical Paragraph based on a map/chart (5 marks) |
+| **C** | Language through Literature| 40 | Reference to context extracts, short and long descriptive answers from prose and poetry texts |
+
+---
+
+### 5. Hindi (Course A & B)
+**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+
+**Section-Wise Format & Contents**
+| Section | Component | Total Marks | Content Details |
+| :--- | :--- | :--- | :--- |
+| **A** | Reading Comprehension | 20 | Unseen passages |
+| **B** | Writing Skills & Grammar| 20 | Grammar exercises, composition, paragraph, and letter writing |
+| **C** | Language through Literature| 40 | Textbook-based questions focusing on deeper understanding of prose and poetry |
+
+---
+
+### 6. Information Technology (IT - Code 402)
+**Structure:** 50 Marks Theory | 50 Marks Practical/Internal
+
+**Section-Wise Format (2-Hour Theory Paper)**
+The paper features 21 total questions, out of which you must answer 15. 
+| Section | Component | Total Marks | Content Details |
+| :--- | :--- | :--- | :--- |
+| **A** | Objective Questions | 24 | Contains multiple-choice questions based on both employability and subject skills |
+| **B** | Subjective Questions| 26 | Includes short, long, and step-based application questions |
+
+**Unit-Wise Contents & Weightage (Theory)**
+* **Part A: Employability Skills (10 Marks)** 
+  * Communication, Self-Management, ICT, Entrepreneurial, and Green Skills.
+* **Part B: Subject-Specific Skills (40 Marks)** 
+  * Digital Documentation (Advanced): ~10 Marks
+  * Electronic Spreadsheet (Advanced): ~10 Marks
+  * Database Management System (Base): ~12 Marks
+  * Web Applications and Security: ~8 Marks
+
+
