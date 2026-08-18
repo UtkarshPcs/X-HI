@@ -93,7 +93,27 @@ export default function TermPracticeAnalyticsDashboard({ result, test, activeQue
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', color: '#fff' }}>AI Performance Report</h1>
-        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem' }}>{displayTitle} • {percentage}% Score</p>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem' }}>{displayTitle}</p>
+      </div>
+
+      {/* Overview Stats (Moved to top) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))', padding: '1.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(16,185,129,0.2)', textAlign: 'center' }}>
+          <div style={{ color: '#10b981', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Score</div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{totalObtained}<span style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>/{totalMax}</span></div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.05))', padding: '1.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(59,130,246,0.2)', textAlign: 'center' }}>
+          <div style={{ color: '#3b82f6', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Accuracy</div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{percentage}%</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(168,85,247,0.05))', padding: '1.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(168,85,247,0.2)', textAlign: 'center' }}>
+          <div style={{ color: '#a855f7', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Time Taken</div>
+          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', lineHeight: 1.25 }}>{formatTime(result.totalTime || 0)}</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05))', padding: '1.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(245,158,11,0.2)', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ color: '#f59e0b', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Strongest Chapter</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{bestChap.topic}</div>
+        </div>
       </div>
 
       {/* 1. AI Diagnosis */}
@@ -377,31 +397,7 @@ export default function TermPracticeAnalyticsDashboard({ result, test, activeQue
         </div>
       </div>
 
-      {/* Personal Bests */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '2rem', marginBottom: '3rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <Trophy size={24} color="#f59e0b" />
-          <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#fff' }}>Your Records (This Session)</h2>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Score</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981' }}>{totalObtained}/{totalMax}</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Accuracy</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#3b82f6' }}>{percentage}%</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Time Taken</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#a855f7' }}>{formatTime(result.totalTime || 0)}</div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Strongest Chapter</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>{bestChap.topic}</div>
-          </div>
-        </div>
-      </div>
+
 
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <button 

@@ -434,22 +434,31 @@ export default function TermPracticeTestPlayerPage() {
                   <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Out of {test.questions[evalIndex].marks || 1} marks</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input 
-                    type="number" 
-                    step="0.5" 
-                    min="0" 
-                    max={test.questions[evalIndex].marks || 1}
-                    className="eval-input"
-                    value={evalMarks[evalIndex] !== undefined ? evalMarks[evalIndex] : ''}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      setEvalMarks(prev => ({ ...prev, [evalIndex]: isNaN(val) ? undefined : val }));
-                    }}
-                    placeholder="0.0"
-                    style={{ width: '80px', padding: '0.6rem', fontSize: '1.1rem' }}
-                  />
+                  <span style={{ color: evalMarks[evalIndex] !== undefined ? '#10b981' : 'rgba(255,255,255,0.4)', fontSize: '1.4rem', fontWeight: 'bold' }}>
+                    {evalMarks[evalIndex] !== undefined ? evalMarks[evalIndex] : '--'}
+                  </span>
                   <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.1rem', fontWeight: 'bold' }}>/ {test.questions[evalIndex].marks || 1}</span>
                 </div>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {Array.from({ length: ((test.questions[evalIndex].marks || 1) * 2) + 1 }, (_, i) => i * 0.5).map(m => (
+                  <button 
+                    key={m}
+                    onClick={() => setEvalMarks(prev => ({ ...prev, [evalIndex]: m }))}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '8px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      border: evalMarks[evalIndex] === m ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                      background: evalMarks[evalIndex] === m ? '#10b981' : 'rgba(255,255,255,0.05)',
+                      color: evalMarks[evalIndex] === m ? '#000' : '#fff',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {m}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
