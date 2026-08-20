@@ -23,7 +23,7 @@ function getInitials(name) {
 }
 
 function computeDenseRanks(scores) {
-  const sorted = [...scores].sort((a, b) => b.score - a.score);
+  const sorted = scores.map(s => ({ ...s })).sort((a, b) => b.score - a.score);
   let currentRank = 0;
   for (let i = 0; i < sorted.length; i++) {
     if (i > 0 && sorted[i].score < sorted[i - 1].score) {
@@ -481,10 +481,6 @@ export default function LiveQuizPlayer({
     }
   }, [status, currentQuestionIndex, effectiveSelectedOption, currentQuestion, scores, currentUser, updateMyScore, scoreCalculatedForQ, quizState.timePerQuestion, timeRemaining]);
 
-  if (status === 'finished') {
-    return <QuizReportCard scores={scores} onEndQuiz={endQuiz} isActingAdmin={isActingAdmin} currentUserPhone={currentUser.phone} quizState={quizState} />;
-  }
-
   // Anti-cheating logic: Prevent screenshots by obscuring when tab loses focus, and block typical screenshot shortcuts
   const [isObscured, setIsObscured] = useState(false);
   
@@ -517,6 +513,10 @@ export default function LiveQuizPlayer({
 
   // Should the full leaderboard show? Only during reading/revealing (not during active answering)
   const showFullLeaderboard = status === 'reading' || status === 'revealing';
+
+  if (status === 'finished') {
+    return <QuizReportCard scores={scores} onEndQuiz={endQuiz} isActingAdmin={isActingAdmin} currentUserPhone={currentUser.phone} quizState={quizState} />;
+  }
 
   return (
     <div 
