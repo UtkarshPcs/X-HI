@@ -218,13 +218,13 @@ CRITICAL INSTRUCTION:
 1. Group all tasks by subject. There must be ONLY ONE object per subject.
 2. If there are multiple tasks for the same subject, combine them into the same "description" string, separated by a line break (\\n).
 3. Capitalization: Always capitalize the first letter of the first word in the description.
-4. Voice: Write the task description in the passive voice.
+4. Voice: Write the task description in an active, imperative voice (e.g., "Revise Chapter 2", "Solve Page 12"). Do NOT use passive voice.
 5. Hindi Translation: If the subject is "Hindi", you MUST translate the entire description into the Hindi language (Devanagari script), even if it was dictated in English.
 
 For example, if you hear "Math do chapter 5 and also Math solve page 12", return:
-{"tasks": [{"subject": "Math", "description": "Chapter 5 is to be done.\\nPage 12 is to be solved."}]}
+{"tasks": [{"subject": "Math", "description": "Do chapter 5.\\nSolve page 12."}]}
 If you hear "Hindi read chapter 2", return:
-{"tasks": [{"subject": "Hindi", "description": "अध्याय 2 पढ़ा जाना है।"}]}
+{"tasks": [{"subject": "Hindi", "description": "अध्याय 2 पढ़ें।"}]}
 
 Return ONLY the JSON object.`;
 
@@ -251,12 +251,12 @@ Return a JSON object with a single key "notes" where keys inside it are the exac
 
 CRITICAL INSTRUCTION:
 1. Capitalization: Always capitalize the first letter of the first word in the note.
-2. Voice: Write the note in the passive voice.
+2. Voice: Write the note in an active, past-tense voice (e.g., "Completed Chapter 5", "Read Page 20"). Do NOT use passive voice.
 3. Hindi Translation: If the subject for that period is "Hindi", you MUST translate the entire note into the Hindi language (Devanagari script), even if it was dictated in English.
 
-Example: {"notes": {"1st": "Chapter 5 was completed.", "3rd": "Page 20 was read."}}
+Example: {"notes": {"1st": "Completed Chapter 5.", "3rd": "Read Page 20."}}
 If the 2nd period is Hindi and dictation says "taught grammar", return:
-{"notes": {"2nd": "व्याकरण पढ़ाया गया।"}}
+{"notes": {"2nd": "व्याकरण पढ़ाया।"}}
 
 Return ONLY the JSON object. Do not output anything else.`;
 
