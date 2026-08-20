@@ -342,7 +342,7 @@ export default function StarBatchPage() {
 
         <div
           className="as-card star-quick-link"
-          onClick={() => navigate('/star-leaderboard')}
+          onClick={() => navigate('/study-together', { state: { tab: 'leaderboard' } })}
           style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
         >
           <div>

@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   BookOpen, Plus, Search, Users, Lock, RefreshCw,
   ArrowRight, LogIn,
@@ -267,11 +267,16 @@ function JoinByCodeForm({ onJoinRoom }) {
   );
 }
 
+import GlobalQuizLeaderboardPage from './GlobalQuizLeaderboardPage';
+import { Crown } from 'lucide-react';
+
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function StudyTogetherPage() {
   const { currentUser, openModal } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  const [activeTab,      setActiveTab]      = useState(location.state?.tab || 'rooms'); // 'rooms' | 'leaderboard'
   const [rooms,          setRooms]          = useState([]);
   const [roomsLoading,   setRoomsLoading]   = useState(true);
   const [searchQuery,    setSearchQuery]    = useState('');
@@ -374,77 +379,113 @@ export default function StudyTogetherPage() {
         )}
       </div>
 
-      {/* Join by code */}
-      <div style={styles.joinSection}>
-        <p style={styles.joinLabel}>Have a room code?</p>
-        <JoinByCodeForm onJoinRoom={handleJoinRoom} />
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
+        <button
+          onClick={() => setActiveTab('rooms')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '0.75rem 0.5rem',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: '0.95rem',
+            color: activeTab === 'rooms' ? 'var(--primary)' : 'var(--text-muted)',
+            borderBottom: activeTab === 'rooms' ? '2px solid var(--primary)' : '2px solid transparent',
+            display: 'flex', alignItems: 'center', gap: '0.4rem'
+          }}
+        >
+          <BookOpen size={16} /> Active Rooms
+        </button>
+        <button
+          onClick={() => setActiveTab('leaderboard')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '0.75rem 0.5rem',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: '0.95rem',
+            color: activeTab === 'leaderboard' ? '#fbbf24' : 'var(--text-muted)',
+            borderBottom: activeTab === 'leaderboard' ? '2px solid #fbbf24' : '2px solid transparent',
+            display: 'flex', alignItems: 'center', gap: '0.4rem'
+          }}
+        >
+          <Crown size={16} /> Global Leaderboard
+        </button>
       </div>
 
-      {/* Search + rooms list */}
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle}>Active Rooms</h2>
-          <div style={styles.searchWrap}>
-            <Search size={14} style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-            <input
-              style={styles.searchInput}
-              type="search"
-              placeholder="Search rooms…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              aria-label="Search rooms"
-            />
+      {activeTab === 'rooms' ? (
+        <>
+          {/* Join by code */}
+          <div style={styles.joinSection}>
+            <p style={styles.joinLabel}>Have a room code?</p>
+            <JoinByCodeForm onJoinRoom={handleJoinRoom} />
           </div>
-          {!roomsLoading && (
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flexShrink: 0 }}>
-              {filtered.length} room{filtered.length !== 1 ? 's' : ''}
-            </span>
-          )}
-        </div>
 
-        {roomsLoading ? (
-          <div style={styles.loadingState}>
-            <RefreshCw size={20} color="var(--text-muted)" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading rooms…</p>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div style={styles.emptyState}>
-            <BookOpen size={36} color="var(--text-muted)" />
-            <p style={{ color: 'var(--text-primary)', fontWeight: 600, marginTop: '0.75rem' }}>
-              {searchQuery ? 'No rooms match your search.' : 'No active rooms right now.'}
-            </p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              {searchQuery ? 'Try a different search or clear the filter.' : 'Be the first — create a study room!'}
-            </p>
-            {!searchQuery && (
-              rooms.length >= 3 ? (
-                <button
-                  className="auth-btn secondary"
-                  disabled
-                  style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.6, cursor: 'not-allowed' }}
-                  title="Server at capacity (Max 3 active rooms)"
-                >
-                  <Plus size={15} /> Server Full
-                </button>
-              ) : (
-                <button
-                  className="auth-btn primary"
-                  onClick={() => setShowCreate(true)}
-                  style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <Plus size={15} /> Create a Room
-                </button>
-              )
+          {/* Search + rooms list */}
+          <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>Active Rooms</h2>
+              <div style={styles.searchWrap}>
+                <Search size={14} style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                <input
+                  style={styles.searchInput}
+                  type="search"
+                  placeholder="Search rooms…"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  aria-label="Search rooms"
+                />
+              </div>
+              {!roomsLoading && (
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flexShrink: 0 }}>
+                  {filtered.length} room{filtered.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+
+            {roomsLoading ? (
+              <div style={styles.loadingState}>
+                <RefreshCw size={20} color="var(--text-muted)" style={{ animation: 'spin 1s linear infinite' }} />
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading rooms…</p>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div style={styles.emptyState}>
+                <BookOpen size={36} color="var(--text-muted)" />
+                <p style={{ color: 'var(--text-primary)', fontWeight: 600, marginTop: '0.75rem' }}>
+                  {searchQuery ? 'No rooms match your search.' : 'No active rooms right now.'}
+                </p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  {searchQuery ? 'Try a different search or clear the filter.' : 'Be the first — create a study room!'}
+                </p>
+                {!searchQuery && (
+                  rooms.length >= 3 ? (
+                    <button
+                      className="auth-btn secondary"
+                      disabled
+                      style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.6, cursor: 'not-allowed' }}
+                      title="Server at capacity (Max 3 active rooms)"
+                    >
+                      <Plus size={15} /> Server Full
+                    </button>
+                  ) : (
+                    <button
+                      className="auth-btn primary"
+                      onClick={() => setShowCreate(true)}
+                      style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <Plus size={15} /> Create a Room
+                    </button>
+                  )
+                )}
+              </div>
+            ) : (
+              <div style={styles.grid}>
+                {filtered.map(room => (
+                  <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} isAdmin={currentUser?.role === 'ADMIN' || currentUser?.activeRole === 'ADMIN'} />
+                ))}
+              </div>
             )}
           </div>
-        ) : (
-          <div style={styles.grid}>
-            {filtered.map(room => (
-              <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} isAdmin={currentUser?.role === 'ADMIN' || currentUser?.activeRole === 'ADMIN'} />
-            ))}
-          </div>
-        )}
-      </div>
+        </>
+      ) : (
+        <GlobalQuizLeaderboardPage embedded={true} />
+      )}
 
       {/* Modals */}
       {showCreate && (

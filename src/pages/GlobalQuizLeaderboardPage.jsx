@@ -3,7 +3,7 @@ import { ArrowLeft, Trophy, Crown, Medal, Filter, Star, BookOpen, TrendingUp } f
 import { useNavigate } from 'react-router-dom';
 import { getGlobalLeaderboard } from '../services/globalQuizLeaderboardService';
 
-export default function GlobalQuizLeaderboardPage() {
+export default function GlobalQuizLeaderboardPage({ embedded = false }) {
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState('total'); // total, subject, difficulty
   const [filterValue, setFilterValue] = useState('');
@@ -34,16 +34,18 @@ export default function GlobalQuizLeaderboardPage() {
   }
 
   return (
-    <div className="as-container" style={{ paddingBottom: '3rem', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className={!embedded ? "as-container" : ""} style={{ paddingBottom: embedded ? '0' : '3rem', minHeight: embedded ? 'auto' : '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '1rem' }}>
-        <button className="as-icon-btn" onClick={() => navigate(-1)} style={{ background: 'var(--surface)' }}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="as-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Crown color="#fbbf24" size={28} /> Global Quiz Leaderboard
-        </h1>
-      </div>
+      {!embedded && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '1rem' }}>
+          <button className="as-icon-btn" onClick={() => navigate(-1)} style={{ background: 'var(--surface)' }}>
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="as-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Crown color="#fbbf24" size={28} /> Global Quiz Leaderboard
+          </h1>
+        </div>
+      )}
 
       <p className="as-muted" style={{ marginBottom: '2rem' }}>
         See who is dominating the Elite Star Batch Room Quizzes. Rankings are updated in real-time when quizzes finish.
