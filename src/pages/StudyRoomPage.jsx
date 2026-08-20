@@ -299,6 +299,35 @@ export default function StudyRoomPage() {
     setShowQuizSetup(true);
   }, []);
 
+  // Alert users when quiz starts
+  const prevModeRef = useRef(room?.mode);
+  useEffect(() => {
+    if (room?.mode === 'quiz' && prevModeRef.current !== 'quiz') {
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200, 100, 500]);
+      }
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          const ctx = new AudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
+          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 1);
+        }
+      } catch (e) {}
+    }
+    prevModeRef.current = room?.mode;
+  }, [room?.mode]);
+
   // Unread tracking — counts new messages when the user isn't looking at chat
   // Note: in video mode, chat is visible if not collapsed.
   const isChatVisible = room?.mode === 'quiz' 
