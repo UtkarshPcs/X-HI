@@ -18,6 +18,8 @@ export const formatMath = (text) => {
     .replace(/\\\\([a-zA-Z])/g, '\\$1')
     // Fix invalid KaTeX escaped single quote
     .replace(/\\'/g, "'")
+    // Strip \tag{...} which causes KaTeX parse errors in normal blocks
+    .replace(/\\tag\{[^}]+\}/g, '')
     // Add two spaces before newlines to ensure Markdown hard line breaks
     .replace(/\n/g, '  \n');
 };

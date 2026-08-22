@@ -374,31 +374,70 @@ function ExplainCard({ explanationData }) {
   if (!explanationData) return null;
 
   return (
-    <div style={{ background: '#151B2E', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', overflow: 'hidden', marginTop: '0.5rem' }}>
+    <div style={{ 
+      background: 'linear-gradient(145deg, #1A1F35 0%, #111526 100%)', 
+      border: '1px solid rgba(167, 139, 250, 0.25)', 
+      borderRadius: '16px', 
+      overflow: 'hidden', 
+      marginTop: '1rem',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+    }}>
        <button 
          onClick={() => setExpanded(!expanded)} 
-         style={{ width: '100%', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}
+         style={{ 
+           width: '100%', 
+           padding: '1.15rem 1.25rem', 
+           display: 'flex', 
+           justifyContent: 'space-between', 
+           alignItems: 'center', 
+           background: expanded ? 'rgba(167, 139, 250, 0.06)' : 'transparent', 
+           border: 'none', 
+           color: '#fff', 
+           cursor: 'pointer',
+           transition: 'background 0.2s ease'
+         }}
        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             <Sparkles size={18} color="#a78bfa" />
-             <span style={{ fontWeight: 600 }}>AI Explanation</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+             <div style={{ background: 'rgba(167, 139, 250, 0.15)', padding: '0.45rem', borderRadius: '8px', display: 'flex' }}>
+               <Sparkles size={18} color="#a78bfa" />
+             </div>
+             <span style={{ fontWeight: 600, fontSize: '1.05rem', letterSpacing: '0.02em' }}>AI Explanation</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             {explanationData.status === 'loading' && <RefreshCw size={14} className="spin" color="rgba(255,255,255,0.5)" />}
-             {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+             {explanationData.status === 'loading' && <RefreshCw size={15} className="spin" color="rgba(255,255,255,0.5)" />}
+             {expanded ? <ChevronUp size={18} color="rgba(255,255,255,0.7)" /> : <ChevronDown size={18} color="rgba(255,255,255,0.7)" />}
           </div>
        </button>
        
        {expanded && (
-          <div style={{ padding: '0 1rem 1rem 1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ padding: '0 1.5rem 1.5rem 1.5rem', borderTop: '1px solid rgba(167,139,250,0.1)' }}>
+            <style>{`
+              .ai-explanation-md ul, .ai-explanation-md ol {
+                padding-left: 1.5rem !important;
+                margin-bottom: 1rem;
+              }
+              .ai-explanation-md li {
+                margin-bottom: 0.4rem;
+              }
+              .ai-explanation-md h1, .ai-explanation-md h2, .ai-explanation-md h3, .ai-explanation-md h4 {
+                margin-top: 1.5rem;
+                margin-bottom: 0.75rem;
+                color: #fff;
+                font-weight: 600;
+              }
+              .ai-explanation-md p {
+                margin-bottom: 1rem;
+                line-height: 1.6;
+              }
+            `}</style>
             {explanationData.status === 'loading' ? (
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', padding: '1rem 0' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', padding: '1.5rem 0' }}>
                  <RefreshCw size={16} className="spin" /> Generating explanation...
                </div>
             ) : explanationData.status === 'error' ? (
-               <div style={{ color: '#ef4444', fontSize: '0.9rem', padding: '1rem 0' }}>{explanationData.text}</div>
+               <div style={{ color: '#ef4444', fontSize: '0.95rem', padding: '1.5rem 0' }}>{explanationData.text}</div>
             ) : (
-               <div className="markdown-body custom-md" style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem' }}>
+               <div className="markdown-body custom-md ai-explanation-md" style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.95rem', paddingTop: '1rem' }}>
                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                    {formatMath(explanationData.text || '')}
                  </ReactMarkdown>
