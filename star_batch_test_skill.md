@@ -51,52 +51,19 @@ Your output must be a JSON array of objects, separating out each chapter. Do not
   - `correctOptionIndex`: (Integer) The 0-based index of the correct option in the `options` array.
   - `difficulty`: (String) "Easy", "Medium", or "Hard".
   - `topic`: (String) The specific topic the question belongs to (e.g. "Laws of Reflection").
-  - `diagram`: (Object, Optional) Use this to generate procedural diagrams. For mathematics geometry, use the `jsxgraph` template:
+  - `diagram`: (Object, Optional) Use this to generate procedural diagrams. You can use the `tikz` template for high-precision mathematical, physical, or chemical diagrams.
     ```json
     "diagram": {
-      "template": "jsxgraph",
-      "boundingBox": [-2, 5, 8, -2],
-      "showAxis": true,
-      "dsl": "A = (0,0); B = (6,0); C = (2,4); triangle ABC; angle ABC; segment AB"
+      "template": "tikz",
+      "tikz_code": "\\begin{tikzpicture}\n\\draw (0,0) -- (1,1);\n\\end{tikzpicture}"
     }
     ```
-    *(The `dsl` string is a semicolon-separated list of geometry commands: `A=(x,y)`, `line AB`, `segment AB`, `triangle ABC`, `circle A 5`, `angle ABC`).*
     
-    **CRITICAL RULES FOR JSXGRAPH USAGE:**
-    1. **MANDATORY RECREATION**: If the original PDF or source material contains a geometry figure, or explicitly refers to one (e.g., "In the given figure..."), you MUST recreate it using the `diagram` block with the `jsxgraph` template. Do not skip drawing the diagram if it exists in the source. (However, do NOT invent diagrams for plain word problems that don't require one).
-    2. **FLAWLESS MATHEMATICAL ACCURACY**: The JSXGraph engine faithfully renders EXACTLY what coordinates you provide. If you specify a point on a line segment, you MUST accurately calculate the math (using the section formula, slope, etc.) to ensure the point mathematically lies on that line. Do NOT guess coordinates. If a line is parallel or perpendicular, the coordinates must perfectly reflect that geometric truth, otherwise lines will stick out or look broken.
+    **CRITICAL RULES FOR DIAGRAM USAGE:**
+    1. **MANDATORY RECREATION**: If the original PDF or source material contains a geometry figure, or explicitly refers to one (e.g., "In the given figure..."), you MUST recreate it using the `diagram` block with the `tikz` template. Do not skip drawing the diagram if it exists in the source. (However, do NOT invent diagrams for plain word problems that don't require one).
+    2. **PURE TIKZ ONLY**: Ensure you use standard TikZ (`\\usepackage{tikz}`) and avoid complex external packages like `pgfplots` or `tkz-euclide` to guarantee compatibility with web rendering.
     3. **COMMON DIAGRAMS**: If a single diagram applies to multiple questions (e.g., a case study or a heading saying "Questions 1-5 refer to the following figure"), you MUST copy and insert that exact same `diagram` object into the JSON for EVERY SINGLE ONE of those questions. Since questions are rendered individually on the screen, each question must carry its own copy of the diagram.
-
-    **JSXGraph Examples Gallery:**
-    *Example 1: Basic Proportionality Theorem (BPT) / Thales Theorem*
-    ```json
-    "diagram": {
-      "template": "jsxgraph",
-      "boundingBox": [-1, 6, 7, -1],
-      "showAxis": false,
-      "dsl": "A = (3,5); B = (0,0); C = (6,0); triangle ABC; D = (1.5, 2.5); E = (4.5, 2.5); segment DE"
-    }
-    ```
-    
-    *Example 2: Circles with Tangents*
-    ```json
-    "diagram": {
-      "template": "jsxgraph",
-      "boundingBox": [-6, 6, 10, -6],
-      "showAxis": false,
-      "dsl": "O = (0,0); P = (0,5); circle O P; Q = (8,5); segment OP; segment PQ; segment OQ"
-    }
-    ```
-    
-    *Example 3: Right Angled Triangle & Pythagorean Theorem*
-    ```json
-    "diagram": {
-      "template": "jsxgraph",
-      "boundingBox": [-1, 5, 5, -1],
-      "showAxis": false,
-      "dsl": "C = (0,0); B = (3,0); A = (0,4); triangle ABC; angle BCA; segment AB"
-    }
-    ```
+    4. **JSXGRAPH ALTERNATIVE**: You may still use the legacy `jsxgraph` template if you prefer it for simple geometric coordinates, but `tikz` is highly recommended for versatile rendering across any subject.
 
 ## ID Reference Guide
 

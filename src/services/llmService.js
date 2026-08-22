@@ -357,3 +357,46 @@ CRITICAL: Return ONLY valid JSON. No markdown formatting, no comments.`;
     return null;
   }
 }
+
+export async function generateQuizExplanation(question, options, correctOptionIndex) {
+  try {
+    const vectorResponse = await fetch('https://pdf-rag-vercel-api.vercel.app/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: question })
+    });
+    
+    let contextResults = "";
+    if (vectorResponse.ok) {
+      const vectorData = await vectorResponse.json();
+      contextResults = vectorData.results || "";
+    }
+
+    const correctOptionText = options[correctOptionIndex];
+    let optionsText = options.map((opt, i) => `${String.fromCharCode(65 + i)}. ${opt}`).join('\n');
+
+    const synthesisSystemPrompt = `You are an expert AI tutor. A student just completed a quiz question.
+Your task is to explain WHY the correct answer is correct.
+
+Question: ${question}
+Options:
+${optionsText}
+
+Correct Answer: ${String.fromCharCode(65 + correctOptionIndex)}. ${correctOptionText}
+
+STRICT RULES:
+1. Explain clearly and concisely why this answer is the correct one.
+2. If applicable, briefly explain why the other options are incorrect.
+3. Use the provided context below if it helps, but you can also use your general academic knowledge to explain the concept.
+4. Format the output in clean, readable markdown with headings, bullet points, and bold text where appropriate. Use LaTeX for math equations.
+
+--- Context ---
+${contextResults}`;
+
+    const finalAnswer = await callLLM(synthesisSystemPrompt, question);
+    return finalAnswer;
+  } catch (error) {
+    console.error("Quiz Explanation Error:", error);
+    return "Failed to generate explanation. Please try again.";
+  }
+}

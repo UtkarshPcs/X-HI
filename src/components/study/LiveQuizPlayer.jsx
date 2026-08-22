@@ -6,8 +6,9 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { formatMath } from '../../utils/formatMath';
-import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw, Star, Bookmark } from 'lucide-react';
+import { Clock, Trophy, ChevronRight, CheckCircle, XCircle, Zap, TrendingUp, TrendingDown, Minus, Crown, BookOpen, Hash, Users, ListOrdered, RefreshCw, Star, Bookmark, Sparkles, ChevronUp, ChevronDown } from 'lucide-react';
 import { addBookmark, removeBookmark, checkIsBookmarked } from '../../services/starBatchBookmarkService';
+import { generateQuizExplanation } from '../../services/llmService';
 
 // ── Medal / rank helpers ─────────────────────────────────────────────────────
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
@@ -366,6 +367,49 @@ const lbStyles = {
   },
 };
 
+// ── AI Explanation Card ──────────────────────────────────────────────────────
+function ExplainCard({ explanationData }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!explanationData) return null;
+
+  return (
+    <div style={{ background: '#151B2E', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', overflow: 'hidden', marginTop: '0.5rem' }}>
+       <button 
+         onClick={() => setExpanded(!expanded)} 
+         style={{ width: '100%', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}
+       >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <Sparkles size={18} color="#a78bfa" />
+             <span style={{ fontWeight: 600 }}>AI Explanation</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             {explanationData.status === 'loading' && <RefreshCw size={14} className="spin" color="rgba(255,255,255,0.5)" />}
+             {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </div>
+       </button>
+       
+       {expanded && (
+          <div style={{ padding: '0 1rem 1rem 1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            {explanationData.status === 'loading' ? (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', padding: '1rem 0' }}>
+                 <RefreshCw size={16} className="spin" /> Generating explanation...
+               </div>
+            ) : explanationData.status === 'error' ? (
+               <div style={{ color: '#ef4444', fontSize: '0.9rem', padding: '1rem 0' }}>{explanationData.text}</div>
+            ) : (
+               <div className="markdown-body custom-md" style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem' }}>
+                 <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                   {formatMath(explanationData.text || '')}
+                 </ReactMarkdown>
+               </div>
+            )}
+          </div>
+       )}
+    </div>
+  );
+}
+
 // ── Main Quiz Player ─────────────────────────────────────────────────────────
 export default function LiveQuizPlayer({
   quizState, isActingAdmin, timeRemaining, answers, scores,
@@ -396,6 +440,33 @@ export default function LiveQuizPlayer({
   // Bookmark state
   const [bookmarking, setBookmarking] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+
+  // AI Explanation state
+  const [explanationCache, setExplanationCache] = useState({});
+
+  useEffect(() => {
+    if (status === 'active' && currentQuestion) {
+      if (!explanationCache[currentQuestionIndex]) {
+         setExplanationCache(prev => ({ ...prev, [currentQuestionIndex]: { status: 'loading', text: '' } }));
+         
+         generateQuizExplanation(
+            currentQuestion.text, 
+            currentQuestion.options, 
+            currentQuestion.correctOptionIndex
+         ).then(explanation => {
+            setExplanationCache(prev => ({ 
+               ...prev, 
+               [currentQuestionIndex]: { status: 'done', text: explanation } 
+            }));
+         }).catch(err => {
+            setExplanationCache(prev => ({ 
+               ...prev, 
+               [currentQuestionIndex]: { status: 'error', text: 'Failed to generate explanation.' } 
+            }));
+         });
+      }
+    }
+  }, [status, currentQuestionIndex, currentQuestion]);
 
   useEffect(() => {
     if (!currentQuestion || !currentUser || !quizState.testId) return;
@@ -736,6 +807,10 @@ export default function LiveQuizPlayer({
           {status === 'revealing' && (
             <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <LeaderboardPanel scores={scores} currentUserPhone={currentUser.phone} />
+              
+              {/* AI Explain Card */}
+              <ExplainCard explanationData={explanationCache[currentQuestionIndex]} />
+
               {isActingAdmin && (
                 <button className="auth-btn primary" onClick={nextQuestion} style={{ width: '100%', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                   {currentQuestionIndex >= questions.length - 1 ? 'See Results' : 'Next Question'} <ChevronRight size={18} />

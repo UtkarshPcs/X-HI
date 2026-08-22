@@ -41,6 +41,7 @@ const UniversalIndicator = React.lazy(() => import('../svg-library/chemistry/Uni
 
 // Mathematics (Interactive/JSXGraph)
 const JSXGraphRenderer = React.lazy(() => import('./JSXGraphRenderer'));
+const TikZRenderer = React.lazy(() => import('./TikZRenderer'));
 
 const TEMPLATES = {
   // Mathematics
@@ -55,6 +56,7 @@ const TEMPLATES = {
   'quadrilateral': Quadrilateral,
   'triangle': Triangle,
   'jsxgraph': JSXGraphRenderer,
+  'tikz': TikZRenderer,
 
   // Physics
   'concave_lens_ray': ConcaveLensRay,

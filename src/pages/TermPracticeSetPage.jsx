@@ -43,10 +43,10 @@ export default function TermPracticeSetPage() {
         .tp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
         .tp-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 1.5rem; transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
         .tp-card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .tp-icon-wrapper { width: 56px; height: 56px; border-radius: 12px; display: flex; alignItems: center; justify-content: center; margin-bottom: 1.25rem; }
+        .tp-icon-wrapper { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
         .tp-card-title { font-size: 1.25rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem; }
         .tp-card-desc { color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        .tp-action { display: flex; alignItems: center; gap: 0.5rem; font-weight: 600; font-size: 0.95rem; }
+        .tp-action { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.95rem; }
       `}</style>
 
       <div className="tp-hero">

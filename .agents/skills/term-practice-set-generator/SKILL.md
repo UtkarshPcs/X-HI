@@ -174,7 +174,14 @@ You must map each question to the correct `chapterId` using this list.
 ---
 
 ## Diagrams & Case Studies
-- Use the **JSXGraph** template for ANY mathematical geometry or procedural drawings (Triangles, Circles, Coordinates). 
+- **LaTeX TikZ**: Use the `tikz` template for any geometric, mathematical, or scientific diagrams that require high precision and are better represented with TikZ. Provide pure, self-contained standard LaTeX TikZ code inside the `tikz_code` field. Ensure you use standard TikZ (`\usepackage{tikz}`) and avoid complex external packages like `pgfplots` or `tkz-euclide` to guarantee compatibility with web rendering.
+  ```json
+  "diagram": {
+    "template": "tikz",
+    "tikz_code": "\\begin{tikzpicture}\n\\draw (0,0) -- (1,1);\n\\end{tikzpicture}"
+  }
+  ```
+- **JSXGraph and SVG**: You can still use the **JSXGraph** template or standard SVGs for other procedural drawings if preferred.
 - Insert the `diagram` object directly into the question object.
 - **Case-Based Questions (4 or 5 marks)**: These should be categorized as `"subjective"`. Write the common scenario/paragraph at the beginning of the `text`, then list sub-questions (i), (ii), (iii) inside the same `text`. The `answerSteps` must explicitly map to these sub-questions. If a diagram is needed for the case study, include the `diagram` object in that question.
 
