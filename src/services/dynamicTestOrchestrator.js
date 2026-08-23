@@ -28,8 +28,8 @@ export async function createAndSaveDynamicTest(subject, userId) {
     const generatedTest = generatePaper(subject, availableQuestions, userHistory);
 
     // 5. Save to Firestore so the player can fetch it via testId
-    // Assuming termPracticeService uses a collection called 'term_practice_tests'
-    const docRef = await addDoc(collection(db, 'term_practice_tests'), {
+    // Assuming termPracticeService uses a collection called 'termPracticeTests'
+    const docRef = await addDoc(collection(db, 'termPracticeTests'), {
       title: generatedTest.title,
       subjectId: generatedTest.subjectId,
       questions: generatedTest.questions,

@@ -95,6 +95,28 @@ export async function uploadQuestionBankJSON(questionsArray) {
   let batch = writeBatch(db);
   let count = 0;
   
+  // Utility to prevent Firestore "Nested arrays are not supported" error
+  const replaceNestedArrays = (obj, inArray = false) => {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) {
+      if (inArray) {
+        const sanitizedObj = {};
+        obj.forEach((val, idx) => {
+          sanitizedObj[idx] = replaceNestedArrays(val, false);
+        });
+        return sanitizedObj;
+      }
+      return obj.map(val => replaceNestedArrays(val, true));
+    }
+    const newObj = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        newObj[key] = replaceNestedArrays(obj[key], false);
+      }
+    }
+    return newObj;
+  };
+
   for (const q of questionsArray) {
     if (!q.question_id) {
       q.question_id = 'qb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
@@ -107,9 +129,11 @@ export async function uploadQuestionBankJSON(questionsArray) {
       else if (q.subjectId.startsWith('math')) q.subject = 'MATH';
     }
 
+    const sanitizedQ = replaceNestedArrays(q, false);
+
     const docRef = doc(db, 'question_bank', q.question_id);
     batch.set(docRef, {
-      ...q,
+      ...sanitizedQ,
       uploadedAt: new Date().toISOString()
     });
     
