@@ -9,7 +9,7 @@ import { calcAttendance } from '../data/attendanceUtils';
 import { getClosedDays } from '../services/calendarOverrideService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus, UploadCloud, Bot } from 'lucide-react';
+import { Users, Activity, Settings, Search, ShieldAlert, ShieldCheck, User, Users as UsersIcon, Clock, BarChart2, GitMerge, AlertTriangle, Check, FileText, CheckCircle, XCircle, Trash2, GraduationCap, Plus, KeyRound, BookOpen, Mail, MailCheck, FlaskConical, Download, ClipboardList, Beaker, X, Save, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Megaphone, Send, Star, Sparkles, AlertCircle, Flag, Target, UserPlus, Copy, Eye, EyeOff, RefreshCw, FilePlus, UploadCloud, Bot, Globe } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -2365,6 +2365,10 @@ function UniversalTestTab() {
   const [syllabusLoading, setSyllabusLoading] = useState(false);
   
   const [busy, setBusy] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [pendingUpload, setPendingUpload] = useState(null);
+  const [showPasteModal, setShowPasteModal] = useState(false);
+  const [pastedJson, setPastedJson] = useState("");
   const [uploadType, setUploadType] = useState('questionBank');
 
   useEffect(() => {
