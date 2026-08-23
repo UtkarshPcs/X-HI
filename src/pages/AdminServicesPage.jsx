@@ -2589,10 +2589,13 @@ function StarBatchTab() {
         await uploadSubjectiveTestJSON(pendingUpload.data);
       } else if (uploadType === 'termPractice') {
         await uploadTermPracticeTest(pendingUpload.data);
+      } else if (uploadType === 'questionBank') {
+        const { uploadQuestionBankJSON } = await import('../services/testGenerationService');
+        await uploadQuestionBankJSON(pendingUpload.data.questions || pendingUpload.data);
       } else {
         await uploadTestJSON(pendingUpload.data);
       }
-      alert(`${uploadType === 'subjective' ? 'Subjective Test' : uploadType === 'termPractice' ? 'Term Practice Set' : 'Objective Test'} uploaded successfully!`);
+      alert(`${uploadType === 'subjective' ? 'Subjective Test' : uploadType === 'termPractice' ? 'Term Practice Set' : uploadType === 'questionBank' ? 'Universal Question Bank' : 'Objective Test'} uploaded successfully!`);
       setPendingUpload(null);
       loadConfig();
     } catch (err) {
@@ -2702,6 +2705,9 @@ function StarBatchTab() {
       
       <div className="as-card">
         <h4 className="as-section-title"><Star size={15} /> Internal Students</h4>
+        <p className="as-muted" style={{ marginBottom: '0.75rem', fontSize: '0.85rem' }}>
+          These students bypass the Access Code check and always see the Star Batch.
+        </p>
         <form onSubmit={handleAddStudent} style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', marginBottom: '1rem' }}>
           <input className="as-input" type="number" placeholder="Roll No." value={rollInput} onChange={e => setRollInput(e.target.value)} style={{ width: 120 }} />
           <button className="auth-btn" type="submit" disabled={busy}>Add Student</button>
@@ -2723,7 +2729,7 @@ function StarBatchTab() {
 
       <div className="as-card">
         <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter Test / Practice Set</h4>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', color: '#fff' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', color: '#fff', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
             <input type="radio" name="uploadType" value="objective" checked={uploadType === 'objective'} onChange={() => setUploadType('objective')} />
             Objective (MCQ)
@@ -2735,6 +2741,10 @@ function StarBatchTab() {
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
             <input type="radio" name="uploadType" value="termPractice" checked={uploadType === 'termPractice'} onChange={() => setUploadType('termPractice')} />
             Term Practice Set
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#10b981', fontWeight: 'bold' }}>
+            <input type="radio" name="uploadType" value="questionBank" checked={uploadType === 'questionBank'} onChange={() => setUploadType('questionBank')} />
+            Universal Question Bank
           </label>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

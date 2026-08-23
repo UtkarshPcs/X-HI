@@ -121,15 +121,29 @@ export default function TermPracticeTestPlayerPage() {
         setIsSubmitting(true);
         let totalObtained = 0;
         let totalMax = 0;
+        const historyUpdates = [];
         
         Object.entries(evalMarks).forEach(([idx, val]) => {
-          totalObtained += parseFloat(val) || 0;
-          totalMax += test.questions[idx].marks || 1;
+          const marks = parseFloat(val) || 0;
+          const maxMarks = test.questions[idx].marks || 1;
+          const qId = test.questions[idx].question_id || test.questions[idx].id;
+          
+          totalObtained += marks;
+          totalMax += maxMarks;
+          
+          if (qId) {
+             // If they scored 100%, mark as correct, else incorrect.
+             // You might want a different threshold, e.g. >= 80%. Let's use === maxMarks for strict 'correct'.
+             historyUpdates.push({
+               questionId: qId,
+               status: marks >= maxMarks ? 'correct' : 'incorrect'
+             });
+          }
         });
 
         try {
           const attemptData = {
-            userId: currentUser.id || currentUser.phone,
+            userId: currentUser.id || currentUser.uid || currentUser.phone,
             testId: test.id,
             subjectId: test.subjectId,
             score: totalObtained,
@@ -137,6 +151,14 @@ export default function TermPracticeTestPlayerPage() {
             responses: evalMarks,
             totalTime: INITIAL_TIME - quizTime
           };
+          
+          // Save question history to firestore for spaced repetition
+          try {
+            const { updateUserQuestionHistory } = await import('../services/testGenerationService');
+            await updateUserQuestionHistory(attemptData.userId, historyUpdates);
+          } catch (histErr) {
+            console.error("Failed to update user question history", histErr);
+          }
 
           // Generate AI Report
           try {
@@ -313,6 +335,13 @@ export default function TermPracticeTestPlayerPage() {
                           {formatMath(q.question_text || q.text)}
                         </ReactMarkdown>
                         {q.diagram && <DiagramRenderer diagram={q.diagram} />}
+                        {q.diagram_urls && q.diagram_urls.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                            {q.diagram_urls.map((url, i) => (
+                              <img key={i} src={url} alt={`Diagram ${i + 1}`} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', border: '1px solid #ccc' }} />
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       {q.options && q.options.length > 0 && (
@@ -381,6 +410,13 @@ export default function TermPracticeTestPlayerPage() {
                 </ol>
               )}
               {test.questions[evalIndex].diagram && <DiagramRenderer diagram={test.questions[evalIndex].diagram} />}
+              {test.questions[evalIndex].diagram_urls && test.questions[evalIndex].diagram_urls.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                  {test.questions[evalIndex].diagram_urls.map((url, i) => (
+                    <img key={i} src={url} alt={`Diagram ${i + 1}`} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)' }} />
+                  ))}
+                </div>
+              )}
             </div>
 
             <div style={{ background: 'rgba(16,185,129,0.05)', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.2)', padding: '1.5rem', marginBottom: '1.5rem' }}>

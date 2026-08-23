@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, FlaskConical, Calculator, Globe, Code, Languages, ArrowRight, Loader2 } from 'lucide-react';
 import { getTermPracticeTestsBySubject } from '../services/termPracticeService';
+import { createAndSaveDynamicTest } from '../services/dynamicTestOrchestrator';
+import { useAuth } from '../auth/AuthContext';
 
 const SUBJECTS = [
   { id: 'science', name: 'Science', icon: FlaskConical, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
@@ -14,21 +16,32 @@ const SUBJECTS = [
 
 export default function TermPracticeSetPage() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [loadingSubject, setLoadingSubject] = useState(null);
 
   const handleSubjectClick = async (subjectId) => {
+    if (!currentUser) {
+      alert("Please log in to generate a practice set.");
+      return;
+    }
     setLoadingSubject(subjectId);
     try {
-      const tests = await getTermPracticeTestsBySubject(subjectId);
-      if (tests.length === 0) {
-        alert("No practice sets available for this subject right now.");
-      } else {
-        // Just pick the latest one for now
-        const testId = tests[0].id;
-        navigate(`/term-practice/test/${testId}`);
+      // Try to generate a dynamic test first
+      let testId;
+      try {
+        testId = await createAndSaveDynamicTest(subjectId, currentUser.id || currentUser.uid || currentUser.phone);
+      } catch (dynamicErr) {
+        console.warn("Dynamic generation failed, falling back to static tests:", dynamicErr);
+        // Fallback to static test if dynamic fails (e.g. no syllabus found)
+        const tests = await getTermPracticeTestsBySubject(subjectId);
+        if (tests.length === 0) {
+          throw new Error("No practice sets available for this subject right now.");
+        }
+        testId = tests[0].id;
       }
+      navigate(`/term-practice/test/${testId}`);
     } catch (err) {
-      alert("Error fetching tests: " + err.message);
+      alert("Error generating test: " + err.message);
     } finally {
       setLoadingSubject(null);
     }
