@@ -45,6 +45,7 @@ import { getAllowedChapters, addAllowedChapter, removeAllowedChapter } from '../
 import { getUploadHistory, deleteUpload } from '../services/starBatchUploadService';
 
 const TABS = [
+  { id: 'universal',  label: 'Universal Test',   Icon: Globe },
   { id: 'users',      label: 'User Directory',  Icon: Users },
   { id: 'activity',   label: 'Activity',         Icon: Activity },
   { id: 'marks',      label: 'Marks Complaints', Icon: FileText },
@@ -1782,6 +1783,7 @@ export default function AdminServicesPage() {
         )}
         {tab === 'testdata'   && <TestDataTab />}
         {tab === 'push'       && <PushNoticesTab />}
+        { tab === 'universal'  && <UniversalTestTab /> }
         { tab === 'starbatch'  && <StarBatchTab /> }
         { tab === 'mathfixer'  && <MathFixerTab /> }
         { tab === 'reportedQs' && <ReportedQuestionsTab /> }
@@ -2363,11 +2365,6 @@ function StarBatchTab() {
   const [newCode, setNewCode] = useState('');
   const [rollInput, setRollInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const [pendingUpload, setPendingUpload] = useState(null);
-  const [uploadType, setUploadType] = useState('objective');
-  const [showPasteModal, setShowPasteModal] = useState(false);
-  const [pastedJson, setPastedJson] = useState('');
   const [attempts, setAttempts] = useState([]);
   const [allBankTests, setAllBankTests] = useState([]);
   const [allSubjectiveTests, setAllSubjectiveTests] = useState([]);
@@ -2380,230 +2377,17 @@ function StarBatchTab() {
   const toggleBankSection = (secId) => setExpandedBankSections(p => ({ ...p, [secId]: !p[secId] }));
   const toggleBankSubject = (subId) => setExpandedBankSubjects(p => ({ ...p, [subId]: !p[subId] }));
 
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
+;
 
-  const handleDrop = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
+;
 
-  const getFriendlyTitle = (chapterId) => {
-    if (!chapterId) return 'Untitled Test';
-    for (const sec of syllabusData) {
-      for (const sub of sec.subjects) {
-        for (const chap of sub.chapters) {
-          if (chap.chapterId === chapterId) {
-            return `${sub.subjectName} - ${chap.chapterName} Subjective Test`;
-          }
-        }
-      }
-    }
-    return `${chapterId} Upload`;
-  };
+;
 
-  const handlePastedJson = () => {
-    if (!pastedJson.trim()) return alert("Please paste some JSON code first.");
-    setBusy(true);
-    try {
-      let json = JSON.parse(pastedJson);
-      
-      if (Array.isArray(json) && json.length > 0 && (json[0].question || json[0].text || json[0].answerSteps || json[0].options)) {
-        json = {
-          chapterId: json[0].chapterId || 'Unknown',
-          subjectId: json[0].subjectId || 'Unknown',
-          sectionId: json[0].sectionId || 'Unknown',
-          title: getFriendlyTitle(json[0].chapterId),
-          questions: json.map(q => {
-            if (q.question && !q.text) q.text = q.question;
-            return q;
-          })
-        };
-      }
-      
-      let sampleQuestions = [];
-      if (Array.isArray(json)) {
-        if (json[0] && Array.isArray(json[0].questions)) {
-          sampleQuestions = json[0].questions;
-        } else if (json[0] && (json[0].question || json[0].text)) {
-          sampleQuestions = json;
-        }
-      } else if (json.questions) {
-        sampleQuestions = json.questions;
-      }
+;
 
-      if (sampleQuestions.length > 0 && uploadType !== 'termPractice' && uploadType !== 'questionBank') {
-        const sample = sampleQuestions[0];
-        if (!!sample.answerSteps) setUploadType('subjective');
-        else setUploadType('objective');
-      }
-      
-      let summary = [];
-      const computeMarks = (questions) => {
-        let b = {1:0, 2:0, 3:0, 4:0, 5:0};
-        if (Array.isArray(questions)) {
-          questions.forEach(q => {
-            if (q.marks) b[q.marks] = (b[q.marks] || 0) + 1;
-          });
-        }
-        return b;
-      };
+;
 
-      if (Array.isArray(json)) {
-        summary = json.map(test => ({
-          chapterId: test.chapterId || test.subjectId || 'Unknown',
-          title: test.title || getFriendlyTitle(test.chapterId || test.subjectId),
-          count: Array.isArray(test.questions) ? test.questions.length : 0,
-          marksBreakdown: computeMarks(test.questions)
-        }));
-      } else {
-        summary = [{
-          chapterId: json.chapterId || json.subjectId || 'Unknown',
-          title: json.title || json.chapterId || json.subjectId || 'Untitled',
-          count: Array.isArray(json.questions) ? json.questions.length : 0,
-          marksBreakdown: computeMarks(json.questions)
-        }];
-      }
-      
-      setPendingUpload({
-        data: json,
-        summary: summary,
-        totalQuestions: summary.reduce((acc, curr) => acc + curr.count, 0)
-      });
-      setShowPasteModal(false);
-      setPastedJson('');
-    } catch (err) {
-      alert("Failed to parse JSON: " + err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleFile = async (file) => {
-    if (!file) return;
-    if (file.type !== "application/json" && !file.name.endsWith(".json")) {
-      return alert("Please upload a valid JSON file.");
-    }
-    setBusy(true);
-    try {
-      const text = await file.text();
-      let json = JSON.parse(text);
-      
-      // Auto-wrap if it's an array of questions rather than a test object/array of tests
-      if (Array.isArray(json) && json.length > 0 && (json[0].question || json[0].text || json[0].answerSteps || json[0].options)) {
-        json = {
-          chapterId: json[0].chapterId || 'Unknown',
-          subjectId: json[0].subjectId || 'Unknown',
-          sectionId: json[0].sectionId || 'Unknown',
-          title: getFriendlyTitle(json[0].chapterId),
-          questions: json.map(q => {
-            if (q.question && !q.text) {
-              q.text = q.question;
-            }
-            return q;
-          })
-        };
-      }
-      
-      let sampleQuestions = [];
-      if (Array.isArray(json)) {
-        if (json[0] && Array.isArray(json[0].questions)) {
-          sampleQuestions = json[0].questions;
-        } else if (json[0] && (json[0].question || json[0].text)) {
-          sampleQuestions = json;
-        }
-      } else if (json.questions) {
-        sampleQuestions = json.questions;
-      }
-
-      if (sampleQuestions.length > 0) {
-        const sample = sampleQuestions[0];
-        const isSubjectiveData = !!sample.answerSteps;
-        const isObjectiveData = !!sample.options;
-        
-        if (uploadType === 'subjective' && isObjectiveData && !isSubjectiveData) {
-          setBusy(false);
-          return alert("Format Mismatch: You are trying to upload an Objective JSON (contains options) but you selected Subjective upload!");
-        }
-        if (uploadType === 'objective' && isSubjectiveData && !isObjectiveData) {
-          setBusy(false);
-          return alert("Format Mismatch: You are trying to upload a Subjective JSON (contains answerSteps) but you selected Objective upload!");
-        }
-      }
-      
-      let summary = [];
-      const computeMarks = (questions) => {
-        let b = {1:0, 2:0, 3:0, 4:0, 5:0};
-        if (Array.isArray(questions)) {
-          questions.forEach(q => {
-            if (q.marks) b[q.marks] = (b[q.marks] || 0) + 1;
-          });
-        }
-        return b;
-      };
-
-      if (Array.isArray(json)) {
-        summary = json.map(test => ({
-          chapterId: test.chapterId || test.subjectId || 'Unknown',
-          title: test.title || getFriendlyTitle(test.chapterId || test.subjectId),
-          count: Array.isArray(test.questions) ? test.questions.length : 0,
-          marksBreakdown: computeMarks(test.questions)
-        }));
-      } else {
-        summary = [{
-          chapterId: json.chapterId || json.subjectId || 'Unknown',
-          title: json.title || json.chapterId || json.subjectId || 'Untitled',
-          count: Array.isArray(json.questions) ? json.questions.length : 0,
-          marksBreakdown: computeMarks(json.questions)
-        }];
-      }
-      
-      setPendingUpload({
-        data: json,
-        summary: summary,
-        totalQuestions: summary.reduce((acc, curr) => acc + curr.count, 0)
-      });
-    } catch (err) {
-      alert("Failed to parse JSON file: " + err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const confirmUpload = async () => {
-    if (!pendingUpload) return;
-    setBusy(true);
-    try {
-      if (uploadType === 'subjective') {
-        await uploadSubjectiveTestJSON(pendingUpload.data);
-      } else if (uploadType === 'termPractice') {
-        await uploadTermPracticeTest(pendingUpload.data);
-      } else if (uploadType === 'questionBank') {
-        const { uploadQuestionBankJSON } = await import('../services/testGenerationService');
-        await uploadQuestionBankJSON(pendingUpload.data.questions || pendingUpload.data);
-      } else {
-        await uploadTestJSON(pendingUpload.data);
-      }
-      alert(`${uploadType === 'subjective' ? 'Subjective Test' : uploadType === 'termPractice' ? 'Term Practice Set' : uploadType === 'questionBank' ? 'Universal Question Bank' : 'Objective Test'} uploaded successfully!`);
-      setPendingUpload(null);
-      loadConfig();
-    } catch (err) {
-      alert("Failed to upload test: " + err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
+;
 
   useEffect(() => {
     loadConfig();
@@ -2727,98 +2511,7 @@ function StarBatchTab() {
         )}
       </div>
 
-      <div className="as-card">
-        <h4 className="as-section-title"><BookOpen size={15} /> Upload Chapter Test / Practice Set</h4>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', color: '#fff', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input type="radio" name="uploadType" value="objective" checked={uploadType === 'objective'} onChange={() => setUploadType('objective')} />
-            Objective (MCQ)
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input type="radio" name="uploadType" value="subjective" checked={uploadType === 'subjective'} onChange={() => setUploadType('subjective')} />
-            Subjective
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-            <input type="radio" name="uploadType" value="termPractice" checked={uploadType === 'termPractice'} onChange={() => setUploadType('termPractice')} />
-            Term Practice Set
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#10b981', fontWeight: 'bold' }}>
-            <input type="radio" name="uploadType" value="questionBank" checked={uploadType === 'questionBank'} onChange={() => setUploadType('questionBank')} />
-            Universal Question Bank
-          </label>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <p className="as-muted" style={{ margin: 0 }}>Upload a valid JSON file containing subjectId/chapterId, title, and a questions array.</p>
-          <button className="auth-btn" onClick={() => setShowPasteModal(true)} disabled={busy} style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '0.5rem 1rem' }}>Paste JSON Instead</button>
-        </div>
-        
-        {pendingUpload ? (
-          <div style={{ marginTop: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            <h5 style={{ margin: '0 0 0.5rem 0', color: '#fbbf24', fontSize: '1.05rem' }}>Upload Summary</h5>
-            <p className="as-muted" style={{ margin: '0 0 1rem 0' }}>Total {pendingUpload.totalQuestions} questions will be added across {pendingUpload.summary.length} chapters.</p>
-            <ul style={{ paddingLeft: '1.5rem', margin: '0 0 1.5rem 0', color: '#e2e8f0', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              {pendingUpload.summary.map((item, idx) => (
-                <li key={idx}>
-                  <strong>{item.title}</strong> ({item.chapterId}): <span style={{color: '#10b981', fontWeight: 600}}>+{item.count}</span> questions
-                  {uploadType === 'subjective' && item.marksBreakdown && (
-                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
-                      <span style={{ marginRight: '8px' }}>1M: <strong>{item.marksBreakdown[1] || 0}</strong></span>
-                      <span style={{ marginRight: '8px' }}>2M: <strong>{item.marksBreakdown[2] || 0}</strong></span>
-                      <span style={{ marginRight: '8px' }}>3M: <strong>{item.marksBreakdown[3] || 0}</strong></span>
-                      <span style={{ marginRight: '8px' }}>4M: <strong>{item.marksBreakdown[4] || 0}</strong></span>
-                      <span>5M: <strong>{item.marksBreakdown[5] || 0}</strong></span>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button className="auth-btn primary" onClick={confirmUpload} disabled={busy}>Approve & Upload</button>
-              <button className="auth-btn" onClick={() => setPendingUpload(null)} disabled={busy} style={{ background: 'transparent', border: '1px solid var(--border)' }}>Cancel</button>
-            </div>
-          </div>
-        ) : (
-          <div 
-            onDragEnter={handleDrag} 
-            onDragLeave={handleDrag} 
-            onDragOver={handleDrag} 
-            onDrop={handleDrop}
-            style={{
-              background: dragActive ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255,255,255,0.03)', 
-              padding: '3rem 1rem', 
-              borderRadius: '12px', 
-              border: `2px dashed ${dragActive ? '#fbbf24' : 'rgba(255,255,255,0.2)'}`,
-              width: '100%',
-              textAlign: 'center',
-              transition: 'all 0.2s',
-              position: 'relative'
-            }}
-          >
-            <div style={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: dragActive ? '#fbbf24' : '#e2e8f0' }}>
-              <FileText size={32} style={{ opacity: 0.8 }} />
-              <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Drag & Drop your JSON file here</div>
-              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>or click to browse</div>
-            </div>
-            <input 
-              type="file" 
-              accept=".json" 
-              disabled={busy}
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleFile(e.target.files[0]);
-                }
-                e.target.value = '';
-              }}
-              style={{ 
-                position: 'absolute',
-                top: 0, left: 0, width: '100%', height: '100%',
-                opacity: 0, cursor: 'pointer'
-              }} 
-            />
-          </div>
-        )}
-        {busy && <div style={{ color: '#fbbf24', marginTop: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>Processing test... Please wait.</div>}
-      </div>
+
 
       <div className="as-card">
         <h4 className="as-section-title"><BookOpen size={15} /> Question Bank Status</h4>
@@ -3042,24 +2735,7 @@ function StarBatchTab() {
         )}
       </div>
       {/* Paste JSON Modal */}
-      {showPasteModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '1rem' }}>
-          <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '700px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <h3 style={{ color: '#fff', margin: 0 }}>Paste Test JSON</h3>
-            <p style={{ color: 'rgba(255,255,255,0.6)', margin: 0, fontSize: '0.9rem' }}>Paste your raw objective or subjective JSON code here. The system will auto-detect the type.</p>
-            <textarea 
-              value={pastedJson}
-              onChange={e => setPastedJson(e.target.value)}
-              placeholder="Paste JSON here..."
-              style={{ width: '100%', height: '300px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '1rem', color: '#fff', fontFamily: 'monospace', resize: 'vertical' }}
-            />
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button className="auth-btn" onClick={() => { setShowPasteModal(false); setPastedJson(''); }} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}>Cancel</button>
-              <button className="auth-btn primary" onClick={handlePastedJson} disabled={busy}>Proceed</button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
