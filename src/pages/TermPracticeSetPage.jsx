@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, FlaskConical, Calculator, Globe, Code, Languages, ArrowRight, Loader2 } from 'lucide-react';
-import { getTermPracticeTestsBySubject } from '../services/termPracticeService';
+import { BookOpen, FlaskConical, Calculator, Globe, Code, Languages, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { getTermPracticeTestsBySubject, getUserTermPracticeHistory } from '../services/termPracticeService';
 import { createAndSaveDynamicTest } from '../services/dynamicTestOrchestrator';
 import { useAuth } from '../auth/AuthContext';
 
@@ -20,14 +20,31 @@ export default function TermPracticeSetPage() {
   
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [staticTests, setStaticTests] = useState(null);
+  const [userAttempts, setUserAttempts] = useState({});
   const [loadingAction, setLoadingAction] = useState(null);
 
   const handleSubjectClick = async (subject) => {
     setSelectedSubject(subject);
     setStaticTests(null);
+    setUserAttempts({});
     try {
       const tests = await getTermPracticeTestsBySubject(subject.id);
-      setStaticTests(tests);
+      // Reverse to show oldest first (Set 1, Set 2, ...)
+      setStaticTests([...tests].reverse());
+
+      if (currentUser) {
+        const history = await getUserTermPracticeHistory(currentUser.id || currentUser.uid || currentUser.phone);
+        const historyMap = {};
+        history.forEach(attempt => {
+          if (attempt.subjectId === subject.id) {
+            // Keep the highest score if multiple attempts
+            if (!historyMap[attempt.testId] || attempt.score > historyMap[attempt.testId].score) {
+              historyMap[attempt.testId] = attempt;
+            }
+          }
+        });
+        setUserAttempts(historyMap);
+      }
     } catch (err) {
       console.error("Failed to load static tests:", err);
       setStaticTests([]);
@@ -77,6 +94,8 @@ export default function TermPracticeSetPage() {
         .tp-generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
         .tp-static-btn { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
         .tp-static-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .tp-static-btn.completed { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+        .tp-static-btn.completed:hover { background: rgba(16,185,129,0.1); }
       `}</style>
 
       {!selectedSubject ? (
@@ -148,20 +167,38 @@ export default function TermPracticeSetPage() {
                 ) : staticTests.length === 0 ? (
                   <div style={{ color: '#64748b', fontStyle: 'italic' }}>No official sets uploaded yet.</div>
                 ) : (
-                  staticTests.map(test => (
-                    <button
-                      key={test.id}
-                      className="tp-action-btn tp-static-btn"
-                      style={{ padding: '1rem', fontSize: '1rem', justifyContent: 'flex-start', textAlign: 'left' }}
-                      onClick={() => handleTakeStaticTest(test.id)}
-                      disabled={loadingAction === test.id}
-                    >
-                      {loadingAction === test.id ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <BookOpen size={18} />}
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {test.title || 'Untitled Practice Set'}
-                      </span>
-                    </button>
-                  ))
+                  staticTests.map((test, index) => {
+                    const attempt = userAttempts[test.id];
+                    const isCompleted = !!attempt;
+                    
+                    let displayTitle = test.title;
+                    if (!displayTitle || displayTitle.toLowerCase().includes('untitled') || displayTitle === 'Unknown Upload') {
+                      displayTitle = `Set ${index + 1}`;
+                    }
+
+                    return (
+                      <button
+                        key={test.id}
+                        className={`tp-action-btn tp-static-btn ${isCompleted ? 'completed' : ''}`}
+                        style={{ padding: '1rem', fontSize: '1rem', justifyContent: 'space-between', textAlign: 'left' }}
+                        onClick={() => handleTakeStaticTest(test.id)}
+                        disabled={loadingAction === test.id}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden', flex: 1 }}>
+                          {loadingAction === test.id ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : (isCompleted ? <CheckCircle size={18} color="#10b981" /> : <BookOpen size={18} />)}
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: isCompleted ? '#10b981' : '#fff' }}>
+                            {displayTitle}
+                          </span>
+                        </div>
+                        
+                        {isCompleted && (
+                          <div style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', padding: '4px 8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 800, flexShrink: 0 }}>
+                            {attempt.score}/{attempt.total}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>
