@@ -2443,7 +2443,7 @@ function StarBatchTab() {
         sampleQuestions = json.questions;
       }
 
-      if (sampleQuestions.length > 0 && uploadType !== 'termPractice') {
+      if (sampleQuestions.length > 0 && uploadType !== 'termPractice' && uploadType !== 'questionBank') {
         const sample = sampleQuestions[0];
         if (!!sample.answerSteps) setUploadType('subjective');
         else setUploadType('objective');
