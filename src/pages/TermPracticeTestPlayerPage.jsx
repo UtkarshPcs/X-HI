@@ -33,6 +33,22 @@ export default function TermPracticeTestPlayerPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const totalTestMarks = test?.questions ? test.questions.reduce((acc, q) => acc + (q.marks || 1), 0) : 80;
+
+  async function fetchTest() {
+    setLoading(true);
+    try {
+      const data = await getTermPracticeTestById(testId);
+      if (!data.questions || data.questions.length === 0) {
+        throw new Error("This practice set is empty.");
+      }
+      setTest(data);
+    } catch (e) {
+      setError(e.message || 'Test not found or access denied.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!currentUser) {
@@ -59,20 +75,6 @@ export default function TermPracticeTestPlayerPage() {
     return () => clearInterval(timer);
   }, [phase]);
 
-  async function fetchTest() {
-    setLoading(true);
-    try {
-      const data = await getTermPracticeTestById(testId);
-      if (!data.questions || data.questions.length === 0) {
-        throw new Error("This practice set is empty.");
-      }
-      setTest(data);
-    } catch (e) {
-      setError(e.message || 'Test not found or access denied.');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
@@ -304,7 +306,7 @@ export default function TermPracticeTestPlayerPage() {
               <h2 className="paper-title">{displayTitle}</h2>
               <div className="paper-meta">
                 <span>Subject: {test.subjectId?.toUpperCase()}</span>
-                <span>Max. Marks: 80</span>
+                <span>Max. Marks: {totalTestMarks}</span>
               </div>
               <div className="paper-meta" style={{ marginTop: '0.5rem', fontWeight: 'normal' }}>
                 <span>Time Allowed: 3 Hours</span>
@@ -328,7 +330,7 @@ export default function TermPracticeTestPlayerPage() {
                     </div>
                   )}
                   <div className="paper-question">
-                    <div className="paper-question-number">Q{q.question_number || (idx + 1)}.</div>
+                    <div className="paper-question-number">Q{idx + 1}.</div>
                     <div className="paper-question-body">
                       <div className="custom-md">
                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
