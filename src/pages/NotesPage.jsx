@@ -379,6 +379,13 @@ export default function NotesPage() {
   const { currentUser, openModal } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Temporary kill-switch UI
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', textAlign: 'center' }}>
+      <h1 style={{ color: '#ef4444', fontSize: '2rem', fontWeight: 800 }}>This feature has been Disabled</h1>
+    </div>
+  );
+
   // Drill-down state
   const [view,    setView]    = useState('sections');
   const [section, setSection] = useState(null);
@@ -471,12 +478,14 @@ export default function NotesPage() {
     // Already permanently dismissed (completed or stored 'true')
     if (localVal === 'true' || localVal === '1') return;
     // Snoozed? Check expiry
+    // Snoozed? Check expiry from localStorage
     if (localVal?.startsWith('snooze_')) {
       const until = parseInt(localVal.split('_')[1], 10);
-      if (Date.now() < until) return; // still snoozed
+      if (Date.now() < until) return; // still snoozed locally
     }
-    // Also check Firestore field (loaded via currentUser)
+    // Also check Firestore field for completion or cross-device snooze
     if (currentUser['ux_notes-tour-v1']) return;
+    if (currentUser['ux_notes-tour-v1_snooze'] && Date.now() < currentUser['ux_notes-tour-v1_snooze']) return;
     // Show the prompt
     setShowTourPrompt(true);
   }, [currentUser]);
