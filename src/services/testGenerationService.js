@@ -198,23 +198,42 @@ export async function confirmUniversalUpload(uploadId, payload) {
 }
 
 /**
- * Fetches the division of questions for a selected chapter.
+ * Fetches the division of questions for a selected subject based on the active syllabus.
  */
-export async function fetchChapterQuestionAnalytics(subject, chapterId) {
+export async function fetchSubjectAnalytics(subject) {
   try {
-    const questions = await fetchQuestionsByChapters(subject, [chapterId]);
+    const activeChapters = await fetchActiveSyllabus(subject);
+
+    const q = query(
+      collection(db, 'question_bank'),
+      where('subject', '==', subject.toUpperCase())
+    );
+    const querySnapshot = await getDocs(q);
+    
+    let totalSubjectQuestions = 0;
+    let totalSyllabusQuestions = 0;
     let marksBreakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    questions.forEach(q => {
-      if (q.marks && marksBreakdown[q.marks] !== undefined) {
-        marksBreakdown[q.marks]++;
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      totalSubjectQuestions++;
+      
+      if (activeChapters.includes(data.chapterId)) {
+        totalSyllabusQuestions++;
+        if (data.marks && marksBreakdown[data.marks] !== undefined) {
+          marksBreakdown[data.marks]++;
+        }
       }
     });
+
     return {
-      totalEligible: questions.length,
-      marksBreakdown
+      totalSubjectQuestions,
+      totalSyllabusQuestions,
+      marksBreakdown,
+      activeChaptersCount: activeChapters.length
     };
   } catch (error) {
-    console.error("Error fetching chapter analytics:", error);
+    console.error("Error fetching subject analytics:", error);
     return null;
   }
 }

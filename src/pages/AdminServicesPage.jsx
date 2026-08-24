@@ -2656,11 +2656,10 @@ function UniversalTestTab() {
   };
 
   const handleLoadAnalytics = async () => {
-    if (!analyticsChapter.trim()) return alert('Please enter a Chapter ID.');
     setAnalyticsLoading(true);
     try {
-      const { fetchChapterQuestionAnalytics } = await import('../services/testGenerationService');
-      const data = await fetchChapterQuestionAnalytics(analyticsSubject, analyticsChapter.trim());
+      const { fetchSubjectAnalytics } = await import('../services/testGenerationService');
+      const data = await fetchSubjectAnalytics(analyticsSubject);
       setAnalyticsData(data);
     } catch (e) {
       alert('Failed to load analytics: ' + e.message);
@@ -2852,45 +2851,53 @@ function UniversalTestTab() {
         )}
       </div>
 
-      {/* Chapter Analytics */}
+      {/* Subject & Syllabus Analytics */}
       <div className="as-card" style={{ marginTop: '2rem' }}>
-        <h4 className="as-section-title"><BookOpen size={15} /> Chapter Questions Analytics</h4>
-        <p className="as-muted" style={{ marginBottom: '1rem' }}>Check eligible questions for a chapter and their marks distribution in the Universal Question Bank.</p>
+        <h4 className="as-section-title"><BookOpen size={15} /> Subject & Syllabus Analytics</h4>
+        <p className="as-muted" style={{ marginBottom: '1rem' }}>Check total uploaded questions in the subject and see the breakdown for questions matching the active syllabus.</p>
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
           <select 
             className="as-input" 
             value={analyticsSubject} 
             onChange={e => setAnalyticsSubject(e.target.value)} 
-            style={{ width: '150px' }}
+            style={{ width: '200px' }}
           >
             {['SCIENCE', 'MATH', 'SST', 'ENGLISH', 'HINDI', 'IT'].map(sub => (
               <option key={sub} value={sub}>{sub}</option>
             ))}
           </select>
-          <input 
-            type="text" 
-            className="as-input" 
-            placeholder="Chapter ID (e.g. sci-0-c1)" 
-            value={analyticsChapter} 
-            onChange={e => setAnalyticsChapter(e.target.value)} 
-            style={{ width: '250px' }}
-          />
           <button className="auth-btn" onClick={handleLoadAnalytics} disabled={analyticsLoading} style={{ background: 'rgba(255,255,255,0.1)' }}>
             {analyticsLoading ? 'Loading...' : 'Check Analytics'}
           </button>
         </div>
 
         {analyticsData && (
-          <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', padding: '1rem', borderRadius: '8px' }}>
-            <h5 style={{ margin: '0 0 0.5rem 0', color: '#10b981', fontSize: '1.05rem' }}>Results for {analyticsChapter}</h5>
-            <p style={{ margin: '0 0 1rem 0', color: '#e2e8f0' }}>Total Eligible Questions: <strong style={{ color: '#fff', fontSize: '1.1rem' }}>{analyticsData.totalEligible}</strong></p>
+          <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
+            <h5 style={{ margin: '0 0 1rem 0', color: '#10b981', fontSize: '1.1rem' }}>Results for {analyticsSubject}</h5>
             
+            <div style={{ display: 'flex', gap: '2rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <div>
+                <p style={{ margin: '0 0 0.25rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Total Questions in Subject</p>
+                <div style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{analyticsData.totalSubjectQuestions}</div>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 0.25rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Questions Matching Active Syllabus</p>
+                <div style={{ color: '#fbbf24', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                  {analyticsData.totalSyllabusQuestions} 
+                  <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'normal', marginLeft: '0.5rem' }}>
+                    (from {analyticsData.activeChaptersCount} active chapters)
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <h6 style={{ margin: '0 0 0.75rem 0', color: '#e2e8f0', fontSize: '0.95rem' }}>Active Syllabus Breakdown by Marks:</h6>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
               {[1, 2, 3, 4, 5].map(m => (
-                <div key={m} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '6px' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>{m} Mark</div>
-                  <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.2rem' }}>{analyticsData.marksBreakdown[m] || 0}</div>
+                <div key={m} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '6px' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '4px' }}>{m} Mark</div>
+                  <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.3rem' }}>{analyticsData.marksBreakdown[m] || 0}</div>
                 </div>
               ))}
             </div>
