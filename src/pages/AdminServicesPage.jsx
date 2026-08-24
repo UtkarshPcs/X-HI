@@ -2371,6 +2371,25 @@ function UniversalTestTab() {
   const [pastedJson, setPastedJson] = useState("");
   const [uploadType, setUploadType] = useState('questionBank');
 
+  const [apiUploads, setApiUploads] = useState([]);
+  const [analyticsSubject, setAnalyticsSubject] = useState('SCIENCE');
+  const [analyticsChapter, setAnalyticsChapter] = useState('');
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadApiUploads() {
+      try {
+        const { fetchUniversalApiUploads } = await import('../services/testGenerationService');
+        const uploads = await fetchUniversalApiUploads();
+        setApiUploads(uploads);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    loadApiUploads();
+  }, []);
+
   useEffect(() => {
     async function loadSyllabus() {
       setSyllabusLoading(true);
@@ -2620,6 +2639,35 @@ function UniversalTestTab() {
       setBusy(false);
     }
   }
+  const handleConfirmApiUpload = async (upload) => {
+    if (!window.confirm('Are you sure you want to push this AI upload to the Universal Question Bank?')) return;
+    setBusy(true);
+    try {
+      const { confirmUniversalUpload, fetchUniversalApiUploads } = await import('../services/testGenerationService');
+      await confirmUniversalUpload(upload.id, upload.payload);
+      alert('Upload confirmed and pushed to question bank!');
+      const updated = await fetchUniversalApiUploads();
+      setApiUploads(updated);
+    } catch (e) {
+      alert('Failed to confirm upload: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleLoadAnalytics = async () => {
+    if (!analyticsChapter.trim()) return alert('Please enter a Chapter ID.');
+    setAnalyticsLoading(true);
+    try {
+      const { fetchChapterQuestionAnalytics } = await import('../services/testGenerationService');
+      const data = await fetchChapterQuestionAnalytics(analyticsSubject, analyticsChapter.trim());
+      setAnalyticsData(data);
+    } catch (e) {
+      alert('Failed to load analytics: ' + e.message);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -2763,6 +2811,93 @@ function UniversalTestTab() {
           </div>
         </div>
       )}
+
+      {/* API Uploads Manager */}
+      <div className="as-card" style={{ marginTop: '2rem' }}>
+        <h4 className="as-section-title"><Globe size={15} /> Pending API Uploads</h4>
+        <p className="as-muted" style={{ marginBottom: '1rem' }}>Review and confirm practice sets uploaded by the AI agent via the API.</p>
+        
+        {apiUploads.length === 0 ? (
+          <div style={{ color: '#94a3b8', fontStyle: 'italic' }}>No API uploads found.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {apiUploads.map(up => (
+              <div key={up.id} style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h5 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>{up.title || 'Untitled'}</h5>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>
+                    Subject: {up.subjectId} | Chapter: {up.chapterId} | Questions: {up.totalQuestions}
+                  </p>
+                  {up.marksBreakdown && (
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                      <span style={{ marginRight: '8px' }}>1M: <strong>{up.marksBreakdown[1] || 0}</strong></span>
+                      <span style={{ marginRight: '8px' }}>2M: <strong>{up.marksBreakdown[2] || 0}</strong></span>
+                      <span style={{ marginRight: '8px' }}>3M: <strong>{up.marksBreakdown[3] || 0}</strong></span>
+                      <span style={{ marginRight: '8px' }}>4M: <strong>{up.marksBreakdown[4] || 0}</strong></span>
+                      <span>5M: <strong>{up.marksBreakdown[5] || 0}</strong></span>
+                    </div>
+                  )}
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: up.status === 'confirmed' ? '#10b981' : '#fbbf24', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                    Status: {up.status}
+                  </p>
+                </div>
+                {up.status !== 'confirmed' && (
+                  <button className="auth-btn primary" onClick={() => handleConfirmApiUpload(up)} disabled={busy} style={{ background: '#10b981', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                    Confirm & Push
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Chapter Analytics */}
+      <div className="as-card" style={{ marginTop: '2rem' }}>
+        <h4 className="as-section-title"><BookOpen size={15} /> Chapter Questions Analytics</h4>
+        <p className="as-muted" style={{ marginBottom: '1rem' }}>Check eligible questions for a chapter and their marks distribution in the Universal Question Bank.</p>
+        
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <select 
+            className="as-input" 
+            value={analyticsSubject} 
+            onChange={e => setAnalyticsSubject(e.target.value)} 
+            style={{ width: '150px' }}
+          >
+            {['SCIENCE', 'MATH', 'SST', 'ENGLISH', 'HINDI', 'IT'].map(sub => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
+          <input 
+            type="text" 
+            className="as-input" 
+            placeholder="Chapter ID (e.g. sci-0-c1)" 
+            value={analyticsChapter} 
+            onChange={e => setAnalyticsChapter(e.target.value)} 
+            style={{ width: '250px' }}
+          />
+          <button className="auth-btn" onClick={handleLoadAnalytics} disabled={analyticsLoading} style={{ background: 'rgba(255,255,255,0.1)' }}>
+            {analyticsLoading ? 'Loading...' : 'Check Analytics'}
+          </button>
+        </div>
+
+        {analyticsData && (
+          <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', padding: '1rem', borderRadius: '8px' }}>
+            <h5 style={{ margin: '0 0 0.5rem 0', color: '#10b981', fontSize: '1.05rem' }}>Results for {analyticsChapter}</h5>
+            <p style={{ margin: '0 0 1rem 0', color: '#e2e8f0' }}>Total Eligible Questions: <strong style={{ color: '#fff', fontSize: '1.1rem' }}>{analyticsData.totalEligible}</strong></p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
+              {[1, 2, 3, 4, 5].map(m => (
+                <div key={m} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '6px' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>{m} Mark</div>
+                  <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.2rem' }}>{analyticsData.marksBreakdown[m] || 0}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

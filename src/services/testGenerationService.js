@@ -159,3 +159,62 @@ export async function uploadActiveSyllabus(subject, chapterIdsArray) {
     updatedAt: new Date().toISOString()
   });
 }
+
+/**
+ * Fetches pending API uploads for the Universal Practice Set.
+ */
+export async function fetchUniversalApiUploads() {
+  try {
+    const q = query(collection(db, 'universal_api_uploads'));
+    const snapshot = await getDocs(q);
+    const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    return docs.sort((a, b) => {
+      const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+      const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+      return timeB - timeA;
+    });
+  } catch (error) {
+    console.error("Error fetching universal API uploads:", error);
+    return [];
+  }
+}
+
+/**
+ * Confirms a pending API upload by moving it to the question_bank collection
+ * and updating the status to 'confirmed'.
+ */
+export async function confirmUniversalUpload(uploadId, payload) {
+  try {
+    // 1. Upload to the Universal Question Bank
+    await uploadQuestionBankJSON(payload);
+    
+    // 2. Mark as confirmed
+    const docRef = doc(db, 'universal_api_uploads', uploadId);
+    await setDoc(docRef, { status: 'confirmed' }, { merge: true });
+  } catch (error) {
+    console.error("Error confirming universal upload:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches the division of questions for a selected chapter.
+ */
+export async function fetchChapterQuestionAnalytics(subject, chapterId) {
+  try {
+    const questions = await fetchQuestionsByChapters(subject, [chapterId]);
+    let marksBreakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    questions.forEach(q => {
+      if (q.marks && marksBreakdown[q.marks] !== undefined) {
+        marksBreakdown[q.marks]++;
+      }
+    });
+    return {
+      totalEligible: questions.length,
+      marksBreakdown
+    };
+  } catch (error) {
+    console.error("Error fetching chapter analytics:", error);
+    return null;
+  }
+}
