@@ -118,16 +118,20 @@ export async function uploadQuestionBankJSON(questionsArray) {
   };
 
   for (const q of questionsArray) {
-    if (!q.question_id) {
-      q.question_id = 'qb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    if (!q.question_id || String(q.question_id).length < 10) {
+      q.question_id = 'qb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
     }
-    // ensure 'subject' field exists for filtering (derive from subjectId if missing)
-    if (!q.subject && q.subjectId) {
-      q.subject = (q.subjectId.split('-')[0] || q.subjectId).toUpperCase();
-      if (q.subject === 'SST' || q.subjectId.startsWith('sst')) q.subject = 'SST';
-      else if (q.subjectId.startsWith('sci')) q.subject = 'SCIENCE';
-      else if (q.subjectId.startsWith('math')) q.subject = 'MATH';
-    }
+    // Strongly enforce 'subject' field to match standard constants
+    let derivedSubject = q.subject || q.subjectId || '';
+    derivedSubject = derivedSubject.toUpperCase();
+    
+    if (derivedSubject.includes('SCI')) q.subject = 'SCIENCE';
+    else if (derivedSubject.includes('MATH')) q.subject = 'MATH';
+    else if (derivedSubject.includes('SST') || derivedSubject.includes('SOCIAL') || derivedSubject.includes('HISTORY') || derivedSubject.includes('CIVICS') || derivedSubject.includes('GEOGRAPHY')) q.subject = 'SST';
+    else if (derivedSubject.includes('ENG')) q.subject = 'ENGLISH';
+    else if (derivedSubject.includes('HIN')) q.subject = 'HINDI';
+    else if (derivedSubject.includes('IT') || derivedSubject.includes('INFO')) q.subject = 'IT';
+    else q.subject = derivedSubject;
 
     const sanitizedQ = replaceNestedArrays(q, false);
 

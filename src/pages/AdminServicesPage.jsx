@@ -2644,7 +2644,7 @@ function UniversalTestTab() {
     setBusy(true);
     try {
       const { confirmUniversalUpload, fetchUniversalApiUploads } = await import('../services/testGenerationService');
-      await confirmUniversalUpload(upload.id, upload.payload);
+      await confirmUniversalUpload(upload.id, upload.payloadString ? JSON.parse(upload.payloadString) : upload.payload);
       alert('Upload confirmed and pushed to question bank!');
       const updated = await fetchUniversalApiUploads();
       setApiUploads(updated);
