@@ -68,6 +68,29 @@ export default async function handler(req, res) {
     // 1. Generate hash
     const hash = crypto.createHash('sha256').update(JSON.stringify(normalizedQuestions)).digest('hex');
 
+    const replaceNestedArrays = (obj, inArray = false) => {
+      if (obj === null || typeof obj !== 'object') return obj;
+      if (Array.isArray(obj)) {
+        if (inArray) {
+          const sanitizedObj = {};
+          obj.forEach((val, idx) => {
+            sanitizedObj[idx] = replaceNestedArrays(val, false);
+          });
+          return sanitizedObj;
+        }
+        return obj.map(val => replaceNestedArrays(val, true));
+      }
+      const newObj = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          newObj[key] = replaceNestedArrays(obj[key], false);
+        }
+      }
+      return newObj;
+    };
+
+    const sanitizedPayload = replaceNestedArrays(normalizedQuestions);
+
     const db = adminDb();
     
     // 2. Check duplicates
@@ -91,7 +114,7 @@ export default async function handler(req, res) {
       chapterId,
       totalQuestions: normalizedQuestions.length,
       marksBreakdown,
-      payload: normalizedQuestions,
+      payload: sanitizedPayload,
       createdAt: FieldValue.serverTimestamp()
     });
 
