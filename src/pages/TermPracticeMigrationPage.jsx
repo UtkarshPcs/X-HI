@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Loader2, CheckCircle, Database, Edit, Save, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
@@ -173,20 +173,30 @@ export default function TermPracticeMigrationPage() {
   };
 
   const fixMapQuestionsInBank = async () => {
-    if (!window.confirm("Are you sure? This will scan question_bank and fix missing subjects/chapters for Map questions.")) return;
+    if (!window.confirm("Are you sure? This will delete old map questions (without images) and fix missing subjects/chapters for the good ones.")) return;
     setLoading(true);
-    setStatus("Fixing map questions in Question Bank...");
+    setStatus("Cleaning & Fixing map questions in Question Bank...");
     let updatedCount = 0;
+    let deletedCount = 0;
     try {
       const snap = await getDocs(collection(db, 'question_bank'));
       for (const d of snap.docs) {
         const data = d.data();
-        if (data['sub-type'] === 'Map-Based' || (data.map_urls && data.map_urls.length > 0)) {
+        if (data['sub-type'] === 'Map-Based' || (data.map_urls && data.map_urls.length > 0) || (data.question_text && data.question_text.includes('outline map'))) {
+          // If it doesn't have map_urls, it's an old broken map question - DELETE IT!
+          if (!data.map_urls || data.map_urls.length === 0) {
+            await deleteDoc(doc(db, 'question_bank', d.id));
+            deletedCount++;
+            continue;
+          }
+
+          // Otherwise, it's a good map question, fix its metadata
           let needsUpdate = false;
           const updates = {};
           
           if (data.subject !== 'SST') { updates.subject = 'SST'; needsUpdate = true; }
           if (data.subjectId !== 'sst') { updates.subjectId = 'sst'; needsUpdate = true; }
+          if (data['sub-type'] !== 'Map-Based') { updates['sub-type'] = 'Map-Based'; needsUpdate = true; }
           
           const expectedChapter = data.marks === 2 ? 'sst-0' : (data.marks === 3 ? 'sst-1' : 'sst-0');
           if (data.chapterId !== expectedChapter) { updates.chapterId = expectedChapter; needsUpdate = true; }
@@ -197,7 +207,7 @@ export default function TermPracticeMigrationPage() {
           }
         }
       }
-      setStatus(`Fixed ${updatedCount} map questions in the Master Question Bank!`);
+      setStatus(`Cleaned Question Bank: Fixed ${updatedCount} valid map questions, and permanently deleted ${deletedCount} old map questions without images!`);
     } catch (err) {
       console.error(err);
       setStatus("Error fixing map questions.");
