@@ -359,6 +359,13 @@ export default function TermPracticeTestPlayerPage() {
                             ))}
                           </div>
                         )}
+                        {q.map_urls && q.map_urls.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                            {q.map_urls.map((url, i) => (
+                              <img key={i} src={url} alt={`Map Reference ${i + 1}`} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', border: '1px solid #ccc' }} />
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       {q.options && q.options.length > 0 && (
@@ -449,6 +456,13 @@ export default function TermPracticeTestPlayerPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                   {test.questions[evalIndex].diagram_urls.map((url, i) => (
                     <img key={i} src={url} alt={`Diagram ${i + 1}`} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)' }} />
+                  ))}
+                </div>
+              )}
+              {test.questions[evalIndex].map_urls && test.questions[evalIndex].map_urls.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                  {test.questions[evalIndex].map_urls.map((url, i) => (
+                    <img key={i} src={url} alt={`Map Reference ${i + 1}`} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)' }} />
                   ))}
                 </div>
               )}
