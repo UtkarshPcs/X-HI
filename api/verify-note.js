@@ -63,7 +63,7 @@ Respond in STRICT JSON with:
             ]
           }
         ],
-        response_format: { type: 'json_object' }
+        temperature: 0.1
       })
     });
 
