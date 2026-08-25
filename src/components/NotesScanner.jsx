@@ -450,7 +450,7 @@ export default function NotesScanner({ onPDFGenerated }) {
   }
 
   return (
-    <div className="notes-scanner-container" style={{ padding: '0.5rem 0' }}>
+    <div className="notes-scanner-container" style={{ padding: '0.5rem 1rem' }}>
       <input 
         type="file" 
         accept="image/*" 
@@ -462,18 +462,18 @@ export default function NotesScanner({ onPDFGenerated }) {
       {/* --- CROPPER STATE --- */}
       {rawImageSrc && (
         <div className="scanner-cropper-view">
-          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Crop Page</h4>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1.15rem' }}>Crop Page</h4>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {rawImageQueue.length > 1 && (
-                <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: '#ef4444', cursor: 'pointer' }} onClick={() => setRawImageQueue([])}>Cancel All</button>
+                <button type="button" className="auth-btn secondary" style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }} onClick={() => setRawImageQueue([])}>Cancel All</button>
               )}
-              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => { setRawImageQueue(prev => prev.slice(1)); setRotation(0); setCrop(null); }}>{rawImageQueue.length > 1 ? 'Skip' : 'Cancel'}</button>
-              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleRotateRaw}><RotateCw size={14}/> Rotate</button>
+              <button type="button" className="auth-btn secondary" onClick={() => { setRawImageQueue(prev => prev.slice(1)); setCrop(null); }}>{rawImageQueue.length > 1 ? 'Skip' : 'Cancel'}</button>
+              <button type="button" className="auth-btn secondary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleRotateRaw}><RotateCw size={14}/> Rotate</button>
               <button type="button" className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleNextCropper}>Next <ArrowRight size={14}/></button>
             </div>
           </div>
-          <div className="scanner-cropper-workspace" style={{ background: '#000', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+          <div className="scanner-cropper-workspace" style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '12px', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
             <ReactCrop
               crop={crop}
               onChange={c => setCrop(c)}
@@ -483,7 +483,7 @@ export default function NotesScanner({ onPDFGenerated }) {
                 ref={imgRef}
                 src={rawImageSrc} 
                 onLoad={onImageLoad}
-                style={{ maxHeight: '50vh', maxWidth: '100%', objectFit: 'contain' }}
+                style={{ maxHeight: '55vh', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }}
                 alt="Crop preview" 
               />
             </ReactCrop>
