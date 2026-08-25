@@ -38,11 +38,11 @@ export default async function handler(req, res) {
               {
                 type: 'text',
                 text: `Verify these notes against metadata:
-Subject: ${metadata.subject}
-Chapter: ${metadata.chapter}
-Section: ${metadata.section}
+Subject: ${metadata.subjectName}
+Chapter: ${metadata.chapterName}
+Section: ${metadata.sectionName}
 Title: ${metadata.title}
-Desc: ${metadata.desc}
+Desc: ${metadata.description}
 
 Respond in STRICT JSON with:
 {
