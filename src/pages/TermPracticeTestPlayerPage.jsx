@@ -381,7 +381,7 @@ export default function TermPracticeTestPlayerPage() {
             
             {/* Render map_urls at the end of the paper */}
             {(() => {
-              const allMapUrls = test.map_urls || test.questions.flatMap(q => q.map_urls || []);
+              const allMapUrls = test.questions.flatMap(q => q.map_urls || []);
               if (allMapUrls.length > 0) {
                 return (
                   <div style={{ marginTop: '3rem', borderTop: '2px dashed #ccc', paddingTop: '2rem' }}>

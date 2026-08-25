@@ -139,6 +139,36 @@ export default function TermPracticeMigrationPage() {
     }
   };
 
+  const deleteMapQuestions = async () => {
+    if (!window.confirm("Are you sure? This will permanently remove ALL questions with sub-type 'Map-Based' from all tests in termPracticeTests.")) return;
+    
+    setLoading(true);
+    setStatus("Deleting map questions...");
+    let updatedCount = 0;
+    
+    try {
+      for (const test of tests) {
+        if (!test.questions) continue;
+        
+        const originalLength = test.questions.length;
+        const newQuestions = test.questions.filter(q => q['sub-type'] !== 'Map-Based');
+        
+        if (newQuestions.length < originalLength) {
+          const ref = doc(db, 'termPracticeTests', test.id);
+          await updateDoc(ref, { questions: newQuestions });
+          updatedCount++;
+        }
+      }
+      setStatus(`Deletion complete! Removed map questions from ${updatedCount} tests.`);
+      fetchTests();
+    } catch (err) {
+      console.error(err);
+      setStatus("Error during deletion.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', color: '#e2e8f0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -155,6 +185,23 @@ export default function TermPracticeMigrationPage() {
 
       {!selectedTest ? (
         <>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h2 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertTriangle color="#ef4444" /> 3. Delete Map Questions
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+              Run this to remove all questions tagged as "Map-Based" from the uploaded tests. You can then re-add them manually with the map_urls included.
+            </p>
+            <button 
+              onClick={deleteMapQuestions} 
+              disabled={loading}
+              style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Database size={18} />}
+              {loading ? 'Processing...' : 'Delete Map Questions'}
+            </button>
+          </div>
+
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
             <h2 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <AlertTriangle color="#eab308" /> 1. Bulk Auto-Migration
