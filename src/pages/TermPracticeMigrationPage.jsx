@@ -172,6 +172,40 @@ export default function TermPracticeMigrationPage() {
     }
   };
 
+  const fixMapQuestionsInBank = async () => {
+    if (!window.confirm("Are you sure? This will scan question_bank and fix missing subjects/chapters for Map questions.")) return;
+    setLoading(true);
+    setStatus("Fixing map questions in Question Bank...");
+    let updatedCount = 0;
+    try {
+      const snap = await getDocs(collection(db, 'question_bank'));
+      for (const d of snap.docs) {
+        const data = d.data();
+        if (data['sub-type'] === 'Map-Based' || (data.map_urls && data.map_urls.length > 0)) {
+          let needsUpdate = false;
+          const updates = {};
+          
+          if (data.subject !== 'SST') { updates.subject = 'SST'; needsUpdate = true; }
+          if (data.subjectId !== 'sst') { updates.subjectId = 'sst'; needsUpdate = true; }
+          
+          const expectedChapter = data.marks === 2 ? 'sst-0' : (data.marks === 3 ? 'sst-1' : 'sst-0');
+          if (data.chapterId !== expectedChapter) { updates.chapterId = expectedChapter; needsUpdate = true; }
+          
+          if (needsUpdate) {
+            await updateDoc(doc(db, 'question_bank', d.id), updates);
+            updatedCount++;
+          }
+        }
+      }
+      setStatus(`Fixed ${updatedCount} map questions in the Master Question Bank!`);
+    } catch (err) {
+      console.error(err);
+      setStatus("Error fixing map questions.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', color: '#e2e8f0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -188,6 +222,23 @@ export default function TermPracticeMigrationPage() {
 
       {!selectedTest ? (
         <>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h2 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <CheckCircle color="#3b82f6" /> 4. Fix Map Questions in Bank
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+              Run this to scan the Master Question Bank. It will find map questions uploaded with "Unknown" subjects and assign them to SST, correctly mapping 2-mark questions to History and 3-mark questions to Geography.
+            </p>
+            <button 
+              onClick={fixMapQuestionsInBank} 
+              disabled={loading}
+              style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Database size={18} />}
+              {loading ? 'Processing...' : 'Fix Map Questions in DB'}
+            </button>
+          </div>
+
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
             <h2 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <AlertTriangle color="#ef4444" /> 3. Delete Map Questions
