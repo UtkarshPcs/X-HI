@@ -1,9 +1,9 @@
 /**
- * GET /api/note-share?id=<noteId>
+ * GET /api/notice-share?id=<noticeId>
  * Returns HTML with OG tags for link previews (WhatsApp etc.)
- * Real users are immediately redirected to /notes in the SPA.
+ * Real users are immediately redirected to /notices in the SPA.
  */
-import { adminDb } from './_lib/firebaseAdmin.js';
+import { adminDb } from '../_lib/firebaseAdmin.js';
 
 function esc(s) {
   return (s || '').toString()
@@ -11,35 +11,44 @@ function esc(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// Strip WhatsApp/markdown symbols + collapse whitespace for clean previews.
+function clean(s, max = 160) {
+  const t = (s || '').toString()
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/[*_>`~#-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return t.length > max ? t.slice(0, max - 1) + '…' : t;
+}
+
 export default async function handler(req, res) {
   const host   = req.headers['x-forwarded-host'] || req.headers.host;
   const proto  = (req.headers['x-forwarded-proto'] || 'https').split(',')[0];
   const origin = `${proto}://${host}`;
 
-  const noteId = new URL(req.url, origin).searchParams.get('id') || '';
+  const noticeId = new URL(req.url, origin).searchParams.get('id') || '';
 
-  let title       = '10th HI — Notes Exchange';
-  let description = 'Browse and share chapter notes with your classmates.';
-  let subject     = '';
-  let chapter     = '';
+  let title       = '📢 Class Notice — 10th HI';
+  let description = 'Latest announcement for Class 10th HI.';
+  let author      = '';
 
   try {
-    if (noteId) {
-      const snap = await adminDb().collection('notes').doc(noteId).get();
+    if (noticeId) {
+      const snap = await adminDb().collection('notices').doc(noticeId).get();
       if (snap.exists) {
         const d = snap.data();
-        title       = `${d.title} — Notes`;
-        subject     = d.subjectName || '';
-        chapter     = d.chapterName || '';
-        description = `${subject} · ${chapter}${d.description ? ' · ' + d.description : ''} | Shared via 10th HI Portal`;
+        const preview = clean(d.body, 110);
+        title       = preview ? `📢 ${preview.slice(0, 60)}${preview.length > 60 ? '…' : ''}` : title;
+        author      = d.authorName || '';
+        description = `${preview}${author ? ' — ' + author : ''} | 10th HI Portal`;
       }
     }
   } catch (err) {
-    console.error('note-share:', err);
+    console.error('notice-share:', err);
   }
 
-  const imgUrl  = `${origin}/api/og-image?type=notes&title=${encodeURIComponent(title)}&lines=${encodeURIComponent([subject, chapter].filter(Boolean).join('|'))}`;
-  const appUrl  = `${origin}/notes?noteId=${encodeURIComponent(noteId)}`;
+  const imgUrl  = `${origin}/api/og-image?type=notice&title=${encodeURIComponent(title)}&lines=${encodeURIComponent(author ? 'By ' + author : '')}`;
+  const appUrl  = `${origin}/notices`;
 
   const html = `<!doctype html>
 <html lang="en">
@@ -54,7 +63,7 @@ export default async function handler(req, res) {
 <meta property="og:image" content="${esc(imgUrl)}"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
-<meta property="og:url" content="${esc(origin)}/api/note-share?id=${esc(noteId)}"/>
+<meta property="og:url" content="${esc(origin)}/api/notice-share?id=${esc(noticeId)}"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${esc(title)}"/>
 <meta name="twitter:description" content="${esc(description)}"/>

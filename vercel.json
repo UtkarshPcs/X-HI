@@ -1,16 +1,32 @@
 {
   "rewrites": [
     {
+      "source": "/api/ai-:action",
+      "destination": "/api/ai"
+    },
+    {
       "source": "/share/:path*",
-      "destination": "/api/share"
+      "destination": "/api/share?action=hw"
     },
     {
       "source": "/maths-share",
-      "destination": "/api/maths-share"
+      "destination": "/api/share?action=maths"
     },
     {
       "source": "/custom-test-share",
-      "destination": "/api/custom-test-share"
+      "destination": "/api/share?action=custom-test"
+    },
+    {
+      "source": "/api/note-share",
+      "destination": "/api/share?action=note"
+    },
+    {
+      "source": "/api/notice-share",
+      "destination": "/api/share?action=notice"
+    },
+    {
+      "source": "/api/page-share",
+      "destination": "/api/share?action=page"
     },
     {
       "source": "/(.*)",

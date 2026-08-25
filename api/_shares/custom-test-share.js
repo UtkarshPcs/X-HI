@@ -1,9 +1,9 @@
 /**
- * GET /api/page-share?id=<pageId>
- * Returns HTML with OG tags for custom pages.
- * Real users are immediately redirected to /p/:pageId in the SPA.
+ * GET /api/custom-test-share?id=<testId>
+ * Returns HTML with OG tags for custom tests.
+ * Real users are immediately redirected to /custom-tests/:testId in the SPA.
  */
-import { adminDb } from './_lib/firebaseAdmin.js';
+import { adminDb } from '../_lib/firebaseAdmin.js';
 
 function esc(s) {
   return (s || '').toString()
@@ -16,32 +16,33 @@ export default async function handler(req, res) {
   const proto  = (req.headers['x-forwarded-proto'] || 'https').split(',')[0];
   const origin = `${proto}://${host}`;
 
-  const pageId = new URL(req.url, origin).searchParams.get('id') || '';
+  const testId = new URL(req.url, origin).searchParams.get('id') || '';
 
-  let title       = '10th HI Portal';
-  let description = 'Check out this page on the 10th HI Portal.';
-  let imgUrl      = `${origin}/api/og-image?type=generic&title=${encodeURIComponent('10th HI Portal')}`;
-
+  let title       = '10th HI Custom Test';
+  let description = 'Test your knowledge on the 10th HI Portal.';
+  
+  // We don't fetch the test here unless we need specific title/description. 
+  // Let's try to fetch it for better SEO
+  let fetchedLines = [];
   try {
-    if (pageId) {
-      const snap = await adminDb().collection('custom_pages').doc(pageId).get();
+    if (testId) {
+      const snap = await adminDb().collection('starBatchCustomTests').doc(testId).get();
       if (snap.exists) {
         const d = snap.data();
-        if (d.visibility !== 'hidden') {
-          if (d.title) title = d.title;
-          if (d.description) description = d.description;
-          if (d.thumbnail) imgUrl = d.thumbnail;
-        } else {
-          title = 'Page Removed';
-          description = 'This page has been removed by the ADMIN.';
-        }
+        if (d.title) title = d.title;
+        if (d.description) description = d.description;
+        if (d.syllabus) fetchedLines.push(d.syllabus);
+        if (d.questions) fetchedLines.push(`${d.questions.length} Questions`);
       }
     }
   } catch (err) {
-    console.error('page-share:', err);
+    console.error('custom-test-share:', err);
   }
 
-  const appUrl = `${origin}/p/${encodeURIComponent(pageId)}`;
+  const linesParam = encodeURIComponent(fetchedLines.join('|'));
+  let imgUrl = `${origin}/api/og-image?type=custom-test&title=${encodeURIComponent(title)}&lines=${linesParam}`;
+
+  const appUrl = `${origin}/custom-tests/${encodeURIComponent(testId)}`;
 
   const html = `<!doctype html>
 <html lang="en">
@@ -56,16 +57,16 @@ export default async function handler(req, res) {
 <meta property="og:image" content="${esc(imgUrl)}"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
-<meta property="og:url" content="${esc(origin)}/api/page-share?id=${esc(pageId)}"/>
+<meta property="og:url" content="${esc(origin)}/api/custom-test-share?id=${esc(testId)}"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${esc(title)}"/>
 <meta name="twitter:description" content="${esc(description)}"/>
 <meta name="twitter:image" content="${esc(imgUrl)}"/>
 <meta http-equiv="refresh" content="0; url=${esc(appUrl)}"/>
 <script>window.location.replace(${JSON.stringify(appUrl)});</script>
-<style>body{margin:0;font-family:system-ui,sans-serif;background:#09090b;color:#fafafa;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;}a{color:#8b5cf6;}</style>
+<style>body{margin:0;font-family:system-ui,sans-serif;background:#09090b;color:#fafafa;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;}a{color:#10b981;}</style>
 </head>
-<body><p>Opening... <a href="${esc(appUrl)}">Tap here if not redirected</a></p></body>
+<body><p>Opening Test... <a href="${esc(appUrl)}">Tap here if not redirected</a></p></body>
 </html>`;
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
