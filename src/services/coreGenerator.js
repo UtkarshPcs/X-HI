@@ -15,7 +15,7 @@ export function generatePaper(subject, availableQuestions, userHistory) {
   const chapterUsage = {}; 
   const selectedQuestions = [];
 
-  const pickQuestion = (subSubjectId, type, marks, count, isMap = false) => {
+  const pickQuestion = (subSubjectId, type, marks, count, isMap = false, subType = null) => {
     let candidates = availableQuestions.filter(q => 
         (subSubjectId === 'math-all' || q.subjectId === subSubjectId) && 
         q.type === type && 
@@ -28,9 +28,15 @@ export function generatePaper(subject, availableQuestions, userHistory) {
     } else {
        candidates = candidates.filter(q => !isMapQuestion(q));
     }
+    
+    if (subType === 'Assertion-Reason') {
+       candidates = candidates.filter(q => q['sub-type'] === 'Assertion-Reason');
+    } else if (subType === 'MCQ') {
+       candidates = candidates.filter(q => q['sub-type'] !== 'Assertion-Reason');
+    }
 
     if (candidates.length < count) {
-      console.warn(`Not enough questions for ${subSubjectId} - Type: ${type}, Marks: ${marks}, Map: ${isMap}. Need ${count}, found ${candidates.length}.`);
+      console.warn(`Not enough questions for ${subSubjectId} - Type: ${type}, Marks: ${marks}, SubType: ${subType}. Need ${count}, found ${candidates.length}.`);
     }
 
     // Sort candidates using Priority Scoring
@@ -64,7 +70,8 @@ export function generatePaper(subject, availableQuestions, userHistory) {
 
   // 1. Gather all required questions without pushing directly to the final array order
   Object.entries(blueprint).forEach(([subSubjectId, reqs]) => {
-    if (reqs.mcq > 0) pickQuestion(subSubjectId, 'objective', 1, reqs.mcq);
+    if (reqs.mcq > 0) pickQuestion(subSubjectId, 'objective', 1, reqs.mcq, false, 'MCQ');
+    if (reqs.ar > 0) pickQuestion(subSubjectId, 'objective', 1, reqs.ar, false, 'Assertion-Reason');
     if (reqs.vsa > 0) pickQuestion(subSubjectId, 'subjective', 2, reqs.vsa);
     if (reqs.sa > 0) pickQuestion(subSubjectId, 'subjective', 3, reqs.sa);
     if (reqs.la > 0) pickQuestion(subSubjectId, 'subjective', 5, reqs.la);
@@ -74,17 +81,25 @@ export function generatePaper(subject, availableQuestions, userHistory) {
 
   // 2. Sort and structure into sections according to CBSE layout
   const orderedQuestions = [];
-  let currentSection = '';
 
-  const addSection = (sectionName, filterFn) => {
-    const qs = selectedQuestions.filter(filterFn);
+  const addSection = (sectionName, filterFn, sortFn = null) => {
+    let qs = selectedQuestions.filter(filterFn);
+    if (sortFn) {
+      qs = qs.sort(sortFn);
+    }
     if (qs.length > 0) {
       qs[0].sectionTitle = sectionName; // Tag the first question of this block
       orderedQuestions.push(...qs);
     }
   };
 
-  addSection('Section A (Multiple Choice Questions - 1 Mark each)', q => q.type === 'objective' && q.marks === 1 && !isMapQuestion(q));
+  const sortARLast = (a, b) => {
+    const isAR_A = a['sub-type'] === 'Assertion-Reason' ? 1 : 0;
+    const isAR_B = b['sub-type'] === 'Assertion-Reason' ? 1 : 0;
+    return isAR_A - isAR_B;
+  };
+
+  addSection('Section A (Multiple Choice Questions - 1 Mark each)', q => q.type === 'objective' && q.marks === 1 && !isMapQuestion(q), sortARLast);
   addSection('Section B (Very Short Answer - 2 Marks each)', q => q.type === 'subjective' && q.marks === 2 && !isMapQuestion(q));
   addSection('Section C (Short Answer - 3 Marks each)', q => q.type === 'subjective' && q.marks === 3 && !isMapQuestion(q));
   addSection('Section D (Long Answer - 5 Marks each)', q => q.type === 'subjective' && q.marks === 5 && !isMapQuestion(q));
