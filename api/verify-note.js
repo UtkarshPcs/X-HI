@@ -44,6 +44,8 @@ Section: ${metadata.sectionName}
 Title: ${metadata.title}
 Desc: ${metadata.description}
 
+Write the "reason" professionally in 1 or 2 short sentences. Do not over-explain.
+
 Respond in STRICT JSON with:
 {
   "approved": boolean,
@@ -73,12 +75,29 @@ Respond in STRICT JSON with:
     }
 
     let resultJson;
+    let content = data.choices[0].message.content.trim();
+    
+    // Aggressively strip markdown code block backticks
+    if (content.startsWith('```')) {
+      content = content.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
+    }
+
     try {
-      resultJson = JSON.parse(data.choices[0].message.content);
+      resultJson = JSON.parse(content);
     } catch (e) {
-      // fallback parsing if not strict JSON
-      const jsonMatch = data.choices[0].message.content.match(/\{[\s\S]*\}/);
-      resultJson = jsonMatch ? JSON.parse(jsonMatch[0]) : { approved: false, reason: 'AI parsing failed' };
+      // Fallback: extract the first complete { ... } block ignoring greedy trailing brackets
+      const start = content.indexOf('{');
+      const end = content.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+        try {
+          resultJson = JSON.parse(content.substring(start, end + 1));
+        } catch (err) {
+          console.error('JSON Extraction failed:', content);
+          resultJson = { approved: false, reason: 'AI generated invalid formatting.' };
+        }
+      } else {
+        resultJson = { approved: false, reason: 'AI failed to generate a verification response.' };
+      }
     }
 
     return res.status(200).json(resultJson);
