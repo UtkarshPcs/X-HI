@@ -7,16 +7,19 @@ import { db } from '../firebase';
 
 const COL = 'notes';
 
-export async function submitNote({ sectionId, subjectId, chapterId, sectionName, subjectName, chapterName, title, description, blobUrl, uploaderPhone, uploaderName, isTest = false }) {
+export async function submitNote({ sectionId, subjectId, chapterId, sectionName, subjectName, chapterName, title, description, blobUrl, uploaderPhone, uploaderName, isTest = false, fileHash = null, aiVerified = false, aiDecision = '' }) {
   return addDoc(collection(db, COL), {
     sectionId, subjectId, chapterId,
     sectionName, subjectName, chapterName,
     title, description: description || '',
     blobUrl,
     uploaderPhone, uploaderName,
-    status: 'pending',
+    fileHash,
+    status: aiVerified ? 'published' : 'pending',
     createdAt: Date.now(),
-    approvedAt: null,
+    approvedAt: aiVerified ? Date.now() : null,
+    aiVerified,
+    aiDecision,
     ...(isTest && { isTest: true }),
   });
 }

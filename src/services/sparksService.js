@@ -24,7 +24,7 @@ async function adjustSparks(phone, delta, entry) {
   const snap = await getDoc(userRef(phone));
   const data = snap.exists() ? snap.data() : {};
   const current = data.sparks ?? INITIAL_SPARKS;
-  const next    = Math.max(0, current + delta);
+  const next    = current + delta;
   const log     = data.sparkLog || [];
   const newEntry = { ...entry, at: Date.now(), balance: next };
   // Keep last 50 entries

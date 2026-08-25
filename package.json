@@ -23,6 +23,7 @@
     "jspdf-autotable": "^5.0.2",
     "jsxgraph": "^1.13.1",
     "lucide-react": "^1.16.0",
+    "pdfjs-dist": "^6.2.108",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-image-crop": "^11.1.2",

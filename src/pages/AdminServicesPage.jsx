@@ -36,7 +36,7 @@ const ALL_SUBJECTS = syllabusData.flatMap(sec =>
   sec.subjects.map(sub => ({ subjectId: sub.subjectId, label: `${sub.subjectName} (${sec.sectionName})` }))
 );
 import { getPendingNotes, approveNote, rejectNote, deleteNote, getPublishedNotes } from '../services/notesService';
-import { earnSparks, SPARK_UPLOAD_REWARD } from '../services/sparksService';
+import { earnSparks, spendSparks, SPARK_UPLOAD_REWARD } from '../services/sparksService';
 import { getAllClasswork } from '../services/classworkService';
 import { getHomework } from '../services/homeworkService';
 import { createPage, updatePage, getPage, getAllPages, deletePage } from '../services/dynamicPageService';
@@ -709,6 +709,20 @@ function NotesReviewTab() {
     finally { setBusy(null); }
   }
 
+
+  async function handleCancelAI(n) {
+    const reason = prompt(`Reason for cancelling AI approval for "${n.title}":`);
+    if (reason === null) return;
+    setBusy(n.id);
+    try {
+      await rejectNote(n.id, "AI Approval Cancelled: " + reason.trim());
+      await spendSparks(n.uploaderPhone, SPARK_UPLOAD_REWARD, `AI Notes approval cancelled: ${n.title}`);
+      setPublished(prev => prev.filter(x => x.id !== n.id));
+      alert('AI Approval cancelled and 4 Sparks deducted from the user.');
+    } catch (e) { alert(e.message); }
+    finally { setBusy(null); }
+  }
+
   async function handleReject(n) {
     const reason = prompt(`Reason for rejecting "${n.title}" (students will see this):`);
     if (reason === null) return;
@@ -736,6 +750,7 @@ function NotesReviewTab() {
       <div className="marks-complaint-row">
         <div className="marks-complaint-info">
           <strong>{n.title}</strong>
+          {n.aiVerified && <span style={{ marginLeft: '8px', padding: '2px 6px', background: '#8b5cf6', color: '#fff', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>AI APPROVED</span>}
           <span className="as-muted" style={{ marginLeft: '0.5rem', fontSize: '0.82rem' }}>
             {n.subjectName} · {n.chapterName}
           </span>
@@ -752,6 +767,11 @@ function NotesReviewTab() {
           </div>
         </div>
         <div className="marks-complaint-actions">
+          {fromPublished && n.aiVerified && (
+            <button className="marks-btn reject" onClick={() => handleCancelAI(n)} disabled={!!busy}>
+              <XCircle size={14} /> Cancel AI Approval (-4✦)
+            </button>
+          )}
           {!fromPublished && (
             <>
               <button className="marks-btn approve" onClick={() => handleApprove(n)} disabled={!!busy}>

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { X, Upload, Loader2, Camera } from 'lucide-react';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 import { syllabusData } from '../data/syllabusData';
 import { holidayData } from '../data/holidayData';
 import { uploadNotePDF, submitNote } from '../services/notesService';
+import { earnSparks } from '../services/sparksService';
 import { TEST_PHONE } from '../auth/roles';
 import NotesScanner from './NotesScanner';
 
@@ -10,6 +13,32 @@ const MAX_MB = 30;
 
 // Group holidayData by unique subject names for the subject picker
 const HH_SUBJECTS = [...new Set(holidayData.map(t => t.subject))];
+
+
+async function calculateHash(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function getPdfImages(file, maxPages = 3) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const numPages = Math.min(pdf.numPages, maxPages);
+  const images = [];
+  for (let i = 1; i <= numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1.0 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    images.push(canvas.toDataURL('image/jpeg', 0.6));
+  }
+  return images;
+}
 
 export default function UploadNoteModal({ currentUser, onClose, onSuccess, defaultHHTask }) {
   // 'syllabus' | 'holiday-hw'
@@ -64,47 +93,95 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess, defau
 
     let payload;
     if (mode === 'syllabus') {
-      if (!selectedSection || !selectedSubject || !selectedChapter) { setErr('Select section, subject and chapter.'); return; }
+      if (!sectionId || !subjectId || !chapterId) return setErr('Select all fields.');
       payload = {
-        sectionId:   selectedSection.sectionId,
-        subjectId:   selectedSubject.subjectId,
-        chapterId:   selectedChapter.chapterId,
+        sectionId, subjectId, chapterId,
         sectionName: selectedSection.sectionName,
         subjectName: selectedSubject.subjectName,
         chapterName: selectedChapter.chapterName,
+        title, description: desc
       };
     } else {
-      if (!selectedHHTask) { setErr('Select a homework item.'); return; }
+      if (!hhSubject || !hhTaskId) return setErr('Select subject and task.');
       payload = {
-        sectionId:   'holiday-hw',
-        subjectId:   String(selectedHHTask.id),
-        chapterId:   `hh-${selectedHHTask.id}`,
-        sectionName: 'Holiday Homework',
-        subjectName: selectedHHTask.subject,
-        chapterName: `${selectedHHTask.subject} Answer`,
+        sectionId: 'holiday-hw', subjectId: hhSubject, chapterId: hhTaskId,
+        sectionName: 'Holiday Homework', subjectName: hhSubject,
+        chapterName: `${hhSubject} - ${hhTasksForSubject.find(t=>String(t.id)===hhTaskId)?.message?.slice(0,30) || 'Task'}`,
+        title, description: desc
       };
     }
 
-    if (!title.trim()) { setErr('Enter a title.'); return; }
-    if (!file)         { setErr(uploadMethod === 'scan' ? 'Please scan some pages first.' : 'Select a PDF file.'); return; }
-
     setBusy(true);
+    let hash = null;
+    let aiVerified = false;
+    let aiDecision = '';
+    
     try {
-      setProgress('Uploading PDF…');
-      const { url } = await uploadNotePDF(file);
-      setProgress('Saving…');
-      await submitNote({
-        ...payload,
-        title:         title.trim(),
-        description:   desc.trim(),
-        blobUrl:       url,
-        uploaderPhone: currentUser.phone,
-        uploaderName:  currentUser.name,
-        isTest:        currentUser.phone === TEST_PHONE,
+      setProgress('Hashing file & checking duplicates...');
+      hash = await calculateHash(file);
+      
+      setProgress('Extracting pages for AI...');
+      const images = await getPdfImages(file);
+      
+      setProgress('Verifying content with AI...');
+      const verifyRes = await fetch('/api/verify-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hash,
+          metadata: { ...payload },
+          images
+        })
       });
-      onSuccess();
-    } catch (ex) {
-      setErr(ex.message);
+      
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) throw new Error(verifyData.error || 'AI verification failed');
+      
+      if (verifyData.duplicate_detected) {
+        throw new Error('Duplicate note detected. This exact file has already been uploaded.');
+      }
+      
+      if (verifyData.approved === false) {
+        throw new Error(`AI Verification Failed: ${verifyData.reason || 'Content mismatch.'}`);
+      }
+      
+      aiVerified = true;
+      aiDecision = verifyData.reason || 'Approved by AI';
+      
+    } catch (err) {
+      console.error(err);
+      setErr(err.message || 'Verification error');
+      setBusy(false);
+      setProgress('');
+      return;
+    }
+
+    try {
+      setProgress('Uploading PDF...');
+      const { url } = await uploadNotePDF(file);
+      setProgress('Saving to database...');
+      await submitNote({ 
+        ...payload, 
+        blobUrl: url,
+        uploaderPhone: currentUser.phone,
+        uploaderName: currentUser.name || 'Student',
+        isTest: currentUser.phone === TEST_PHONE,
+        fileHash: hash,
+        aiVerified,
+        aiDecision
+      });
+      
+      if (aiVerified) {
+        await earnSparks(currentUser.phone, 4, 'Notes automatically approved by AI');
+        alert('Upload successful! Note was approved by AI and you earned 4 Sparks.');
+      } else {
+        alert('Upload successful! Note is pending admin review.');
+      }
+      
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setErr('Upload failed. Please try again.');
     } finally {
       setBusy(false);
       setProgress('');
