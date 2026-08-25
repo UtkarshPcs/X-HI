@@ -107,7 +107,9 @@ function SortableItem({ id, page, index, onRemove, onRotate }) {
 export default function NotesScanner({ onPDFGenerated }) {
   const [pages, setPages] = useState([]); // { id, imageSrc }
   
-  const [rawImageSrc, setRawImageSrc] = useState(null);
+  const [rawImageQueue, setRawImageQueue] = useState([]);
+  const rawImageSrc = rawImageQueue.length > 0 ? rawImageQueue[0] : null;
+
   const [crop, setCrop] = useState();
   const [completedCrop, setCompletedCrop] = useState(null);
   const [rotation, setRotation] = useState(0);
@@ -122,18 +124,20 @@ export default function NotesScanner({ onPDFGenerated }) {
     if (fileInputRef.current) {
       if (capture) {
         fileInputRef.current.setAttribute('capture', 'environment');
+        fileInputRef.current.removeAttribute('multiple');
       } else {
         fileInputRef.current.removeAttribute('capture');
+        fileInputRef.current.setAttribute('multiple', 'multiple');
       }
       fileInputRef.current.click();
     }
   }
 
   async function handleFileSelect(e) {
-    const file = e.target.files?.[0];
-    if (file) {
-      const dataUrl = await fileToDataUrl(file);
-      setRawImageSrc(dataUrl);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const dataUrls = await Promise.all(files.map(fileToDataUrl));
+      setRawImageQueue(prev => [...prev, ...dataUrls]);
       setRotation(0);
       setCrop(null);
     }
@@ -182,7 +186,9 @@ export default function NotesScanner({ onPDFGenerated }) {
       if (processedDataUrl) {
         setPages(prev => [...prev, { id: `page-${Date.now()}-${Math.random()}`, imageSrc: processedDataUrl }]);
       }
-      setRawImageSrc(null);
+      setRawImageQueue(prev => prev.slice(1));
+      setRotation(0);
+      setCrop(null);
     } catch (e) {
       console.error("Cropping failed:", e);
       alert("Failed to process image.");
@@ -279,7 +285,10 @@ export default function NotesScanner({ onPDFGenerated }) {
           <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Crop Page</h4>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setRawImageSrc(null)}>Cancel</button>
+              {rawImageQueue.length > 1 && (
+                <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: '#ef4444', cursor: 'pointer' }} onClick={() => setRawImageQueue([])}>Cancel All</button>
+              )}
+              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => { setRawImageQueue(prev => prev.slice(1)); setRotation(0); setCrop(null); }}>{rawImageQueue.length > 1 ? 'Skip' : 'Cancel'}</button>
               <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleRotateRaw}><RotateCw size={14}/> Rotate</button>
               <button type="button" className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleNext}>Next <ArrowRight size={14}/></button>
             </div>
