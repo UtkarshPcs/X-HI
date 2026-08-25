@@ -379,15 +379,6 @@ export default function NotesPage() {
   const { currentUser, openModal } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Temporary kill-switch UI
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', textAlign: 'center' }}>
-      <h1 style={{ color: '#ef4444', fontSize: '1.75rem', fontWeight: 'normal', fontFamily: '"Times New Roman", Times, serif' }}>
-        This feature has been Disabled
-      </h1>
-    </div>
-  );
-
   // Drill-down state
   const [view,    setView]    = useState('sections');
   const [section, setSection] = useState(null);
