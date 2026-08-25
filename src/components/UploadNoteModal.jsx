@@ -63,6 +63,7 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess, defau
   // New scanner states
   const [uploadMethod, setUploadMethod] = useState('pdf'); // 'pdf' | 'scan'
   const [scannerActive, setScannerActive] = useState(false);
+  const [verificationResult, setVerificationResult] = useState(null);
 
   const selectedSection = syllabusData.find(s => s.sectionId === sectionId);
   const selectedSubject = selectedSection?.subjects.find(s => s.subjectId === subjectId);
@@ -142,7 +143,14 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess, defau
       }
       
       if (verifyData.approved === false) {
-        throw new Error(`AI Verification Failed: ${verifyData.reason || 'Content mismatch.'}`);
+        setVerificationResult({
+          status: 'failed',
+          message: 'Verification Failed',
+          decision: verifyData.reason || 'The AI determined this document does not match the selected chapter/subject.'
+        });
+        setBusy(false);
+        setProgress('');
+        return;
       }
       
       aiVerified = true;
@@ -150,7 +158,15 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess, defau
       
     } catch (err) {
       console.error(err);
-      setErr(err.message || 'Verification error');
+      if (err.message && (err.message.includes('Verification Failed') || err.message.includes('Duplicate'))) {
+        setVerificationResult({
+          status: 'failed',
+          message: 'Verification Failed',
+          decision: err.message
+        });
+      } else {
+        setErr(err.message || 'Verification error');
+      }
       setBusy(false);
       setProgress('');
       return;
@@ -173,12 +189,18 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess, defau
       
       if (aiVerified) {
         await earnSparks(currentUser.phone, 4, 'Notes automatically approved by AI');
-        alert('Upload successful! Note was approved by AI and you earned 4 Sparks.');
+        setVerificationResult({
+          status: 'success',
+          message: 'Verification Successful!',
+          decision: 'Your notes were perfectly verified by AI. You earned 4 Sparks!'
+        });
       } else {
-        alert('Upload successful! Note is pending admin review.');
+        setVerificationResult({
+          status: 'success',
+          message: 'Upload Successful',
+          decision: 'Your note is pending admin review.'
+        });
       }
-      
-      onClose();
     } catch (err) {
       console.error(err);
       setErr('Upload failed. Please try again.');
@@ -196,7 +218,37 @@ export default function UploadNoteModal({ currentUser, onClose, onSuccess, defau
           <button className="notes-viewer-close" onClick={onClose}><X size={18} /></button>
         </div>
 
-        {scannerActive ? (
+        {verificationResult ? (
+          <div style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+             {verificationResult.status === 'success' ? (
+                <div>
+                   <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'pulse 2s infinite' }}>
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                   </div>
+                   <h3 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#10b981' }}>{verificationResult.message}</h3>
+                   <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6', fontSize: '0.95rem' }}>{verificationResult.decision}</p>
+                   <button type="button" className="auth-btn primary" onClick={() => { onClose(); if (onSuccess) onSuccess(); }}>Continue</button>
+                </div>
+             ) : (
+                <div>
+                   <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                   </div>
+                   <h3 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#ef4444' }}>{verificationResult.message}</h3>
+                   <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6', fontSize: '0.95rem' }}>{verificationResult.decision}</p>
+                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                     <button type="button" className="auth-btn secondary" onClick={() => setVerificationResult(null)}>Try Again</button>
+                     <button type="button" className="auth-btn primary" onClick={onClose}>Close</button>
+                   </div>
+                </div>
+             )}
+          </div>
+        ) : scannerActive ? (
           <NotesScanner onPDFGenerated={(pdfFile) => {
             setFile(pdfFile);
             setScannerActive(false);
