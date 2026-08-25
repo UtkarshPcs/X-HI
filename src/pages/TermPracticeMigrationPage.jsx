@@ -127,7 +127,10 @@ export default function TermPracticeMigrationPage() {
     setIsSaving(true);
     try {
       const ref = doc(db, 'termPracticeTests', selectedTest.id);
-      await updateDoc(ref, { questions: editingQuestions });
+      await updateDoc(ref, { 
+        questions: editingQuestions,
+        subjectId: selectedTest.subjectId
+      });
       setStatus(`Successfully saved edits for ${selectedTest.title || selectedTest.id}`);
       setSelectedTest(null);
       fetchTests();
@@ -249,7 +252,16 @@ export default function TermPracticeMigrationPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
             <div>
               <h2 style={{ margin: '0 0 0.5rem', color: '#fff' }}>Editing: {selectedTest.title}</h2>
-              <div style={{ color: 'rgba(255,255,255,0.5)' }}>Update sub-types and map URLs below. Separate multiple URLs with commas.</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>Subject ID:</label>
+                <input 
+                  type="text" 
+                  value={selectedTest.subjectId || ''} 
+                  onChange={(e) => setSelectedTest({...selectedTest, subjectId: e.target.value})}
+                  style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.5rem', borderRadius: '6px' }}
+                />
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.5)', marginTop: '1rem' }}>Update sub-types and map URLs below. Separate multiple URLs with commas.</div>
             </div>
             <div style={{ display: 'flex', gap: '1rem' }}>
               <button 
