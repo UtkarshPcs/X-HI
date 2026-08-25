@@ -119,6 +119,9 @@ service cloud.firestore {
     match /featureLaunches/{id} { allow read, write: if true; }
     match /termPracticeTests/{id} { allow read, write: if true; }
     match /termPracticeTestAttempts/{id} { allow read, write: if true; }
+    match /universal_api_uploads/{id} { allow read, write: if true; }
+    match /question_bank/{id} { allow read, write: if true; }
+    match /active_syllabus/{id} { allow read, write: if true; }
 
     // ---- Default deny ---------------------------------------------------
     // Anything not explicitly matched above (including collections an

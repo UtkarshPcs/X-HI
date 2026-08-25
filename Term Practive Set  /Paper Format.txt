@@ -30,7 +30,7 @@ for MAth the values for every concept are not fixed the algorithm can expierment
 ---
 
 ### 2. Science
-**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+**Structure:** 80 Marks Theory |
 
 **Section-Wise Format**
 | Section | Question Type | No. of Questions | Marks per Q | Total Marks |
@@ -50,7 +50,7 @@ for MAth the values for every concept are not fixed the algorithm can expierment
 ---
 
 ### 3. Social Science (SST)
-**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+**Structure:** 80 Marks Theory 
 
 **Section-Wise Format**
 | Section | Question Type | No. of Questions | Marks per Q | Total Marks |
@@ -71,7 +71,7 @@ for MAth the values for every concept are not fixed the algorithm can expierment
 ---
 
 ### 4. English (Language & Literature)
-**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+**Structure:** 80 Marks Theory |
 
 **Section-Wise Format & Contents**
 | Section | Component | Total Marks | Content Details |
@@ -83,7 +83,7 @@ for MAth the values for every concept are not fixed the algorithm can expierment
 ---
 
 ### 5. Hindi (Course A & B)
-**Structure:** 80 Marks Theory | 20 Marks Internal Assessment
+**Structure:** 80 Marks Theory |
 
 **Section-Wise Format & Contents**
 | Section | Component | Total Marks | Content Details |

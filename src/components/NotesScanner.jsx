@@ -308,9 +308,12 @@ export default function NotesScanner({ onPDFGenerated }) {
       {/* --- ARRANGEMENT STATE --- */}
       {!rawImageSrc && pages.length > 0 && (
         <div className="scanner-arrangement-view">
-          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Arrange Pages ({pages.length})</h4>
-            <button type="button" className="auth-btn secondary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => handleCaptureClick(false)}><Plus size={14}/> Add Page</button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" className="auth-btn secondary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => handleCaptureClick(true)}><Camera size={14}/> Camera</button>
+              <button type="button" className="auth-btn secondary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => handleCaptureClick(false)}><ImageIcon size={14}/> Image</button>
+            </div>
           </div>
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
