@@ -5,7 +5,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { jsPDF } from 'jspdf';
-import { Camera, Image as ImageIcon, X, Plus, RotateCw, Trash2, ArrowRight, FileText, Check } from 'lucide-react';
+import { Camera, Image as ImageIcon, X, Plus, RotateCw, Trash2, ArrowRight, FileText, Check, Loader2 } from 'lucide-react';
 
 // --- Utility Functions for Image Processing ---
 
@@ -71,6 +71,88 @@ async function getCroppedImg(imageSrc, crop, rotation = 0) {
   return croppedCanvas.toDataURL('image/jpeg', 0.85);
 }
 
+// --- OpenCV Filter Processing ---
+async function applyFilter(imageSrc, filterName) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const img = await createImage(imageSrc);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const cv = window.cv;
+      const src = cv.imread(canvas);
+      const dst = new cv.Mat();
+
+      if (filterName === 'Natural') {
+        src.convertTo(dst, -1, 1.05, 5);
+      } 
+      else if (filterName === 'B&W Scan') {
+        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+        cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 21, 15);
+        cv.cvtColor(dst, dst, cv.COLOR_GRAY2RGBA);
+      } 
+      else if (filterName === 'Sharp') {
+        const blurred = new cv.Mat();
+        cv.GaussianBlur(src, blurred, new cv.Size(0, 0), 3);
+        cv.addWeighted(src, 1.5, blurred, -0.5, 0, dst);
+        blurred.delete();
+      } 
+      else if (filterName === 'Clean') {
+        const blurred = new cv.Mat();
+        cv.GaussianBlur(src, blurred, new cv.Size(51, 51), 0);
+        const srcFloat = new cv.Mat();
+        const blurFloat = new cv.Mat();
+        src.convertTo(srcFloat, cv.CV_32F);
+        blurred.convertTo(blurFloat, cv.CV_32F);
+        
+        const divided = new cv.Mat();
+        cv.divide(srcFloat, blurFloat, divided, 255);
+        
+        divided.convertTo(dst, cv.CV_8U, 1.2, -10);
+        
+        srcFloat.delete();
+        blurFloat.delete();
+        blurred.delete();
+        divided.delete();
+      } 
+      else if (filterName === 'Vivid Light') {
+        const blurred = new cv.Mat();
+        cv.GaussianBlur(src, blurred, new cv.Size(31, 31), 0);
+        
+        const srcFloat = new cv.Mat();
+        const blurFloat = new cv.Mat();
+        src.convertTo(srcFloat, cv.CV_32F);
+        blurred.convertTo(blurFloat, cv.CV_32F);
+        
+        const divided = new cv.Mat();
+        cv.divide(srcFloat, blurFloat, divided, 255);
+        
+        divided.convertTo(dst, cv.CV_8U, 1.4, -40);
+        
+        srcFloat.delete();
+        blurFloat.delete();
+        blurred.delete();
+        divided.delete();
+      } 
+      else {
+        src.copyTo(dst);
+      }
+
+      cv.imshow(canvas, dst);
+      const resultUrl = canvas.toDataURL('image/jpeg', 0.85);
+      
+      src.delete();
+      dst.delete();
+      resolve(resultUrl);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 // --- Sortable Item Component ---
 function SortableItem({ id, page, index, onRemove, onRotate }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -107,14 +189,47 @@ function SortableItem({ id, page, index, onRemove, onRotate }) {
 export default function NotesScanner({ onPDFGenerated }) {
   const [pages, setPages] = useState([]); // { id, imageSrc }
   
+  // OpenCV Loader
+  const [cvLoaded, setCvLoaded] = useState(false);
+  useEffect(() => {
+    if (window.cv && window.cv.Mat) {
+      setCvLoaded(true);
+      return;
+    }
+    if (document.getElementById('opencv-script')) return;
+    
+    const script = document.createElement('script');
+    script.id = 'opencv-script';
+    script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
+    script.async = true;
+    script.onload = () => {
+      const checkCv = setInterval(() => {
+        if (window.cv && window.cv.Mat) {
+          clearInterval(checkCv);
+          setCvLoaded(true);
+        }
+      }, 100);
+    };
+    document.body.appendChild(script);
+  }, []);
+
+  // Queue state
   const [rawImageQueue, setRawImageQueue] = useState([]);
   const rawImageSrc = rawImageQueue.length > 0 ? rawImageQueue[0] : null;
 
+  // Cropper state
   const [crop, setCrop] = useState();
   const [completedCrop, setCompletedCrop] = useState(null);
   const [rotation, setRotation] = useState(0);
   const imgRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Filter state
+  const [filterImageSrc, setFilterImageSrc] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState('Vivid Light');
+  const [filteredImageCache, setFilteredImageCache] = useState({});
+  const [isProcessingFilter, setIsProcessingFilter] = useState(false);
+  const FILTERS = ['Vivid Light', 'Clean', 'Sharp', 'Natural', 'B&W Scan'];
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -155,7 +270,7 @@ export default function NotesScanner({ onPDFGenerated }) {
     setCrop(initialCrop);
   }
 
-  async function handleNext() {
+  async function handleNextCropper() {
     if (!rawImageSrc) return;
     try {
       let finalCrop = completedCrop;
@@ -184,11 +299,10 @@ export default function NotesScanner({ onPDFGenerated }) {
 
       const processedDataUrl = await getCroppedImg(rawImageSrc, finalCrop, rotation);
       if (processedDataUrl) {
-        setPages(prev => [...prev, { id: `page-${Date.now()}-${Math.random()}`, imageSrc: processedDataUrl }]);
+        setFilterImageSrc(processedDataUrl);
+        setSelectedFilter('Vivid Light');
+        setFilteredImageCache({});
       }
-      setRawImageQueue(prev => prev.slice(1));
-      setRotation(0);
-      setCrop(null);
     } catch (e) {
       console.error("Cropping failed:", e);
       alert("Failed to process image.");
@@ -199,6 +313,51 @@ export default function NotesScanner({ onPDFGenerated }) {
     setRotation(prev => (prev + 90) % 360);
   }
 
+  // --- Filter View Handlers ---
+  useEffect(() => {
+    if (!filterImageSrc || !cvLoaded) return;
+    if (filteredImageCache[selectedFilter]) return;
+
+    let isMounted = true;
+    setIsProcessingFilter(true);
+
+    setTimeout(async () => {
+      try {
+        const resultSrc = await applyFilter(filterImageSrc, selectedFilter);
+        if (isMounted) {
+          setFilteredImageCache(prev => ({ ...prev, [selectedFilter]: resultSrc }));
+        }
+      } catch (err) {
+        console.error("Filter error:", err);
+        if (isMounted) {
+          setFilteredImageCache(prev => ({ ...prev, [selectedFilter]: filterImageSrc }));
+        }
+      } finally {
+        if (isMounted) setIsProcessingFilter(false);
+      }
+    }, 50);
+
+    return () => { isMounted = false; };
+  }, [filterImageSrc, selectedFilter, cvLoaded]); // eslint-disable-line
+
+  function handleNextFilter() {
+    const finalSrc = filteredImageCache[selectedFilter] || filterImageSrc;
+    setPages(prev => [...prev, { id: `page-${Date.now()}-${Math.random()}`, imageSrc: finalSrc }]);
+    
+    // Clean up filter state and pop queue
+    setFilterImageSrc(null);
+    setFilteredImageCache({});
+    setRawImageQueue(prev => prev.slice(1));
+    setRotation(0);
+    setCrop(null);
+  }
+
+  function handleCancelFilter() {
+    setFilterImageSrc(null);
+    setFilteredImageCache({});
+  }
+
+  // --- Arrangement Handlers ---
   function handleDragEnd(event) {
     const { active, over } = event;
     if (active.id !== over.id) {
@@ -280,7 +439,7 @@ export default function NotesScanner({ onPDFGenerated }) {
       />
 
       {/* --- CROPPER STATE --- */}
-      {rawImageSrc && (
+      {rawImageSrc && !filterImageSrc && (
         <div className="scanner-cropper-view">
           <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Crop Page</h4>
@@ -290,7 +449,7 @@ export default function NotesScanner({ onPDFGenerated }) {
               )}
               <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => { setRawImageQueue(prev => prev.slice(1)); setRotation(0); setCrop(null); }}>{rawImageQueue.length > 1 ? 'Skip' : 'Cancel'}</button>
               <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleRotateRaw}><RotateCw size={14}/> Rotate</button>
-              <button type="button" className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleNext}>Next <ArrowRight size={14}/></button>
+              <button type="button" className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleNextCropper}>Next <ArrowRight size={14}/></button>
             </div>
           </div>
           <div className="scanner-cropper-workspace" style={{ background: '#000', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
@@ -314,8 +473,62 @@ export default function NotesScanner({ onPDFGenerated }) {
         </div>
       )}
 
+      {/* --- FILTER STATE --- */}
+      {filterImageSrc && (
+        <div className="scanner-filter-view">
+          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Enhance Page</h4>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={handleCancelFilter}>Back to Crop</button>
+              <button type="button" className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleNextFilter} disabled={!cvLoaded || isProcessingFilter}>
+                Next <ArrowRight size={14}/>
+              </button>
+            </div>
+          </div>
+          
+          <div className="scanner-filter-workspace" style={{ background: '#000', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'center', overflow: 'hidden', minHeight: '40vh' }}>
+            {!cvLoaded || isProcessingFilter || !filteredImageCache[selectedFilter] ? (
+               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: '1rem' }}>
+                 <Loader2 size={32} style={{ animation: 'spin 1s linear infinite' }} />
+                 <span>{!cvLoaded ? 'Loading OpenCV...' : 'Applying Filter...'}</span>
+               </div>
+            ) : (
+               <img src={filteredImageCache[selectedFilter]} alt="Filter preview" style={{ maxHeight: '50vh', maxWidth: '100%', objectFit: 'contain' }} />
+            )}
+          </div>
+
+          <div className="scanner-filters" style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+            {FILTERS.map(f => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setSelectedFilter(f)}
+                disabled={!cvLoaded}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  whiteSpace: 'nowrap',
+                  border: selectedFilter === f ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: selectedFilter === f ? 'rgba(139,92,246,0.1)' : 'var(--surface-hover)',
+                  color: selectedFilter === f ? 'var(--primary)' : 'var(--text-primary)',
+                  cursor: 'pointer',
+                  fontWeight: selectedFilter === f ? 600 : 400,
+                  transition: 'all 0.2s',
+                  opacity: cvLoaded ? 1 : 0.5
+                }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+            Select a filter to enhance the document, then press Next.
+          </p>
+        </div>
+      )}
+
       {/* --- ARRANGEMENT STATE --- */}
-      {!rawImageSrc && pages.length > 0 && (
+      {!rawImageSrc && !filterImageSrc && pages.length > 0 && (
         <div className="scanner-arrangement-view">
           <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Arrange Pages ({pages.length})</h4>
@@ -351,7 +564,7 @@ export default function NotesScanner({ onPDFGenerated }) {
       )}
 
       {/* --- INITIAL STATE --- */}
-      {!rawImageSrc && pages.length === 0 && (
+      {!rawImageSrc && !filterImageSrc && pages.length === 0 && (
         <div className="scanner-initial-view" style={{ textAlign: 'center', padding: '1rem 0' }}>
           <div style={{ background: 'var(--surface-hover)', padding: '2.5rem 1rem', borderRadius: '1rem', border: '1px dashed var(--border)' }}>
             <Camera size={44} color="var(--primary)" style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
