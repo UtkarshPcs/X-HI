@@ -359,8 +359,16 @@ export default function NotesScanner({ onPDFGenerated }) {
     }
   }
 
-  function handleRotateRaw() {
-    setRotation(prev => (prev + 90) % 360);
+  async function handleRotateRaw() {
+    const newSrc = await getCroppedImg(rawImageSrc, null, 90);
+    if (newSrc) {
+      setRawImageQueue(prev => {
+        const next = [...prev];
+        next[0] = newSrc;
+        return next;
+      });
+      setCrop(null); // Force crop recalculation on next render/load
+    }
   }
 
   // --- Arrangement Handlers ---
@@ -475,7 +483,7 @@ export default function NotesScanner({ onPDFGenerated }) {
                 ref={imgRef}
                 src={rawImageSrc} 
                 onLoad={onImageLoad}
-                style={{ transform: `rotate(${rotation}deg)`, maxHeight: '50vh', maxWidth: '100%', objectFit: 'contain' }}
+                style={{ maxHeight: '50vh', maxWidth: '100%', objectFit: 'contain' }}
                 alt="Crop preview" 
               />
             </ReactCrop>
