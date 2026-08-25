@@ -29,6 +29,7 @@ This skill instructs you on how to format and generate full-length 80-mark pract
       "sectionTitle": "Section A - Objective Type (1 Mark each)",
       "question_number": 1,
       "type": "objective",
+      "sub-type": "MCQ",
       "chapterId": "science-0-c0",
       "topic": "Reflection",
       "text": "What is the angle of reflection if the incident angle is $30^\\circ$?",
@@ -41,6 +42,7 @@ This skill instructs you on how to format and generate full-length 80-mark pract
     {
       "question_number": 2,
       "type": "objective",
+      "sub-type": "MCQ",
       "chapterId": "science-1-c1",
       "topic": "Acids and Bases",
       "text": "Which of the following is a strong acid?",
@@ -54,6 +56,7 @@ This skill instructs you on how to format and generate full-length 80-mark pract
       "sectionTitle": "Section B - Very Short Answer Type (2 Marks each)",
       "question_number": 21,
       "type": "subjective",
+      "sub-type": "Chemical Equation / Reaction-Based",
       "chapterId": "science-2-c0",
       "topic": "Photosynthesis",
       "text": "Write the balanced chemical equation for photosynthesis.",
@@ -78,6 +81,13 @@ This skill instructs you on how to format and generate full-length 80-mark pract
 - **`subjectId`**: Must be the top-level string representing the subject: `"science"`, `"math"`, `"sst"`, `"english"`, `"hindi"`, or `"it"`.
 - **`sectionTitle`**: ONLY add this string to the FIRST question of a new section. Omit this field entirely for the subsequent questions in the same section.
 - **`type`**: Must be `"objective"` or `"subjective"`.
+- **`sub-type`**: MUST be one of the prebuilt values for the respective subject.
+  - **MATHEMATICS**: MCQ, Assertion-Reason, Very Short Answer, Short Answer, Long Answer, Case-Based, Application-Based, Word Problem, Numerical, Proof / Show That, Graph-Based, Geometry / Diagram-Based.
+  - **SCIENCE**: MCQ, Assertion-Reason, Very Short Answer, Short Answer, Long Answer, Case-Based, Application-Based, Numerical, Diagram-Based, Experiment / Activity-Based, Chemical Equation / Reaction-Based, Data / Graph-Based.
+  - **SOCIAL SCIENCE**: MCQ, Assertion-Reason, Very Short Answer, Short Answer, Long Answer, Case-Based, Source-Based, Data / Graph-Based, Map-Based, Picture / Visual-Based, Application-Based, Chronology / Sequence-Based.
+  - **ENGLISH**: MCQ, Very Short Answer, Short Answer, Long Answer, Reading Comprehension, Case-Based / Competency-Based, Extract-Based, Grammar, Notice Writing, Letter Writing, Analytical / Discursive Writing, Story / Creative Writing.
+  - **HINDI**: MCQ, Very Short Answer, Short Answer, Long Answer, अपठत गदयश, अपठत पदयश, गदय / पदय Extract-Based, वयकरण, पतर लखन, अनचछद लखन, सचन / वजञपन लखन, रचनतमक लखन.
+  - **COMPUTER / IT**: MCQ, Assertion-Reason, Very Short Answer, Short Answer, Long Answer, Case-Based, Output-Based, Code-Based, Debugging / Error-Based, Scenario-Based, Practical / Application-Based, Match the Following.
 - **`marks`**: Integer or Float representing the total marks for the question.
 - **`difficulty`**: MUST be one of `"Easy"`, `"Medium"`, or `"Hard"`. This field is mandatory for AI diagnosis.
 - **`topic`**: A short 2-4 word string indicating the specific concept/topic tested (e.g., `"Acids and Bases"`, `"Photosynthesis"`). Mandatory for Chapter Health.

@@ -5,6 +5,8 @@ import { PAPER_BLUEPRINTS } from '../data/testConfig';
  * Incorporates spaced-repetition logic by weighting questions based on past performance.
  */
 export function generatePaper(subject, availableQuestions, userHistory) {
+  const isMapQuestion = q => q['sub-type'] === 'Map-Based' || (q.topic || '').toLowerCase().includes('map') || (q.subtopic || '').toLowerCase().includes('map');
+
   const blueprint = PAPER_BLUEPRINTS[subject.toUpperCase()];
   if (!blueprint) {
     throw new Error(`No blueprint found for subject: ${subject}`);
@@ -22,9 +24,9 @@ export function generatePaper(subject, availableQuestions, userHistory) {
     );
 
     if (isMap) {
-       candidates = candidates.filter(q => (q.topic || '').toLowerCase().includes('map') || (q.subtopic || '').toLowerCase().includes('map'));
+       candidates = candidates.filter(isMapQuestion);
     } else {
-       candidates = candidates.filter(q => !(q.topic || '').toLowerCase().includes('map') && !(q.subtopic || '').toLowerCase().includes('map'));
+       candidates = candidates.filter(q => !isMapQuestion(q));
     }
 
     if (candidates.length < count) {
@@ -82,12 +84,12 @@ export function generatePaper(subject, availableQuestions, userHistory) {
     }
   };
 
-  addSection('Section A (Multiple Choice Questions - 1 Mark each)', q => q.type === 'objective' && q.marks === 1);
-  addSection('Section B (Very Short Answer - 2 Marks each)', q => q.type === 'subjective' && q.marks === 2);
-  addSection('Section C (Short Answer - 3 Marks each)', q => q.type === 'subjective' && q.marks === 3);
-  addSection('Section D (Long Answer - 5 Marks each)', q => q.type === 'subjective' && q.marks === 5 && !(q.topic || '').toLowerCase().includes('map') && !(q.subtopic || '').toLowerCase().includes('map'));
-  addSection('Section E (Case-based Questions - 4 Marks each)', q => q.type === 'subjective' && q.marks === 4);
-  addSection('Section F (Map Skill-Based Questions)', q => (q.topic || '').toLowerCase().includes('map') || (q.subtopic || '').toLowerCase().includes('map'));
+  addSection('Section A (Multiple Choice Questions - 1 Mark each)', q => q.type === 'objective' && q.marks === 1 && !isMapQuestion(q));
+  addSection('Section B (Very Short Answer - 2 Marks each)', q => q.type === 'subjective' && q.marks === 2 && !isMapQuestion(q));
+  addSection('Section C (Short Answer - 3 Marks each)', q => q.type === 'subjective' && q.marks === 3 && !isMapQuestion(q));
+  addSection('Section D (Long Answer - 5 Marks each)', q => q.type === 'subjective' && q.marks === 5 && !isMapQuestion(q));
+  addSection('Section E (Case-based Questions - 4 Marks each)', q => q.type === 'subjective' && q.marks === 4 && !isMapQuestion(q));
+  addSection('Section F (Map Skill-Based Questions)', isMapQuestion);
 
   return {
     id: `generated-${subject.toLowerCase()}-${Date.now()}`,

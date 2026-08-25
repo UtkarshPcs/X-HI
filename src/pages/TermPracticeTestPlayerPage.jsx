@@ -244,6 +244,12 @@ export default function TermPracticeTestPlayerPage() {
         @media (max-width: 768px) {
           .paper-container { padding: 1.5rem; }
         }
+        @media print {
+          body * { visibility: hidden; }
+          .paper-container, .paper-container * { visibility: visible; }
+          .paper-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0 !important; box-shadow: none !important; background: white !important; color: black !important; }
+          button { display: none !important; }
+        }
       `}</style>
       
       {confirmDialog && (
@@ -276,8 +282,17 @@ export default function TermPracticeTestPlayerPage() {
           <h1 className="tp-title" title={displayTitle}>{displayTitle}</h1>
         </div>
         {(phase === 'TEST' || phase === 'EVALUATION') && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.75rem', borderRadius: '20px', color: '#fff', fontWeight: 700, flexShrink: 0, fontSize: '0.9rem' }}>
-            <Clock size={14} /> {formatTime(quizTime)}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button 
+              onClick={() => window.print()}
+              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', padding: '0.4rem 0.75rem', borderRadius: '20px', color: '#fff', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.75rem', borderRadius: '20px', color: '#fff', fontWeight: 700, flexShrink: 0, fontSize: '0.9rem' }}>
+              <Clock size={14} /> {formatTime(quizTime)}
+            </div>
           </div>
         )}
       </div>
@@ -363,6 +378,24 @@ export default function TermPracticeTestPlayerPage() {
                 </React.Fragment>
               );
             })}
+            
+            {/* Render map_urls at the end of the paper */}
+            {(() => {
+              const allMapUrls = test.map_urls || test.questions.flatMap(q => q.map_urls || []);
+              if (allMapUrls.length > 0) {
+                return (
+                  <div style={{ marginTop: '3rem', borderTop: '2px dashed #ccc', paddingTop: '2rem' }}>
+                    <h3 style={{ textAlign: 'center', marginBottom: '1.5rem', textTransform: 'uppercase', fontSize: '1.4rem' }}>Reference Maps</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                      {allMapUrls.map((url, i) => (
+                        <img key={i} src={url} alt={`Map Reference ${i + 1}`} style={{ maxWidth: '100%', height: 'auto', border: '1px solid #1a1a1a', borderRadius: '4px' }} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           <button 
