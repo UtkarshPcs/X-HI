@@ -1,0 +1,363 @@
+import React, { useState, useRef, useEffect } from 'react';
+import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { jsPDF } from 'jspdf';
+import { Camera, Image as ImageIcon, X, Plus, RotateCw, Trash2, ArrowRight, FileText, Check } from 'lucide-react';
+
+// --- Utility Functions for Image Processing ---
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = e => reject(e);
+    reader.readAsDataURL(file);
+  });
+}
+
+function createImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = error => reject(error);
+    image.src = url;
+  });
+}
+
+async function getCroppedImg(imageSrc, crop, rotation = 0) {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) return null;
+
+  const rotRad = (rotation * Math.PI) / 180;
+  const bBoxWidth = Math.abs(Math.cos(rotRad) * image.width) + Math.abs(Math.sin(rotRad) * image.height);
+  const bBoxHeight = Math.abs(Math.sin(rotRad) * image.width) + Math.abs(Math.cos(rotRad) * image.height);
+
+  canvas.width = bBoxWidth;
+  canvas.height = bBoxHeight;
+
+  ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+  ctx.rotate(rotRad);
+  ctx.translate(-image.width / 2, -image.height / 2);
+  ctx.drawImage(image, 0, 0);
+
+  if (!crop || !crop.width || !crop.height) {
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  const croppedCanvas = document.createElement('canvas');
+  const croppedCtx = croppedCanvas.getContext('2d');
+
+  croppedCanvas.width = crop.width;
+  croppedCanvas.height = crop.height;
+
+  croppedCtx.drawImage(
+    canvas,
+    crop.x,
+    crop.y,
+    crop.width,
+    crop.height,
+    0,
+    0,
+    crop.width,
+    crop.height
+  );
+
+  return croppedCanvas.toDataURL('image/jpeg', 0.85);
+}
+
+// --- Sortable Item Component ---
+function SortableItem({ id, page, index, onRemove, onRotate }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="scanner-page-card">
+      <div className="scanner-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+        <span className="scanner-page-num" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Page {index + 1}</span>
+        <button type="button" onClick={() => onRemove(id)} className="scanner-icon-btn error" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.2rem' }}><Trash2 size={16}/></button>
+      </div>
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="scanner-page-thumb"
+        style={{ padding: '0.5rem', cursor: 'grab', display: 'flex', justifyContent: 'center', background: '#000', borderRadius: '4px' }}
+      >
+        <img src={page.imageSrc} alt={`Page ${index + 1}`} style={{ maxWidth: '100%', height: '180px', objectFit: 'contain' }} />
+      </div>
+      <div className="scanner-page-footer" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+        <button type="button" onClick={() => onRotate(id)} style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', padding: '0.4rem 0.6rem', borderRadius: '4px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)', width: '100%', justifyContent: 'center' }}><RotateCw size={14} /> Rotate</button>
+      </div>
+    </div>
+  );
+}
+
+// --- Main Scanner Component ---
+export default function NotesScanner({ onPDFGenerated }) {
+  const [pages, setPages] = useState([]); // { id, imageSrc }
+  
+  const [rawImageSrc, setRawImageSrc] = useState(null);
+  const [crop, setCrop] = useState();
+  const [completedCrop, setCompletedCrop] = useState(null);
+  const [rotation, setRotation] = useState(0);
+  const imgRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  function handleCaptureClick(capture = false) {
+    if (fileInputRef.current) {
+      if (capture) {
+        fileInputRef.current.setAttribute('capture', 'environment');
+      } else {
+        fileInputRef.current.removeAttribute('capture');
+      }
+      fileInputRef.current.click();
+    }
+  }
+
+  async function handleFileSelect(e) {
+    const file = e.target.files?.[0];
+    if (file) {
+      const dataUrl = await fileToDataUrl(file);
+      setRawImageSrc(dataUrl);
+      setRotation(0);
+      setCrop(null);
+    }
+    e.target.value = '';
+  }
+
+  function onImageLoad(e) {
+    const { width, height } = e.currentTarget;
+    imgRef.current = e.currentTarget;
+    const initialCrop = centerCrop(
+      makeAspectCrop({ unit: '%', width: 90 }, width / height, width, height),
+      width,
+      height
+    );
+    setCrop(initialCrop);
+  }
+
+  async function handleNext() {
+    if (!rawImageSrc) return;
+    try {
+      let finalCrop = completedCrop;
+      
+      if (!finalCrop && imgRef.current) {
+        const image = imgRef.current;
+        finalCrop = {
+          unit: 'px',
+          x: (crop.x * image.naturalWidth) / 100,
+          y: (crop.y * image.naturalHeight) / 100,
+          width: (crop.width * image.naturalWidth) / 100,
+          height: (crop.height * image.naturalHeight) / 100,
+        };
+      }
+
+      if (finalCrop && imgRef.current && finalCrop.unit !== '%') {
+        const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
+        const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
+        finalCrop = {
+          x: finalCrop.x * scaleX,
+          y: finalCrop.y * scaleY,
+          width: finalCrop.width * scaleX,
+          height: finalCrop.height * scaleY,
+        };
+      }
+
+      const processedDataUrl = await getCroppedImg(rawImageSrc, finalCrop, rotation);
+      if (processedDataUrl) {
+        setPages(prev => [...prev, { id: `page-${Date.now()}-${Math.random()}`, imageSrc: processedDataUrl }]);
+      }
+      setRawImageSrc(null);
+    } catch (e) {
+      console.error("Cropping failed:", e);
+      alert("Failed to process image.");
+    }
+  }
+
+  function handleRotateRaw() {
+    setRotation(prev => (prev + 90) % 360);
+  }
+
+  function handleDragEnd(event) {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      setPages((items) => {
+        const oldIndex = items.findIndex(i => i.id === active.id);
+        const newIndex = items.findIndex(i => i.id === over.id);
+        const newItems = [...items];
+        const [removed] = newItems.splice(oldIndex, 1);
+        newItems.splice(newIndex, 0, removed);
+        return newItems;
+      });
+    }
+  }
+
+  function removePage(id) {
+    setPages(prev => prev.filter(p => p.id !== id));
+  }
+
+  async function rotatePageArrangement(id) {
+    const pageIndex = pages.findIndex(p => p.id === id);
+    if (pageIndex === -1) return;
+    const page = pages[pageIndex];
+    const newSrc = await getCroppedImg(page.imageSrc, null, 90);
+    if (newSrc) {
+      setPages(prev => {
+        const next = [...prev];
+        next[pageIndex] = { ...page, imageSrc: newSrc };
+        return next;
+      });
+    }
+  }
+
+  async function generatePDF() {
+    if (pages.length === 0) return;
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      for (let i = 0; i < pages.length; i++) {
+        const img = await createImage(pages[i].imageSrc);
+        
+        const imgRatio = img.width / img.height;
+        const pageRatio = pageWidth / pageHeight;
+        
+        let finalWidth = pageWidth;
+        let finalHeight = pageHeight;
+        
+        if (imgRatio > pageRatio) {
+          finalHeight = pageWidth / imgRatio;
+        } else {
+          finalWidth = pageHeight * imgRatio;
+        }
+        
+        const x = (pageWidth - finalWidth) / 2;
+        const y = (pageHeight - finalHeight) / 2;
+
+        if (i > 0) doc.addPage();
+        doc.addImage(img, 'JPEG', x, y, finalWidth, finalHeight);
+      }
+      
+      const pdfBlob = doc.output('blob');
+      const pdfFile = new File([pdfBlob], 'scanned_notes.pdf', { type: 'application/pdf' });
+      onPDFGenerated(pdfFile);
+    } catch (e) {
+      console.error("PDF Gen failed:", e);
+      alert("Failed to generate PDF. Please try again.");
+    }
+  }
+
+  return (
+    <div className="notes-scanner-container" style={{ padding: '0.5rem 0' }}>
+      <input 
+        type="file" 
+        accept="image/*" 
+        style={{ display: 'none' }} 
+        ref={fileInputRef} 
+        onChange={handleFileSelect} 
+      />
+
+      {/* --- CROPPER STATE --- */}
+      {rawImageSrc && (
+        <div className="scanner-cropper-view">
+          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Crop Page</h4>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setRawImageSrc(null)}>Cancel</button>
+              <button type="button" style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleRotateRaw}><RotateCw size={14}/> Rotate</button>
+              <button type="button" className="auth-btn primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={handleNext}>Next <ArrowRight size={14}/></button>
+            </div>
+          </div>
+          <div className="scanner-cropper-workspace" style={{ background: '#000', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+            <ReactCrop
+              crop={crop}
+              onChange={c => setCrop(c)}
+              onComplete={c => setCompletedCrop(c)}
+            >
+              <img 
+                ref={imgRef}
+                src={rawImageSrc} 
+                onLoad={onImageLoad}
+                style={{ transform: `rotate(${rotation}deg)`, maxHeight: '50vh', maxWidth: '100%', objectFit: 'contain' }}
+                alt="Crop preview" 
+              />
+            </ReactCrop>
+          </div>
+          <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '1rem' }}>
+            Adjust the corners to crop your page, then press Next.
+          </p>
+        </div>
+      )}
+
+      {/* --- ARRANGEMENT STATE --- */}
+      {!rawImageSrc && pages.length > 0 && (
+        <div className="scanner-arrangement-view">
+          <div className="scanner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Arrange Pages ({pages.length})</h4>
+            <button type="button" className="auth-btn secondary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => handleCaptureClick(false)}><Plus size={14}/> Add Page</button>
+          </div>
+
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={pages.map(p => p.id)} strategy={rectSortingStrategy}>
+              <div className="scanner-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', background: 'var(--surface-hover)', padding: '1rem', borderRadius: '8px', minHeight: '200px' }}>
+                {pages.map((page, i) => (
+                  <SortableItem 
+                    key={page.id} 
+                    id={page.id} 
+                    page={page} 
+                    index={i} 
+                    onRemove={removePage} 
+                    onRotate={rotatePageArrangement} 
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+
+          <div className="scanner-footer" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button type="button" className="auth-btn primary" onClick={generatePDF} style={{ padding: '0.75rem 2rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Check size={18} /> Done & Create PDF
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- INITIAL STATE --- */}
+      {!rawImageSrc && pages.length === 0 && (
+        <div className="scanner-initial-view" style={{ textAlign: 'center', padding: '1rem 0' }}>
+          <div style={{ background: 'var(--surface-hover)', padding: '2.5rem 1rem', borderRadius: '1rem', border: '1px dashed var(--border)' }}>
+            <Camera size={44} color="var(--primary)" style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
+            <h3 style={{ marginBottom: '0.5rem', fontSize: '1.15rem' }}>Scan Notes</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+              Use your camera to scan pages, or upload existing images.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <button type="button" className="auth-btn primary" onClick={() => handleCaptureClick(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Camera size={16} /> Open Camera
+              </button>
+              <button type="button" className="auth-btn secondary" onClick={() => handleCaptureClick(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ImageIcon size={16} /> Choose Images
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
