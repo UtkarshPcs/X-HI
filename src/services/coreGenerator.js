@@ -16,27 +16,41 @@ export function generatePaper(subject, availableQuestions, userHistory) {
   const selectedQuestions = [];
 
   const pickQuestion = (subSubjectId, type, marks, count, isMap = false, subType = null) => {
-    let candidates = availableQuestions.filter(q => 
-        (subSubjectId === 'math-all' || q.subjectId === subSubjectId) && 
-        q.type === type && 
-        q.marks === marks &&
-        !selectedQuestions.find(sq => (sq.question_id || sq.id) === (q.question_id || q.id))
-    );
+    const getCandidates = (enforceSubSubject, enforceSubType) => {
+      let c = availableQuestions.filter(q => 
+          (enforceSubSubject === 'math-all' || q.subjectId === enforceSubSubject || enforceSubSubject === null) && 
+          q.type === type && 
+          q.marks === marks &&
+          !selectedQuestions.find(sq => (sq.question_id || sq.id) === (q.question_id || q.id))
+      );
+      
+      if (isMap) c = c.filter(isMapQuestion);
+      else c = c.filter(q => !isMapQuestion(q));
 
-    if (isMap) {
-       candidates = candidates.filter(isMapQuestion);
-    } else {
-       candidates = candidates.filter(q => !isMapQuestion(q));
+      if (enforceSubType === 'Assertion-Reason') {
+         c = c.filter(q => q['sub-type'] === 'Assertion-Reason');
+      } else if (enforceSubType === 'MCQ') {
+         c = c.filter(q => q['sub-type'] !== 'Assertion-Reason');
+      }
+      return c;
+    };
+
+    let candidates = getCandidates(subSubjectId, subType);
+
+    // Fallback 1: Relax subType (e.g. take MCQ if AR is missing)
+    if (candidates.length < count && subType) {
+      const fallback = getCandidates(subSubjectId, null).filter(f => !candidates.find(c => (c.question_id || c.id) === (f.question_id || f.id)));
+      candidates = [...candidates, ...fallback];
     }
-    
-    if (subType === 'Assertion-Reason') {
-       candidates = candidates.filter(q => q['sub-type'] === 'Assertion-Reason');
-    } else if (subType === 'MCQ') {
-       candidates = candidates.filter(q => q['sub-type'] !== 'Assertion-Reason');
+
+    // Fallback 2: Relax subSubjectId (borrow from another sub-subject)
+    if (candidates.length < count) {
+      const fallback = getCandidates(null, null).filter(f => !candidates.find(c => (c.question_id || c.id) === (f.question_id || f.id)));
+      candidates = [...candidates, ...fallback];
     }
 
     if (candidates.length < count) {
-      console.warn(`Not enough questions for ${subSubjectId} - Type: ${type}, Marks: ${marks}, SubType: ${subType}. Need ${count}, found ${candidates.length}.`);
+      console.warn(`STILL not enough questions for ${subSubjectId} - Type: ${type}, Marks: ${marks}, SubType: ${subType}. Need ${count}, found ${candidates.length}.`);
     }
 
     // Sort candidates using Priority Scoring
