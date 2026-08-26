@@ -196,7 +196,7 @@ export default function TermPracticeMigrationPage() {
           
           if (data.subject !== 'SST') { updates.subject = 'SST'; needsUpdate = true; }
           if (data['sub-type'] !== 'Map-Based') { updates['sub-type'] = 'Map-Based'; needsUpdate = true; }
-          if (data.type !== 'Long Answer') { updates.type = 'Long Answer'; needsUpdate = true; }
+          if (data.type !== 'subjective') { updates.type = 'subjective'; needsUpdate = true; }
           
           const expectedSubSubject = data.marks === 2 ? 'sst-0' : (data.marks === 3 ? 'sst-1' : 'sst-0');
           if (data.subjectId !== expectedSubSubject) { updates.subjectId = expectedSubSubject; needsUpdate = true; }
