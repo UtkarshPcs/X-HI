@@ -34,7 +34,9 @@ export async function fetchQuestionsByChapters(subject, chapterIds) {
     const questions = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      if (chapterIds.includes(data.chapterId)) {
+      // Unconditionally include Map-Based questions because they span multiple chapters
+      // and their chapterId (e.g. 'sst-0') might not exactly match a specific chapter (e.g. 'sst-0-c1')
+      if (chapterIds.includes(data.chapterId) || data['sub-type'] === 'Map-Based') {
         questions.push({ ...data, id: doc.id });
       }
     });

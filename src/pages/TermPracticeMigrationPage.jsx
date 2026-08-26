@@ -195,11 +195,12 @@ export default function TermPracticeMigrationPage() {
           const updates = {};
           
           if (data.subject !== 'SST') { updates.subject = 'SST'; needsUpdate = true; }
-          if (data.subjectId !== 'sst') { updates.subjectId = 'sst'; needsUpdate = true; }
           if (data['sub-type'] !== 'Map-Based') { updates['sub-type'] = 'Map-Based'; needsUpdate = true; }
+          if (data.type !== 'Long Answer') { updates.type = 'Long Answer'; needsUpdate = true; }
           
-          const expectedChapter = data.marks === 2 ? 'sst-0' : (data.marks === 3 ? 'sst-1' : 'sst-0');
-          if (data.chapterId !== expectedChapter) { updates.chapterId = expectedChapter; needsUpdate = true; }
+          const expectedSubSubject = data.marks === 2 ? 'sst-0' : (data.marks === 3 ? 'sst-1' : 'sst-0');
+          if (data.subjectId !== expectedSubSubject) { updates.subjectId = expectedSubSubject; needsUpdate = true; }
+          if (data.chapterId !== expectedSubSubject) { updates.chapterId = expectedSubSubject; needsUpdate = true; }
           
           if (needsUpdate) {
             await updateDoc(doc(db, 'question_bank', d.id), updates);
