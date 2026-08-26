@@ -200,7 +200,11 @@ export default function TermPracticeMigrationPage() {
           
           const expectedSubSubject = data.marks === 2 ? 'sst-0' : (data.marks === 3 ? 'sst-1' : 'sst-0');
           if (data.subjectId !== expectedSubSubject) { updates.subjectId = expectedSubSubject; needsUpdate = true; }
-          if (data.chapterId !== expectedSubSubject) { updates.chapterId = expectedSubSubject; needsUpdate = true; }
+          
+          // History map questions (2 marks) are universally from Nationalism in India (Chapter 2 -> sst-0-c1)
+          // Geography map questions (3 marks) usually include a Dam, which is Water Resources (Chapter 3 -> sst-1-c2)
+          const expectedChapter = data.marks === 2 ? 'sst-0-c1' : 'sst-1-c2';
+          if (data.chapterId !== expectedChapter) { updates.chapterId = expectedChapter; needsUpdate = true; }
           
           if (needsUpdate) {
             await updateDoc(doc(db, 'question_bank', d.id), updates);
