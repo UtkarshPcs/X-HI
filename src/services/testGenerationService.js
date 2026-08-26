@@ -82,14 +82,54 @@ export async function updateUserQuestionHistory(userId, results) {
   }
 }
 
+const VALID_DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const VALID_TYPES = ['objective', 'subjective', 'Long Answer', 'Short Answer', 'Very Short Answer', 'Case-Based'];
+const VALID_SECTION_IDS = ['sst', 'science', 'math', 'maths', 'english', 'hindi', 'it'];
+
+export function validateQuestionBankJSON(questionsArray) {
+  if (!Array.isArray(questionsArray)) {
+    throw new Error("Invalid format. Expected an array of question objects.");
+  }
+
+  questionsArray.forEach((q, index) => {
+    // 1. Verify Difficulty
+    if (q.difficulty && !VALID_DIFFICULTIES.includes(q.difficulty)) {
+      throw new Error(`Question ${q.question_id || index + 1}: Invalid difficulty '${q.difficulty}'. Allowed: ${VALID_DIFFICULTIES.join(', ')}`);
+    }
+
+    // 2. Verify Type
+    if (q.type && !VALID_TYPES.includes(q.type)) {
+      throw new Error(`Question ${q.question_id || index + 1}: Invalid type '${q.type}'. Allowed: ${VALID_TYPES.join(', ')}`);
+    }
+
+    // 3. Verify Section ID / Broad Subject
+    const section = q.sectionId || (q.subject ? q.subject.toLowerCase() : null);
+    if (section && !VALID_SECTION_IDS.includes(section)) {
+      throw new Error(`Question ${q.question_id || index + 1}: Invalid sectionId/subject '${section}'. Allowed: ${VALID_SECTION_IDS.join(', ')}`);
+    }
+
+    // 4. Verify Subject ID format (e.g., sst-0, maths-0, etc.)
+    if (q.subjectId && !/^[a-z]+-\d+$/.test(q.subjectId)) {
+      throw new Error(`Question ${q.question_id || index + 1}: Invalid subjectId '${q.subjectId}'. Expected format like 'sst-0' or 'science-1'.`);
+    }
+
+    // 5. Verify Chapter ID format (e.g., sst-0-c1)
+    if (q.chapterId && !/^[a-z]+-\d+-c\d+$/.test(q.chapterId)) {
+      // Allow specific exceptions if needed, but strict format is best
+      if (q.chapterId !== 'Unknown') {
+        throw new Error(`Question ${q.question_id || index + 1}: Invalid chapterId '${q.chapterId}'. Expected format like 'sst-0-c1'.`);
+      }
+    }
+  });
+}
+
 /**
  * Uploads an array of questions to the 'question_bank' collection in Firestore.
  * Each question must have subjectId, chapterId, type, marks, etc.
  */
 export async function uploadQuestionBankJSON(questionsArray) {
-  if (!Array.isArray(questionsArray)) {
-    throw new Error("Invalid format. Expected an array of question objects.");
-  }
+  // STRICT VALIDATION: Throw error if any predefined field is invalid
+  validateQuestionBankJSON(questionsArray);
 
   // Upload in chunks of 500 (Firestore batch limit)
   let batch = writeBatch(db);
