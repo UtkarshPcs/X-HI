@@ -133,11 +133,15 @@ export default function StarBatchPYQTestPlayerPage() {
     let objScore = 0;
     let objTotal = 0;
     const objDetails = [];
+    const responses = {}; // for dashboard compatibility
     
-    objQuestions.forEach(q => {
-      objTotal += (q.marks || 1);
-      const isCorrect = objAnswers[q.id] === q.correct_option;
-      if (isCorrect) objScore += (q.marks || 1);
+    objQuestions.forEach((q, idx) => {
+      const maxM = q.marks || 1;
+      objTotal += maxM;
+      const isCorrect = objAnswers[q.id] === q.correctOptionIndex;
+      const awarded = isCorrect ? maxM : 0;
+      objScore += awarded;
+      responses[idx] = awarded; // index-based mapping
       objDetails.push({ questionId: q.id, correct: isCorrect, timeSpent: objDwellTimes[q.id] || 0 });
     });
 
@@ -145,11 +149,14 @@ export default function StarBatchPYQTestPlayerPage() {
     let subjTotal = 0;
     const subjDetails = [];
 
-    subjQuestions.forEach(q => {
-      subjTotal += (q.marks || 2);
+    const offset = objQuestions.length;
+    subjQuestions.forEach((q, idx) => {
+      const maxM = q.marks || 2;
+      subjTotal += maxM;
       const m = subjMarks[q.id] || 0;
       subjScore += m;
-      subjDetails.push({ questionId: q.id, marksAwarded: m, maxMarks: (q.marks || 2) });
+      responses[offset + idx] = m; // index-based mapping
+      subjDetails.push({ questionId: q.id, marksAwarded: m, maxMarks: maxM });
     });
 
     const totalScore = objScore + subjScore;
@@ -166,7 +173,9 @@ export default function StarBatchPYQTestPlayerPage() {
       subjTotal,
       mode: test.mode,
       difficulty: test.difficulty,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      responses,
+      totalTime: objTimer + (600 - timeRemaining)
     };
 
     const resId = await savePYQAttempt(currentUser.id || currentUser.phone, attemptData);
@@ -184,7 +193,7 @@ export default function StarBatchPYQTestPlayerPage() {
         testId: test.id,
         testTitle: "PYQ Practice Test",
         chapterId: test.chapterId,
-        questionText: q.question,
+        questionText: q.question_text || q.text,
         options: q.options || {},
         correctOptionIndex: q.correct_option,
         difficulty: q.difficulty,
@@ -206,7 +215,7 @@ export default function StarBatchPYQTestPlayerPage() {
         testTitle: "PYQ Practice Test",
         chapterId: test.chapterId,
         questionId: q.id,
-        questionText: q.question,
+        questionText: q.question_text || q.text,
         reporterId: currentUser.id || currentUser.phone
       });
       setReportedStatus(prev => ({ ...prev, [q.id]: true }));
@@ -297,7 +306,7 @@ export default function StarBatchPYQTestPlayerPage() {
               </div>
 
               <div style={{ fontSize: '1.25rem', color: '#fff', lineHeight: 1.6, marginBottom: '2rem' }} className="markdown-body">
-                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath(objQuestions[objIndex].question)}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath(objQuestions[objIndex].question_text || objQuestions[objIndex].text)}</ReactMarkdown>
                 {objQuestions[objIndex].diagram_url && <DiagramRenderer code={objQuestions[objIndex].diagram_url} />}
               </div>
 
@@ -351,7 +360,7 @@ export default function StarBatchPYQTestPlayerPage() {
                 <div key={q.id} className="cbse-q">
                   <div style={{ fontWeight: 'bold', width: '30px' }}>{idx + 1}.</div>
                   <div style={{ flex: 1 }} className="markdown-body">
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath(q.question)}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath(q.question_text || q.text)}</ReactMarkdown>
                     {q.diagram_url && <DiagramRenderer code={q.diagram_url} />}
                   </div>
                   <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>[{q.marks || 2}]</div>
@@ -393,7 +402,7 @@ export default function StarBatchPYQTestPlayerPage() {
                   </div>
                   
                   <div style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '1rem' }} className="markdown-body">
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath(q.question)}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{formatMath(q.question_text || q.text)}</ReactMarkdown>
                   </div>
 
                   <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem' }}>
