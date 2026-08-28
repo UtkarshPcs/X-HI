@@ -300,6 +300,20 @@ export default function StarBatchPage() {
 
         <div
           className="as-card star-quick-link"
+          onClick={() => navigate('/star-pyq-practice')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <Target size={20} color="#fbbf24" /> PYQ Practice
+            </h3>
+            <p className="as-muted" style={{ margin: 0 }}>Generate objective, subjective, or mixed tests from the Universal Question Bank.</p>
+          </div>
+          <ChevronRight size={22} color="#fbbf24" style={{ flexShrink: 0, marginLeft: '1rem' }} />
+        </div>
+
+        <div
+          className="as-card star-quick-link"
           onClick={() => navigate('/star-mixed-tests')}
           style={{ cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
         >

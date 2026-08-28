@@ -45,6 +45,8 @@ const StarBatchTestPlayerPage = lazy(() => import('./pages/StarBatchTestPlayerPa
 const StarBatchSubjectiveTestPlayerPage = lazy(() => import('./pages/StarBatchSubjectiveTestPlayerPage'));
 const StarBatchMixedTestModulePage = lazy(() => import('./pages/StarBatchMixedTestModulePage'));
 const StarBatchMixedSubjectiveTestPlayerPage = lazy(() => import('./pages/StarBatchMixedSubjectiveTestPlayerPage'));
+const StarBatchPYQPracticePage = lazy(() => import('./pages/StarBatchPYQPracticePage'));
+const StarBatchPYQTestPlayerPage = lazy(() => import('./pages/StarBatchPYQTestPlayerPage'));
 const HistoricalTestAnalysisPage = lazy(() => import('./pages/HistoricalTestAnalysisPage'));
 const StarBatchConceptsHub = lazy(() => import('./pages/StarBatchConceptsHub'));
 const StarConceptChapterPage = lazy(() => import('./pages/StarConceptChapterPage'));
@@ -55,6 +57,7 @@ const AiChatPage = lazy(() => import('./pages/AiChatPage'));
 const TestJSONPreviewerPage = lazy(() => import('./pages/TestJSONPreviewerPage'));
 const TermPracticeSetPage = lazy(() => import('./pages/TermPracticeSetPage'));
 const TermPracticeTestPlayerPage = lazy(() => import('./pages/TermPracticeTestPlayerPage'));
+const TermPracticeMigrationPage = lazy(() => import('./pages/TermPracticeMigrationPage'));
 import { Heart } from 'lucide-react';
 import { checkAndConsumeEmailLink } from './firebase';
 import { markEmailVerified } from './auth/authService';
@@ -90,7 +93,7 @@ function AppInner() {
   // Star Batch is an internal-only feature now (no separate external role/
   // login). Still suppress the normal app-wide popups while viewing the
   // Star Batch portal/syllabus pages, since those are a focused sub-area.
-  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-mixed-tests') || pathname.startsWith('/star-mixed-subjective-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests') || pathname.startsWith('/term-practice');
+  const isStarBatchOrPortal = pathname.startsWith('/star-batch') || pathname.startsWith('/star-syllabus') || pathname.startsWith('/star-tests') || pathname.startsWith('/star-mixed-tests') || pathname.startsWith('/star-mixed-subjective-tests') || pathname.startsWith('/star-concepts') || pathname.startsWith('/star-tracking') || pathname.startsWith('/custom-tests') || pathname.startsWith('/term-practice') || pathname.startsWith('/star-pyq');
 
   useEffect(() => {
     async function handleEmailLink() {
@@ -159,6 +162,8 @@ function AppInner() {
               <Route path="/star-tracking/:sectionId/:subjectId/:chapterId" element={<StarBatchSyllabusTrackingPage />} />
               <Route path="/star-syllabus" element={<StarBatchSyllabusPage />} />
               <Route path="/star-tests" element={<StarBatchTestModulePage />} />
+              <Route path="/star-pyq-practice" element={<StarBatchPYQPracticePage />} />
+              <Route path="/star-pyq-test/:testId" element={<StarBatchPYQTestPlayerPage />} />
               <Route path="/star-tests/:testId" element={<StarBatchTestPlayerPage />} />
               <Route path="/star-subjective-tests/:testId" element={<StarBatchSubjectiveTestPlayerPage />} />
               <Route path="/star-mixed-tests" element={<StarBatchMixedTestModulePage />} />
@@ -174,6 +179,7 @@ function AppInner() {
               <Route path="/test-preview" element={<TestJSONPreviewerPage />} />
               <Route path="/term-practice" element={<TermPracticeSetPage />} />
               <Route path="/term-practice/test/:testId" element={<TermPracticeTestPlayerPage />} />
+              <Route path="/migrate-papers" element={<TermPracticeMigrationPage />} />
             </Routes>
           </Suspense>
         </main>
