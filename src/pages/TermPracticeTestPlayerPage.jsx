@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { getTermPracticeTestById, submitTermPracticeAttempt } from '../services/termPracticeService';
+import { getTermPracticeTestById, submitTermPracticeAttempt, reportAndReplaceQuestion } from '../services/termPracticeService';
 import TermPracticeAnalyticsDashboard from '../components/TermPracticeAnalyticsDashboard';
-import { Loader2, ArrowLeft, Clock, Target, CheckCircle, Edit3, AlertCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, Clock, Target, CheckCircle, Edit3, AlertCircle, Flag } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -33,6 +33,8 @@ export default function TermPracticeTestPlayerPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const [reportingIndex, setReportingIndex] = useState(null); // index currently being replaced (loading state)
+  const [rejectedIds, setRejectedIds] = useState(() => new Set()); // question IDs reported+deleted this session
   const totalTestMarks = test?.questions ? test.questions.reduce((acc, q) => acc + (q.marks || 1), 0) : 80;
 
   async function fetchTest() {
@@ -96,6 +98,34 @@ export default function TermPracticeTestPlayerPage() {
       onConfirm: () => {
         setPhase('EVALUATION');
         window.scrollTo(0,0);
+      }
+    });
+  };
+
+  const handleReportQuestion = (idx) => {
+    setConfirmDialog({
+      message: "Report this question as corrupt? It will be permanently deleted from the question bank and instantly replaced with a fresh question of the same marks/type.",
+      onConfirm: async () => {
+        setReportingIndex(idx);
+        try {
+          const reportedQ = test.questions[idx];
+          const reportedId = reportedQ.question_id || reportedQ.id;
+          const replacement = await reportAndReplaceQuestion(test.id, idx, rejectedIds);
+
+          setTest(prev => {
+            const newQuestions = [...prev.questions];
+            newQuestions[idx] = replacement;
+            return { ...prev, questions: newQuestions };
+          });
+
+          if (reportedId) {
+            setRejectedIds(prev => new Set(prev).add(reportedId));
+          }
+        } catch (err) {
+          alert('Failed to report question: ' + err.message);
+        } finally {
+          setReportingIndex(null);
+        }
       }
     });
   };
@@ -345,8 +375,44 @@ export default function TermPracticeTestPlayerPage() {
                     </div>
                   )}
                   <div className="paper-question">
-                    <div className="paper-question-number">Q{idx + 1}.</div>
+                    <div className="paper-question-number" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      Q{idx + 1}.
+                      {test.isDynamic && (
+                        <button
+                          type="button"
+                          className="tp-report-btn"
+                          title="Report this question as corrupt"
+                          onClick={() => handleReportQuestion(idx)}
+                          disabled={reportingIndex !== null}
+                          style={{
+                            background: 'rgba(239,68,68,0.08)',
+                            border: '1px solid rgba(239,68,68,0.3)',
+                            color: '#dc2626',
+                            borderRadius: '6px',
+                            width: '26px',
+                            height: '26px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: reportingIndex !== null ? 'not-allowed' : 'pointer',
+                            flexShrink: 0,
+                            opacity: reportingIndex !== null && reportingIndex !== idx ? 0.4 : 1
+                          }}
+                        >
+                          {reportingIndex === idx ? (
+                            <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                          ) : (
+                            <Flag size={13} />
+                          )}
+                        </button>
+                      )}
+                    </div>
                     <div className="paper-question-body">
+                      {reportingIndex === idx && (
+                        <div style={{ fontSize: '0.85rem', color: '#dc2626', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Replacing question...
+                        </div>
+                      )}
                       <div className="custom-md">
                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                           {formatMath(q.question_text || q.text)}

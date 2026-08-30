@@ -1,12 +1,94 @@
 import { PAPER_BLUEPRINTS } from '../data/testConfig';
 
+export const isMapQuestion = q => q['sub-type'] === 'Map-Based' || (q.topic || '').toLowerCase().includes('map') || (q.subtopic || '').toLowerCase().includes('map');
+
+/**
+ * Reusable candidate-finding + priority-scoring logic, shared by the initial
+ * paper generator (`generatePaper`) and the in-test "Report & Replace" flow.
+ *
+ * Filters `availableQuestions` down to those matching subject/type/marks/subType,
+ * excluding any question already used (via `excludeIds`), applying the same two
+ * fallback relaxations as before (relax subType, then relax subSubjectId), and
+ * finally sorting by spaced-repetition priority score (incorrect > unseen > correct,
+ * with a penalty for overused chapters).
+ *
+ * Returns the full sorted candidate list — callers slice off however many they need.
+ */
+export function findReplacementCandidates(availableQuestions, {
+  subSubjectId = null,
+  type,
+  marks,
+  isMap = false,
+  subType = null,
+  excludeIds = new Set(),
+  userHistory = {},
+  chapterUsage = {}
+} = {}) {
+  const excludeSet = excludeIds instanceof Set ? excludeIds : new Set(excludeIds);
+
+  const getCandidates = (enforceSubSubject, enforceSubType) => {
+    let c = availableQuestions.filter(q =>
+        (enforceSubSubject === 'math-all' || q.subjectId === enforceSubSubject || enforceSubSubject === null) &&
+        q.type === type &&
+        q.marks === marks &&
+        !excludeSet.has(q.question_id || q.id)
+    );
+
+    if (isMap) c = c.filter(isMapQuestion);
+    else c = c.filter(q => !isMapQuestion(q));
+
+    if (enforceSubType === 'Assertion-Reason') {
+       c = c.filter(q => q['sub-type'] === 'Assertion-Reason');
+    } else if (enforceSubType === 'MCQ') {
+       c = c.filter(q => q['sub-type'] !== 'Assertion-Reason');
+    }
+    return c;
+  };
+
+  let candidates = getCandidates(subSubjectId, subType);
+
+  // Fallback 1: Relax subType (e.g. take MCQ if AR is missing)
+  if (subType) {
+    const fallback = getCandidates(subSubjectId, null).filter(f => !candidates.find(c => (c.question_id || c.id) === (f.question_id || f.id)));
+    candidates = [...candidates, ...fallback];
+  }
+
+  // Fallback 2: Relax subSubjectId (borrow from another sub-subject)
+  {
+    const fallback = getCandidates(null, null).filter(f => !candidates.find(c => (c.question_id || c.id) === (f.question_id || f.id)));
+    candidates = [...candidates, ...fallback];
+  }
+
+  // Sort candidates using Priority Scoring
+  candidates.sort((a, b) => {
+    const qIdA = a.question_id || a.id;
+    const qIdB = b.question_id || b.id;
+    const statusA = userHistory[qIdA];
+    const statusB = userHistory[qIdB];
+    const usageA = chapterUsage[a.chapterId] || 0;
+    const usageB = chapterUsage[b.chapterId] || 0;
+
+    const getScore = (status, usage) => {
+      let score = 0;
+      if (status === 'correct') score -= 1000;       // Heavily penalize correct questions to avoid repeating
+      else if (status === 'incorrect') score += 500; // Prioritize incorrect questions
+      else score += 100;                             // Unseen questions are secondary priority
+
+      score -= (usage * 50);                         // Penalty for overused chapters to enforce variation
+      return score + Math.random();                  // Add minor random noise for ties
+    };
+
+    return getScore(statusB, usageB) - getScore(statusA, usageA); // Sort descending
+  });
+
+  return candidates;
+}
+
 /**
  * Core algorithm to generate a dynamic paper matching exactly 80 marks according to the blueprint.
  * Incorporates spaced-repetition logic by weighting questions based on past performance.
  */
 export function generatePaper(subject, availableQuestions, userHistory) {
-  const isMapQuestion = q => q['sub-type'] === 'Map-Based' || (q.topic || '').toLowerCase().includes('map') || (q.subtopic || '').toLowerCase().includes('map');
-
   const blueprint = PAPER_BLUEPRINTS[subject.toUpperCase()];
   if (!blueprint) {
     throw new Error(`No blueprint found for subject: ${subject}`);
@@ -16,64 +98,15 @@ export function generatePaper(subject, availableQuestions, userHistory) {
   const selectedQuestions = [];
 
   const pickQuestion = (subSubjectId, type, marks, count, isMap = false, subType = null) => {
-    const getCandidates = (enforceSubSubject, enforceSubType) => {
-      let c = availableQuestions.filter(q => 
-          (enforceSubSubject === 'math-all' || q.subjectId === enforceSubSubject || enforceSubSubject === null) && 
-          q.type === type && 
-          q.marks === marks &&
-          !selectedQuestions.find(sq => (sq.question_id || sq.id) === (q.question_id || q.id))
-      );
-      
-      if (isMap) c = c.filter(isMapQuestion);
-      else c = c.filter(q => !isMapQuestion(q));
+    const excludeIds = new Set(selectedQuestions.map(sq => sq.question_id || sq.id));
 
-      if (enforceSubType === 'Assertion-Reason') {
-         c = c.filter(q => q['sub-type'] === 'Assertion-Reason');
-      } else if (enforceSubType === 'MCQ') {
-         c = c.filter(q => q['sub-type'] !== 'Assertion-Reason');
-      }
-      return c;
-    };
-
-    let candidates = getCandidates(subSubjectId, subType);
-
-    // Fallback 1: Relax subType (e.g. take MCQ if AR is missing)
-    if (candidates.length < count && subType) {
-      const fallback = getCandidates(subSubjectId, null).filter(f => !candidates.find(c => (c.question_id || c.id) === (f.question_id || f.id)));
-      candidates = [...candidates, ...fallback];
-    }
-
-    // Fallback 2: Relax subSubjectId (borrow from another sub-subject)
-    if (candidates.length < count) {
-      const fallback = getCandidates(null, null).filter(f => !candidates.find(c => (c.question_id || c.id) === (f.question_id || f.id)));
-      candidates = [...candidates, ...fallback];
-    }
+    const candidates = findReplacementCandidates(availableQuestions, {
+      subSubjectId, type, marks, isMap, subType, excludeIds, userHistory, chapterUsage
+    });
 
     if (candidates.length < count) {
       console.warn(`STILL not enough questions for ${subSubjectId} - Type: ${type}, Marks: ${marks}, SubType: ${subType}. Need ${count}, found ${candidates.length}.`);
     }
-
-    // Sort candidates using Priority Scoring
-    candidates.sort((a, b) => {
-      const qIdA = a.question_id || a.id;
-      const qIdB = b.question_id || b.id;
-      const statusA = userHistory[qIdA];
-      const statusB = userHistory[qIdB];
-      const usageA = chapterUsage[a.chapterId] || 0;
-      const usageB = chapterUsage[b.chapterId] || 0;
-
-      const getScore = (status, usage) => {
-        let score = 0;
-        if (status === 'correct') score -= 1000;       // Heavily penalize correct questions to avoid repeating
-        else if (status === 'incorrect') score += 500; // Prioritize incorrect questions
-        else score += 100;                             // Unseen questions are secondary priority
-
-        score -= (usage * 50);                         // Penalty for overused chapters to enforce variation
-        return score + Math.random();                  // Add minor random noise for ties
-      };
-
-      return getScore(statusB, usageB) - getScore(statusA, usageA); // Sort descending
-    });
 
     const picked = candidates.slice(0, count);
     picked.forEach(q => {
