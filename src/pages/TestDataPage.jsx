@@ -103,15 +103,11 @@ function SectionCard({ section }) {
 
 /* ── Main Page ───────────────────────────────────────────────── */
 export default function TestDataPage() {
-  const { currentUser, loading } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [fetching, setFetching] = useState(true);
-
-  useEffect(() => {
-    if (!loading && !currentUser) navigate('/');
-  }, [currentUser, loading, navigate]);
 
   useEffect(() => {
     let active = true;
@@ -129,7 +125,7 @@ export default function TestDataPage() {
     return () => { active = false; };
   }, [navigate]);
 
-  if (!currentUser || fetching) return (
+  if (fetching) return (
     <div className="td-page">
       <div className="td-loading">
         <div className="td-loading-shimmer" />
@@ -177,7 +173,7 @@ export default function TestDataPage() {
 
       {/* Top Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button className="td-back-btn" onClick={() => navigate(-1)}>
+        <button className="td-back-btn" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
           <ArrowLeft size={16} /> Back
         </button>
         {currentUser?.isAdmin && (
